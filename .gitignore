@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+.vscode/
+TestResults/
+*.user
+*.suo
+*.nupkg
+
+Contexto para IA.zip
+_contexto_para_ia_extracted/
