@@ -1,0 +1,3 @@
+namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarClientePorDocumento;
+
+public sealed record ConsultarClientePorDocumentoRequest(string Documento);
