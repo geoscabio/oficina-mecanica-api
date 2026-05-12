@@ -1,0 +1,3 @@
+namespace OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculoPorPlaca;
+
+public sealed record ConsultarVeiculoPorPlacaRequest(string Placa);
