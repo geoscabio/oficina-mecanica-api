@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarCliente;
+using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarClientePorDocumento;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;
 
@@ -16,6 +17,7 @@ public static class DependencyInjection
 
         services.AddScoped<CadastrarClienteUseCase>();
         services.AddScoped<ConsultarClienteUseCase>();
+        services.AddScoped<ConsultarClientePorDocumentoUseCase>();
         services.AddScoped<CadastrarVeiculoUseCase>();
         services.AddScoped<ConsultarVeiculoUseCase>();
 
