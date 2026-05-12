@@ -1,6 +1,6 @@
 using OficinaMecanica.Domain.Shared.Exceptions;
 
-namespace OficinaMecanica.Domain.OrdemServico.Exceptions;
+namespace OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
 
 public sealed class OrdemServicoInvalidaException : DomainException
 {

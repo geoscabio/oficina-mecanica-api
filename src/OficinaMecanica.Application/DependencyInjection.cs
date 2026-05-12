@@ -6,6 +6,7 @@ using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarClientePo
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculoPorPlaca;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
 
 namespace OficinaMecanica.Application;
 
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<CadastrarVeiculoUseCase>();
         services.AddScoped<ConsultarVeiculoUseCase>();
         services.AddScoped<ConsultarVeiculoPorPlacaUseCase>();
+        services.AddScoped<AbrirOrdemServicoUseCase>();
 
         return services;
     }

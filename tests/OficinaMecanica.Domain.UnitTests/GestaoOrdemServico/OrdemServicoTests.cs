@@ -1,9 +1,9 @@
 using FluentAssertions;
-using OficinaMecanica.Domain.OrdemServico.Enums;
-using OficinaMecanica.Domain.OrdemServico.Exceptions;
-using OrdemServicoAggregate = OficinaMecanica.Domain.OrdemServico.Aggregates.OrdemServico;
+using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
+using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
+using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
 
-namespace OficinaMecanica.Domain.UnitTests.OrdemServico;
+namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico;
 
 public class OrdemServicoTests
 {
@@ -13,7 +13,7 @@ public class OrdemServicoTests
         var veiculoId = Guid.NewGuid();
         var mecanicoId = Guid.NewGuid();
 
-        var ordemServico = OrdemServicoAggregate.Abrir(veiculoId, mecanicoId);
+        var ordemServico = OrdemServico.Abrir(veiculoId, mecanicoId);
 
         ordemServico.Id.Should().NotBeEmpty();
         ordemServico.Numero.Should().BeGreaterThan(0);
@@ -145,19 +145,19 @@ public class OrdemServicoTests
         acao.Should().Throw<OrdemServicoInvalidaException>();
     }
 
-    private static OrdemServicoAggregate CriarOrdemServico()
+    private static OrdemServico CriarOrdemServico()
     {
-        return OrdemServicoAggregate.Abrir(Guid.NewGuid(), Guid.NewGuid());
+        return OrdemServico.Abrir(Guid.NewGuid(), Guid.NewGuid());
     }
 
-    private static OrdemServicoAggregate CriarOrdemServicoEmDiagnostico()
+    private static OrdemServico CriarOrdemServicoEmDiagnostico()
     {
         var ordemServico = CriarOrdemServico();
         ordemServico.IniciarDiagnostico();
         return ordemServico;
     }
 
-    private static OrdemServicoAggregate CriarOrdemServicoAguardandoAprovacao()
+    private static OrdemServico CriarOrdemServicoAguardandoAprovacao()
     {
         var ordemServico = CriarOrdemServicoEmDiagnostico();
         ordemServico.DefinirServico(Guid.NewGuid(), 150m);
@@ -165,14 +165,14 @@ public class OrdemServicoTests
         return ordemServico;
     }
 
-    private static OrdemServicoAggregate CriarOrdemServicoEmExecucao()
+    private static OrdemServico CriarOrdemServicoEmExecucao()
     {
         var ordemServico = CriarOrdemServicoAguardandoAprovacao();
         ordemServico.IniciarExecucao();
         return ordemServico;
     }
 
-    private static OrdemServicoAggregate CriarOrdemServicoFinalizada()
+    private static OrdemServico CriarOrdemServicoFinalizada()
     {
         var ordemServico = CriarOrdemServicoEmExecucao();
         var servicoId = ordemServico.Servicos.Single().Id;

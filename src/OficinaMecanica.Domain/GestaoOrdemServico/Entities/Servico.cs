@@ -1,7 +1,7 @@
-using OficinaMecanica.Domain.OrdemServico.Enums;
-using OficinaMecanica.Domain.OrdemServico.Exceptions;
+using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
+using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
 
-namespace OficinaMecanica.Domain.OrdemServico.Entities;
+namespace OficinaMecanica.Domain.GestaoOrdemServico.Entities;
 
 public sealed class Servico
 {

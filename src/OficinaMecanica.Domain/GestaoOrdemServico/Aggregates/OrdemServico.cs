@@ -1,8 +1,8 @@
-using OficinaMecanica.Domain.OrdemServico.Entities;
-using OficinaMecanica.Domain.OrdemServico.Enums;
-using OficinaMecanica.Domain.OrdemServico.Exceptions;
+using OficinaMecanica.Domain.GestaoOrdemServico.Entities;
+using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
+using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
 
-namespace OficinaMecanica.Domain.OrdemServico.Aggregates;
+namespace OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 
 public sealed class OrdemServico
 {
