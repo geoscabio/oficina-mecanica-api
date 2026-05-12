@@ -1,32 +1,26 @@
-using OficinaMecanica.Application.Common.Exceptions;
+using FluentValidation;
 
 namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
 
-public sealed class CadastrarClienteValidator
+public sealed class CadastrarClienteValidator : AbstractValidator<CadastrarClienteRequest>
 {
-    public void Validate(CadastrarClienteRequest request)
+    public CadastrarClienteValidator()
     {
-        if (request is null)
-        {
-            throw new ValidationException("Request de cadastro de cliente e obrigatorio.");
-        }
+        RuleFor(request => request)
+            .NotNull()
+            .WithMessage("Request de cadastro de cliente e obrigatorio.");
 
-        ValidarObrigatorio(request.Documento, "Documento");
-        ValidarObrigatorio(request.Nome, "Nome");
-        ValidarObrigatorio(request.Logradouro, "Logradouro");
-        ValidarObrigatorio(request.Numero, "Numero");
-        ValidarObrigatorio(request.Bairro, "Bairro");
-        ValidarObrigatorio(request.Cidade, "Cidade");
-        ValidarObrigatorio(request.CEP, "CEP");
-        ValidarObrigatorio(request.Telefone, "Telefone");
-        ValidarObrigatorio(request.Email, "Email");
-    }
-
-    private static void ValidarObrigatorio(string valor, string campo)
-    {
-        if (string.IsNullOrWhiteSpace(valor))
+        When(request => request is not null, () =>
         {
-            throw new ValidationException($"{campo} e obrigatorio.");
-        }
+            RuleFor(request => request.Documento).NotEmpty().WithMessage("Documento e obrigatorio.");
+            RuleFor(request => request.Nome).NotEmpty().WithMessage("Nome e obrigatorio.");
+            RuleFor(request => request.Logradouro).NotEmpty().WithMessage("Logradouro e obrigatorio.");
+            RuleFor(request => request.Numero).NotEmpty().WithMessage("Numero e obrigatorio.");
+            RuleFor(request => request.Bairro).NotEmpty().WithMessage("Bairro e obrigatorio.");
+            RuleFor(request => request.Cidade).NotEmpty().WithMessage("Cidade e obrigatorio.");
+            RuleFor(request => request.CEP).NotEmpty().WithMessage("CEP e obrigatorio.");
+            RuleFor(request => request.Telefone).NotEmpty().WithMessage("Telefone e obrigatorio.");
+            RuleFor(request => request.Email).NotEmpty().WithMessage("Email e obrigatorio.");
+        });
     }
 }

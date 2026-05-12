@@ -1,9 +1,11 @@
 using FluentAssertions;
+using FluentValidation;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;
-using OficinaMecanica.Application.Common.Exceptions;
+using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
+using Moq;
 
 namespace OficinaMecanica.Application.UnitTests.Atendimento.VeiculoUseCases.ConsultarVeiculo;
 
@@ -12,10 +14,12 @@ public class ConsultarVeiculoUseCaseTests
     [Fact]
     public async Task Dado_VeiculoExistente_Quando_ConsultarVeiculo_Entao_DeveRetornarDadosDoVeiculo()
     {
-        var repository = new VeiculoRepositoryFake();
         var veiculo = CriarVeiculo();
-        await repository.AdicionarAsync(veiculo);
-        var useCase = new ConsultarVeiculoUseCase(repository, new ConsultarVeiculoValidator());
+        var repository = new Mock<IVeiculoRepository>();
+        repository
+            .Setup(repo => repo.ObterPorIdAsync(veiculo.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(veiculo);
+        var useCase = new ConsultarVeiculoUseCase(repository.Object, new ConsultarVeiculoValidator(), MapperFactory.Criar());
 
         var resultado = await useCase.ExecuteAsync(new ConsultarVeiculoRequest(veiculo.Id));
 
@@ -32,8 +36,8 @@ public class ConsultarVeiculoUseCaseTests
     [Fact]
     public async Task Dado_VeiculoInexistente_Quando_ConsultarVeiculo_Entao_DeveRetornarFalha()
     {
-        var repository = new VeiculoRepositoryFake();
-        var useCase = new ConsultarVeiculoUseCase(repository, new ConsultarVeiculoValidator());
+        var repository = new Mock<IVeiculoRepository>();
+        var useCase = new ConsultarVeiculoUseCase(repository.Object, new ConsultarVeiculoValidator(), MapperFactory.Criar());
 
         var resultado = await useCase.ExecuteAsync(new ConsultarVeiculoRequest(Guid.NewGuid()));
 
@@ -44,8 +48,8 @@ public class ConsultarVeiculoUseCaseTests
     [Fact]
     public async Task Dado_IdVazio_Quando_ConsultarVeiculo_Entao_DeveLancarValidationException()
     {
-        var repository = new VeiculoRepositoryFake();
-        var useCase = new ConsultarVeiculoUseCase(repository, new ConsultarVeiculoValidator());
+        var repository = new Mock<IVeiculoRepository>();
+        var useCase = new ConsultarVeiculoUseCase(repository.Object, new ConsultarVeiculoValidator(), MapperFactory.Criar());
 
         var acao = () => useCase.ExecuteAsync(new ConsultarVeiculoRequest(Guid.Empty));
 
@@ -62,24 +66,4 @@ public class ConsultarVeiculoUseCaseTests
             2020);
     }
 
-    private sealed class VeiculoRepositoryFake : IVeiculoRepository
-    {
-        private readonly List<Veiculo> _veiculos = new();
-
-        public Task AdicionarAsync(Veiculo veiculo, CancellationToken cancellationToken = default)
-        {
-            _veiculos.Add(veiculo);
-            return Task.CompletedTask;
-        }
-
-        public Task<Veiculo?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(_veiculos.SingleOrDefault(veiculo => veiculo.Id == id));
-        }
-
-        public Task<Veiculo?> ObterPorPlacaAsync(string placa, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(_veiculos.SingleOrDefault(veiculo => veiculo.Placa.NumeroPlaca == placa));
-        }
-    }
 }

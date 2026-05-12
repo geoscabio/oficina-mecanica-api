@@ -1,19 +1,20 @@
-using OficinaMecanica.Application.Common.Exceptions;
+using FluentValidation;
 
 namespace OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;
 
-public sealed class ConsultarVeiculoValidator
+public sealed class ConsultarVeiculoValidator : AbstractValidator<ConsultarVeiculoRequest>
 {
-    public void Validate(ConsultarVeiculoRequest request)
+    public ConsultarVeiculoValidator()
     {
-        if (request is null)
-        {
-            throw new ValidationException("Request invalido.");
-        }
+        RuleFor(request => request)
+            .NotNull()
+            .WithMessage("Request invalido.");
 
-        if (request.Id == Guid.Empty)
+        When(request => request is not null, () =>
         {
-            throw new ValidationException("Id do veiculo e obrigatorio.");
-        }
+            RuleFor(request => request.Id)
+                .NotEmpty()
+                .WithMessage("Id do veiculo e obrigatorio.");
+        });
     }
 }

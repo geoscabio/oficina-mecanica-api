@@ -1,9 +1,11 @@
 using FluentAssertions;
+using FluentValidation;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
-using OficinaMecanica.Application.Common.Exceptions;
+using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
+using Moq;
 
 namespace OficinaMecanica.Application.UnitTests.Atendimento.VeiculoUseCases.CadastrarVeiculo;
 
@@ -13,9 +15,19 @@ public class CadastrarVeiculoUseCaseTests
     public async Task Dado_RequestValido_Quando_CadastrarVeiculo_Entao_DevePersistirVeiculoERetornarSucesso()
     {
         var cliente = CriarCliente();
-        var clienteRepository = new ClienteRepositoryFake(cliente);
-        var veiculoRepository = new VeiculoRepositoryFake();
-        var useCase = new CadastrarVeiculoUseCase(veiculoRepository, clienteRepository, new CadastrarVeiculoValidator());
+        var clienteRepository = new Mock<IClienteRepository>();
+        var veiculoRepository = new Mock<IVeiculoRepository>();
+        clienteRepository
+            .Setup(repo => repo.ObterPorIdAsync(cliente.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cliente);
+        veiculoRepository
+            .Setup(repo => repo.ObterPorPlacaAsync("ABC1234", It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Veiculo?)null);
+        var useCase = new CadastrarVeiculoUseCase(
+            veiculoRepository.Object,
+            clienteRepository.Object,
+            new CadastrarVeiculoValidator(),
+            MapperFactory.Criar());
         var request = CriarRequestValido(cliente.Id);
 
         var resultado = await useCase.ExecuteAsync(request);
@@ -28,47 +40,67 @@ public class CadastrarVeiculoUseCaseTests
         resultado.Valor.Marca.Should().Be("Toyota");
         resultado.Valor.Modelo.Should().Be("Corolla");
         resultado.Valor.Ano.Should().Be(2020);
-        veiculoRepository.Veiculos.Should().ContainSingle();
+        veiculoRepository.Verify(repo => repo.AdicionarAsync(It.Is<Veiculo>(veiculo =>
+            veiculo.ClienteId == cliente.Id
+            && veiculo.Placa.NumeroPlaca == "ABC1234"), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task Dado_ClienteInexistente_Quando_CadastrarVeiculo_Entao_DeveRetornarFalha()
     {
-        var clienteRepository = new ClienteRepositoryFake();
-        var veiculoRepository = new VeiculoRepositoryFake();
-        var useCase = new CadastrarVeiculoUseCase(veiculoRepository, clienteRepository, new CadastrarVeiculoValidator());
+        var clienteRepository = new Mock<IClienteRepository>();
+        var veiculoRepository = new Mock<IVeiculoRepository>();
+        var useCase = new CadastrarVeiculoUseCase(
+            veiculoRepository.Object,
+            clienteRepository.Object,
+            new CadastrarVeiculoValidator(),
+            MapperFactory.Criar());
         var request = CriarRequestValido(Guid.NewGuid());
 
         var resultado = await useCase.ExecuteAsync(request);
 
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().Be("Cliente nao encontrado.");
-        veiculoRepository.Veiculos.Should().BeEmpty();
+        veiculoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<Veiculo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task Dado_PlacaJaCadastrada_Quando_CadastrarVeiculo_Entao_DeveRetornarFalha()
     {
         var cliente = CriarCliente();
-        var clienteRepository = new ClienteRepositoryFake(cliente);
-        var veiculoRepository = new VeiculoRepositoryFake();
-        var useCase = new CadastrarVeiculoUseCase(veiculoRepository, clienteRepository, new CadastrarVeiculoValidator());
+        var veiculoExistente = CriarVeiculo(cliente.Id);
+        var clienteRepository = new Mock<IClienteRepository>();
+        var veiculoRepository = new Mock<IVeiculoRepository>();
+        clienteRepository
+            .Setup(repo => repo.ObterPorIdAsync(cliente.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cliente);
+        veiculoRepository
+            .Setup(repo => repo.ObterPorPlacaAsync("ABC1234", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(veiculoExistente);
+        var useCase = new CadastrarVeiculoUseCase(
+            veiculoRepository.Object,
+            clienteRepository.Object,
+            new CadastrarVeiculoValidator(),
+            MapperFactory.Criar());
         var request = CriarRequestValido(cliente.Id);
-        await useCase.ExecuteAsync(request);
 
         var resultado = await useCase.ExecuteAsync(request);
 
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().Be("Veiculo ja cadastrado para a placa informada.");
-        veiculoRepository.Veiculos.Should().ContainSingle();
+        veiculoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<Veiculo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task Dado_ClienteIdVazio_Quando_CadastrarVeiculo_Entao_DeveLancarValidationException()
     {
-        var clienteRepository = new ClienteRepositoryFake();
-        var veiculoRepository = new VeiculoRepositoryFake();
-        var useCase = new CadastrarVeiculoUseCase(veiculoRepository, clienteRepository, new CadastrarVeiculoValidator());
+        var clienteRepository = new Mock<IClienteRepository>();
+        var veiculoRepository = new Mock<IVeiculoRepository>();
+        var useCase = new CadastrarVeiculoUseCase(
+            veiculoRepository.Object,
+            clienteRepository.Object,
+            new CadastrarVeiculoValidator(),
+            MapperFactory.Criar());
         var request = CriarRequestValido(Guid.Empty);
 
         var acao = () => useCase.ExecuteAsync(request);
@@ -96,52 +128,13 @@ public class CadastrarVeiculoUseCaseTests
             Email.Criar("maria@email.com"));
     }
 
-    private sealed class ClienteRepositoryFake : IClienteRepository
+    private static Veiculo CriarVeiculo(Guid clienteId)
     {
-        private readonly List<Cliente> _clientes = new();
-
-        public ClienteRepositoryFake(params Cliente[] clientes)
-        {
-            _clientes.AddRange(clientes);
-        }
-
-        public Task AdicionarAsync(Cliente cliente, CancellationToken cancellationToken = default)
-        {
-            _clientes.Add(cliente);
-            return Task.CompletedTask;
-        }
-
-        public Task<Cliente?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(_clientes.SingleOrDefault(cliente => cliente.Id == id));
-        }
-
-        public Task<Cliente?> ObterPorDocumentoAsync(string documento, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(_clientes.SingleOrDefault(cliente => cliente.Documento.Numero == documento));
-        }
-    }
-
-    private sealed class VeiculoRepositoryFake : IVeiculoRepository
-    {
-        private readonly List<Veiculo> _veiculos = new();
-
-        public IReadOnlyCollection<Veiculo> Veiculos => _veiculos.AsReadOnly();
-
-        public Task AdicionarAsync(Veiculo veiculo, CancellationToken cancellationToken = default)
-        {
-            _veiculos.Add(veiculo);
-            return Task.CompletedTask;
-        }
-
-        public Task<Veiculo?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(_veiculos.SingleOrDefault(veiculo => veiculo.Id == id));
-        }
-
-        public Task<Veiculo?> ObterPorPlacaAsync(string placa, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(_veiculos.SingleOrDefault(veiculo => veiculo.Placa.NumeroPlaca == placa));
-        }
+        return Veiculo.Criar(
+            clienteId,
+            Placa.Criar("ABC-1234"),
+            "Toyota",
+            "Corolla",
+            2020);
     }
 }

@@ -1,3 +1,5 @@
+using AutoMapper;
+using FluentValidation;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -8,19 +10,24 @@ namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarClien
 public sealed class CadastrarClienteUseCase
 {
     private readonly IClienteRepository _clienteRepository;
-    private readonly CadastrarClienteValidator _validator;
+    private readonly IValidator<CadastrarClienteRequest> _validator;
+    private readonly IMapper _mapper;
 
-    public CadastrarClienteUseCase(IClienteRepository clienteRepository, CadastrarClienteValidator validator)
+    public CadastrarClienteUseCase(
+        IClienteRepository clienteRepository,
+        IValidator<CadastrarClienteRequest> validator,
+        IMapper mapper)
     {
         _clienteRepository = clienteRepository;
         _validator = validator;
+        _mapper = mapper;
     }
 
     public async Task<Result<CadastrarClienteResponse>> ExecuteAsync(
         CadastrarClienteRequest request,
         CancellationToken cancellationToken = default)
     {
-        _validator.Validate(request);
+        _validator.ValidateAndThrow(request);
 
         var documento = CpfCnpj.Criar(request.Documento);
         var clienteExistente = await _clienteRepository.ObterPorDocumentoAsync(documento.Numero, cancellationToken);
@@ -39,10 +46,6 @@ public sealed class CadastrarClienteUseCase
 
         await _clienteRepository.AdicionarAsync(cliente, cancellationToken);
 
-        return Result<CadastrarClienteResponse>.Ok(new CadastrarClienteResponse(
-            cliente.Id,
-            cliente.Documento.Numero,
-            cliente.Nome,
-            cliente.Email.Endereco));
+        return Result<CadastrarClienteResponse>.Ok(_mapper.Map<CadastrarClienteResponse>(cliente));
     }
 }
