@@ -1,4 +1,4 @@
-namespace OficinaMecanica.Domain.OrdemServico.Enums;
+namespace OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 
 public enum StatusServico
 {
