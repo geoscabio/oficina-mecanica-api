@@ -1,3 +1,5 @@
+using AutoMapper;
+using FluentValidation;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -9,23 +11,26 @@ public sealed class CadastrarVeiculoUseCase
 {
     private readonly IVeiculoRepository _veiculoRepository;
     private readonly IClienteRepository _clienteRepository;
-    private readonly CadastrarVeiculoValidator _validator;
+    private readonly IValidator<CadastrarVeiculoRequest> _validator;
+    private readonly IMapper _mapper;
 
     public CadastrarVeiculoUseCase(
         IVeiculoRepository veiculoRepository,
         IClienteRepository clienteRepository,
-        CadastrarVeiculoValidator validator)
+        IValidator<CadastrarVeiculoRequest> validator,
+        IMapper mapper)
     {
         _veiculoRepository = veiculoRepository;
         _clienteRepository = clienteRepository;
         _validator = validator;
+        _mapper = mapper;
     }
 
     public async Task<Result<CadastrarVeiculoResponse>> ExecuteAsync(
         CadastrarVeiculoRequest request,
         CancellationToken cancellationToken = default)
     {
-        _validator.Validate(request);
+        _validator.ValidateAndThrow(request);
 
         var cliente = await _clienteRepository.ObterPorIdAsync(request.ClienteId, cancellationToken);
 
@@ -46,12 +51,6 @@ public sealed class CadastrarVeiculoUseCase
 
         await _veiculoRepository.AdicionarAsync(veiculo, cancellationToken);
 
-        return Result<CadastrarVeiculoResponse>.Ok(new CadastrarVeiculoResponse(
-            veiculo.Id,
-            veiculo.ClienteId,
-            veiculo.Placa.NumeroPlaca,
-            veiculo.Marca,
-            veiculo.Modelo,
-            veiculo.Ano));
+        return Result<CadastrarVeiculoResponse>.Ok(_mapper.Map<CadastrarVeiculoResponse>(veiculo));
     }
 }

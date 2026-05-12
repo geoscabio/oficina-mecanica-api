@@ -1,5 +1,6 @@
+using AutoMapper;
+using FluentValidation;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 
 namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarCliente;
@@ -7,19 +8,24 @@ namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarClien
 public sealed class ConsultarClienteUseCase
 {
     private readonly IClienteRepository _clienteRepository;
-    private readonly ConsultarClienteValidator _validator;
+    private readonly IValidator<ConsultarClienteRequest> _validator;
+    private readonly IMapper _mapper;
 
-    public ConsultarClienteUseCase(IClienteRepository clienteRepository, ConsultarClienteValidator validator)
+    public ConsultarClienteUseCase(
+        IClienteRepository clienteRepository,
+        IValidator<ConsultarClienteRequest> validator,
+        IMapper mapper)
     {
         _clienteRepository = clienteRepository;
         _validator = validator;
+        _mapper = mapper;
     }
 
     public async Task<Result<ConsultarClienteResponse>> ExecuteAsync(
         ConsultarClienteRequest request,
         CancellationToken cancellationToken = default)
     {
-        _validator.Validate(request);
+        _validator.ValidateAndThrow(request);
 
         var cliente = await _clienteRepository.ObterPorIdAsync(request.Id, cancellationToken);
 
@@ -28,21 +34,6 @@ public sealed class ConsultarClienteUseCase
             return Result<ConsultarClienteResponse>.Falha("Cliente nao encontrado.");
         }
 
-        return Result<ConsultarClienteResponse>.Ok(MapearResponse(cliente));
-    }
-
-    private static ConsultarClienteResponse MapearResponse(Cliente cliente)
-    {
-        return new ConsultarClienteResponse(
-            cliente.Id,
-            cliente.Documento.Numero,
-            cliente.Nome,
-            cliente.Endereco.Logradouro,
-            cliente.Endereco.Numero,
-            cliente.Endereco.Bairro,
-            cliente.Endereco.Cidade,
-            cliente.Endereco.CEP,
-            cliente.Telefone.Numero,
-            cliente.Email.Endereco);
+        return Result<ConsultarClienteResponse>.Ok(_mapper.Map<ConsultarClienteResponse>(cliente));
     }
 }
