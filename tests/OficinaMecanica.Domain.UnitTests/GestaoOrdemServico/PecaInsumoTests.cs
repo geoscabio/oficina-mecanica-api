@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.GestaoOrdemServico.Entities;
-using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico;
@@ -25,7 +26,7 @@ public class PecaInsumoTests
     }
 
     [Fact]
-    public void Dado_QuantidadeInvalida_Quando_CriarPecaInsumo_Entao_DeveLancarPecaInsumoInvalidaException()
+    public void Dado_QuantidadeInvalida_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException()
     {
         // Arrange
         var catalogoId = Guid.NewGuid();
@@ -36,11 +37,13 @@ public class PecaInsumoTests
         var acao = () => PecaInsumo.Criar(catalogoId, quantidade, valorUnitario);
 
         // Assert
-        acao.Should().Throw<PecaInsumoInvalidaException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(OrdemServicoErrorMessages.QuantidadePecaInsumoMaiorQueZero);
     }
 
     [Fact]
-    public void Dado_ValorUnitarioInvalido_Quando_CriarPecaInsumo_Entao_DeveLancarPecaInsumoInvalidaException()
+    public void Dado_ValorUnitarioInvalido_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException()
     {
         // Arrange
         var catalogoId = Guid.NewGuid();
@@ -51,6 +54,8 @@ public class PecaInsumoTests
         var acao = () => PecaInsumo.Criar(catalogoId, quantidade, valorUnitario);
 
         // Assert
-        acao.Should().Throw<PecaInsumoInvalidaException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(OrdemServicoErrorMessages.ValorUnitarioPecaInsumoMaiorQueZero);
     }
 }

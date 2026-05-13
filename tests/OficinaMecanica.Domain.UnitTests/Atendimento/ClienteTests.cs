@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Atendimento.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.Atendimento.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.Atendimento;
@@ -36,7 +37,7 @@ public class ClienteTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_NomeInvalido_Quando_CriarCliente_Entao_DeveLancarClienteInvalidoException(string nome)
+    public void Dado_NomeInvalido_Quando_CriarCliente_Entao_DeveLancarDomainException(string nome)
     {
         // Arrange
         var documento = ClienteTestDataFactory.CriarDocumentoPadrao();
@@ -48,6 +49,8 @@ public class ClienteTests
         var acao = () => Cliente.Criar(documento, nome, endereco, telefone, email);
 
         // Assert
-        acao.Should().Throw<ClienteInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(ClienteErrorMessages.NomeObrigatorio);
     }
 }

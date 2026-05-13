@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.Atendimento.Messages;
 
 namespace OficinaMecanica.Domain.Atendimento.ValueObjects;
@@ -20,7 +20,7 @@ public sealed partial record Placa
         if (!PlacaMercosulRegex().IsMatch(numeroNormalizado)
             && !PlacaAntigaRegex().IsMatch(numeroNormalizado))
         {
-            throw new PlacaInvalidaException(VeiculoErrorMessages.PlacaInvalida);
+            throw new DomainException(VeiculoErrorMessages.PlacaInvalida);
         }
 
         return new Placa(numeroNormalizado);

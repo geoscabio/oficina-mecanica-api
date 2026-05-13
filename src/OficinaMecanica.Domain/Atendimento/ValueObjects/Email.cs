@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.Atendimento.Messages;
 
 namespace OficinaMecanica.Domain.Atendimento.ValueObjects;
@@ -17,7 +17,7 @@ public sealed partial record Email
     {
         if (string.IsNullOrWhiteSpace(endereco) || !EmailRegex().IsMatch(endereco.Trim()))
         {
-            throw new ClienteInvalidoException(ClienteErrorMessages.EmailInvalido);
+            throw new DomainException(ClienteErrorMessages.EmailInvalido);
         }
 
         return new Email(endereco.Trim().ToLowerInvariant());

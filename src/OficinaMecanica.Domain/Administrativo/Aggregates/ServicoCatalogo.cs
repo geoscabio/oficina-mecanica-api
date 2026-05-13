@@ -1,4 +1,4 @@
-using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.Administrativo.Messages;
 
 namespace OficinaMecanica.Domain.Administrativo.Aggregates;
@@ -20,12 +20,12 @@ public sealed class ServicoCatalogo
     {
         if (string.IsNullOrWhiteSpace(descricao))
         {
-            throw new ServicoCatalogoInvalidoException(ServicoCatalogoErrorMessages.DescricaoObrigatoria);
+            throw new DomainException(ServicoCatalogoErrorMessages.DescricaoObrigatoria);
         }
 
         if (valor <= 0)
         {
-            throw new ServicoCatalogoInvalidoException(ServicoCatalogoErrorMessages.ValorMaiorQueZero);
+            throw new DomainException(ServicoCatalogoErrorMessages.ValorMaiorQueZero);
         }
 
         return new ServicoCatalogo(Guid.NewGuid(), descricao.Trim(), valor);

@@ -1,4 +1,4 @@
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
 
@@ -27,21 +27,21 @@ public sealed class Cliente
     {
         if (documento is null)
         {
-            throw new ClienteInvalidoException(ClienteErrorMessages.DocumentoObrigatorio);
+            throw new DomainException(ClienteErrorMessages.DocumentoObrigatorio);
         }
 
         if (string.IsNullOrWhiteSpace(nome))
         {
-            throw new ClienteInvalidoException(ClienteErrorMessages.NomeObrigatorio);
+            throw new DomainException(ClienteErrorMessages.NomeObrigatorio);
         }
 
         return new Cliente(
             Guid.NewGuid(),
             documento,
             nome.Trim(),
-            endereco ?? throw new ClienteInvalidoException(ClienteErrorMessages.EnderecoObrigatorio),
-            telefone ?? throw new ClienteInvalidoException(ClienteErrorMessages.TelefoneObrigatorio),
-            email ?? throw new ClienteInvalidoException(ClienteErrorMessages.EmailObrigatorio));
+            endereco ?? throw new DomainException(ClienteErrorMessages.EnderecoObrigatorio),
+            telefone ?? throw new DomainException(ClienteErrorMessages.TelefoneObrigatorio),
+            email ?? throw new DomainException(ClienteErrorMessages.EmailObrigatorio));
     }
 }
 

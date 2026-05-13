@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Atendimento.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.Atendimento.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.Atendimento;
@@ -32,7 +33,7 @@ public class VeiculoTests
     }
 
     [Fact]
-    public void Dado_ClienteIdVazio_Quando_CriarVeiculo_Entao_DeveLancarVeiculoInvalidoException()
+    public void Dado_ClienteIdVazio_Quando_CriarVeiculo_Entao_DeveLancarDomainException()
     {
         // Arrange
         var placa = VeiculoTestDataFactory.CriarPlacaPadrao();
@@ -46,13 +47,15 @@ public class VeiculoTests
             VeiculoTestDataFactory.AnoPadrao);
 
         // Assert
-        acao.Should().Throw<VeiculoInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(VeiculoErrorMessages.ClienteObrigatorio);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_MarcaInvalida_Quando_CriarVeiculo_Entao_DeveLancarVeiculoInvalidoException(string marca)
+    public void Dado_MarcaInvalida_Quando_CriarVeiculo_Entao_DeveLancarDomainException(string marca)
     {
         // Arrange
         var clienteId = Guid.NewGuid();
@@ -67,6 +70,8 @@ public class VeiculoTests
             VeiculoTestDataFactory.AnoPadrao);
 
         // Assert
-        acao.Should().Throw<VeiculoInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(VeiculoErrorMessages.MarcaObrigatoria);
     }
 }
