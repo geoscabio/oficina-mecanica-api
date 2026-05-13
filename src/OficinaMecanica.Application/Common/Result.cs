@@ -18,8 +18,8 @@ public sealed class Result<T>
         return new Result<T>(true, valor, null);
     }
 
-    public static Result<T> Falha(string erro)
+    public static Result<T> Falha(string mensagem, TipoErro tipo)
     {
-        return new Result<T>(false, default, new ErrorResponse(erro));
+        return new Result<T>(false, default!, new ErrorResponse(mensagem, tipo));
     }
 }

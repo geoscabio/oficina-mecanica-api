@@ -1,6 +1,7 @@
 using FluentAssertions;
-using FluentValidation;
 using Moq;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
@@ -49,23 +50,27 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Ordem de servico nao encontrada.");
+        resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
         repository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task Dado_IdVazio_Quando_IniciarDiagnostico_Entao_DeveLancarValidationException()
+    public async Task Dado_IdVazio_Quando_IniciarDiagnostico_Entao_DeveRetornarFalhaDeValidacao()
     {
         // Arrange
         var repository = new Mock<IOrdemServicoRepository>();
         var useCase = CriarUseCase(repository);
 
         // Act
-        var acao = () => useCase.ExecuteAsync(new IniciarDiagnosticoOrdemServicoRequest(Guid.Empty));
+        var resultado = await useCase.ExecuteAsync(new IniciarDiagnosticoOrdemServicoRequest(Guid.Empty));
 
         // Assert
-        await acao.Should().ThrowAsync<ValidationException>();
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
     }
 
     private static IniciarDiagnosticoOrdemServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
@@ -76,5 +81,10 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
             MapperFactory.Criar());
     }
 }
+
+
+
+
+
 
 

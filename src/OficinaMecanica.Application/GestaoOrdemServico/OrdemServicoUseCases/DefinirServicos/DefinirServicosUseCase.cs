@@ -1,6 +1,8 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
+using OficinaMecanica.Domain.Administrativo.Messages;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
@@ -31,20 +33,25 @@ public sealed class DefinirServicosUseCase
         DefinirServicosRequest request,
         CancellationToken cancellationToken = default)
     {
-        _validator.ValidateAndThrow(request);
+        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return Result<OrdemServicoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+        }
 
         var ordemServico = await _ordemServicoRepository.ObterPorIdAsync(request.OrdemServicoId, cancellationToken);
 
         if (ordemServico is null)
         {
-            return Result<OrdemServicoResponse>.Falha("Ordem de servico nao encontrada.");
+            return Result<OrdemServicoResponse>.Falha(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada, TipoErro.NaoEncontrado);
         }
 
         var servicosCatalogo = await ObterServicosCatalogoAsync(request.ServicosCatalogoIds, cancellationToken);
 
         if (servicosCatalogo.Count != request.ServicosCatalogoIds.Count)
         {
-            return Result<OrdemServicoResponse>.Falha("Servico do catalogo nao encontrado.");
+            return Result<OrdemServicoResponse>.Falha(ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         foreach (var servicoCatalogo in servicosCatalogo)
@@ -78,4 +85,6 @@ public sealed class DefinirServicosUseCase
         return servicosCatalogo;
     }
 }
+
+
 

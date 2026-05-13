@@ -1,4 +1,5 @@
 using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.Administrativo.Messages;
 
 namespace OficinaMecanica.Domain.Administrativo.Aggregates;
 
@@ -19,14 +20,15 @@ public sealed class Mecanico
     {
         if (string.IsNullOrWhiteSpace(nome))
         {
-            throw new MecanicoInvalidoException("Nome do mecanico e obrigatorio.");
+            throw new MecanicoInvalidoException(MecanicoErrorMessages.NomeObrigatorio);
         }
 
         if (string.IsNullOrWhiteSpace(funcional))
         {
-            throw new MecanicoInvalidoException("Funcional do mecanico e obrigatorio.");
+            throw new MecanicoInvalidoException(MecanicoErrorMessages.FuncionalObrigatorio);
         }
 
         return new Mecanico(Guid.NewGuid(), nome.Trim(), funcional.Trim());
     }
 }
+

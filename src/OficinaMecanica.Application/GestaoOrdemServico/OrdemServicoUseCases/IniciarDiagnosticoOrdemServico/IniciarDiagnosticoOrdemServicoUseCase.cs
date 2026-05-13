@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 
@@ -26,13 +27,18 @@ public sealed class IniciarDiagnosticoOrdemServicoUseCase
         IniciarDiagnosticoOrdemServicoRequest request,
         CancellationToken cancellationToken = default)
     {
-        _validator.ValidateAndThrow(request);
+        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return Result<OrdemServicoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+        }
 
         var ordemServico = await _ordemServicoRepository.ObterPorIdAsync(request.OrdemServicoId, cancellationToken);
 
         if (ordemServico is null)
         {
-            return Result<OrdemServicoResponse>.Falha("Ordem de servico nao encontrada.");
+            return Result<OrdemServicoResponse>.Falha(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada, TipoErro.NaoEncontrado);
         }
 
         ordemServico.IniciarDiagnostico();
@@ -42,4 +48,6 @@ public sealed class IniciarDiagnosticoOrdemServicoUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }
+
+
 

@@ -1,6 +1,9 @@
 using FluentAssertions;
-using FluentValidation;
 using Moq;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.GestaoEstoque.Messages;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
+using OficinaMecanica.Domain.Administrativo.Messages;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
@@ -79,7 +82,8 @@ public class ReservarPecaInsumoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Ordem de servico nao encontrada.");
+        resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
         ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
         estoqueRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -113,7 +117,8 @@ public class ReservarPecaInsumoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Peca ou insumo do catalogo nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be(PecaInsumoCatalogoErrorMessages.PecaInsumoCatalogoNaoEncontrado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
         ordemServico.PecasInsumos.Should().BeEmpty();
 
         ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -151,7 +156,8 @@ public class ReservarPecaInsumoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Estoque insuficiente para reservar peca ou insumo.");
+        resultado.Erro!.Mensagem.Should().Be(EstoqueErrorMessages.EstoqueInsuficiente);
+        resultado.Erro.Tipo.Should().Be(TipoErro.RegraNegocio);
         ordemServico.PecasInsumos.Should().BeEmpty();
 
         ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -159,7 +165,7 @@ public class ReservarPecaInsumoUseCaseTests
     }
 
     [Fact]
-    public async Task Dado_ListaPecasInsumosVazia_Quando_ReservarPecaInsumo_Entao_DeveLancarValidationException()
+    public async Task Dado_ListaPecasInsumosVazia_Quando_ReservarPecaInsumo_Entao_DeveRetornarFalhaDeValidacao()
     {
         // Arrange
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
@@ -169,14 +175,17 @@ public class ReservarPecaInsumoUseCaseTests
         var request = new ReservarPecaInsumoRequest(Guid.NewGuid(), Array.Empty<PecaInsumoRequest>());
 
         // Act
-        var acao = () => useCase.ExecuteAsync(request);
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
-        await acao.Should().ThrowAsync<ValidationException>();
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
     }
 
     [Fact]
-    public async Task Dado_PecasInsumosRepetidas_Quando_ReservarPecaInsumo_Entao_DeveLancarValidationException()
+    public async Task Dado_PecasInsumosRepetidas_Quando_ReservarPecaInsumo_Entao_DeveRetornarFalhaDeValidacao()
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
@@ -193,10 +202,13 @@ public class ReservarPecaInsumoUseCaseTests
             });
 
         // Act
-        var acao = () => useCase.ExecuteAsync(request);
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
-        await acao.Should().ThrowAsync<ValidationException>();
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
     }
 
     private static ReservarPecaInsumoUseCase CriarUseCase(
@@ -221,5 +233,10 @@ public class ReservarPecaInsumoUseCaseTests
             .ReturnsAsync(pecaInsumoCatalogo);
     }
 }
+
+
+
+
+
 
 

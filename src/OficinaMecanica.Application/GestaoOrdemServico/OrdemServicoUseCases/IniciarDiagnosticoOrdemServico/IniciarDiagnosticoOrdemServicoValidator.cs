@@ -1,4 +1,5 @@
 using FluentValidation;
+using OficinaMecanica.Application.GestaoOrdemServico.ValidationMessages;
 
 namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
 
@@ -8,13 +9,14 @@ public sealed class IniciarDiagnosticoOrdemServicoValidator : AbstractValidator<
     {
         RuleFor(request => request)
             .NotNull()
-            .WithMessage("Request para iniciar diagnostico e obrigatorio.");
+            .WithMessage(OrdemServicoValidationMessages.RequestIniciarDiagnosticoObrigatorio);
 
         When(request => request is not null, () =>
         {
             RuleFor(request => request.OrdemServicoId)
                 .NotEmpty()
-                .WithMessage("OrdemServicoId e obrigatorio.");
+                .WithMessage(OrdemServicoValidationMessages.OrdemServicoIdObrigatorio);
         });
     }
 }
+

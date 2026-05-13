@@ -1,6 +1,7 @@
 using FluentAssertions;
-using FluentValidation;
 using Moq;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
@@ -56,7 +57,8 @@ public class CadastrarClienteUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Cliente ja cadastrado para o documento informado.");
+        resultado.Erro!.Mensagem.Should().Be(ClienteErrorMessages.ClienteDuplicado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.RegraNegocio);
 
         repository.Verify(repo => repo.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -64,7 +66,7 @@ public class CadastrarClienteUseCaseTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public async Task Dado_NomeInvalido_Quando_CadastrarCliente_Entao_DeveLancarValidationException(string nome)
+    public async Task Dado_NomeInvalido_Quando_CadastrarCliente_Entao_DeveRetornarFalhaDeValidacao(string nome)
     {
         // Arrange
         var repository = new Mock<IClienteRepository>();
@@ -72,10 +74,13 @@ public class CadastrarClienteUseCaseTests
         var request = CriarRequestValido() with { Nome = nome };
 
         // Act
-        var acao = () => useCase.ExecuteAsync(request);
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
-        await acao.Should().ThrowAsync<ValidationException>();
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
     }
 
     private static CadastrarClienteUseCase CriarUseCase(Mock<IClienteRepository> repository)
@@ -101,5 +106,10 @@ public class CadastrarClienteUseCaseTests
             Email: "maria@email.com");
     }
 }
+
+
+
+
+
 
 

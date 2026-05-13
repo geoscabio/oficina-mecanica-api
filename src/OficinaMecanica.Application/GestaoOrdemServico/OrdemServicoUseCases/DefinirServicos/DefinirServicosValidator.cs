@@ -1,4 +1,5 @@
 using FluentValidation;
+using OficinaMecanica.Application.GestaoOrdemServico.ValidationMessages;
 
 namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.DefinirServicos;
 
@@ -8,21 +9,22 @@ public sealed class DefinirServicosValidator : AbstractValidator<DefinirServicos
     {
         RuleFor(request => request)
             .NotNull()
-            .WithMessage("Request para definir servicos e obrigatorio.");
+            .WithMessage(OrdemServicoValidationMessages.RequestDefinirServicosObrigatorio);
 
         When(request => request is not null, () =>
         {
             RuleFor(request => request.OrdemServicoId)
                 .NotEmpty()
-                .WithMessage("OrdemServicoId e obrigatorio.");
+                .WithMessage(OrdemServicoValidationMessages.OrdemServicoIdObrigatorio);
 
             RuleFor(request => request.ServicosCatalogoIds)
                 .NotEmpty()
-                .WithMessage("ServicosCatalogoIds e obrigatorio.");
+                .WithMessage(OrdemServicoValidationMessages.ServicosCatalogoIdsObrigatorio);
 
             RuleForEach(request => request.ServicosCatalogoIds)
                 .NotEmpty()
-                .WithMessage("ServicoCatalogoId e obrigatorio.");
+                .WithMessage(OrdemServicoValidationMessages.ServicoCatalogoIdObrigatorio);
         });
     }
 }
+

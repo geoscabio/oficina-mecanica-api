@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Atendimento.Messages;
 
 namespace OficinaMecanica.Domain.Atendimento.ValueObjects;
 
@@ -19,7 +20,7 @@ public sealed partial record Placa
         if (!PlacaMercosulRegex().IsMatch(numeroNormalizado)
             && !PlacaAntigaRegex().IsMatch(numeroNormalizado))
         {
-            throw new PlacaInvalidaException("Placa invalida.");
+            throw new PlacaInvalidaException(VeiculoErrorMessages.PlacaInvalida);
         }
 
         return new Placa(numeroNormalizado);
@@ -41,3 +42,4 @@ public sealed partial record Placa
     [GeneratedRegex("^[A-Z]{3}[0-9]{4}$")]
     private static partial Regex PlacaAntigaRegex();
 }
+

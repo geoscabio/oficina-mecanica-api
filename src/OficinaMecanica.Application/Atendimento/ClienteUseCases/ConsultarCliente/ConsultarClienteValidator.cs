@@ -1,4 +1,6 @@
 using FluentValidation;
+using OficinaMecanica.Application.Atendimento.ValidationMessages;
+using OficinaMecanica.Application.Common;
 
 namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarCliente;
 
@@ -8,13 +10,14 @@ public sealed class ConsultarClienteValidator : AbstractValidator<ConsultarClien
     {
         RuleFor(request => request)
             .NotNull()
-            .WithMessage("Request invalido.");
+            .WithMessage(ValidationErrorMessages.RequestInvalido);
 
         When(request => request is not null, () =>
         {
             RuleFor(request => request.Id)
                 .NotEmpty()
-                .WithMessage("Id do cliente e obrigatorio.");
+                .WithMessage(ClienteValidationMessages.IdClienteObrigatorio);
         });
     }
 }
+

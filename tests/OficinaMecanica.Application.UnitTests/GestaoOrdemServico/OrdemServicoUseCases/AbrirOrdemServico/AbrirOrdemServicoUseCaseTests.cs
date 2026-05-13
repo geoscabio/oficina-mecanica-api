@@ -1,6 +1,8 @@
 using FluentAssertions;
-using FluentValidation;
 using Moq;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.Administrativo.Messages;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.Administrativo.Builders;
@@ -76,7 +78,8 @@ public class AbrirOrdemServicoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Veiculo nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be(VeiculoErrorMessages.VeiculoNaoEncontrado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
         ordemServicoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -102,13 +105,14 @@ public class AbrirOrdemServicoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Mecanico nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be(MecanicoErrorMessages.MecanicoNaoEncontrado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
         ordemServicoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task Dado_VeiculoIdVazio_Quando_AbrirOrdemServico_Entao_DeveLancarValidationException()
+    public async Task Dado_VeiculoIdVazio_Quando_AbrirOrdemServico_Entao_DeveRetornarFalhaDeValidacao()
     {
         // Arrange
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
@@ -118,10 +122,13 @@ public class AbrirOrdemServicoUseCaseTests
         var request = new AbrirOrdemServicoRequest(Guid.Empty, Guid.NewGuid());
 
         // Act
-        var acao = () => useCase.ExecuteAsync(request);
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
-        await acao.Should().ThrowAsync<ValidationException>();
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
     }
 
     private static AbrirOrdemServicoUseCase CriarUseCase(
@@ -137,5 +144,10 @@ public class AbrirOrdemServicoUseCaseTests
             MapperFactory.Criar());
     }
 }
+
+
+
+
+
 
 

@@ -1,6 +1,9 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.GestaoEstoque.Messages;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
+using OficinaMecanica.Domain.Administrativo.Messages;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
@@ -36,32 +39,37 @@ public sealed class ReservarPecaInsumoUseCase
         ReservarPecaInsumoRequest request,
         CancellationToken cancellationToken = default)
     {
-        _validator.ValidateAndThrow(request);
+        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return Result<OrdemServicoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+        }
 
         var ordemServico = await _ordemServicoRepository.ObterPorIdAsync(request.OrdemServicoId, cancellationToken);
 
         if (ordemServico is null)
         {
-            return Result<OrdemServicoResponse>.Falha("Ordem de servico nao encontrada.");
+            return Result<OrdemServicoResponse>.Falha(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada, TipoErro.NaoEncontrado);
         }
 
         var estoque = await _estoqueRepository.ObterAsync(cancellationToken);
 
         if (estoque is null)
         {
-            return Result<OrdemServicoResponse>.Falha("Estoque nao encontrado.");
+            return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         var pecasInsumosCatalogo = await ObterPecasInsumosCatalogoAsync(request.PecasInsumos, cancellationToken);
 
         if (pecasInsumosCatalogo.Count != request.PecasInsumos.Count)
         {
-            return Result<OrdemServicoResponse>.Falha("Peca ou insumo do catalogo nao encontrado.");
+            return Result<OrdemServicoResponse>.Falha(PecaInsumoCatalogoErrorMessages.PecaInsumoCatalogoNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         if (!ExisteEstoqueDisponivel(estoque, request.PecasInsumos))
         {
-            return Result<OrdemServicoResponse>.Falha("Estoque insuficiente para reservar peca ou insumo.");
+            return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueInsuficiente, TipoErro.RegraNegocio);
         }
 
         foreach (var pecaInsumo in request.PecasInsumos)
@@ -118,4 +126,6 @@ public sealed class ReservarPecaInsumoUseCase
         return true;
     }
 }
+
+
 

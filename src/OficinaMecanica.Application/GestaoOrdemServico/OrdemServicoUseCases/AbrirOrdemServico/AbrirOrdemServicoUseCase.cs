@@ -1,6 +1,8 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.Administrativo.Messages;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -35,18 +37,23 @@ public sealed class AbrirOrdemServicoUseCase
         AbrirOrdemServicoRequest request,
         CancellationToken cancellationToken = default)
     {
-        _validator.ValidateAndThrow(request);
+        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return Result<OrdemServicoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+        }
 
         var veiculo = await _veiculoRepository.ObterPorIdAsync(request.VeiculoId, cancellationToken);
         if (veiculo is null)
         {
-            return Result<OrdemServicoResponse>.Falha("Veiculo nao encontrado.");
+            return Result<OrdemServicoResponse>.Falha(VeiculoErrorMessages.VeiculoNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         var mecanico = await _mecanicoRepository.ObterPorIdAsync(request.MecanicoId, cancellationToken);
         if (mecanico is null)
         {
-            return Result<OrdemServicoResponse>.Falha("Mecanico nao encontrado.");
+            return Result<OrdemServicoResponse>.Falha(MecanicoErrorMessages.MecanicoNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         var ordemServico = OrdemServico.Abrir(request.VeiculoId, request.MecanicoId);
@@ -56,4 +63,6 @@ public sealed class AbrirOrdemServicoUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }
+
+
 
