@@ -1,7 +1,8 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
-using OficinaMecanica.Domain.GestaoEstoque.Exceptions;
+using OficinaMecanica.Domain.GestaoEstoque.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.GestaoEstoque.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque;
@@ -23,7 +24,7 @@ public class EstoqueTests
     }
 
     [Fact]
-    public void Dado_ListaSemItens_Quando_CriarEstoque_Entao_DeveLancarEstoqueInvalidoException()
+    public void Dado_ListaSemItens_Quando_CriarEstoque_Entao_DeveLancarDomainException()
     {
         // Arrange
         var itens = Array.Empty<ItemEstoque>();
@@ -32,7 +33,9 @@ public class EstoqueTests
         var acao = () => Estoque.Criar(itens);
 
         // Assert
-        acao.Should().Throw<EstoqueInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(EstoqueErrorMessages.EstoqueSemItens);
     }
 
     [Fact]
@@ -116,7 +119,7 @@ public class EstoqueTests
     }
 
     [Fact]
-    public void Dado_ItemInexistente_Quando_ReservarItens_Entao_DeveLancarEstoqueInvalidoException()
+    public void Dado_ItemInexistente_Quando_ReservarItens_Entao_DeveLancarDomainException()
     {
         // Arrange
         var estoque = EstoqueTestDataFactory.CriarEstoquePadrao();
@@ -126,6 +129,8 @@ public class EstoqueTests
         var acao = () => estoque.ReservarItens(pecaInsumoCatalogoIdInexistente, 1);
 
         // Assert
-        acao.Should().Throw<EstoqueInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(EstoqueErrorMessages.ItemNaoEncontrado);
     }
 }

@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
-using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.Administrativo.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.Administrativo.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.Administrativo;
@@ -26,7 +27,7 @@ public class MecanicoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_NomeInvalido_Quando_CriarMecanico_Entao_DeveLancarMecanicoInvalidoException(string nome)
+    public void Dado_NomeInvalido_Quando_CriarMecanico_Entao_DeveLancarDomainException(string nome)
     {
         // Arrange
         const string funcional = MecanicoTestDataFactory.FuncionalPadrao;
@@ -35,13 +36,15 @@ public class MecanicoTests
         var acao = () => Mecanico.Criar(nome, funcional);
 
         // Assert
-        acao.Should().Throw<MecanicoInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(MecanicoErrorMessages.NomeObrigatorio);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_FuncionalInvalido_Quando_CriarMecanico_Entao_DeveLancarMecanicoInvalidoException(string funcional)
+    public void Dado_FuncionalInvalido_Quando_CriarMecanico_Entao_DeveLancarDomainException(string funcional)
     {
         // Arrange
         const string nome = MecanicoTestDataFactory.NomePadrao;
@@ -50,6 +53,8 @@ public class MecanicoTests
         var acao = () => Mecanico.Criar(nome, funcional);
 
         // Assert
-        acao.Should().Throw<MecanicoInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(MecanicoErrorMessages.FuncionalObrigatorio);
     }
 }

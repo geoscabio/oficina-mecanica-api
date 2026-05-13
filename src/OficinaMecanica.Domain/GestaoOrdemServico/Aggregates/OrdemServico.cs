@@ -1,6 +1,6 @@
 using OficinaMecanica.Domain.GestaoOrdemServico.Entities;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
-using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 
 namespace OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
@@ -35,12 +35,12 @@ public sealed class OrdemServico
     {
         if (veiculoId == Guid.Empty)
         {
-            throw new OrdemServicoInvalidaException(OrdemServicoErrorMessages.VeiculoObrigatorio);
+            throw new DomainException(OrdemServicoErrorMessages.VeiculoObrigatorio);
         }
 
         if (mecanicoId == Guid.Empty)
         {
-            throw new OrdemServicoInvalidaException(OrdemServicoErrorMessages.MecanicoObrigatorio);
+            throw new DomainException(OrdemServicoErrorMessages.MecanicoObrigatorio);
         }
 
         return new OrdemServico(Guid.NewGuid(), Random.Shared.Next(1, int.MaxValue), veiculoId, mecanicoId);
@@ -81,7 +81,7 @@ public sealed class OrdemServico
 
         if (_servicos.Count == 0)
         {
-            throw new OrdemServicoInvalidaException(OrdemServicoErrorMessages.ServicoObrigatorioParaAguardarAprovacao);
+            throw new DomainException(OrdemServicoErrorMessages.ServicoObrigatorioParaAguardarAprovacao);
         }
 
         CalcularOrcamento();
@@ -115,7 +115,7 @@ public sealed class OrdemServico
 
         if (_servicos.Count == 0 || _servicos.Any(servico => servico.Status != StatusServico.FINALIZADO))
         {
-            throw new OrdemServicoInvalidaException(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
+            throw new DomainException(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
         }
 
         Status = StatusOrdemServico.FINALIZADA;
@@ -133,7 +133,7 @@ public sealed class OrdemServico
     {
         if (Status is StatusOrdemServico.FINALIZADA or StatusOrdemServico.ENTREGUE or StatusOrdemServico.CANCELADA)
         {
-            throw new TransicaoStatusOrdemServicoInvalidaException(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
+            throw new DomainException(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
         }
 
         Status = StatusOrdemServico.CANCELADA;
@@ -143,14 +143,14 @@ public sealed class OrdemServico
     private Servico ObterServico(Guid servicoId)
     {
         return _servicos.SingleOrDefault(servico => servico.Id == servicoId)
-            ?? throw new ServicoInvalidoException(OrdemServicoErrorMessages.ServicoNaoEncontrado);
+            ?? throw new DomainException(OrdemServicoErrorMessages.ServicoNaoEncontrado);
     }
 
     private void ExigirStatus(StatusOrdemServico statusEsperado)
     {
         if (Status != statusEsperado)
         {
-            throw new TransicaoStatusOrdemServicoInvalidaException(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+            throw new DomainException(OrdemServicoErrorMessages.TransicaoStatusInvalida);
         }
     }
 }

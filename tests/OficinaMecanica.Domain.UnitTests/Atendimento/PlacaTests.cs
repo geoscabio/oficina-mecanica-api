@@ -1,5 +1,6 @@
 using FluentAssertions;
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Atendimento.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
 
 namespace OficinaMecanica.Domain.UnitTests.Atendimento;
@@ -26,7 +27,7 @@ public class PlacaTests
     [InlineData("ABC123")]
     [InlineData("ABCD123")]
     [InlineData("ABC12D4")]
-    public void Dado_PlacaInvalida_Quando_Criar_Entao_DeveLancarPlacaInvalidaException(string numero)
+    public void Dado_PlacaInvalida_Quando_Criar_Entao_DeveLancarDomainException(string numero)
     {
         // Arrange
         var numeroInformado = numero;
@@ -35,7 +36,9 @@ public class PlacaTests
         var acao = () => Placa.Criar(numeroInformado);
 
         // Assert
-        acao.Should().Throw<PlacaInvalidaException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(VeiculoErrorMessages.PlacaInvalida);
     }
 
     [Fact]

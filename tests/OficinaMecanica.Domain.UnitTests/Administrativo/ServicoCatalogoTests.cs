@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
-using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.Administrativo.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.Administrativo.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.Administrativo;
@@ -26,7 +27,7 @@ public class ServicoCatalogoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_DescricaoInvalida_Quando_CriarServicoCatalogo_Entao_DeveLancarServicoCatalogoInvalidoException(string descricao)
+    public void Dado_DescricaoInvalida_Quando_CriarServicoCatalogo_Entao_DeveLancarDomainException(string descricao)
     {
         // Arrange
         const decimal valor = ServicoCatalogoTestDataFactory.ValorPadrao;
@@ -35,13 +36,15 @@ public class ServicoCatalogoTests
         var acao = () => ServicoCatalogo.Criar(descricao, valor);
 
         // Assert
-        acao.Should().Throw<ServicoCatalogoInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(ServicoCatalogoErrorMessages.DescricaoObrigatoria);
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Dado_ValorInvalido_Quando_CriarServicoCatalogo_Entao_DeveLancarServicoCatalogoInvalidoException(decimal valor)
+    public void Dado_ValorInvalido_Quando_CriarServicoCatalogo_Entao_DeveLancarDomainException(decimal valor)
     {
         // Arrange
         const string descricao = ServicoCatalogoTestDataFactory.DescricaoPadrao;
@@ -50,6 +53,8 @@ public class ServicoCatalogoTests
         var acao = () => ServicoCatalogo.Criar(descricao, valor);
 
         // Assert
-        acao.Should().Throw<ServicoCatalogoInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(ServicoCatalogoErrorMessages.ValorMaiorQueZero);
     }
 }

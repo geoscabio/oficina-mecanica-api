@@ -1,5 +1,5 @@
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
-using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 
 namespace OficinaMecanica.Domain.GestaoOrdemServico.Entities;
@@ -25,12 +25,12 @@ public sealed class Servico
     {
         if (servicoCatalogoId == Guid.Empty)
         {
-            throw new ServicoInvalidoException(OrdemServicoErrorMessages.ServicoCatalogoObrigatorio);
+            throw new DomainException(OrdemServicoErrorMessages.ServicoCatalogoObrigatorio);
         }
 
         if (valor <= 0)
         {
-            throw new ServicoInvalidoException(OrdemServicoErrorMessages.ValorServicoMaiorQueZero);
+            throw new DomainException(OrdemServicoErrorMessages.ValorServicoMaiorQueZero);
         }
 
         return new Servico(Guid.NewGuid(), servicoCatalogoId, valor);
@@ -40,7 +40,7 @@ public sealed class Servico
     {
         if (Status != StatusServico.PENDENTE)
         {
-            throw new ServicoInvalidoException(OrdemServicoErrorMessages.ServicoPendenteParaIniciarExecucao);
+            throw new DomainException(OrdemServicoErrorMessages.ServicoPendenteParaIniciarExecucao);
         }
 
         Status = StatusServico.EM_EXECUCAO;
@@ -51,7 +51,7 @@ public sealed class Servico
     {
         if (Status != StatusServico.EM_EXECUCAO)
         {
-            throw new ServicoInvalidoException(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
+            throw new DomainException(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
         }
 
         Status = StatusServico.FINALIZADO;

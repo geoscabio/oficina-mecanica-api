@@ -1,8 +1,8 @@
 namespace OficinaMecanica.Domain.Shared.Exceptions;
 
-public abstract class DomainException : Exception
+public class DomainException : Exception
 {
-    protected DomainException(string message)
+    public DomainException(string message)
         : base(message)
     {
     }

@@ -1,7 +1,8 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
-using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico;
@@ -162,7 +163,7 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoRecebida_Quando_IniciarExecucao_Entao_DeveLancarTransicaoStatusOrdemServicoInvalidaException()
+    public void Dado_OrdemServicoRecebida_Quando_IniciarExecucao_Entao_DeveLancarDomainException()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
@@ -171,11 +172,13 @@ public class OrdemServicoTests
         var acao = ordemServico.IniciarExecucao;
 
         // Assert
-        acao.Should().Throw<TransicaoStatusOrdemServicoInvalidaException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]
-    public void Dado_OrdemServicoEmExecucaoComServicoPendente_Quando_Finalizar_Entao_DeveLancarOrdemServicoInvalidaException()
+    public void Dado_OrdemServicoEmExecucaoComServicoPendente_Quando_Finalizar_Entao_DeveLancarDomainException()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmExecucao();
@@ -184,6 +187,8 @@ public class OrdemServicoTests
         var acao = ordemServico.Finalizar;
 
         // Assert
-        acao.Should().Throw<OrdemServicoInvalidaException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
     }
 }

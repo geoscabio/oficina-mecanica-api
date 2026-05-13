@@ -1,5 +1,5 @@
 using OficinaMecanica.Domain.Atendimento.Enums;
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.Atendimento.Messages;
 
 namespace OficinaMecanica.Domain.Atendimento.ValueObjects;
@@ -23,7 +23,7 @@ public sealed record CpfCnpj
         {
             11 when CpfValido(numeroNormalizado) => new CpfCnpj(numeroNormalizado, TipoDocumento.CPF),
             14 when CnpjValido(numeroNormalizado) => new CpfCnpj(numeroNormalizado, TipoDocumento.CNPJ),
-            _ => throw new DocumentoInvalidoException(ClienteErrorMessages.DocumentoInvalido)
+            _ => throw new DomainException(ClienteErrorMessages.DocumentoInvalido)
         };
     }
 

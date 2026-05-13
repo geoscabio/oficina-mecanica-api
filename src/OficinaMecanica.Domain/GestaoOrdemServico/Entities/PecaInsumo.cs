@@ -1,4 +1,4 @@
-using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 
 namespace OficinaMecanica.Domain.GestaoOrdemServico.Entities;
@@ -23,17 +23,17 @@ public sealed class PecaInsumo
     {
         if (pecaInsumoCatalogoId == Guid.Empty)
         {
-            throw new PecaInsumoInvalidaException(OrdemServicoErrorMessages.PecaInsumoCatalogoObrigatorio);
+            throw new DomainException(OrdemServicoErrorMessages.PecaInsumoCatalogoObrigatorio);
         }
 
         if (quantidade <= 0)
         {
-            throw new PecaInsumoInvalidaException(OrdemServicoErrorMessages.QuantidadePecaInsumoMaiorQueZero);
+            throw new DomainException(OrdemServicoErrorMessages.QuantidadePecaInsumoMaiorQueZero);
         }
 
         if (valorUnitario <= 0)
         {
-            throw new PecaInsumoInvalidaException(OrdemServicoErrorMessages.ValorUnitarioPecaInsumoMaiorQueZero);
+            throw new DomainException(OrdemServicoErrorMessages.ValorUnitarioPecaInsumoMaiorQueZero);
         }
 
         return new PecaInsumo(Guid.NewGuid(), pecaInsumoCatalogoId, quantidade, valorUnitario);

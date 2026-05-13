@@ -1,4 +1,4 @@
-using OficinaMecanica.Domain.GestaoEstoque.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.GestaoEstoque.Messages;
 
 namespace OficinaMecanica.Domain.GestaoEstoque.Entities;
@@ -22,12 +22,12 @@ public sealed class ItemEstoque
     {
         if (pecaInsumoCatalogoId == Guid.Empty)
         {
-            throw new ItemEstoqueInvalidoException(EstoqueErrorMessages.PecaInsumoCatalogoObrigatorio);
+            throw new DomainException(EstoqueErrorMessages.PecaInsumoCatalogoObrigatorio);
         }
 
         if (quantidadeDisponivel < 0)
         {
-            throw new ItemEstoqueInvalidoException(EstoqueErrorMessages.QuantidadeDisponivelNaoNegativa);
+            throw new DomainException(EstoqueErrorMessages.QuantidadeDisponivelNaoNegativa);
         }
 
         return new ItemEstoque(Guid.NewGuid(), pecaInsumoCatalogoId, quantidadeDisponivel, 0);
@@ -46,7 +46,7 @@ public sealed class ItemEstoque
 
         if (!PossuiDisponibilidade(quantidade))
         {
-            throw new EstoqueInsuficienteException(EstoqueErrorMessages.EstoqueInsuficiente);
+            throw new DomainException(EstoqueErrorMessages.EstoqueInsuficiente);
         }
 
         QuantidadeDisponivel -= quantidade;
@@ -74,7 +74,7 @@ public sealed class ItemEstoque
     {
         if (quantidade <= 0)
         {
-            throw new ItemEstoqueInvalidoException(EstoqueErrorMessages.QuantidadeMaiorQueZero);
+            throw new DomainException(EstoqueErrorMessages.QuantidadeMaiorQueZero);
         }
     }
 
@@ -82,7 +82,7 @@ public sealed class ItemEstoque
     {
         if (QuantidadeReservada < quantidade)
         {
-            throw new ItemEstoqueInvalidoException(EstoqueErrorMessages.QuantidadeReservadaInsuficiente);
+            throw new DomainException(EstoqueErrorMessages.QuantidadeReservadaInsuficiente);
         }
     }
 }

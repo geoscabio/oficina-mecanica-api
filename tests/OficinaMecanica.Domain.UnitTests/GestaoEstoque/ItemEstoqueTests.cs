@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
-using OficinaMecanica.Domain.GestaoEstoque.Exceptions;
+using OficinaMecanica.Domain.GestaoEstoque.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.GestaoEstoque.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque;
@@ -27,7 +28,7 @@ public class ItemEstoqueTests
     }
 
     [Fact]
-    public void Dado_CatalogoIdVazio_Quando_CriarItemEstoque_Entao_DeveLancarItemEstoqueInvalidoException()
+    public void Dado_CatalogoIdVazio_Quando_CriarItemEstoque_Entao_DeveLancarDomainException()
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.Empty;
@@ -37,11 +38,13 @@ public class ItemEstoqueTests
         var acao = () => ItemEstoque.Criar(pecaInsumoCatalogoId, quantidadeDisponivel);
 
         // Assert
-        acao.Should().Throw<ItemEstoqueInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(EstoqueErrorMessages.PecaInsumoCatalogoObrigatorio);
     }
 
     [Fact]
-    public void Dado_QuantidadeInicialNegativa_Quando_CriarItemEstoque_Entao_DeveLancarItemEstoqueInvalidoException()
+    public void Dado_QuantidadeInicialNegativa_Quando_CriarItemEstoque_Entao_DeveLancarDomainException()
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
@@ -51,7 +54,9 @@ public class ItemEstoqueTests
         var acao = () => ItemEstoque.Criar(pecaInsumoCatalogoId, quantidadeDisponivel);
 
         // Assert
-        acao.Should().Throw<ItemEstoqueInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(EstoqueErrorMessages.QuantidadeDisponivelNaoNegativa);
     }
 
     [Fact]
@@ -69,7 +74,7 @@ public class ItemEstoqueTests
     }
 
     [Fact]
-    public void Dado_ItemSemQuantidadeDisponivelSuficiente_Quando_Reservar_Entao_DeveLancarEstoqueInsuficienteException()
+    public void Dado_ItemSemQuantidadeDisponivelSuficiente_Quando_Reservar_Entao_DeveLancarDomainException()
     {
         // Arrange
         var item = EstoqueTestDataFactory.CriarItemEstoquePadrao(quantidadeDisponivel: 3);
@@ -78,7 +83,9 @@ public class ItemEstoqueTests
         var acao = () => item.Reservar(4);
 
         // Assert
-        acao.Should().Throw<EstoqueInsuficienteException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(EstoqueErrorMessages.EstoqueInsuficiente);
     }
 
     [Fact]

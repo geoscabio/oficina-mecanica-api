@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.Atendimento.Enums;
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Atendimento.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
 
 namespace OficinaMecanica.Domain.UnitTests.Atendimento;
@@ -40,7 +41,7 @@ public class CpfCnpjTests
     [InlineData("111.111.111-11")]
     [InlineData("12.345.678/0001-99")]
     [InlineData("123")]
-    public void Dado_DocumentoInvalido_Quando_Criar_Entao_DeveLancarDocumentoInvalidoException(string numero)
+    public void Dado_DocumentoInvalido_Quando_Criar_Entao_DeveLancarDomainException(string numero)
     {
         // Arrange
         var numeroInformado = numero;
@@ -49,7 +50,9 @@ public class CpfCnpjTests
         var acao = () => CpfCnpj.Criar(numeroInformado);
 
         // Assert
-        acao.Should().Throw<DocumentoInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(ClienteErrorMessages.DocumentoInvalido);
     }
 
     [Fact]

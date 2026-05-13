@@ -1,4 +1,4 @@
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
 
@@ -27,27 +27,27 @@ public sealed class Veiculo
     {
         if (clienteId == Guid.Empty)
         {
-            throw new VeiculoInvalidoException(VeiculoErrorMessages.ClienteObrigatorio);
+            throw new DomainException(VeiculoErrorMessages.ClienteObrigatorio);
         }
 
         if (placa is null)
         {
-            throw new VeiculoInvalidoException(VeiculoErrorMessages.PlacaObrigatoria);
+            throw new DomainException(VeiculoErrorMessages.PlacaObrigatoria);
         }
 
         if (string.IsNullOrWhiteSpace(marca))
         {
-            throw new VeiculoInvalidoException(VeiculoErrorMessages.MarcaObrigatoria);
+            throw new DomainException(VeiculoErrorMessages.MarcaObrigatoria);
         }
 
         if (string.IsNullOrWhiteSpace(modelo))
         {
-            throw new VeiculoInvalidoException(VeiculoErrorMessages.ModeloObrigatorio);
+            throw new DomainException(VeiculoErrorMessages.ModeloObrigatorio);
         }
 
         if (ano <= 0)
         {
-            throw new VeiculoInvalidoException(VeiculoErrorMessages.AnoInvalido);
+            throw new DomainException(VeiculoErrorMessages.AnoInvalido);
         }
 
         return new Veiculo(Guid.NewGuid(), clienteId, placa, marca.Trim(), modelo.Trim(), ano);

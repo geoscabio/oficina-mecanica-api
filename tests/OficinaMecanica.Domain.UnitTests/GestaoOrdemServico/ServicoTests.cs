@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
-using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico;
@@ -54,7 +55,7 @@ public class ServicoTests
     }
 
     [Fact]
-    public void Dado_ServicoPendente_Quando_Finalizar_Entao_DeveLancarServicoInvalidoException()
+    public void Dado_ServicoPendente_Quando_Finalizar_Entao_DeveLancarDomainException()
     {
         // Arrange
         var servico = OrdemServicoTestDataFactory.CriarServicoPadrao();
@@ -63,6 +64,8 @@ public class ServicoTests
         var acao = servico.Finalizar;
 
         // Assert
-        acao.Should().Throw<ServicoInvalidoException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
     }
 }

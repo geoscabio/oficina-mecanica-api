@@ -1,7 +1,8 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Enums;
-using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.Administrativo.Messages;
+using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.Administrativo.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.Administrativo;
@@ -30,7 +31,7 @@ public class PecaInsumoCatalogoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_DescricaoInvalida_Quando_CriarPecaInsumoCatalogo_Entao_DeveLancarPecaInsumoCatalogoInvalidaException(string descricao)
+    public void Dado_DescricaoInvalida_Quando_CriarPecaInsumoCatalogo_Entao_DeveLancarDomainException(string descricao)
     {
         // Arrange
         const TipoPecaInsumo tipo = TipoPecaInsumo.PECA;
@@ -40,13 +41,15 @@ public class PecaInsumoCatalogoTests
         var acao = () => PecaInsumoCatalogo.Criar(descricao, tipo, valor);
 
         // Assert
-        acao.Should().Throw<PecaInsumoCatalogoInvalidaException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(PecaInsumoCatalogoErrorMessages.DescricaoObrigatoria);
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Dado_ValorInvalido_Quando_CriarPecaInsumoCatalogo_Entao_DeveLancarPecaInsumoCatalogoInvalidaException(decimal valor)
+    public void Dado_ValorInvalido_Quando_CriarPecaInsumoCatalogo_Entao_DeveLancarDomainException(decimal valor)
     {
         // Arrange
         const string descricao = PecaInsumoCatalogoTestDataFactory.DescricaoPadrao;
@@ -56,11 +59,13 @@ public class PecaInsumoCatalogoTests
         var acao = () => PecaInsumoCatalogo.Criar(descricao, tipo, valor);
 
         // Assert
-        acao.Should().Throw<PecaInsumoCatalogoInvalidaException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(PecaInsumoCatalogoErrorMessages.ValorMaiorQueZero);
     }
 
     [Fact]
-    public void Dado_TipoInvalido_Quando_CriarPecaInsumoCatalogo_Entao_DeveLancarPecaInsumoCatalogoInvalidaException()
+    public void Dado_TipoInvalido_Quando_CriarPecaInsumoCatalogo_Entao_DeveLancarDomainException()
     {
         // Arrange
         const string descricao = PecaInsumoCatalogoTestDataFactory.DescricaoPadrao;
@@ -71,6 +76,8 @@ public class PecaInsumoCatalogoTests
         var acao = () => PecaInsumoCatalogo.Criar(descricao, tipoInvalido, valor);
 
         // Assert
-        acao.Should().Throw<PecaInsumoCatalogoInvalidaException>();
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(PecaInsumoCatalogoErrorMessages.TipoInvalido);
     }
 }
