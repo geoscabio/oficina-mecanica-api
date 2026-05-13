@@ -80,7 +80,7 @@ public class ListarOrdensServicoUseCaseTests
             .ReturnsAsync(Array.Empty<OrdemServico>());
         repository
             .Setup(repo => repo.ContarAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(11);
+            .ReturnsAsync(10);
 
         var useCase = CriarUseCase(repository);
 
@@ -93,7 +93,7 @@ public class ListarOrdensServicoUseCaseTests
         resultado.Valor!.Itens.Should().BeEmpty();
         resultado.Valor.Pagina.Should().Be(2);
         resultado.Valor.TamanhoPagina.Should().Be(10);
-        resultado.Valor.TotalItens.Should().Be(11);
+        resultado.Valor.TotalItens.Should().Be(10);
     }
 
     [Fact]
