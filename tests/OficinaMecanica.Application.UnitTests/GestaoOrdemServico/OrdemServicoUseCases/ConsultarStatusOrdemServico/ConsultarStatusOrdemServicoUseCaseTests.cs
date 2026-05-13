@@ -2,6 +2,7 @@ using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ConsultarStatusOrdemServico;
+using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
@@ -96,6 +97,7 @@ public class ConsultarStatusOrdemServicoUseCaseTests
     {
         return new ConsultarStatusOrdemServicoUseCase(
             repository.Object,
-            new ConsultarStatusOrdemServicoValidator());
+            new ConsultarStatusOrdemServicoValidator(),
+            MapperFactory.Criar());
     }
 }

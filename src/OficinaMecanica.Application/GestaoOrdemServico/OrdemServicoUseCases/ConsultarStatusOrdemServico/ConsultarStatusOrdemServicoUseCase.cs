@@ -1,3 +1,4 @@
+using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
@@ -9,13 +10,16 @@ public sealed class ConsultarStatusOrdemServicoUseCase
 {
     private readonly IOrdemServicoRepository _ordemServicoRepository;
     private readonly IValidator<ConsultarStatusOrdemServicoRequest> _validator;
+    private readonly IMapper _mapper;
 
     public ConsultarStatusOrdemServicoUseCase(
         IOrdemServicoRepository ordemServicoRepository,
-        IValidator<ConsultarStatusOrdemServicoRequest> validator)
+        IValidator<ConsultarStatusOrdemServicoRequest> validator,
+        IMapper mapper)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _validator = validator;
+        _mapper = mapper;
     }
 
     public async Task<Result<ConsultarStatusOrdemServicoResponse>> ExecuteAsync(
@@ -40,19 +44,7 @@ public sealed class ConsultarStatusOrdemServicoUseCase
                 TipoErro.NaoEncontrado);
         }
 
-        var servicos = ordemServico.Servicos
-            .Select(servico => new ServicoStatusResponse(
-                servico.Id,
-                servico.ServicoCatalogoId,
-                servico.Status.ToString()))
-            .ToArray();
-
-        var response = new ConsultarStatusOrdemServicoResponse(
-            ordemServico.Id,
-            ordemServico.Numero,
-            ordemServico.Status.ToString(),
-            servicos);
-
-        return Result<ConsultarStatusOrdemServicoResponse>.Ok(response);
+        return Result<ConsultarStatusOrdemServicoResponse>.Ok(
+            _mapper.Map<ConsultarStatusOrdemServicoResponse>(ordemServico));
     }
 }
