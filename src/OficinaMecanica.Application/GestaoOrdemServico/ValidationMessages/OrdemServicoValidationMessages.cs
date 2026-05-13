@@ -10,6 +10,7 @@ public static class OrdemServicoValidationMessages
     public const string RequestIniciarExecucaoOrdemServicoObrigatorio = "Request para iniciar execução da ordem de serviço é obrigatório.";
     public const string RequestIniciarExecucaoServicoObrigatorio = "Request para iniciar execução do serviço é obrigatório.";
     public const string RequestFinalizarServicoObrigatorio = "Request para finalizar serviço é obrigatório.";
+    public const string RequestFinalizarOrdemServicoObrigatorio = "Request para finalizar ordem de serviço é obrigatório.";
     public const string VeiculoIdObrigatorio = "VeículoId é obrigatório.";
     public const string MecanicoIdObrigatorio = "MecânicoId é obrigatório.";
     public const string OrdemServicoIdObrigatorio = "OrdemServicoId é obrigatório.";
