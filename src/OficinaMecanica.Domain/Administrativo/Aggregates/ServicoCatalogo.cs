@@ -30,5 +30,21 @@ public sealed class ServicoCatalogo
 
         return new ServicoCatalogo(Guid.NewGuid(), descricao.Trim(), valor);
     }
+
+    public void Atualizar(string descricao, decimal valor)
+    {
+        if (string.IsNullOrWhiteSpace(descricao))
+        {
+            throw new DomainException(ServicoCatalogoErrorMessages.DescricaoObrigatoria);
+        }
+
+        if (valor <= 0)
+        {
+            throw new DomainException(ServicoCatalogoErrorMessages.ValorMaiorQueZero);
+        }
+
+        Descricao = descricao.Trim();
+        Valor = valor;
+    }
 }
 

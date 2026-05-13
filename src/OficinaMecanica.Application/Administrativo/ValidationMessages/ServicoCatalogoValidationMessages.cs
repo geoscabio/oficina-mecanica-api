@@ -3,6 +3,7 @@ namespace OficinaMecanica.Application.Administrativo.ValidationMessages;
 public static class ServicoCatalogoValidationMessages
 {
     public const string RequestCadastrarServicoCatalogoObrigatorio = "Request para cadastrar serviço do catálogo é obrigatório.";
+    public const string RequestAtualizarServicoCatalogoObrigatorio = "Request para atualizar serviço do catálogo é obrigatório.";
     public const string RequestConsultarServicoCatalogoObrigatorio = "Request para consultar serviço do catálogo é obrigatório.";
     public const string RequestListarServicosCatalogoObrigatorio = "Request para listar serviços do catálogo é obrigatório.";
     public const string RequestConsultarTempoMedioExecucaoServicoObrigatorio = "Request para consultar tempo médio de execução do serviço é obrigatório.";
