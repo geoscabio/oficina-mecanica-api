@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
+using OficinaMecanica.Application.GestaoOrdemServico.Responses;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 
 namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
@@ -21,7 +22,7 @@ public sealed class IniciarDiagnosticoOrdemServicoUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<IniciarDiagnosticoOrdemServicoResponse>> ExecuteAsync(
+    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(
         IniciarDiagnosticoOrdemServicoRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -31,14 +32,13 @@ public sealed class IniciarDiagnosticoOrdemServicoUseCase
 
         if (ordemServico is null)
         {
-            return Result<IniciarDiagnosticoOrdemServicoResponse>.Falha("Ordem de servico nao encontrada.");
+            return Result<OrdemServicoResponse>.Falha("Ordem de servico nao encontrada.");
         }
 
         ordemServico.IniciarDiagnostico();
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
 
-        return Result<IniciarDiagnosticoOrdemServicoResponse>.Ok(
-            _mapper.Map<IniciarDiagnosticoOrdemServicoResponse>(ordemServico));
+        return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }

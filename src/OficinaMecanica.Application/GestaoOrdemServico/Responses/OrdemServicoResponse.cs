@@ -1,6 +1,6 @@
-namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
+namespace OficinaMecanica.Application.GestaoOrdemServico.Responses;
 
-public sealed record AbrirOrdemServicoResponse(
+public sealed record OrdemServicoResponse(
     Guid Id,
     int Numero,
     string Status,

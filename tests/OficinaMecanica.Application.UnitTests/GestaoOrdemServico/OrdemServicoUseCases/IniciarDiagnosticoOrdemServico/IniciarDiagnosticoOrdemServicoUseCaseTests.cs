@@ -13,19 +13,24 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
     [Fact]
     public async Task Dado_OrdemServicoRecebida_Quando_IniciarDiagnostico_Entao_DeveAtualizarStatusEPersistir()
     {
-        var ordemServico = OrdemServico.Abrir(Guid.NewGuid(), Guid.NewGuid());
+        // Arrange
+        var ordemServico = TestDataFactory.CriarOrdemServicoRecebida();
         var repository = new Mock<IOrdemServicoRepository>();
         repository
             .Setup(repo => repo.ObterPorIdAsync(ordemServico.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(ordemServico);
+
         var useCase = CriarUseCase(repository);
 
+        // Act
         var resultado = await useCase.ExecuteAsync(new IniciarDiagnosticoOrdemServicoRequest(ordemServico.Id));
 
+        // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(ordemServico.Id);
         resultado.Valor.Status.Should().Be("EM_DIAGNOSTICO");
+
         repository.Verify(repo => repo.AtualizarAsync(It.Is<OrdemServico>(ordemServicoAtualizada =>
             ordemServicoAtualizada.Id == ordemServico.Id
             && ordemServicoAtualizada.Status.ToString() == "EM_DIAGNOSTICO"), It.IsAny<CancellationToken>()), Times.Once);
@@ -34,24 +39,31 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
     [Fact]
     public async Task Dado_OrdemServicoInexistente_Quando_IniciarDiagnostico_Entao_DeveRetornarFalha()
     {
+        // Arrange
         var repository = new Mock<IOrdemServicoRepository>();
         var useCase = CriarUseCase(repository);
 
+        // Act
         var resultado = await useCase.ExecuteAsync(new IniciarDiagnosticoOrdemServicoRequest(Guid.NewGuid()));
 
+        // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().Be("Ordem de servico nao encontrada.");
+
         repository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task Dado_IdVazio_Quando_IniciarDiagnostico_Entao_DeveLancarValidationException()
     {
+        // Arrange
         var repository = new Mock<IOrdemServicoRepository>();
         var useCase = CriarUseCase(repository);
 
+        // Act
         var acao = () => useCase.ExecuteAsync(new IniciarDiagnosticoOrdemServicoRequest(Guid.Empty));
 
+        // Assert
         await acao.Should().ThrowAsync<ValidationException>();
     }
 

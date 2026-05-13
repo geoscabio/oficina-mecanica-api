@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using OficinaMecanica.Application.Atendimento.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
@@ -22,7 +23,7 @@ public sealed class ConsultarVeiculoPorPlacaUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<ConsultarVeiculoPorPlacaResponse>> ExecuteAsync(
+    public async Task<Result<VeiculoResponse>> ExecuteAsync(
         ConsultarVeiculoPorPlacaRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -33,10 +34,9 @@ public sealed class ConsultarVeiculoPorPlacaUseCase
 
         if (veiculo is null)
         {
-            return Result<ConsultarVeiculoPorPlacaResponse>.Falha("Veiculo nao encontrado.");
+            return Result<VeiculoResponse>.Falha("Veiculo nao encontrado.");
         }
 
-        return Result<ConsultarVeiculoPorPlacaResponse>.Ok(
-            _mapper.Map<ConsultarVeiculoPorPlacaResponse>(veiculo));
+        return Result<VeiculoResponse>.Ok(_mapper.Map<VeiculoResponse>(veiculo));
     }
 }

@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using OficinaMecanica.Application.Atendimento.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -26,7 +27,7 @@ public sealed class CadastrarVeiculoUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<CadastrarVeiculoResponse>> ExecuteAsync(
+    public async Task<Result<VeiculoResponse>> ExecuteAsync(
         CadastrarVeiculoRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -36,7 +37,7 @@ public sealed class CadastrarVeiculoUseCase
 
         if (cliente is null)
         {
-            return Result<CadastrarVeiculoResponse>.Falha("Cliente nao encontrado.");
+            return Result<VeiculoResponse>.Falha("Cliente nao encontrado.");
         }
 
         var placa = Placa.Criar(request.Placa);
@@ -44,13 +45,13 @@ public sealed class CadastrarVeiculoUseCase
 
         if (veiculoExistente is not null)
         {
-            return Result<CadastrarVeiculoResponse>.Falha("Veiculo ja cadastrado para a placa informada.");
+            return Result<VeiculoResponse>.Falha("Veiculo ja cadastrado para a placa informada.");
         }
 
         var veiculo = Veiculo.Criar(request.ClienteId, placa, request.Marca, request.Modelo, request.Ano);
 
         await _veiculoRepository.AdicionarAsync(veiculo, cancellationToken);
 
-        return Result<CadastrarVeiculoResponse>.Ok(_mapper.Map<CadastrarVeiculoResponse>(veiculo));
+        return Result<VeiculoResponse>.Ok(_mapper.Map<VeiculoResponse>(veiculo));
     }
 }

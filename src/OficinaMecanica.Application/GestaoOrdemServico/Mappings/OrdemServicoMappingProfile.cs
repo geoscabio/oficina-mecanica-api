@@ -1,13 +1,14 @@
 using AutoMapper;
+using OficinaMecanica.Application.GestaoOrdemServico.Responses;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 
-namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
+namespace OficinaMecanica.Application.GestaoOrdemServico.Mappings;
 
-public sealed class IniciarDiagnosticoOrdemServicoMappingProfile : Profile
+public sealed class OrdemServicoMappingProfile : Profile
 {
-    public IniciarDiagnosticoOrdemServicoMappingProfile()
+    public OrdemServicoMappingProfile()
     {
-        CreateMap<OrdemServico, IniciarDiagnosticoOrdemServicoResponse>()
+        CreateMap<OrdemServico, OrdemServicoResponse>()
             .ForCtorParam("Id", opcao => opcao.MapFrom(origem => origem.Id))
             .ForCtorParam("Numero", opcao => opcao.MapFrom(origem => origem.Numero))
             .ForCtorParam("Status", opcao => opcao.MapFrom(origem => origem.Status.ToString()))

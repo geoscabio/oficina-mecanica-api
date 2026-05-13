@@ -3,11 +3,8 @@ using FluentValidation;
 using Moq;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
 using OficinaMecanica.Application.UnitTests.Common;
-using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
-using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
-using OficinaMecanica.Domain.Atendimento.ValueObjects;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 
@@ -18,8 +15,9 @@ public class AbrirOrdemServicoUseCaseTests
     [Fact]
     public async Task Dado_RequestValido_Quando_AbrirOrdemServico_Entao_DevePersistirOrdemServicoERetornarSucesso()
     {
-        var veiculo = CriarVeiculo();
-        var mecanico = Mecanico.Criar("Jose Santos", "MEC-001");
+        // Arrange
+        var veiculo = TestDataFactory.CriarVeiculoPadrao();
+        var mecanico = TestDataFactory.CriarMecanicoPadrao();
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var veiculoRepository = new Mock<IVeiculoRepository>();
         var mecanicoRepository = new Mock<IMecanicoRepository>();
@@ -33,9 +31,12 @@ public class AbrirOrdemServicoUseCaseTests
             .ReturnsAsync(mecanico);
 
         var useCase = CriarUseCase(ordemServicoRepository, veiculoRepository, mecanicoRepository);
+        var request = new AbrirOrdemServicoRequest(veiculo.Id, mecanico.Id);
 
-        var resultado = await useCase.ExecuteAsync(new AbrirOrdemServicoRequest(veiculo.Id, mecanico.Id));
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
 
+        // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().NotBeEmpty();
@@ -55,51 +56,69 @@ public class AbrirOrdemServicoUseCaseTests
     [Fact]
     public async Task Dado_VeiculoInexistente_Quando_AbrirOrdemServico_Entao_DeveRetornarFalha()
     {
-        var mecanico = Mecanico.Criar("Jose Santos", "MEC-001");
+        // Arrange
+        var mecanico = TestDataFactory.CriarMecanicoPadrao();
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var veiculoRepository = new Mock<IVeiculoRepository>();
         var mecanicoRepository = new Mock<IMecanicoRepository>();
+
         mecanicoRepository
             .Setup(repo => repo.ObterPorIdAsync(mecanico.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(mecanico);
+
         var useCase = CriarUseCase(ordemServicoRepository, veiculoRepository, mecanicoRepository);
+        var request = new AbrirOrdemServicoRequest(Guid.NewGuid(), mecanico.Id);
 
-        var resultado = await useCase.ExecuteAsync(new AbrirOrdemServicoRequest(Guid.NewGuid(), mecanico.Id));
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
 
+        // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().Be("Veiculo nao encontrado.");
+
         ordemServicoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task Dado_MecanicoInexistente_Quando_AbrirOrdemServico_Entao_DeveRetornarFalha()
     {
-        var veiculo = CriarVeiculo();
+        // Arrange
+        var veiculo = TestDataFactory.CriarVeiculoPadrao();
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var veiculoRepository = new Mock<IVeiculoRepository>();
         var mecanicoRepository = new Mock<IMecanicoRepository>();
+
         veiculoRepository
             .Setup(repo => repo.ObterPorIdAsync(veiculo.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(veiculo);
+
         var useCase = CriarUseCase(ordemServicoRepository, veiculoRepository, mecanicoRepository);
+        var request = new AbrirOrdemServicoRequest(veiculo.Id, Guid.NewGuid());
 
-        var resultado = await useCase.ExecuteAsync(new AbrirOrdemServicoRequest(veiculo.Id, Guid.NewGuid()));
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
 
+        // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().Be("Mecanico nao encontrado.");
+
         ordemServicoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task Dado_VeiculoIdVazio_Quando_AbrirOrdemServico_Entao_DeveLancarValidationException()
     {
+        // Arrange
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var veiculoRepository = new Mock<IVeiculoRepository>();
         var mecanicoRepository = new Mock<IMecanicoRepository>();
         var useCase = CriarUseCase(ordemServicoRepository, veiculoRepository, mecanicoRepository);
+        var request = new AbrirOrdemServicoRequest(Guid.Empty, Guid.NewGuid());
 
-        var acao = () => useCase.ExecuteAsync(new AbrirOrdemServicoRequest(Guid.Empty, Guid.NewGuid()));
+        // Act
+        var acao = () => useCase.ExecuteAsync(request);
 
+        // Assert
         await acao.Should().ThrowAsync<ValidationException>();
     }
 
@@ -114,15 +133,5 @@ public class AbrirOrdemServicoUseCaseTests
             mecanicoRepository.Object,
             new AbrirOrdemServicoValidator(),
             MapperFactory.Criar());
-    }
-
-    private static Veiculo CriarVeiculo()
-    {
-        return Veiculo.Criar(
-            Guid.NewGuid(),
-            Placa.Criar("ABC-1234"),
-            "Toyota",
-            "Corolla",
-            2020);
     }
 }

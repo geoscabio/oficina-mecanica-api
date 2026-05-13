@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using OficinaMecanica.Application.Atendimento.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -23,7 +24,7 @@ public sealed class CadastrarClienteUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<CadastrarClienteResponse>> ExecuteAsync(
+    public async Task<Result<ClienteResponse>> ExecuteAsync(
         CadastrarClienteRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -34,18 +35,23 @@ public sealed class CadastrarClienteUseCase
 
         if (clienteExistente is not null)
         {
-            return Result<CadastrarClienteResponse>.Falha("Cliente ja cadastrado para o documento informado.");
+            return Result<ClienteResponse>.Falha("Cliente ja cadastrado para o documento informado.");
         }
 
         var cliente = Cliente.Criar(
             documento,
             request.Nome,
-            new Endereco(request.Logradouro, request.Numero, request.Bairro, request.Cidade, request.CEP),
+            new Endereco(
+                request.Endereco.Logradouro,
+                request.Endereco.Numero,
+                request.Endereco.Bairro,
+                request.Endereco.Cidade,
+                request.Endereco.CEP),
             Telefone.Criar(request.Telefone),
             Email.Criar(request.Email));
 
         await _clienteRepository.AdicionarAsync(cliente, cancellationToken);
 
-        return Result<CadastrarClienteResponse>.Ok(_mapper.Map<CadastrarClienteResponse>(cliente));
+        return Result<ClienteResponse>.Ok(_mapper.Map<ClienteResponse>(cliente));
     }
 }
