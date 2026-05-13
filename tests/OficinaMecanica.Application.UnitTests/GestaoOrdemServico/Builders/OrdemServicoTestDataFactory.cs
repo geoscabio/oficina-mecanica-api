@@ -74,6 +74,15 @@ internal static class OrdemServicoTestDataFactory
         return ordemServico;
     }
 
+    public static OrdemServico CriarOrdemServicoFinalizada()
+    {
+        var ordemServico = CriarOrdemServicoEmExecucaoComServicoFinalizado();
+
+        ordemServico.Finalizar();
+
+        return ordemServico;
+    }
+
     public static OrdemServico CriarOrdemServicoEmExecucaoComServicoFinalizadoEPecaInsumoReservado(
         Guid pecaInsumoCatalogoId,
         int quantidade = 2)
