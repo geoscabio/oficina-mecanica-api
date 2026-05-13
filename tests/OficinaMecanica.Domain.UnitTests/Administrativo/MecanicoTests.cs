@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.UnitTests.Administrativo.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.Administrativo;
 
@@ -9,11 +10,17 @@ public class MecanicoTests
     [Fact]
     public void Dado_DadosValidos_Quando_CriarMecanico_Entao_DeveRegistrarMecanicoComIdentidade()
     {
-        var mecanico = Mecanico.Criar("Joao Pereira", "Suspensao e freios");
+        // Arrange
+        const string nomeEsperado = MecanicoTestDataFactory.NomePadrao;
+        const string funcionalEsperado = MecanicoTestDataFactory.FuncionalPadrao;
 
+        // Act
+        var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
+
+        // Assert
         mecanico.Id.Should().NotBeEmpty();
-        mecanico.Nome.Should().Be("Joao Pereira");
-        mecanico.Funcional.Should().Be("Suspensao e freios");
+        mecanico.Nome.Should().Be(nomeEsperado);
+        mecanico.Funcional.Should().Be(funcionalEsperado);
     }
 
     [Theory]
@@ -21,8 +28,13 @@ public class MecanicoTests
     [InlineData("  ")]
     public void Dado_NomeInvalido_Quando_CriarMecanico_Entao_DeveLancarMecanicoInvalidoException(string nome)
     {
-        var acao = () => Mecanico.Criar(nome, "Suspensao e freios");
+        // Arrange
+        const string funcional = MecanicoTestDataFactory.FuncionalPadrao;
 
+        // Act
+        var acao = () => Mecanico.Criar(nome, funcional);
+
+        // Assert
         acao.Should().Throw<MecanicoInvalidoException>();
     }
 
@@ -31,8 +43,13 @@ public class MecanicoTests
     [InlineData("  ")]
     public void Dado_FuncionalInvalido_Quando_CriarMecanico_Entao_DeveLancarMecanicoInvalidoException(string funcional)
     {
-        var acao = () => Mecanico.Criar("Joao Pereira", funcional);
+        // Arrange
+        const string nome = MecanicoTestDataFactory.NomePadrao;
 
+        // Act
+        var acao = () => Mecanico.Criar(nome, funcional);
+
+        // Assert
         acao.Should().Throw<MecanicoInvalidoException>();
     }
 }

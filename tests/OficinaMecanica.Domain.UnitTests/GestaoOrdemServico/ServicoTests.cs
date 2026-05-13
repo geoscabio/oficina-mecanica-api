@@ -1,7 +1,7 @@
 using FluentAssertions;
-using OficinaMecanica.Domain.GestaoOrdemServico.Entities;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
+using OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico;
 
@@ -10,13 +10,16 @@ public class ServicoTests
     [Fact]
     public void Dado_DadosValidos_Quando_CriarServico_Entao_DeveRegistrarServicoPendenteDeExecucao()
     {
+        // Arrange
         var servicoCatalogoId = Guid.NewGuid();
 
-        var servico = Servico.Criar(servicoCatalogoId, 150m);
+        // Act
+        var servico = OrdemServicoTestDataFactory.CriarServicoPadrao(servicoCatalogoId);
 
+        // Assert
         servico.Id.Should().NotBeEmpty();
         servico.ServicoCatalogoId.Should().Be(servicoCatalogoId);
-        servico.Valor.Should().Be(150m);
+        servico.Valor.Should().Be(OrdemServicoTestDataFactory.ValorServicoPadrao);
         servico.Status.Should().Be(StatusServico.PENDENTE);
         servico.DataInicio.Should().BeNull();
         servico.DataFim.Should().BeNull();
@@ -25,10 +28,13 @@ public class ServicoTests
     [Fact]
     public void Dado_ServicoPendente_Quando_IniciarExecucao_Entao_DeveFicarEmExecucao()
     {
-        var servico = Servico.Criar(Guid.NewGuid(), 150m);
+        // Arrange
+        var servico = OrdemServicoTestDataFactory.CriarServicoPadrao();
 
+        // Act
         servico.IniciarExecucao();
 
+        // Assert
         servico.Status.Should().Be(StatusServico.EM_EXECUCAO);
         servico.DataInicio.Should().NotBeNull();
     }
@@ -36,11 +42,13 @@ public class ServicoTests
     [Fact]
     public void Dado_ServicoEmExecucao_Quando_Finalizar_Entao_DeveFicarFinalizado()
     {
-        var servico = Servico.Criar(Guid.NewGuid(), 150m);
-        servico.IniciarExecucao();
+        // Arrange
+        var servico = OrdemServicoTestDataFactory.CriarServicoEmExecucao();
 
+        // Act
         servico.Finalizar();
 
+        // Assert
         servico.Status.Should().Be(StatusServico.FINALIZADO);
         servico.DataFim.Should().NotBeNull();
     }
@@ -48,10 +56,13 @@ public class ServicoTests
     [Fact]
     public void Dado_ServicoPendente_Quando_Finalizar_Entao_DeveLancarServicoInvalidoException()
     {
-        var servico = Servico.Criar(Guid.NewGuid(), 150m);
+        // Arrange
+        var servico = OrdemServicoTestDataFactory.CriarServicoPadrao();
 
+        // Act
         var acao = servico.Finalizar;
 
+        // Assert
         acao.Should().Throw<ServicoInvalidoException>();
     }
 }
