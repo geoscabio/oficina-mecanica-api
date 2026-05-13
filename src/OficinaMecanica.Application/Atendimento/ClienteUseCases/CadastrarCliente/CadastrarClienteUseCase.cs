@@ -1,6 +1,6 @@
 using AutoMapper;
 using FluentValidation;
-using OficinaMecanica.Application.Atendimento.Responses;
+using OficinaMecanica.Application.Atendimento.ClienteUseCases.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -55,3 +55,4 @@ public sealed class CadastrarClienteUseCase
         return Result<ClienteResponse>.Ok(_mapper.Map<ClienteResponse>(cliente));
     }
 }
+

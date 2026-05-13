@@ -3,6 +3,7 @@ using FluentValidation;
 using Moq;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
 using OficinaMecanica.Application.UnitTests.Common;
+using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 
@@ -14,7 +15,7 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
     public async Task Dado_OrdemServicoRecebida_Quando_IniciarDiagnostico_Entao_DeveAtualizarStatusEPersistir()
     {
         // Arrange
-        var ordemServico = TestDataFactory.CriarOrdemServicoRecebida();
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoRecebida();
         var repository = new Mock<IOrdemServicoRepository>();
         repository
             .Setup(repo => repo.ObterPorIdAsync(ordemServico.Id, It.IsAny<CancellationToken>()))
@@ -48,7 +49,7 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Ordem de servico nao encontrada.");
+        resultado.Erro!.Mensagem.Should().Be("Ordem de servico nao encontrada.");
 
         repository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -75,3 +76,5 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
             MapperFactory.Criar());
     }
 }
+
+

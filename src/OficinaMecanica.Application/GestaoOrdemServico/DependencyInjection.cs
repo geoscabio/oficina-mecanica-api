@@ -1,9 +1,5 @@
-using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
-using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.DefinirServicos;
-using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
-using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases;
 
 namespace OficinaMecanica.Application.GestaoOrdemServico;
 
@@ -11,15 +7,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddGestaoOrdemServicoApplication(this IServiceCollection services)
     {
-        services.AddScoped<IValidator<AbrirOrdemServicoRequest>, AbrirOrdemServicoValidator>();
-        services.AddScoped<IValidator<IniciarDiagnosticoOrdemServicoRequest>, IniciarDiagnosticoOrdemServicoValidator>();
-        services.AddScoped<IValidator<DefinirServicosRequest>, DefinirServicosValidator>();
-        services.AddScoped<IValidator<ReservarPecaInsumoRequest>, ReservarPecaInsumoValidator>();
-
-        services.AddScoped<AbrirOrdemServicoUseCase>();
-        services.AddScoped<IniciarDiagnosticoOrdemServicoUseCase>();
-        services.AddScoped<DefinirServicosUseCase>();
-        services.AddScoped<ReservarPecaInsumoUseCase>();
+        services.AddOrdemServicoUseCases();
 
         return services;
     }

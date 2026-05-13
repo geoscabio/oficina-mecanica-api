@@ -1,4 +1,4 @@
-namespace OficinaMecanica.Application.Atendimento.Responses;
+namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.Responses;
 
 public sealed record EnderecoResponse(
     string Logradouro,

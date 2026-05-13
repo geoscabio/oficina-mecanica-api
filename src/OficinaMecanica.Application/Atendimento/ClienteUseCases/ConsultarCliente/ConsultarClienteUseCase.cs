@@ -1,6 +1,6 @@
 using AutoMapper;
 using FluentValidation;
-using OficinaMecanica.Application.Atendimento.Responses;
+using OficinaMecanica.Application.Atendimento.ClienteUseCases.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 
@@ -38,3 +38,4 @@ public sealed class ConsultarClienteUseCase
         return Result<ClienteResponse>.Ok(_mapper.Map<ClienteResponse>(cliente));
     }
 }
+
