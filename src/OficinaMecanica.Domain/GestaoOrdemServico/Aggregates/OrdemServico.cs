@@ -1,6 +1,7 @@
 using OficinaMecanica.Domain.GestaoOrdemServico.Entities;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 
 namespace OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 
@@ -34,12 +35,12 @@ public sealed class OrdemServico
     {
         if (veiculoId == Guid.Empty)
         {
-            throw new OrdemServicoInvalidaException("Veiculo da ordem de servico e obrigatorio.");
+            throw new OrdemServicoInvalidaException(OrdemServicoErrorMessages.VeiculoObrigatorio);
         }
 
         if (mecanicoId == Guid.Empty)
         {
-            throw new OrdemServicoInvalidaException("Mecanico da ordem de servico e obrigatorio.");
+            throw new OrdemServicoInvalidaException(OrdemServicoErrorMessages.MecanicoObrigatorio);
         }
 
         return new OrdemServico(Guid.NewGuid(), Random.Shared.Next(1, int.MaxValue), veiculoId, mecanicoId);
@@ -80,7 +81,7 @@ public sealed class OrdemServico
 
         if (_servicos.Count == 0)
         {
-            throw new OrdemServicoInvalidaException("Ordem de servico deve possuir ao menos um servico para aguardar aprovacao.");
+            throw new OrdemServicoInvalidaException(OrdemServicoErrorMessages.ServicoObrigatorioParaAguardarAprovacao);
         }
 
         CalcularOrcamento();
@@ -114,7 +115,7 @@ public sealed class OrdemServico
 
         if (_servicos.Count == 0 || _servicos.Any(servico => servico.Status != StatusServico.FINALIZADO))
         {
-            throw new OrdemServicoInvalidaException("Todos os servicos devem estar finalizados para finalizar a ordem de servico.");
+            throw new OrdemServicoInvalidaException(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
         }
 
         Status = StatusOrdemServico.FINALIZADA;
@@ -132,7 +133,7 @@ public sealed class OrdemServico
     {
         if (Status is StatusOrdemServico.FINALIZADA or StatusOrdemServico.ENTREGUE or StatusOrdemServico.CANCELADA)
         {
-            throw new TransicaoStatusOrdemServicoInvalidaException("Ordem de servico nao pode ser cancelada no status atual.");
+            throw new TransicaoStatusOrdemServicoInvalidaException(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
         }
 
         Status = StatusOrdemServico.CANCELADA;
@@ -142,14 +143,15 @@ public sealed class OrdemServico
     private Servico ObterServico(Guid servicoId)
     {
         return _servicos.SingleOrDefault(servico => servico.Id == servicoId)
-            ?? throw new ServicoInvalidoException("Servico nao encontrado na ordem de servico.");
+            ?? throw new ServicoInvalidoException(OrdemServicoErrorMessages.ServicoNaoEncontrado);
     }
 
     private void ExigirStatus(StatusOrdemServico statusEsperado)
     {
         if (Status != statusEsperado)
         {
-            throw new TransicaoStatusOrdemServicoInvalidaException("Transicao de status da ordem de servico invalida.");
+            throw new TransicaoStatusOrdemServicoInvalidaException(OrdemServicoErrorMessages.TransicaoStatusInvalida);
         }
     }
 }
+

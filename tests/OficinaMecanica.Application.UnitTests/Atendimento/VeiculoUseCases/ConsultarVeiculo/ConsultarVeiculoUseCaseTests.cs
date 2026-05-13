@@ -1,6 +1,7 @@
 using FluentAssertions;
-using FluentValidation;
 using Moq;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
@@ -48,21 +49,25 @@ public class ConsultarVeiculoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Veiculo nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be(VeiculoErrorMessages.VeiculoNaoEncontrado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
     }
 
     [Fact]
-    public async Task Dado_IdVazio_Quando_ConsultarVeiculo_Entao_DeveLancarValidationException()
+    public async Task Dado_IdVazio_Quando_ConsultarVeiculo_Entao_DeveRetornarFalhaDeValidacao()
     {
         // Arrange
         var repository = new Mock<IVeiculoRepository>();
         var useCase = CriarUseCase(repository);
 
         // Act
-        var acao = () => useCase.ExecuteAsync(new ConsultarVeiculoRequest(Guid.Empty));
+        var resultado = await useCase.ExecuteAsync(new ConsultarVeiculoRequest(Guid.Empty));
 
         // Assert
-        await acao.Should().ThrowAsync<ValidationException>();
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
     }
 
     private static ConsultarVeiculoUseCase CriarUseCase(Mock<IVeiculoRepository> repository)
@@ -73,5 +78,10 @@ public class ConsultarVeiculoUseCaseTests
             MapperFactory.Criar());
     }
 }
+
+
+
+
+
 
 

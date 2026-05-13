@@ -1,4 +1,5 @@
 using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Atendimento.Messages;
 
 namespace OficinaMecanica.Domain.Atendimento.ValueObjects;
 
@@ -12,7 +13,7 @@ public sealed record Endereco
             || string.IsNullOrWhiteSpace(cidade)
             || string.IsNullOrWhiteSpace(cep))
         {
-            throw new ClienteInvalidoException("Endereco invalido.");
+            throw new ClienteInvalidoException(ClienteErrorMessages.EnderecoInvalido);
         }
 
         Logradouro = logradouro.Trim();
@@ -34,9 +35,10 @@ public sealed record Endereco
 
         if (cepNormalizado.Length != 8)
         {
-            throw new ClienteInvalidoException("CEP invalido.");
+            throw new ClienteInvalidoException(ClienteErrorMessages.CepInvalido);
         }
 
         return cepNormalizado;
     }
 }
+

@@ -1,5 +1,6 @@
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.GestaoOrdemServico.Exceptions;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 
 namespace OficinaMecanica.Domain.GestaoOrdemServico.Entities;
 
@@ -24,12 +25,12 @@ public sealed class Servico
     {
         if (servicoCatalogoId == Guid.Empty)
         {
-            throw new ServicoInvalidoException("Servico do catalogo e obrigatorio.");
+            throw new ServicoInvalidoException(OrdemServicoErrorMessages.ServicoCatalogoObrigatorio);
         }
 
         if (valor <= 0)
         {
-            throw new ServicoInvalidoException("Valor do servico deve ser maior que zero.");
+            throw new ServicoInvalidoException(OrdemServicoErrorMessages.ValorServicoMaiorQueZero);
         }
 
         return new Servico(Guid.NewGuid(), servicoCatalogoId, valor);
@@ -39,7 +40,7 @@ public sealed class Servico
     {
         if (Status != StatusServico.PENDENTE)
         {
-            throw new ServicoInvalidoException("Servico deve estar pendente para iniciar execucao.");
+            throw new ServicoInvalidoException(OrdemServicoErrorMessages.ServicoPendenteParaIniciarExecucao);
         }
 
         Status = StatusServico.EM_EXECUCAO;
@@ -50,10 +51,11 @@ public sealed class Servico
     {
         if (Status != StatusServico.EM_EXECUCAO)
         {
-            throw new ServicoInvalidoException("Servico deve estar em execucao para finalizar.");
+            throw new ServicoInvalidoException(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
         }
 
         Status = StatusServico.FINALIZADO;
         DataFim = DateTime.UtcNow;
     }
 }
+

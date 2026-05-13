@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.Responses;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -28,14 +29,19 @@ public sealed class CadastrarClienteUseCase
         CadastrarClienteRequest request,
         CancellationToken cancellationToken = default)
     {
-        _validator.ValidateAndThrow(request);
+        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return Result<ClienteResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+        }
 
         var documento = CpfCnpj.Criar(request.Documento);
         var clienteExistente = await _clienteRepository.ObterPorDocumentoAsync(documento.Numero, cancellationToken);
 
         if (clienteExistente is not null)
         {
-            return Result<ClienteResponse>.Falha("Cliente ja cadastrado para o documento informado.");
+            return Result<ClienteResponse>.Falha(ClienteErrorMessages.ClienteDuplicado, TipoErro.RegraNegocio);
         }
 
         var cliente = Cliente.Criar(
@@ -55,4 +61,6 @@ public sealed class CadastrarClienteUseCase
         return Result<ClienteResponse>.Ok(_mapper.Map<ClienteResponse>(cliente));
     }
 }
+
+
 

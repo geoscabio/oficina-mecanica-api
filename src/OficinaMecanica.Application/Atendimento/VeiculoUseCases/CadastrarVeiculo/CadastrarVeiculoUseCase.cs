@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.Responses;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -31,13 +32,18 @@ public sealed class CadastrarVeiculoUseCase
         CadastrarVeiculoRequest request,
         CancellationToken cancellationToken = default)
     {
-        _validator.ValidateAndThrow(request);
+        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return Result<VeiculoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+        }
 
         var cliente = await _clienteRepository.ObterPorIdAsync(request.ClienteId, cancellationToken);
 
         if (cliente is null)
         {
-            return Result<VeiculoResponse>.Falha("Cliente nao encontrado.");
+            return Result<VeiculoResponse>.Falha(ClienteErrorMessages.ClienteNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         var placa = Placa.Criar(request.Placa);
@@ -45,7 +51,7 @@ public sealed class CadastrarVeiculoUseCase
 
         if (veiculoExistente is not null)
         {
-            return Result<VeiculoResponse>.Falha("Veiculo ja cadastrado para a placa informada.");
+            return Result<VeiculoResponse>.Falha(VeiculoErrorMessages.VeiculoDuplicado, TipoErro.RegraNegocio);
         }
 
         var veiculo = Veiculo.Criar(request.ClienteId, placa, request.Marca, request.Modelo, request.Ano);
@@ -55,5 +61,7 @@ public sealed class CadastrarVeiculoUseCase
         return Result<VeiculoResponse>.Ok(_mapper.Map<VeiculoResponse>(veiculo));
     }
 }
+
+
 
 

@@ -1,6 +1,7 @@
 using FluentAssertions;
-using FluentValidation;
 using Moq;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarClientePorDocumento;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
@@ -57,13 +58,14 @@ public class ConsultarClientePorDocumentoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Cliente nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be(ClienteErrorMessages.ClienteNaoEncontrado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public async Task Dado_DocumentoVazio_Quando_ConsultarClientePorDocumento_Entao_DeveLancarValidationException(
+    public async Task Dado_DocumentoVazio_Quando_ConsultarClientePorDocumento_Entao_DeveRetornarFalhaDeValidacao(
         string documento)
     {
         // Arrange
@@ -71,10 +73,13 @@ public class ConsultarClientePorDocumentoUseCaseTests
         var useCase = CriarUseCase(repository);
 
         // Act
-        var acao = () => useCase.ExecuteAsync(new ConsultarClientePorDocumentoRequest(documento));
+        var resultado = await useCase.ExecuteAsync(new ConsultarClientePorDocumentoRequest(documento));
 
         // Assert
-        await acao.Should().ThrowAsync<ValidationException>();
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
     }
 
     private static ConsultarClientePorDocumentoUseCase CriarUseCase(Mock<IClienteRepository> repository)
@@ -85,5 +90,10 @@ public class ConsultarClientePorDocumentoUseCaseTests
             MapperFactory.Criar());
     }
 }
+
+
+
+
+
 
 

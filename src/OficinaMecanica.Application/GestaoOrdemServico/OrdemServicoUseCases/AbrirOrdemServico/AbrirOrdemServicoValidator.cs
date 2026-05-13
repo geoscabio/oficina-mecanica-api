@@ -1,4 +1,5 @@
 using FluentValidation;
+using OficinaMecanica.Application.GestaoOrdemServico.ValidationMessages;
 
 namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
 
@@ -8,17 +9,18 @@ public sealed class AbrirOrdemServicoValidator : AbstractValidator<AbrirOrdemSer
     {
         RuleFor(request => request)
             .NotNull()
-            .WithMessage("Request de abertura de ordem de servico e obrigatorio.");
+            .WithMessage(OrdemServicoValidationMessages.RequestAberturaOrdemServicoObrigatorio);
 
         When(request => request is not null, () =>
         {
             RuleFor(request => request.VeiculoId)
                 .NotEmpty()
-                .WithMessage("VeiculoId e obrigatorio.");
+                .WithMessage(OrdemServicoValidationMessages.VeiculoIdObrigatorio);
 
             RuleFor(request => request.MecanicoId)
                 .NotEmpty()
-                .WithMessage("MecanicoId e obrigatorio.");
+                .WithMessage(OrdemServicoValidationMessages.MecanicoIdObrigatorio);
         });
     }
 }
+

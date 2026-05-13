@@ -1,5 +1,6 @@
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.GestaoEstoque.Exceptions;
+using OficinaMecanica.Domain.GestaoEstoque.Messages;
 
 namespace OficinaMecanica.Domain.GestaoEstoque.Aggregates;
 
@@ -22,12 +23,12 @@ public sealed class Estoque
 
         if (itens.Count == 0)
         {
-            throw new EstoqueInvalidoException("Estoque deve possuir ao menos um item.");
+            throw new EstoqueInvalidoException(EstoqueErrorMessages.EstoqueSemItens);
         }
 
         if (itens.Any(item => item is null))
         {
-            throw new EstoqueInvalidoException("Estoque nao pode possuir item nulo.");
+            throw new EstoqueInvalidoException(EstoqueErrorMessages.EstoqueComItemNulo);
         }
 
         return new Estoque(Guid.NewGuid(), itens);
@@ -58,16 +59,17 @@ public sealed class Estoque
     public ItemEstoque ObterItem(Guid pecaInsumoCatalogoId)
     {
         return EncontrarItem(pecaInsumoCatalogoId)
-            ?? throw new EstoqueInvalidoException("Item de estoque nao encontrado.");
+            ?? throw new EstoqueInvalidoException(EstoqueErrorMessages.ItemNaoEncontrado);
     }
 
     private ItemEstoque? EncontrarItem(Guid pecaInsumoCatalogoId)
     {
         if (pecaInsumoCatalogoId == Guid.Empty)
         {
-            throw new EstoqueInvalidoException("Peca ou insumo do catalogo e obrigatorio.");
+            throw new EstoqueInvalidoException(EstoqueErrorMessages.PecaInsumoCatalogoObrigatorio);
         }
 
         return _itensEstoque.SingleOrDefault(item => item.PecaInsumoCatalogoId == pecaInsumoCatalogoId);
     }
 }
+

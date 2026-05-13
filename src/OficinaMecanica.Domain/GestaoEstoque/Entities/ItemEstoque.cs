@@ -1,4 +1,5 @@
 using OficinaMecanica.Domain.GestaoEstoque.Exceptions;
+using OficinaMecanica.Domain.GestaoEstoque.Messages;
 
 namespace OficinaMecanica.Domain.GestaoEstoque.Entities;
 
@@ -21,12 +22,12 @@ public sealed class ItemEstoque
     {
         if (pecaInsumoCatalogoId == Guid.Empty)
         {
-            throw new ItemEstoqueInvalidoException("Peca ou insumo do catalogo e obrigatorio.");
+            throw new ItemEstoqueInvalidoException(EstoqueErrorMessages.PecaInsumoCatalogoObrigatorio);
         }
 
         if (quantidadeDisponivel < 0)
         {
-            throw new ItemEstoqueInvalidoException("Quantidade disponivel nao pode ser negativa.");
+            throw new ItemEstoqueInvalidoException(EstoqueErrorMessages.QuantidadeDisponivelNaoNegativa);
         }
 
         return new ItemEstoque(Guid.NewGuid(), pecaInsumoCatalogoId, quantidadeDisponivel, 0);
@@ -45,7 +46,7 @@ public sealed class ItemEstoque
 
         if (!PossuiDisponibilidade(quantidade))
         {
-            throw new EstoqueInsuficienteException("Estoque insuficiente para reservar peca ou insumo.");
+            throw new EstoqueInsuficienteException(EstoqueErrorMessages.EstoqueInsuficiente);
         }
 
         QuantidadeDisponivel -= quantidade;
@@ -73,7 +74,7 @@ public sealed class ItemEstoque
     {
         if (quantidade <= 0)
         {
-            throw new ItemEstoqueInvalidoException("Quantidade deve ser maior que zero.");
+            throw new ItemEstoqueInvalidoException(EstoqueErrorMessages.QuantidadeMaiorQueZero);
         }
     }
 
@@ -81,7 +82,8 @@ public sealed class ItemEstoque
     {
         if (QuantidadeReservada < quantidade)
         {
-            throw new ItemEstoqueInvalidoException("Quantidade reservada insuficiente.");
+            throw new ItemEstoqueInvalidoException(EstoqueErrorMessages.QuantidadeReservadaInsuficiente);
         }
     }
 }
+

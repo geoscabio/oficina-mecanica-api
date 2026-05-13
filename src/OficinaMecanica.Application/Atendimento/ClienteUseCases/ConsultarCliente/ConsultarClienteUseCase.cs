@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.Responses;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 
@@ -26,16 +27,23 @@ public sealed class ConsultarClienteUseCase
         ConsultarClienteRequest request,
         CancellationToken cancellationToken = default)
     {
-        _validator.ValidateAndThrow(request);
+        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return Result<ClienteResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+        }
 
         var cliente = await _clienteRepository.ObterPorIdAsync(request.Id, cancellationToken);
 
         if (cliente is null)
         {
-            return Result<ClienteResponse>.Falha("Cliente nao encontrado.");
+            return Result<ClienteResponse>.Falha(ClienteErrorMessages.ClienteNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         return Result<ClienteResponse>.Ok(_mapper.Map<ClienteResponse>(cliente));
     }
 }
+
+
 

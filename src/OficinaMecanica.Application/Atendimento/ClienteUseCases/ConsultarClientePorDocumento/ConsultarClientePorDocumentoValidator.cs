@@ -1,4 +1,6 @@
 using FluentValidation;
+using OficinaMecanica.Application.Atendimento.ValidationMessages;
+using OficinaMecanica.Application.Common;
 
 namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarClientePorDocumento;
 
@@ -8,13 +10,14 @@ public sealed class ConsultarClientePorDocumentoValidator : AbstractValidator<Co
     {
         RuleFor(request => request)
             .NotNull()
-            .WithMessage("Request invalido.");
+            .WithMessage(ValidationErrorMessages.RequestInvalido);
 
         When(request => request is not null, () =>
         {
             RuleFor(request => request.Documento)
                 .NotEmpty()
-                .WithMessage("Documento do cliente e obrigatorio.");
+                .WithMessage(ClienteValidationMessages.DocumentoClienteObrigatorio);
         });
     }
 }
+

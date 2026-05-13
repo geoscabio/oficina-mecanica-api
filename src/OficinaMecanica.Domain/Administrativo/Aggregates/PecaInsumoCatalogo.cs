@@ -1,5 +1,6 @@
 using OficinaMecanica.Domain.Administrativo.Enums;
 using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.Administrativo.Messages;
 
 namespace OficinaMecanica.Domain.Administrativo.Aggregates;
 
@@ -22,19 +23,20 @@ public sealed class PecaInsumoCatalogo
     {
         if (string.IsNullOrWhiteSpace(descricao))
         {
-            throw new PecaInsumoCatalogoInvalidaException("Descricao da peca ou insumo e obrigatoria.");
+            throw new PecaInsumoCatalogoInvalidaException(PecaInsumoCatalogoErrorMessages.DescricaoObrigatoria);
         }
 
         if (!Enum.IsDefined(tipo))
         {
-            throw new PecaInsumoCatalogoInvalidaException("Tipo da peca ou insumo e invalido.");
+            throw new PecaInsumoCatalogoInvalidaException(PecaInsumoCatalogoErrorMessages.TipoInvalido);
         }
 
         if (valor <= 0)
         {
-            throw new PecaInsumoCatalogoInvalidaException("Valor da peca ou insumo deve ser maior que zero.");
+            throw new PecaInsumoCatalogoInvalidaException(PecaInsumoCatalogoErrorMessages.ValorMaiorQueZero);
         }
 
         return new PecaInsumoCatalogo(Guid.NewGuid(), descricao.Trim(), tipo, valor);
     }
 }
+

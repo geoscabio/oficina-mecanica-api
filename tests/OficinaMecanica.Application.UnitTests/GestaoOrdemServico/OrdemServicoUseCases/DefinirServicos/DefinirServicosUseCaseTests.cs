@@ -1,6 +1,8 @@
 using FluentAssertions;
-using FluentValidation;
 using Moq;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
+using OficinaMecanica.Domain.Administrativo.Messages;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.DefinirServicos;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
@@ -68,7 +70,8 @@ public class DefinirServicosUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Ordem de servico nao encontrada.");
+        resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
         ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -98,14 +101,15 @@ public class DefinirServicosUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Servico do catalogo nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be(ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
         ordemServico.Servicos.Should().BeEmpty();
 
         ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task Dado_ListaServicosVazia_Quando_DefinirServicos_Entao_DeveLancarValidationException()
+    public async Task Dado_ListaServicosVazia_Quando_DefinirServicos_Entao_DeveRetornarFalhaDeValidacao()
     {
         // Arrange
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
@@ -114,10 +118,13 @@ public class DefinirServicosUseCaseTests
         var request = new DefinirServicosRequest(Guid.NewGuid(), Array.Empty<Guid>());
 
         // Act
-        var acao = () => useCase.ExecuteAsync(request);
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
-        await acao.Should().ThrowAsync<ValidationException>();
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
     }
 
     private static DefinirServicosUseCase CriarUseCase(
@@ -140,5 +147,10 @@ public class DefinirServicosUseCaseTests
             .ReturnsAsync(servicoCatalogo);
     }
 }
+
+
+
+
+
 
 

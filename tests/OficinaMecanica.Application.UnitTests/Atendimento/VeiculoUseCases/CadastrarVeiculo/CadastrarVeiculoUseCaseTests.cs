@@ -1,6 +1,7 @@
 using FluentAssertions;
-using FluentValidation;
 using Moq;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
@@ -62,7 +63,8 @@ public class CadastrarVeiculoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Cliente nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be(ClienteErrorMessages.ClienteNaoEncontrado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
         veiculoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<Veiculo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -92,13 +94,14 @@ public class CadastrarVeiculoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be("Veiculo ja cadastrado para a placa informada.");
+        resultado.Erro!.Mensagem.Should().Be(VeiculoErrorMessages.VeiculoDuplicado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.RegraNegocio);
 
         veiculoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<Veiculo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task Dado_ClienteIdVazio_Quando_CadastrarVeiculo_Entao_DeveLancarValidationException()
+    public async Task Dado_ClienteIdVazio_Quando_CadastrarVeiculo_Entao_DeveRetornarFalhaDeValidacao()
     {
         // Arrange
         var clienteRepository = new Mock<IClienteRepository>();
@@ -107,10 +110,13 @@ public class CadastrarVeiculoUseCaseTests
         var request = CriarRequestValido(Guid.Empty);
 
         // Act
-        var acao = () => useCase.ExecuteAsync(request);
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
-        await acao.Should().ThrowAsync<ValidationException>();
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
     }
 
     private static CadastrarVeiculoUseCase CriarUseCase(
@@ -134,5 +140,10 @@ public class CadastrarVeiculoUseCaseTests
             Ano: 2020);
     }
 }
+
+
+
+
+
 
 
