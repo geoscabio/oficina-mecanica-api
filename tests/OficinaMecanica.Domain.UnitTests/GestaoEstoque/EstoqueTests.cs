@@ -1,9 +1,9 @@
 using FluentAssertions;
-using OficinaMecanica.Domain.Estoque.Entities;
-using OficinaMecanica.Domain.Estoque.Exceptions;
-using EstoqueAggregate = OficinaMecanica.Domain.Estoque.Aggregates.Estoque;
+using OficinaMecanica.Domain.GestaoEstoque.Entities;
+using OficinaMecanica.Domain.GestaoEstoque.Exceptions;
+using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
 
-namespace OficinaMecanica.Domain.UnitTests.Estoque;
+namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque;
 
 public class EstoqueTests
 {
@@ -12,7 +12,7 @@ public class EstoqueTests
     {
         var item = ItemEstoque.Criar(Guid.NewGuid(), 10);
 
-        var estoque = EstoqueAggregate.Criar(new[] { item });
+        var estoque = Estoque.Criar(new[] { item });
 
         estoque.Id.Should().NotBeEmpty();
         estoque.ItensEstoque.Should().ContainSingle().Which.Should().Be(item);
@@ -21,7 +21,7 @@ public class EstoqueTests
     [Fact]
     public void Dado_ListaSemItens_Quando_CriarEstoque_Entao_DeveLancarEstoqueInvalidoException()
     {
-        var acao = () => EstoqueAggregate.Criar(Array.Empty<ItemEstoque>());
+        var acao = () => Estoque.Criar(Array.Empty<ItemEstoque>());
 
         acao.Should().Throw<EstoqueInvalidoException>();
     }
@@ -30,7 +30,7 @@ public class EstoqueTests
     public void Dado_ItemExistenteComDisponibilidade_Quando_VerificarDisponibilidade_Entao_DeveRetornarVerdadeiro()
     {
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        var estoque = EstoqueAggregate.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, 10) });
+        var estoque = Estoque.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, 10) });
 
         var disponivel = estoque.VerificarDisponibilidade(pecaInsumoCatalogoId, 5);
 
@@ -41,7 +41,7 @@ public class EstoqueTests
     public void Dado_ItemExistenteSemDisponibilidade_Quando_VerificarDisponibilidade_Entao_DeveRetornarFalso()
     {
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        var estoque = EstoqueAggregate.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, 3) });
+        var estoque = Estoque.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, 3) });
 
         var disponivel = estoque.VerificarDisponibilidade(pecaInsumoCatalogoId, 5);
 
@@ -52,7 +52,7 @@ public class EstoqueTests
     public void Dado_ItemExistenteComDisponibilidade_Quando_ReservarItens_Entao_DeveReservarQuantidade()
     {
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        var estoque = EstoqueAggregate.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, 10) });
+        var estoque = Estoque.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, 10) });
 
         estoque.ReservarItens(pecaInsumoCatalogoId, 4);
 
@@ -65,7 +65,7 @@ public class EstoqueTests
     public void Dado_ItemExistenteComReserva_Quando_EstornarItens_Entao_DeveEstornarQuantidadeReservada()
     {
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        var estoque = EstoqueAggregate.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, 10) });
+        var estoque = Estoque.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, 10) });
         estoque.ReservarItens(pecaInsumoCatalogoId, 4);
 
         estoque.EstornarItens(pecaInsumoCatalogoId, 4);
@@ -79,7 +79,7 @@ public class EstoqueTests
     public void Dado_ItemExistenteComReserva_Quando_BaixarItens_Entao_DeveBaixarQuantidadeReservada()
     {
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        var estoque = EstoqueAggregate.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, 10) });
+        var estoque = Estoque.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, 10) });
         estoque.ReservarItens(pecaInsumoCatalogoId, 4);
 
         estoque.BaixarItens(pecaInsumoCatalogoId, 4);
@@ -92,7 +92,7 @@ public class EstoqueTests
     [Fact]
     public void Dado_ItemInexistente_Quando_ReservarItens_Entao_DeveLancarEstoqueInvalidoException()
     {
-        var estoque = EstoqueAggregate.Criar(new[] { ItemEstoque.Criar(Guid.NewGuid(), 10) });
+        var estoque = Estoque.Criar(new[] { ItemEstoque.Criar(Guid.NewGuid(), 10) });
 
         var acao = () => estoque.ReservarItens(Guid.NewGuid(), 1);
 

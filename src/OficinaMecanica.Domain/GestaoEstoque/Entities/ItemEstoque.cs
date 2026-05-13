@@ -1,6 +1,6 @@
-using OficinaMecanica.Domain.Estoque.Exceptions;
+using OficinaMecanica.Domain.GestaoEstoque.Exceptions;
 
-namespace OficinaMecanica.Domain.Estoque.Entities;
+namespace OficinaMecanica.Domain.GestaoEstoque.Entities;
 
 public sealed class ItemEstoque
 {

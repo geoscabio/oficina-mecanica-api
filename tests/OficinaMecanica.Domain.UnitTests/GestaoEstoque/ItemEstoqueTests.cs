@@ -1,8 +1,8 @@
 using FluentAssertions;
-using OficinaMecanica.Domain.Estoque.Entities;
-using OficinaMecanica.Domain.Estoque.Exceptions;
+using OficinaMecanica.Domain.GestaoEstoque.Entities;
+using OficinaMecanica.Domain.GestaoEstoque.Exceptions;
 
-namespace OficinaMecanica.Domain.UnitTests.Estoque;
+namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque;
 
 public class ItemEstoqueTests
 {
