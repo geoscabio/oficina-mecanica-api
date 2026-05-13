@@ -5,7 +5,6 @@ using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculoPo
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
-using OficinaMecanica.Domain.Atendimento.ValueObjects;
 
 namespace OficinaMecanica.Application.UnitTests.Atendimento.VeiculoUseCases.ConsultarVeiculoPorPlaca;
 
@@ -14,18 +13,19 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
     [Fact]
     public async Task Dado_VeiculoExistente_Quando_ConsultarVeiculoPorPlaca_Entao_DeveRetornarDadosDoVeiculo()
     {
-        var veiculo = CriarVeiculo();
+        // Arrange
+        var veiculo = TestDataFactory.CriarVeiculoPadrao();
         var repository = new Mock<IVeiculoRepository>();
         repository
             .Setup(repo => repo.ObterPorPlacaAsync("ABC1234", It.IsAny<CancellationToken>()))
             .ReturnsAsync(veiculo);
-        var useCase = new ConsultarVeiculoPorPlacaUseCase(
-            repository.Object,
-            new ConsultarVeiculoPorPlacaValidator(),
-            MapperFactory.Criar());
 
+        var useCase = CriarUseCase(repository);
+
+        // Act
         var resultado = await useCase.ExecuteAsync(new ConsultarVeiculoPorPlacaRequest("ABC-1234"));
 
+        // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(veiculo.Id);
@@ -39,17 +39,18 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
     [Fact]
     public async Task Dado_VeiculoInexistente_Quando_ConsultarVeiculoPorPlaca_Entao_DeveRetornarFalha()
     {
+        // Arrange
         var repository = new Mock<IVeiculoRepository>();
         repository
             .Setup(repo => repo.ObterPorPlacaAsync("ABC1234", It.IsAny<CancellationToken>()))
             .ReturnsAsync((Veiculo?)null);
-        var useCase = new ConsultarVeiculoPorPlacaUseCase(
-            repository.Object,
-            new ConsultarVeiculoPorPlacaValidator(),
-            MapperFactory.Criar());
 
+        var useCase = CriarUseCase(repository);
+
+        // Act
         var resultado = await useCase.ExecuteAsync(new ConsultarVeiculoPorPlacaRequest("ABC-1234"));
 
+        // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().Be("Veiculo nao encontrado.");
     }
@@ -59,24 +60,22 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
     [InlineData("  ")]
     public async Task Dado_PlacaVazia_Quando_ConsultarVeiculoPorPlaca_Entao_DeveLancarValidationException(string placa)
     {
+        // Arrange
         var repository = new Mock<IVeiculoRepository>();
-        var useCase = new ConsultarVeiculoPorPlacaUseCase(
-            repository.Object,
-            new ConsultarVeiculoPorPlacaValidator(),
-            MapperFactory.Criar());
+        var useCase = CriarUseCase(repository);
 
+        // Act
         var acao = () => useCase.ExecuteAsync(new ConsultarVeiculoPorPlacaRequest(placa));
 
+        // Assert
         await acao.Should().ThrowAsync<ValidationException>();
     }
 
-    private static Veiculo CriarVeiculo()
+    private static ConsultarVeiculoPorPlacaUseCase CriarUseCase(Mock<IVeiculoRepository> repository)
     {
-        return Veiculo.Criar(
-            Guid.NewGuid(),
-            Placa.Criar("ABC-1234"),
-            "Toyota",
-            "Corolla",
-            2020);
+        return new ConsultarVeiculoPorPlacaUseCase(
+            repository.Object,
+            new ConsultarVeiculoPorPlacaValidator(),
+            MapperFactory.Criar());
     }
 }

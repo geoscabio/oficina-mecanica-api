@@ -1,13 +1,14 @@
 using AutoMapper;
+using OficinaMecanica.Application.Atendimento.Responses;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 
-namespace OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculoPorPlaca;
+namespace OficinaMecanica.Application.Atendimento.Mappings;
 
-public sealed class ConsultarVeiculoPorPlacaMappingProfile : Profile
+public sealed class VeiculoMappingProfile : Profile
 {
-    public ConsultarVeiculoPorPlacaMappingProfile()
+    public VeiculoMappingProfile()
     {
-        CreateMap<Veiculo, ConsultarVeiculoPorPlacaResponse>()
+        CreateMap<Veiculo, VeiculoResponse>()
             .ForCtorParam("Id", opcao => opcao.MapFrom(origem => origem.Id))
             .ForCtorParam("ClienteId", opcao => opcao.MapFrom(origem => origem.ClienteId))
             .ForCtorParam("Placa", opcao => opcao.MapFrom(origem => origem.Placa.NumeroPlaca))

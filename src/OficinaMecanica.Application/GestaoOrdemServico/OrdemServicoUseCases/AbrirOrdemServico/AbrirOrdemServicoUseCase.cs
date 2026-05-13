@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
+using OficinaMecanica.Application.GestaoOrdemServico.Responses;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
@@ -30,7 +31,7 @@ public sealed class AbrirOrdemServicoUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<AbrirOrdemServicoResponse>> ExecuteAsync(
+    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(
         AbrirOrdemServicoRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -39,19 +40,19 @@ public sealed class AbrirOrdemServicoUseCase
         var veiculo = await _veiculoRepository.ObterPorIdAsync(request.VeiculoId, cancellationToken);
         if (veiculo is null)
         {
-            return Result<AbrirOrdemServicoResponse>.Falha("Veiculo nao encontrado.");
+            return Result<OrdemServicoResponse>.Falha("Veiculo nao encontrado.");
         }
 
         var mecanico = await _mecanicoRepository.ObterPorIdAsync(request.MecanicoId, cancellationToken);
         if (mecanico is null)
         {
-            return Result<AbrirOrdemServicoResponse>.Falha("Mecanico nao encontrado.");
+            return Result<OrdemServicoResponse>.Falha("Mecanico nao encontrado.");
         }
 
         var ordemServico = OrdemServico.Abrir(request.VeiculoId, request.MecanicoId);
 
         await _ordemServicoRepository.AdicionarAsync(ordemServico, cancellationToken);
 
-        return Result<AbrirOrdemServicoResponse>.Ok(_mapper.Map<AbrirOrdemServicoResponse>(ordemServico));
+        return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }

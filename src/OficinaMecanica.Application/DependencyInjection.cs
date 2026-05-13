@@ -1,13 +1,6 @@
-using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
-using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarCliente;
-using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarClientePorDocumento;
-using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
-using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;
-using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculoPorPlaca;
-using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
-using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
+using OficinaMecanica.Application.Atendimento;
+using OficinaMecanica.Application.GestaoOrdemServico;
 
 namespace OficinaMecanica.Application;
 
@@ -16,16 +9,9 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddAutoMapper(_ => { }, typeof(DependencyInjection).Assembly);
-        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
-        services.AddScoped<CadastrarClienteUseCase>();
-        services.AddScoped<ConsultarClienteUseCase>();
-        services.AddScoped<ConsultarClientePorDocumentoUseCase>();
-        services.AddScoped<CadastrarVeiculoUseCase>();
-        services.AddScoped<ConsultarVeiculoUseCase>();
-        services.AddScoped<ConsultarVeiculoPorPlacaUseCase>();
-        services.AddScoped<AbrirOrdemServicoUseCase>();
-        services.AddScoped<IniciarDiagnosticoOrdemServicoUseCase>();
+        services.AddAtendimentoApplication();
+        services.AddGestaoOrdemServicoApplication();
 
         return services;
     }
