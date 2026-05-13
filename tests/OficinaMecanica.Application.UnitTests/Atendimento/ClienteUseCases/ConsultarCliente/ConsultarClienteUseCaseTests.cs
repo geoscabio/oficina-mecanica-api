@@ -3,6 +3,7 @@ using FluentValidation;
 using Moq;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarCliente;
 using OficinaMecanica.Application.UnitTests.Common;
+using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 
 namespace OficinaMecanica.Application.UnitTests.Atendimento.ClienteUseCases.ConsultarCliente;
@@ -13,7 +14,7 @@ public class ConsultarClienteUseCaseTests
     public async Task Dado_ClienteExistente_Quando_ConsultarCliente_Entao_DeveRetornarDadosDoCliente()
     {
         // Arrange
-        var cliente = TestDataFactory.CriarClientePadrao();
+        var cliente = ClienteTestDataFactory.CriarClientePadrao();
         var repository = new Mock<IClienteRepository>();
         repository
             .Setup(repo => repo.ObterPorIdAsync(cliente.Id, It.IsAny<CancellationToken>()))
@@ -51,7 +52,7 @@ public class ConsultarClienteUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Cliente nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be("Cliente nao encontrado.");
     }
 
     [Fact]
@@ -76,3 +77,5 @@ public class ConsultarClienteUseCaseTests
             MapperFactory.Criar());
     }
 }
+
+

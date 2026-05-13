@@ -3,6 +3,7 @@ using FluentValidation;
 using Moq;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.DefinirServicos;
 using OficinaMecanica.Application.UnitTests.Common;
+using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
@@ -16,9 +17,9 @@ public class DefinirServicosUseCaseTests
     public async Task Dado_OrdemServicoEmDiagnosticoEServicosCatalogoExistentes_Quando_DefinirServicos_Entao_DeveAdicionarServicosEAtualizarOrcamento()
     {
         // Arrange
-        var ordemServico = TestDataFactory.CriarOrdemServicoEmDiagnostico();
-        var trocaOleo = TestDataFactory.CriarServicoCatalogoPadrao();
-        var alinhamento = TestDataFactory.CriarServicoCatalogoPadrao("Alinhamento", 80m);
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
+        var trocaOleo = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
+        var alinhamento = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao("Alinhamento", 80m);
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var servicoCatalogoRepository = new Mock<IServicoCatalogoRepository>();
 
@@ -56,7 +57,7 @@ public class DefinirServicosUseCaseTests
     public async Task Dado_OrdemServicoInexistente_Quando_DefinirServicos_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var servicoCatalogo = TestDataFactory.CriarServicoCatalogoPadrao();
+        var servicoCatalogo = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var servicoCatalogoRepository = new Mock<IServicoCatalogoRepository>();
         var useCase = CriarUseCase(ordemServicoRepository, servicoCatalogoRepository);
@@ -67,7 +68,7 @@ public class DefinirServicosUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Ordem de servico nao encontrada.");
+        resultado.Erro!.Mensagem.Should().Be("Ordem de servico nao encontrada.");
 
         ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -76,8 +77,8 @@ public class DefinirServicosUseCaseTests
     public async Task Dado_AlgumServicoCatalogoInexistente_Quando_DefinirServicos_Entao_DeveRetornarFalhaSemAlterarOrdemServico()
     {
         // Arrange
-        var ordemServico = TestDataFactory.CriarOrdemServicoEmDiagnostico();
-        var servicoCatalogo = TestDataFactory.CriarServicoCatalogoPadrao();
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
+        var servicoCatalogo = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var servicoCatalogoRepository = new Mock<IServicoCatalogoRepository>();
 
@@ -97,7 +98,7 @@ public class DefinirServicosUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Servico do catalogo nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be("Servico do catalogo nao encontrado.");
         ordemServico.Servicos.Should().BeEmpty();
 
         ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -139,3 +140,5 @@ public class DefinirServicosUseCaseTests
             .ReturnsAsync(servicoCatalogo);
     }
 }
+
+

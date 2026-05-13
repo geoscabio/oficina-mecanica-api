@@ -3,6 +3,7 @@ using FluentValidation;
 using Moq;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
 using OficinaMecanica.Application.UnitTests.Common;
+using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 
@@ -14,7 +15,7 @@ public class CadastrarVeiculoUseCaseTests
     public async Task Dado_RequestValido_Quando_CadastrarVeiculo_Entao_DevePersistirVeiculoERetornarSucesso()
     {
         // Arrange
-        var cliente = TestDataFactory.CriarClientePadrao();
+        var cliente = ClienteTestDataFactory.CriarClientePadrao();
         var clienteRepository = new Mock<IClienteRepository>();
         var veiculoRepository = new Mock<IVeiculoRepository>();
 
@@ -61,7 +62,7 @@ public class CadastrarVeiculoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Cliente nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be("Cliente nao encontrado.");
 
         veiculoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<Veiculo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -70,8 +71,8 @@ public class CadastrarVeiculoUseCaseTests
     public async Task Dado_PlacaJaCadastrada_Quando_CadastrarVeiculo_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var cliente = TestDataFactory.CriarClientePadrao();
-        var veiculoExistente = TestDataFactory.CriarVeiculoPadrao(cliente.Id);
+        var cliente = ClienteTestDataFactory.CriarClientePadrao();
+        var veiculoExistente = VeiculoTestDataFactory.CriarVeiculoPadrao(cliente.Id);
         var clienteRepository = new Mock<IClienteRepository>();
         var veiculoRepository = new Mock<IVeiculoRepository>();
 
@@ -91,7 +92,7 @@ public class CadastrarVeiculoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Veiculo ja cadastrado para a placa informada.");
+        resultado.Erro!.Mensagem.Should().Be("Veiculo ja cadastrado para a placa informada.");
 
         veiculoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<Veiculo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -133,3 +134,5 @@ public class CadastrarVeiculoUseCaseTests
             Ano: 2020);
     }
 }
+
+

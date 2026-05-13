@@ -1,6 +1,6 @@
 using AutoMapper;
 using FluentValidation;
-using OficinaMecanica.Application.Atendimento.Responses;
+using OficinaMecanica.Application.Atendimento.VeiculoUseCases.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
@@ -40,3 +40,5 @@ public sealed class ConsultarVeiculoPorPlacaUseCase
         return Result<VeiculoResponse>.Ok(_mapper.Map<VeiculoResponse>(veiculo));
     }
 }
+
+

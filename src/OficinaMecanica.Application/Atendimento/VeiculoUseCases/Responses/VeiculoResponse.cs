@@ -1,4 +1,4 @@
-namespace OficinaMecanica.Application.Atendimento.Responses;
+namespace OficinaMecanica.Application.Atendimento.VeiculoUseCases.Responses;
 
 public sealed record VeiculoResponse(
     Guid Id,

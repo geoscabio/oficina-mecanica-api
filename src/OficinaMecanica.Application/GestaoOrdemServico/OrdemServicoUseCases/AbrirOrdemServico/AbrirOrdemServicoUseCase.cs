@@ -1,7 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Application.GestaoOrdemServico.Responses;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
@@ -56,3 +56,4 @@ public sealed class AbrirOrdemServicoUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }
+

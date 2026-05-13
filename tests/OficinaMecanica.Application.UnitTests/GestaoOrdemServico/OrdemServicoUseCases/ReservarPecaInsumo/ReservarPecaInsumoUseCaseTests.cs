@@ -3,6 +3,7 @@ using FluentValidation;
 using Moq;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
 using OficinaMecanica.Application.UnitTests.Common;
+using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
@@ -18,9 +19,9 @@ public class ReservarPecaInsumoUseCaseTests
     public async Task Dado_OrdemServicoEmDiagnosticoPecaCatalogoEEstoqueDisponivel_Quando_ReservarPecaInsumo_Entao_DeveReservarEstoqueEAtualizarOrcamento()
     {
         // Arrange
-        var ordemServico = TestDataFactory.CriarOrdemServicoEmDiagnostico();
-        var pecaInsumoCatalogo = TestDataFactory.CriarPecaInsumoCatalogoPadrao();
-        var estoque = TestDataFactory.CriarEstoqueComItem(pecaInsumoCatalogo.Id);
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
+        var pecaInsumoCatalogo = PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao();
+        var estoque = EstoqueTestDataFactory.CriarEstoqueComItem(pecaInsumoCatalogo.Id);
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var pecaInsumoCatalogoRepository = new Mock<IPecaInsumoCatalogoRepository>();
         var estoqueRepository = new Mock<IEstoqueRepository>();
@@ -64,7 +65,7 @@ public class ReservarPecaInsumoUseCaseTests
     public async Task Dado_OrdemServicoInexistente_Quando_ReservarPecaInsumo_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var pecaInsumoCatalogo = TestDataFactory.CriarPecaInsumoCatalogoPadrao();
+        var pecaInsumoCatalogo = PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao();
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var pecaInsumoCatalogoRepository = new Mock<IPecaInsumoCatalogoRepository>();
         var estoqueRepository = new Mock<IEstoqueRepository>();
@@ -78,7 +79,7 @@ public class ReservarPecaInsumoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Ordem de servico nao encontrada.");
+        resultado.Erro!.Mensagem.Should().Be("Ordem de servico nao encontrada.");
 
         ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
         estoqueRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -88,8 +89,8 @@ public class ReservarPecaInsumoUseCaseTests
     public async Task Dado_PecaInsumoCatalogoInexistente_Quando_ReservarPecaInsumo_Entao_DeveRetornarFalhaSemAlterarOrdemServico()
     {
         // Arrange
-        var ordemServico = TestDataFactory.CriarOrdemServicoEmDiagnostico();
-        var estoque = TestDataFactory.CriarEstoqueComItem(Guid.NewGuid());
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
+        var estoque = EstoqueTestDataFactory.CriarEstoqueComItem(Guid.NewGuid());
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var pecaInsumoCatalogoRepository = new Mock<IPecaInsumoCatalogoRepository>();
         var estoqueRepository = new Mock<IEstoqueRepository>();
@@ -112,7 +113,7 @@ public class ReservarPecaInsumoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Peca ou insumo do catalogo nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be("Peca ou insumo do catalogo nao encontrado.");
         ordemServico.PecasInsumos.Should().BeEmpty();
 
         ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -123,9 +124,9 @@ public class ReservarPecaInsumoUseCaseTests
     public async Task Dado_EstoqueInsuficiente_Quando_ReservarPecaInsumo_Entao_DeveRetornarFalhaSemAlterarOrdemServico()
     {
         // Arrange
-        var ordemServico = TestDataFactory.CriarOrdemServicoEmDiagnostico();
-        var pecaInsumoCatalogo = TestDataFactory.CriarPecaInsumoCatalogoPadrao();
-        var estoque = TestDataFactory.CriarEstoqueComItem(pecaInsumoCatalogo.Id, quantidadeDisponivel: 1);
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
+        var pecaInsumoCatalogo = PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao();
+        var estoque = EstoqueTestDataFactory.CriarEstoqueComItem(pecaInsumoCatalogo.Id, quantidadeDisponivel: 1);
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
         var pecaInsumoCatalogoRepository = new Mock<IPecaInsumoCatalogoRepository>();
         var estoqueRepository = new Mock<IEstoqueRepository>();
@@ -150,7 +151,7 @@ public class ReservarPecaInsumoUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Estoque insuficiente para reservar peca ou insumo.");
+        resultado.Erro!.Mensagem.Should().Be("Estoque insuficiente para reservar peca ou insumo.");
         ordemServico.PecasInsumos.Should().BeEmpty();
 
         ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -220,3 +221,5 @@ public class ReservarPecaInsumoUseCaseTests
             .ReturnsAsync(pecaInsumoCatalogo);
     }
 }
+
+

@@ -1,7 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Application.GestaoOrdemServico.Responses;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 
 namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
@@ -42,3 +42,4 @@ public sealed class IniciarDiagnosticoOrdemServicoUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }
+

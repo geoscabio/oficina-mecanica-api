@@ -3,6 +3,7 @@ using FluentValidation;
 using Moq;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculoPorPlaca;
 using OficinaMecanica.Application.UnitTests.Common;
+using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 
@@ -14,7 +15,7 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
     public async Task Dado_VeiculoExistente_Quando_ConsultarVeiculoPorPlaca_Entao_DeveRetornarDadosDoVeiculo()
     {
         // Arrange
-        var veiculo = TestDataFactory.CriarVeiculoPadrao();
+        var veiculo = VeiculoTestDataFactory.CriarVeiculoPadrao();
         var repository = new Mock<IVeiculoRepository>();
         repository
             .Setup(repo => repo.ObterPorPlacaAsync("ABC1234", It.IsAny<CancellationToken>()))
@@ -52,7 +53,7 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Veiculo nao encontrado.");
+        resultado.Erro!.Mensagem.Should().Be("Veiculo nao encontrado.");
     }
 
     [Theory]
@@ -79,3 +80,5 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
             MapperFactory.Criar());
     }
 }
+
+

@@ -3,6 +3,7 @@ using FluentValidation;
 using Moq;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
 using OficinaMecanica.Application.UnitTests.Common;
+using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
 
@@ -41,7 +42,7 @@ public class CadastrarClienteUseCaseTests
     public async Task Dado_DocumentoJaCadastrado_Quando_CadastrarCliente_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var clienteExistente = TestDataFactory.CriarClientePadrao();
+        var clienteExistente = ClienteTestDataFactory.CriarClientePadrao();
         var repository = new Mock<IClienteRepository>();
         repository
             .Setup(repo => repo.ObterPorDocumentoAsync("52998224725", It.IsAny<CancellationToken>()))
@@ -55,7 +56,7 @@ public class CadastrarClienteUseCaseTests
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Cliente ja cadastrado para o documento informado.");
+        resultado.Erro!.Mensagem.Should().Be("Cliente ja cadastrado para o documento informado.");
 
         repository.Verify(repo => repo.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -100,3 +101,5 @@ public class CadastrarClienteUseCaseTests
             Email: "maria@email.com");
     }
 }
+
+

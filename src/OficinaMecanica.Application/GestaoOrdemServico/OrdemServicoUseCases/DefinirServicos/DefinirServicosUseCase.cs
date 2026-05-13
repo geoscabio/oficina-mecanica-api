@@ -1,7 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Application.GestaoOrdemServico.Responses;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
@@ -78,3 +78,4 @@ public sealed class DefinirServicosUseCase
         return servicosCatalogo;
     }
 }
+
