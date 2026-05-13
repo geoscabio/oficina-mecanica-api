@@ -1,7 +1,10 @@
 using OficinaMecanica.Domain.Administrativo.Aggregates;
+using OficinaMecanica.Domain.Administrativo.Enums;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
+using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
+using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
 
 namespace OficinaMecanica.Application.UnitTests.Common;
 
@@ -50,5 +53,18 @@ internal static class TestDataFactory
         decimal valor = 150m)
     {
         return ServicoCatalogo.Criar(descricao, valor);
+    }
+
+    public static PecaInsumoCatalogo CriarPecaInsumoCatalogoPadrao(
+        string descricao = "Filtro de oleo",
+        TipoPecaInsumo tipo = TipoPecaInsumo.PECA,
+        decimal valor = 45m)
+    {
+        return PecaInsumoCatalogo.Criar(descricao, tipo, valor);
+    }
+
+    public static Estoque CriarEstoqueComItem(Guid pecaInsumoCatalogoId, int quantidadeDisponivel = 10)
+    {
+        return Estoque.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, quantidadeDisponivel) });
     }
 }

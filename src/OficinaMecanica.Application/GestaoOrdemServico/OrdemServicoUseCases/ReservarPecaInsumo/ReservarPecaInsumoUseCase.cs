@@ -1,0 +1,120 @@
+using AutoMapper;
+using FluentValidation;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Application.GestaoOrdemServico.Responses;
+using OficinaMecanica.Domain.Administrativo.Aggregates;
+using OficinaMecanica.Domain.Administrativo.Interfaces;
+using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
+using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
+using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
+
+namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
+
+public sealed class ReservarPecaInsumoUseCase
+{
+    private readonly IOrdemServicoRepository _ordemServicoRepository;
+    private readonly IPecaInsumoCatalogoRepository _pecaInsumoCatalogoRepository;
+    private readonly IEstoqueRepository _estoqueRepository;
+    private readonly IValidator<ReservarPecaInsumoRequest> _validator;
+    private readonly IMapper _mapper;
+
+    public ReservarPecaInsumoUseCase(
+        IOrdemServicoRepository ordemServicoRepository,
+        IPecaInsumoCatalogoRepository pecaInsumoCatalogoRepository,
+        IEstoqueRepository estoqueRepository,
+        IValidator<ReservarPecaInsumoRequest> validator,
+        IMapper mapper)
+    {
+        _ordemServicoRepository = ordemServicoRepository;
+        _pecaInsumoCatalogoRepository = pecaInsumoCatalogoRepository;
+        _estoqueRepository = estoqueRepository;
+        _validator = validator;
+        _mapper = mapper;
+    }
+
+    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(
+        ReservarPecaInsumoRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        _validator.ValidateAndThrow(request);
+
+        var ordemServico = await _ordemServicoRepository.ObterPorIdAsync(request.OrdemServicoId, cancellationToken);
+
+        if (ordemServico is null)
+        {
+            return Result<OrdemServicoResponse>.Falha("Ordem de servico nao encontrada.");
+        }
+
+        var estoque = await _estoqueRepository.ObterAsync(cancellationToken);
+
+        if (estoque is null)
+        {
+            return Result<OrdemServicoResponse>.Falha("Estoque nao encontrado.");
+        }
+
+        var pecasInsumosCatalogo = await ObterPecasInsumosCatalogoAsync(request.PecasInsumos, cancellationToken);
+
+        if (pecasInsumosCatalogo.Count != request.PecasInsumos.Count)
+        {
+            return Result<OrdemServicoResponse>.Falha("Peca ou insumo do catalogo nao encontrado.");
+        }
+
+        if (!ExisteEstoqueDisponivel(estoque, request.PecasInsumos))
+        {
+            return Result<OrdemServicoResponse>.Falha("Estoque insuficiente para reservar peca ou insumo.");
+        }
+
+        foreach (var pecaInsumo in request.PecasInsumos)
+        {
+            var pecaInsumoCatalogo = pecasInsumosCatalogo[pecaInsumo.PecaInsumoCatalogoId];
+
+            ordemServico.ReservarPecaInsumo(
+                pecaInsumoCatalogo.Id,
+                pecaInsumo.Quantidade,
+                pecaInsumoCatalogo.Valor);
+
+            estoque.ReservarItens(pecaInsumoCatalogo.Id, pecaInsumo.Quantidade);
+        }
+
+        await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
+        await _estoqueRepository.AtualizarAsync(estoque, cancellationToken);
+
+        return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
+    }
+
+    private async Task<Dictionary<Guid, PecaInsumoCatalogo>> ObterPecasInsumosCatalogoAsync(
+        IEnumerable<PecaInsumoRequest> pecasInsumos,
+        CancellationToken cancellationToken)
+    {
+        var pecasInsumosCatalogo = new Dictionary<Guid, PecaInsumoCatalogo>();
+
+        foreach (var pecaInsumo in pecasInsumos)
+        {
+            var pecaInsumoCatalogo = await _pecaInsumoCatalogoRepository.ObterPorIdAsync(
+                pecaInsumo.PecaInsumoCatalogoId,
+                cancellationToken);
+
+            if (pecaInsumoCatalogo is not null)
+            {
+                pecasInsumosCatalogo[pecaInsumoCatalogo.Id] = pecaInsumoCatalogo;
+            }
+        }
+
+        return pecasInsumosCatalogo;
+    }
+
+    private static bool ExisteEstoqueDisponivel(
+        Estoque estoque,
+        IEnumerable<PecaInsumoRequest> pecasInsumos)
+    {
+        foreach (var pecaInsumo in pecasInsumos)
+        {
+            if (!estoque.VerificarDisponibilidade(pecaInsumo.PecaInsumoCatalogoId, pecaInsumo.Quantidade))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
