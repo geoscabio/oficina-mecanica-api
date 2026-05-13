@@ -11,7 +11,7 @@ internal static class OrdemServicoTestDataFactory
 
     public static OrdemServico CriarOrdemServicoPadrao()
     {
-        return OrdemServico.Abrir(Guid.NewGuid(), Guid.NewGuid());
+        return OrdemServico.Abrir(1, Guid.NewGuid(), Guid.NewGuid());
     }
 
     public static OrdemServico CriarOrdemServicoEmDiagnostico()

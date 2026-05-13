@@ -31,8 +31,13 @@ public sealed class OrdemServico
     public IReadOnlyCollection<Servico> Servicos => _servicos.AsReadOnly();
     public IReadOnlyCollection<PecaInsumo> PecasInsumos => _pecasInsumos.AsReadOnly();
 
-    public static OrdemServico Abrir(Guid veiculoId, Guid mecanicoId)
+    public static OrdemServico Abrir(int numero, Guid veiculoId, Guid mecanicoId)
     {
+        if (numero <= 0)
+        {
+            throw new DomainException(OrdemServicoErrorMessages.NumeroObrigatorio);
+        }
+
         if (veiculoId == Guid.Empty)
         {
             throw new DomainException(OrdemServicoErrorMessages.VeiculoObrigatorio);
@@ -43,7 +48,7 @@ public sealed class OrdemServico
             throw new DomainException(OrdemServicoErrorMessages.MecanicoObrigatorio);
         }
 
-        return new OrdemServico(Guid.NewGuid(), Random.Shared.Next(1, int.MaxValue), veiculoId, mecanicoId);
+        return new OrdemServico(Guid.NewGuid(), numero, veiculoId, mecanicoId);
     }
 
     public void IniciarDiagnostico()

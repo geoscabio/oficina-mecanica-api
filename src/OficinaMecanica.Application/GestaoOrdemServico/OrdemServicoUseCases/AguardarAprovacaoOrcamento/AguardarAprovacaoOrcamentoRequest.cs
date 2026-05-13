@@ -1,0 +1,3 @@
+namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AguardarAprovacaoOrcamento;
+
+public sealed record AguardarAprovacaoOrcamentoRequest(Guid OrdemServicoId);

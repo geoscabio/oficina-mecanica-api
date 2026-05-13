@@ -17,11 +17,13 @@ public class OrdemServicoTests
         var mecanicoId = Guid.NewGuid();
 
         // Act
-        var ordemServico = OrdemServico.Abrir(veiculoId, mecanicoId);
+        const int numero = 1;
+
+        var ordemServico = OrdemServico.Abrir(numero, veiculoId, mecanicoId);
 
         // Assert
         ordemServico.Id.Should().NotBeEmpty();
-        ordemServico.Numero.Should().BeGreaterThan(0);
+        ordemServico.Numero.Should().Be(numero);
         ordemServico.VeiculoId.Should().Be(veiculoId);
         ordemServico.MecanicoId.Should().Be(mecanicoId);
         ordemServico.Status.Should().Be(StatusOrdemServico.RECEBIDA);
@@ -77,7 +79,7 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoEmDiagnosticoComOrcamento_Quando_AguardarAprovacao_Entao_DeveFicarAguardandoAprovacao()
+    public void Dado_OrdemServicoEmDiagnosticoComServicoDefinido_Quando_AguardarAprovacao_Entao_DeveFicarAguardandoAprovacao()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
@@ -88,6 +90,7 @@ public class OrdemServicoTests
 
         // Assert
         ordemServico.Status.Should().Be(StatusOrdemServico.AGUARDANDO_APROVACAO);
+        ordemServico.ValorTotal.Should().Be(OrdemServicoTestDataFactory.ValorServicoPadrao);
     }
 
     [Fact]
