@@ -4,6 +4,7 @@ using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirO
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AguardarAprovacaoOrcamento;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.CancelarOrdemServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.DefinirServicos;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.DetalharOrdemServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.EntregarOrdemServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.FinalizarOrdemServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.FinalizarServico;
@@ -29,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<IValidator<FinalizarOrdemServicoRequest>, FinalizarOrdemServicoValidator>();
         services.AddScoped<IValidator<CancelarOrdemServicoRequest>, CancelarOrdemServicoValidator>();
         services.AddScoped<IValidator<EntregarOrdemServicoRequest>, EntregarOrdemServicoValidator>();
+        services.AddScoped<IValidator<DetalharOrdemServicoRequest>, DetalharOrdemServicoValidator>();
 
         services.AddScoped<AbrirOrdemServicoUseCase>();
         services.AddScoped<IniciarDiagnosticoOrdemServicoUseCase>();
@@ -41,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<FinalizarOrdemServicoUseCase>();
         services.AddScoped<CancelarOrdemServicoUseCase>();
         services.AddScoped<EntregarOrdemServicoUseCase>();
+        services.AddScoped<DetalharOrdemServicoUseCase>();
 
         return services;
     }
