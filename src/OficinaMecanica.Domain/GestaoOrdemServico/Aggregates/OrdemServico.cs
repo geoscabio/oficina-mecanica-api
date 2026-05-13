@@ -26,6 +26,7 @@ public sealed class OrdemServico
     public decimal ValorTotal { get; private set; }
     public DateTime? DataInicio { get; private set; }
     public DateTime? DataFim { get; private set; }
+    public MotivoCancelamentoOrdemServico? MotivoCancelamento { get; private set; }
     public Guid VeiculoId { get; private set; }
     public Guid MecanicoId { get; private set; }
     public IReadOnlyCollection<Servico> Servicos => _servicos.AsReadOnly();
@@ -134,14 +135,20 @@ public sealed class OrdemServico
         Status = StatusOrdemServico.ENTREGUE;
     }
 
-    public void Cancelar()
+    public void Cancelar(MotivoCancelamentoOrdemServico motivo)
     {
+        if (!Enum.IsDefined(typeof(MotivoCancelamentoOrdemServico), motivo))
+        {
+            throw new DomainException(OrdemServicoErrorMessages.MotivoCancelamentoInvalido);
+        }
+
         if (Status is StatusOrdemServico.FINALIZADA or StatusOrdemServico.ENTREGUE or StatusOrdemServico.CANCELADA)
         {
             throw new DomainException(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
         }
 
         Status = StatusOrdemServico.CANCELADA;
+        MotivoCancelamento = motivo;
         DataFim = DateTime.UtcNow;
     }
 

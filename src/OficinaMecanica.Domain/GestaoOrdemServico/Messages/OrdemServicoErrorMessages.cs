@@ -9,6 +9,7 @@ public static class OrdemServicoErrorMessages
     public const string ServicoObrigatorioParaAguardarAprovacao = "Ordem de serviço deve possuir ao menos um serviço para aguardar aprovação.";
     public const string ServicosFinalizadosObrigatorios = "Todos os serviços devem estar finalizados para finalizar a ordem de serviço.";
     public const string CancelamentoStatusInvalido = "Ordem de serviço não pode ser cancelada no status atual.";
+    public const string MotivoCancelamentoInvalido = "Motivo de cancelamento da ordem de serviço inválido.";
     public const string ServicoNaoEncontrado = "Serviço não encontrado na ordem de serviço.";
     public const string TransicaoStatusInvalida = "Transição de status da ordem de serviço inválida.";
     public const string PecaInsumoCatalogoObrigatorio = "Peça ou insumo do catálogo é obrigatório.";

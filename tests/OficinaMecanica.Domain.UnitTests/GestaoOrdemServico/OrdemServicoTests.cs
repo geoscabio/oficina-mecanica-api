@@ -158,11 +158,27 @@ public class OrdemServicoTests
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacao();
 
         // Act
-        ordemServico.Cancelar();
+        ordemServico.Cancelar(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
 
         // Assert
         ordemServico.Status.Should().Be(StatusOrdemServico.CANCELADA);
+        ordemServico.MotivoCancelamento.Should().Be(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
         ordemServico.DataFim.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Dado_MotivoInvalido_Quando_Cancelar_Entao_DeveLancarDomainException()
+    {
+        // Arrange
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacao();
+
+        // Act
+        var acao = () => ordemServico.Cancelar((MotivoCancelamentoOrdemServico)99);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(OrdemServicoErrorMessages.MotivoCancelamentoInvalido);
     }
 
     [Fact]
