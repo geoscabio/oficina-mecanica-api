@@ -90,5 +90,17 @@ internal static class OrdemServicoTestDataFactory
 
         return ordemServico;
     }
+
+    public static OrdemServico CriarOrdemServicoAguardandoAprovacaoComPecaInsumoReservado(
+        Guid pecaInsumoCatalogoId,
+        int quantidade = 2)
+    {
+        var ordemServico = CriarOrdemServicoEmDiagnosticoComServico();
+
+        ordemServico.ReservarPecaInsumo(pecaInsumoCatalogoId, quantidade, 45m);
+        ordemServico.AguardarAprovacao();
+
+        return ordemServico;
+    }
 }
 

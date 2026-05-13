@@ -11,10 +11,12 @@ public static class OrdemServicoValidationMessages
     public const string RequestIniciarExecucaoServicoObrigatorio = "Request para iniciar execução do serviço é obrigatório.";
     public const string RequestFinalizarServicoObrigatorio = "Request para finalizar serviço é obrigatório.";
     public const string RequestFinalizarOrdemServicoObrigatorio = "Request para finalizar ordem de serviço é obrigatório.";
+    public const string RequestCancelarOrdemServicoObrigatorio = "Request para cancelar ordem de serviço é obrigatório.";
     public const string VeiculoIdObrigatorio = "VeículoId é obrigatório.";
     public const string MecanicoIdObrigatorio = "MecânicoId é obrigatório.";
     public const string OrdemServicoIdObrigatorio = "OrdemServicoId é obrigatório.";
     public const string ServicoIdObrigatorio = "ServicoId é obrigatório.";
+    public const string MotivoCancelamentoObrigatorio = "Motivo do cancelamento é obrigatório.";
     public const string ServicosCatalogoIdsObrigatorio = "ServiçosCatalogoIds é obrigatório.";
     public const string ServicoCatalogoIdObrigatorio = "ServiçoCatalogoId é obrigatório.";
     public const string PecasInsumosObrigatorio = "PeçasInsumos é obrigatório.";
