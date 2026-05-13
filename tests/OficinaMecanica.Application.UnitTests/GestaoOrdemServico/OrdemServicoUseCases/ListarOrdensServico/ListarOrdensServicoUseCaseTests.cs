@@ -50,6 +50,32 @@ public class ListarOrdensServicoUseCaseTests
         // Arrange
         var repository = new Mock<IOrdemServicoRepository>();
         repository
+            .Setup(repo => repo.ListarAsync(1, 10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<OrdemServico>());
+        repository
+            .Setup(repo => repo.ContarAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(0);
+
+        var useCase = CriarUseCase(repository);
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(new ListarOrdensServicoRequest(1, 10));
+
+        // Assert
+        resultado.Sucesso.Should().BeTrue();
+        resultado.Valor.Should().NotBeNull();
+        resultado.Valor!.Itens.Should().BeEmpty();
+        resultado.Valor.Pagina.Should().Be(1);
+        resultado.Valor.TamanhoPagina.Should().Be(10);
+        resultado.Valor.TotalItens.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Dado_PaginaSemResultado_Quando_ListarOrdensServico_Entao_DeveRetornarListaVaziaComTotalItens()
+    {
+        // Arrange
+        var repository = new Mock<IOrdemServicoRepository>();
+        repository
             .Setup(repo => repo.ListarAsync(2, 10, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<OrdemServico>());
         repository
