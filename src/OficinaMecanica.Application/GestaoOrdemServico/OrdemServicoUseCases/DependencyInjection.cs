@@ -4,6 +4,7 @@ using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirO
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AguardarAprovacaoOrcamento;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.DefinirServicos;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarExecucaoOrdemServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
 
 namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases;
@@ -17,12 +18,14 @@ public static class DependencyInjection
         services.AddScoped<IValidator<DefinirServicosRequest>, DefinirServicosValidator>();
         services.AddScoped<IValidator<ReservarPecaInsumoRequest>, ReservarPecaInsumoValidator>();
         services.AddScoped<IValidator<AguardarAprovacaoOrcamentoRequest>, AguardarAprovacaoOrcamentoValidator>();
+        services.AddScoped<IValidator<IniciarExecucaoOrdemServicoRequest>, IniciarExecucaoOrdemServicoValidator>();
 
         services.AddScoped<AbrirOrdemServicoUseCase>();
         services.AddScoped<IniciarDiagnosticoOrdemServicoUseCase>();
         services.AddScoped<DefinirServicosUseCase>();
         services.AddScoped<ReservarPecaInsumoUseCase>();
         services.AddScoped<AguardarAprovacaoOrcamentoUseCase>();
+        services.AddScoped<IniciarExecucaoOrdemServicoUseCase>();
 
         return services;
     }

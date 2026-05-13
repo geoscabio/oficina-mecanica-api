@@ -35,5 +35,14 @@ internal static class OrdemServicoTestDataFactory
 
         return ordemServico;
     }
+
+    public static OrdemServico CriarOrdemServicoAguardandoAprovacao()
+    {
+        var ordemServico = CriarOrdemServicoEmDiagnosticoComServico();
+
+        ordemServico.AguardarAprovacao();
+
+        return ordemServico;
+    }
 }
 
