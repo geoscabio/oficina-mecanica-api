@@ -6,7 +6,7 @@ internal static class OrdemServicoTestDataFactory
 {
     public static OrdemServico CriarOrdemServicoRecebida()
     {
-        return OrdemServico.Abrir(Guid.NewGuid(), Guid.NewGuid());
+        return OrdemServico.Abrir(1, Guid.NewGuid(), Guid.NewGuid());
     }
 
     public static OrdemServico CriarOrdemServicoEmDiagnostico()
@@ -14,6 +14,24 @@ internal static class OrdemServicoTestDataFactory
         var ordemServico = CriarOrdemServicoRecebida();
 
         ordemServico.IniciarDiagnostico();
+
+        return ordemServico;
+    }
+
+    public static OrdemServico CriarOrdemServicoEmDiagnosticoComServico()
+    {
+        var ordemServico = CriarOrdemServicoEmDiagnostico();
+
+        ordemServico.DefinirServico(Guid.NewGuid(), 150m);
+
+        return ordemServico;
+    }
+
+    public static OrdemServico CriarOrdemServicoEmDiagnosticoComOrcamentoCompleto()
+    {
+        var ordemServico = CriarOrdemServicoEmDiagnosticoComServico();
+
+        ordemServico.ReservarPecaInsumo(Guid.NewGuid(), 2, 45m);
 
         return ordemServico;
     }

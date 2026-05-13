@@ -3,6 +3,7 @@ namespace OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 public static class OrdemServicoErrorMessages
 {
     public const string OrdemServicoNaoEncontrada = "Ordem de serviço não encontrada.";
+    public const string NumeroObrigatorio = "Número da ordem de serviço é obrigatório.";
     public const string VeiculoObrigatorio = "Veículo da ordem de serviço é obrigatório.";
     public const string MecanicoObrigatorio = "Mecânico da ordem de serviço é obrigatório.";
     public const string ServicoObrigatorioParaAguardarAprovacao = "Ordem de serviço deve possuir ao menos um serviço para aguardar aprovação.";
