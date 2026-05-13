@@ -36,4 +36,19 @@ internal static class TestDataFactory
     {
         return OrdemServico.Abrir(Guid.NewGuid(), Guid.NewGuid());
     }
+
+    public static OrdemServico CriarOrdemServicoEmDiagnostico()
+    {
+        var ordemServico = CriarOrdemServicoRecebida();
+        ordemServico.IniciarDiagnostico();
+
+        return ordemServico;
+    }
+
+    public static ServicoCatalogo CriarServicoCatalogoPadrao(
+        string descricao = "Troca de oleo",
+        decimal valor = 150m)
+    {
+        return ServicoCatalogo.Criar(descricao, valor);
+    }
 }
