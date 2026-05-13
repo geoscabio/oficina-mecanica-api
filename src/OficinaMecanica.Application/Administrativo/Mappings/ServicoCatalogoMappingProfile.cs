@@ -10,6 +10,8 @@ public sealed class ServicoCatalogoMappingProfile : Profile
 
     public ServicoCatalogoMappingProfile()
     {
+        CreateMap<ServicoCatalogo, ServicoCatalogoResponse>();
+
         CreateMap<ServicoCatalogo, TempoMedioExecucaoServicoResponse>()
             .ForCtorParam(
                 nameof(TempoMedioExecucaoServicoResponse.ServicoCatalogoId),
