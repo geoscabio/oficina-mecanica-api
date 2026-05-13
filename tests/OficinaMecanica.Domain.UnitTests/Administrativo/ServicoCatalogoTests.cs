@@ -57,4 +57,54 @@ public class ServicoCatalogoTests
             .Throw<DomainException>()
             .WithMessage(ServicoCatalogoErrorMessages.ValorMaiorQueZero);
     }
+
+    [Fact]
+    public void Dado_DadosValidos_Quando_AtualizarServicoCatalogo_Entao_DeveAtualizarDescricaoEValor()
+    {
+        // Arrange
+        var servico = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
+        const string descricaoAtualizada = "Alinhamento";
+        const decimal valorAtualizado = 90m;
+
+        // Act
+        servico.Atualizar(descricaoAtualizada, valorAtualizado);
+
+        // Assert
+        servico.Descricao.Should().Be(descricaoAtualizada);
+        servico.Valor.Should().Be(valorAtualizado);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("  ")]
+    public void Dado_DescricaoInvalida_Quando_AtualizarServicoCatalogo_Entao_DeveLancarDomainException(string descricao)
+    {
+        // Arrange
+        var servico = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
+
+        // Act
+        var acao = () => servico.Atualizar(descricao, ServicoCatalogoTestDataFactory.ValorPadrao);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(ServicoCatalogoErrorMessages.DescricaoObrigatoria);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Dado_ValorInvalido_Quando_AtualizarServicoCatalogo_Entao_DeveLancarDomainException(decimal valor)
+    {
+        // Arrange
+        var servico = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
+
+        // Act
+        var acao = () => servico.Atualizar(ServicoCatalogoTestDataFactory.DescricaoPadrao, valor);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(ServicoCatalogoErrorMessages.ValorMaiorQueZero);
+    }
 }
