@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using OficinaMecanica.Application.Administrativo;
 using OficinaMecanica.Application.Atendimento;
 using OficinaMecanica.Application.GestaoOrdemServico;
 
@@ -10,6 +11,7 @@ public static class DependencyInjection
     {
         services.AddAutoMapper(_ => { }, typeof(DependencyInjection).Assembly);
 
+        services.AddAdministrativoApplication();
         services.AddAtendimentoApplication();
         services.AddGestaoOrdemServicoApplication();
 

@@ -13,4 +13,11 @@ public interface IOrdemServicoRepository
         CancellationToken cancellationToken = default);
 
     Task<int> ContarAsync(CancellationToken cancellationToken = default);
+    Task<double?> ObterTempoMedioExecucaoServicoAsync(
+        Guid servicoCatalogoId,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyDictionary<Guid, double>> ListarTemposMediosExecucaoServicosAsync(
+        IReadOnlyCollection<Guid> servicosCatalogoIds,
+        CancellationToken cancellationToken = default);
 }

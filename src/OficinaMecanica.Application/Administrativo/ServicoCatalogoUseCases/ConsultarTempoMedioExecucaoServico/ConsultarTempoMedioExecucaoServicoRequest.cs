@@ -1,0 +1,3 @@
+namespace OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ConsultarTempoMedioExecucaoServico;
+
+public sealed record ConsultarTempoMedioExecucaoServicoRequest(Guid ServicoCatalogoId);

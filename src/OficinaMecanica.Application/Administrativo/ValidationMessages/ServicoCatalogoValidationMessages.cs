@@ -1,0 +1,10 @@
+namespace OficinaMecanica.Application.Administrativo.ValidationMessages;
+
+public static class ServicoCatalogoValidationMessages
+{
+    public const string RequestConsultarTempoMedioExecucaoServicoObrigatorio = "Request para consultar tempo médio de execução do serviço é obrigatório.";
+    public const string RequestListarTempoMedioExecucaoServicosObrigatorio = "Request para listar tempos médios de execução dos serviços é obrigatório.";
+    public const string ServicoCatalogoIdObrigatorio = "ServicoCatalogoId é obrigatório.";
+    public const string PaginaMaiorQueZero = "Página deve ser maior que zero.";
+    public const string TamanhoPaginaInvalido = "Tamanho da página deve estar entre 1 e 100.";
+}
