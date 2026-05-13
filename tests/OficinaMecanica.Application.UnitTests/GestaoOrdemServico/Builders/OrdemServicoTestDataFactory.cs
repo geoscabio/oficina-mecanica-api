@@ -63,5 +63,32 @@ internal static class OrdemServicoTestDataFactory
 
         return ordemServico;
     }
+
+    public static OrdemServico CriarOrdemServicoEmExecucaoComServicoFinalizado()
+    {
+        var ordemServico = CriarOrdemServicoEmExecucaoComServicoEmExecucao();
+        var servicoId = ordemServico.Servicos.Single().Id;
+
+        ordemServico.FinalizarServico(servicoId);
+
+        return ordemServico;
+    }
+
+    public static OrdemServico CriarOrdemServicoEmExecucaoComServicoFinalizadoEPecaInsumoReservado(
+        Guid pecaInsumoCatalogoId,
+        int quantidade = 2)
+    {
+        var ordemServico = CriarOrdemServicoEmDiagnosticoComServico();
+
+        ordemServico.ReservarPecaInsumo(pecaInsumoCatalogoId, quantidade, 45m);
+        ordemServico.AguardarAprovacao();
+        ordemServico.IniciarExecucao();
+
+        var servicoId = ordemServico.Servicos.Single().Id;
+        ordemServico.IniciarExecucaoServico(servicoId);
+        ordemServico.FinalizarServico(servicoId);
+
+        return ordemServico;
+    }
 }
 

@@ -1,0 +1,3 @@
+namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.FinalizarOrdemServico;
+
+public sealed record FinalizarOrdemServicoRequest(Guid OrdemServicoId);
