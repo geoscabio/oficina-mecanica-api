@@ -14,11 +14,14 @@ public static class OrdemServicoValidationMessages
     public const string RequestCancelarOrdemServicoObrigatorio = "Request para cancelar ordem de serviço é obrigatório.";
     public const string RequestEntregarOrdemServicoObrigatorio = "Request para entregar ordem de serviço é obrigatório.";
     public const string RequestDetalharOrdemServicoObrigatorio = "Request para detalhar ordem de serviço é obrigatório.";
+    public const string RequestListarOrdensServicoObrigatorio = "Request para listar ordens de serviço é obrigatório.";
     public const string VeiculoIdObrigatorio = "VeículoId é obrigatório.";
     public const string MecanicoIdObrigatorio = "MecânicoId é obrigatório.";
     public const string OrdemServicoIdObrigatorio = "OrdemServicoId é obrigatório.";
     public const string ServicoIdObrigatorio = "ServicoId é obrigatório.";
     public const string MotivoCancelamentoObrigatorio = "Motivo do cancelamento é obrigatório.";
+    public const string PaginaMaiorQueZero = "Página deve ser maior que zero.";
+    public const string TamanhoPaginaInvalido = "Tamanho da página deve estar entre 1 e 100.";
     public const string ServicosCatalogoIdsObrigatorio = "ServiçosCatalogoIds é obrigatório.";
     public const string ServicoCatalogoIdObrigatorio = "ServiçoCatalogoId é obrigatório.";
     public const string PecasInsumosObrigatorio = "PeçasInsumos é obrigatório.";
