@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.UnitTests.Administrativo.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.Administrativo;
 
@@ -9,11 +10,17 @@ public class ServicoCatalogoTests
     [Fact]
     public void Dado_DadosValidos_Quando_CriarServicoCatalogo_Entao_DeveRegistrarServicoComValor()
     {
-        var servico = ServicoCatalogo.Criar("Troca de oleo", 120m);
+        // Arrange
+        const string descricaoEsperada = ServicoCatalogoTestDataFactory.DescricaoPadrao;
+        const decimal valorEsperado = ServicoCatalogoTestDataFactory.ValorPadrao;
 
+        // Act
+        var servico = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
+
+        // Assert
         servico.Id.Should().NotBeEmpty();
-        servico.Descricao.Should().Be("Troca de oleo");
-        servico.Valor.Should().Be(120m);
+        servico.Descricao.Should().Be(descricaoEsperada);
+        servico.Valor.Should().Be(valorEsperado);
     }
 
     [Theory]
@@ -21,8 +28,13 @@ public class ServicoCatalogoTests
     [InlineData("  ")]
     public void Dado_DescricaoInvalida_Quando_CriarServicoCatalogo_Entao_DeveLancarServicoCatalogoInvalidoException(string descricao)
     {
-        var acao = () => ServicoCatalogo.Criar(descricao, 120m);
+        // Arrange
+        const decimal valor = ServicoCatalogoTestDataFactory.ValorPadrao;
 
+        // Act
+        var acao = () => ServicoCatalogo.Criar(descricao, valor);
+
+        // Assert
         acao.Should().Throw<ServicoCatalogoInvalidoException>();
     }
 
@@ -31,8 +43,13 @@ public class ServicoCatalogoTests
     [InlineData(-1)]
     public void Dado_ValorInvalido_Quando_CriarServicoCatalogo_Entao_DeveLancarServicoCatalogoInvalidoException(decimal valor)
     {
-        var acao = () => ServicoCatalogo.Criar("Troca de oleo", valor);
+        // Arrange
+        const string descricao = ServicoCatalogoTestDataFactory.DescricaoPadrao;
 
+        // Act
+        var acao = () => ServicoCatalogo.Criar(descricao, valor);
+
+        // Assert
         acao.Should().Throw<ServicoCatalogoInvalidoException>();
     }
 }

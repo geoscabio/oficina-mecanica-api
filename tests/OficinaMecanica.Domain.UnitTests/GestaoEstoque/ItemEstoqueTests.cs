@@ -1,6 +1,7 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.GestaoEstoque.Exceptions;
+using OficinaMecanica.Domain.UnitTests.GestaoEstoque.Builders;
 
 namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque;
 
@@ -9,39 +10,60 @@ public class ItemEstoqueTests
     [Fact]
     public void Dado_DadosValidos_Quando_CriarItemEstoque_Entao_DeveRegistrarDisponibilidadeInicial()
     {
+        // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
+        const int quantidadeDisponivel = EstoqueTestDataFactory.QuantidadeDisponivelPadrao;
 
-        var item = ItemEstoque.Criar(pecaInsumoCatalogoId, 10);
+        // Act
+        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao(
+            pecaInsumoCatalogoId,
+            quantidadeDisponivel);
 
+        // Assert
         item.Id.Should().NotBeEmpty();
         item.PecaInsumoCatalogoId.Should().Be(pecaInsumoCatalogoId);
-        item.QuantidadeDisponivel.Should().Be(10);
+        item.QuantidadeDisponivel.Should().Be(quantidadeDisponivel);
         item.QuantidadeReservada.Should().Be(0);
     }
 
     [Fact]
     public void Dado_CatalogoIdVazio_Quando_CriarItemEstoque_Entao_DeveLancarItemEstoqueInvalidoException()
     {
-        var acao = () => ItemEstoque.Criar(Guid.Empty, 10);
+        // Arrange
+        var pecaInsumoCatalogoId = Guid.Empty;
+        const int quantidadeDisponivel = EstoqueTestDataFactory.QuantidadeDisponivelPadrao;
 
+        // Act
+        var acao = () => ItemEstoque.Criar(pecaInsumoCatalogoId, quantidadeDisponivel);
+
+        // Assert
         acao.Should().Throw<ItemEstoqueInvalidoException>();
     }
 
     [Fact]
     public void Dado_QuantidadeInicialNegativa_Quando_CriarItemEstoque_Entao_DeveLancarItemEstoqueInvalidoException()
     {
-        var acao = () => ItemEstoque.Criar(Guid.NewGuid(), -1);
+        // Arrange
+        var pecaInsumoCatalogoId = Guid.NewGuid();
+        const int quantidadeDisponivel = -1;
 
+        // Act
+        var acao = () => ItemEstoque.Criar(pecaInsumoCatalogoId, quantidadeDisponivel);
+
+        // Assert
         acao.Should().Throw<ItemEstoqueInvalidoException>();
     }
 
     [Fact]
     public void Dado_ItemComQuantidadeDisponivel_Quando_Reservar_Entao_DeveMoverQuantidadeParaReservada()
     {
-        var item = ItemEstoque.Criar(Guid.NewGuid(), 10);
+        // Arrange
+        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao();
 
+        // Act
         item.Reservar(4);
 
+        // Assert
         item.QuantidadeDisponivel.Should().Be(6);
         item.QuantidadeReservada.Should().Be(4);
     }
@@ -49,21 +71,27 @@ public class ItemEstoqueTests
     [Fact]
     public void Dado_ItemSemQuantidadeDisponivelSuficiente_Quando_Reservar_Entao_DeveLancarEstoqueInsuficienteException()
     {
-        var item = ItemEstoque.Criar(Guid.NewGuid(), 3);
+        // Arrange
+        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao(quantidadeDisponivel: 3);
 
+        // Act
         var acao = () => item.Reservar(4);
 
+        // Assert
         acao.Should().Throw<EstoqueInsuficienteException>();
     }
 
     [Fact]
     public void Dado_ItemComQuantidadeReservada_Quando_Estornar_Entao_DeveRetornarQuantidadeParaDisponivel()
     {
-        var item = ItemEstoque.Criar(Guid.NewGuid(), 10);
+        // Arrange
+        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao();
         item.Reservar(4);
 
+        // Act
         item.Estornar(2);
 
+        // Assert
         item.QuantidadeDisponivel.Should().Be(8);
         item.QuantidadeReservada.Should().Be(2);
     }
@@ -71,11 +99,14 @@ public class ItemEstoqueTests
     [Fact]
     public void Dado_ItemComQuantidadeReservada_Quando_Baixar_Entao_DeveReduzirQuantidadeReservada()
     {
-        var item = ItemEstoque.Criar(Guid.NewGuid(), 10);
+        // Arrange
+        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao();
         item.Reservar(4);
 
+        // Act
         item.Baixar(3);
 
+        // Assert
         item.QuantidadeDisponivel.Should().Be(6);
         item.QuantidadeReservada.Should().Be(1);
     }
