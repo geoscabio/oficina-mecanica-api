@@ -4,6 +4,7 @@ public static class ClienteValidationMessages
 {
     public const string RequestCadastroClienteObrigatorio = "Request de cadastro de cliente é obrigatório.";
     public const string RequestAtualizarClienteObrigatorio = "Request de atualização de cliente é obrigatório.";
+    public const string RequestRemoverClienteObrigatorio = "Request de remoção de cliente é obrigatório.";
 
     public const string DocumentoObrigatorio = "Documento é obrigatório.";
     public const string NomeObrigatorio = "Nome é obrigatório.";
