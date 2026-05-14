@@ -1,11 +1,12 @@
-using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
+﻿using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
 
-namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque.Builders;
+namespace OficinaMecanica.Application.UnitTests.GestaoEstoque.Builders;
 
 internal static class EstoqueTestDataFactory
 {
     public const int QuantidadeDisponivelPadrao = 10;
+    public const int QuantidadeEntradaPadrao = 5;
 
     public static ItemEstoque CriarItemEstoquePadrao(
         Guid? pecaInsumoCatalogoId = null,
@@ -20,8 +21,9 @@ internal static class EstoqueTestDataFactory
         Guid? pecaInsumoCatalogoId = null,
         int quantidadeDisponivel = QuantidadeDisponivelPadrao)
     {
-        var item = CriarItemEstoquePadrao(pecaInsumoCatalogoId, quantidadeDisponivel);
-
-        return Estoque.Criar(new[] { item });
+        return Estoque.Criar(new[]
+        {
+            CriarItemEstoquePadrao(pecaInsumoCatalogoId, quantidadeDisponivel)
+        });
     }
 }

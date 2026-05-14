@@ -56,6 +56,23 @@ public sealed class Estoque
         ObterItem(pecaInsumoCatalogoId).Baixar(quantidade);
     }
 
+    public ItemEstoque RegistrarEntrada(Guid pecaInsumoCatalogoId, int quantidade)
+    {
+        var item = EncontrarItem(pecaInsumoCatalogoId);
+
+        if (item is null)
+        {
+            item = ItemEstoque.Criar(pecaInsumoCatalogoId, quantidade);
+            _itensEstoque.Add(item);
+
+            return item;
+        }
+
+        item.RegistrarEntrada(quantidade);
+
+        return item;
+    }
+
     public ItemEstoque ObterItem(Guid pecaInsumoCatalogoId)
     {
         return EncontrarItem(pecaInsumoCatalogoId)

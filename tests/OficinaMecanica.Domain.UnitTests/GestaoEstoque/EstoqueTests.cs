@@ -13,7 +13,7 @@ public class EstoqueTests
     public void Dado_ItemValido_Quando_CriarEstoque_Entao_DeveRegistrarEstoqueComItem()
     {
         // Arrange
-        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao();
+        var item = EstoqueDomainTestDataFactory.CriarItemEstoquePadrao();
 
         // Act
         var estoque = Estoque.Criar(new[] { item });
@@ -43,7 +43,7 @@ public class EstoqueTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId);
+        var estoque = EstoqueDomainTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId);
 
         // Act
         var disponivel = estoque.VerificarDisponibilidade(pecaInsumoCatalogoId, 5);
@@ -57,7 +57,7 @@ public class EstoqueTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(
+        var estoque = EstoqueDomainTestDataFactory.CriarEstoquePadrao(
             pecaInsumoCatalogoId,
             quantidadeDisponivel: 3);
 
@@ -73,7 +73,7 @@ public class EstoqueTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId);
+        var estoque = EstoqueDomainTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId);
 
         // Act
         estoque.ReservarItens(pecaInsumoCatalogoId, 4);
@@ -89,7 +89,7 @@ public class EstoqueTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId);
+        var estoque = EstoqueDomainTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId);
         estoque.ReservarItens(pecaInsumoCatalogoId, 4);
 
         // Act
@@ -106,7 +106,7 @@ public class EstoqueTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId);
+        var estoque = EstoqueDomainTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId);
         estoque.ReservarItens(pecaInsumoCatalogoId, 4);
 
         // Act
@@ -122,7 +122,7 @@ public class EstoqueTests
     public void Dado_ItemInexistente_Quando_ReservarItens_Entao_DeveLancarDomainException()
     {
         // Arrange
-        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao();
+        var estoque = EstoqueDomainTestDataFactory.CriarEstoquePadrao();
         var pecaInsumoCatalogoIdInexistente = Guid.NewGuid();
 
         // Act
@@ -132,5 +132,36 @@ public class EstoqueTests
         acao.Should()
             .Throw<DomainException>()
             .WithMessage(EstoqueErrorMessages.ItemNaoEncontrado);
+    }
+
+    [Fact]
+    public void Dado_ItemExistente_Quando_RegistrarEntrada_Entao_DeveSomarQuantidadeDisponivel()
+    {
+        // Arrange
+        var pecaInsumoCatalogoId = Guid.NewGuid();
+        var estoque = EstoqueDomainTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId);
+
+        // Act
+        var item = estoque.RegistrarEntrada(pecaInsumoCatalogoId, 5);
+
+        // Assert
+        item.QuantidadeDisponivel.Should().Be(15);
+        item.QuantidadeReservada.Should().Be(0);
+    }
+
+    [Fact]
+    public void Dado_ItemInexistente_Quando_RegistrarEntrada_Entao_DeveAdicionarItemAoEstoque()
+    {
+        // Arrange
+        var estoque = EstoqueDomainTestDataFactory.CriarEstoquePadrao();
+        var pecaInsumoCatalogoId = Guid.NewGuid();
+
+        // Act
+        var item = estoque.RegistrarEntrada(pecaInsumoCatalogoId, 5);
+
+        // Assert
+        item.PecaInsumoCatalogoId.Should().Be(pecaInsumoCatalogoId);
+        item.QuantidadeDisponivel.Should().Be(5);
+        estoque.ItensEstoque.Should().Contain(item);
     }
 }
