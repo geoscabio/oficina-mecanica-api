@@ -4,6 +4,7 @@ using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarCliente;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarClientePorDocumento;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.ListarClientes;
+using OficinaMecanica.Application.Atendimento.ClienteUseCases.AtualizarCliente;
 
 namespace OficinaMecanica.Application.Atendimento.ClienteUseCases;
 
@@ -15,11 +16,13 @@ public static class DependencyInjection
         services.AddScoped<IValidator<ConsultarClienteRequest>, ConsultarClienteValidator>();
         services.AddScoped<IValidator<ConsultarClientePorDocumentoRequest>, ConsultarClientePorDocumentoValidator>();
         services.AddScoped<IValidator<ListarClientesRequest>, ListarClientesValidator>();
+        services.AddScoped<IValidator<AtualizarClienteRequest>, AtualizarClienteValidator>();
 
         services.AddScoped<CadastrarClienteUseCase>();
         services.AddScoped<ConsultarClienteUseCase>();
         services.AddScoped<ConsultarClientePorDocumentoUseCase>();
         services.AddScoped<ListarClientesUseCase>();
+        services.AddScoped<AtualizarClienteUseCase>();
 
         return services;
     }
