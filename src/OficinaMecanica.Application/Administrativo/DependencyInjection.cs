@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using OficinaMecanica.Application.Administrativo.MecanicoUseCases;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases;
 
@@ -10,6 +11,7 @@ public static class DependencyInjection
     {
         services.AddServicoCatalogoUseCases();
         services.AddPecaInsumoCatalogoUseCases();
+        services.AddMecanicoUseCases();
 
         return services;
     }
