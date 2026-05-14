@@ -26,4 +26,14 @@ internal static class EstoqueTestDataFactory
             CriarItemEstoquePadrao(pecaInsumoCatalogoId, quantidadeDisponivel)
         });
     }
+
+    public static Estoque CriarEstoqueComItens(int quantidadeItens)
+    {
+        var itens = Enumerable
+            .Range(1, quantidadeItens)
+            .Select(_ => CriarItemEstoquePadrao())
+            .ToArray();
+
+        return Estoque.Criar(itens);
+    }
 }
