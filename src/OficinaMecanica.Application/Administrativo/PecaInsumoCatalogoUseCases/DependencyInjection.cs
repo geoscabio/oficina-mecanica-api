@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.AtualizarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.CadastrarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.ListarPecasInsumosCatalogo;
+using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.RemoverPecaInsumoCatalogo;
 
 namespace OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases;
 
@@ -13,10 +14,12 @@ public static class DependencyInjection
         services.AddScoped<IValidator<CadastrarPecaInsumoCatalogoRequest>, CadastrarPecaInsumoCatalogoValidator>();
         services.AddScoped<IValidator<ListarPecasInsumosCatalogoRequest>, ListarPecasInsumosCatalogoValidator>();
         services.AddScoped<IValidator<AtualizarPecaInsumoCatalogoRequest>, AtualizarPecaInsumoCatalogoValidator>();
+        services.AddScoped<IValidator<RemoverPecaInsumoCatalogoRequest>, RemoverPecaInsumoCatalogoValidator>();
 
         services.AddScoped<CadastrarPecaInsumoCatalogoUseCase>();
         services.AddScoped<ListarPecasInsumosCatalogoUseCase>();
         services.AddScoped<AtualizarPecaInsumoCatalogoUseCase>();
+        services.AddScoped<RemoverPecaInsumoCatalogoUseCase>();
 
         return services;
     }
