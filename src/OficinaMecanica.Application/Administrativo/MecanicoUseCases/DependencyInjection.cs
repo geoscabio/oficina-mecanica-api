@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.AtualizarMecanico;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.CadastrarMecanico;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.ListarMecanicos;
+using OficinaMecanica.Application.Administrativo.MecanicoUseCases.RemoverMecanico;
 
 namespace OficinaMecanica.Application.Administrativo.MecanicoUseCases;
 
@@ -13,10 +14,12 @@ public static class DependencyInjection
         services.AddScoped<IValidator<CadastrarMecanicoRequest>, CadastrarMecanicoValidator>();
         services.AddScoped<IValidator<ListarMecanicosRequest>, ListarMecanicosValidator>();
         services.AddScoped<IValidator<AtualizarMecanicoRequest>, AtualizarMecanicoValidator>();
+        services.AddScoped<IValidator<RemoverMecanicoRequest>, RemoverMecanicoValidator>();
 
         services.AddScoped<CadastrarMecanicoUseCase>();
         services.AddScoped<ListarMecanicosUseCase>();
         services.AddScoped<AtualizarMecanicoUseCase>();
+        services.AddScoped<RemoverMecanicoUseCase>();
 
         return services;
     }
