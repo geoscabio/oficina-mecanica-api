@@ -6,6 +6,7 @@ public static class ServicoCatalogoValidationMessages
     public const string RequestAtualizarServicoCatalogoObrigatorio = "Request para atualizar serviço do catálogo é obrigatório.";
     public const string RequestConsultarServicoCatalogoObrigatorio = "Request para consultar serviço do catálogo é obrigatório.";
     public const string RequestListarServicosCatalogoObrigatorio = "Request para listar serviços do catálogo é obrigatório.";
+    public const string RequestRemoverServicoCatalogoObrigatorio = "Request para remover serviço do catálogo é obrigatório.";
     public const string RequestConsultarTempoMedioExecucaoServicoObrigatorio = "Request para consultar tempo médio de execução do serviço é obrigatório.";
     public const string RequestListarTempoMedioExecucaoServicosObrigatorio = "Request para listar tempos médios de execução dos serviços é obrigatório.";
     public const string ServicoCatalogoIdObrigatorio = "ServicoCatalogoId é obrigatório.";
