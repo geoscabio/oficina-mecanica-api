@@ -130,4 +130,32 @@ public class ItemEstoqueTests
         // Assert
         item.QuantidadeDisponivel.Should().Be(15);
     }
+
+    [Fact]
+    public void Dado_QuantidadeDisponivelValida_Quando_AtualizarQuantidadeDisponivel_Entao_DeveAtualizarQuantidade()
+    {
+        // Arrange
+        var item = EstoqueDomainTestDataFactory.CriarItemEstoquePadrao();
+
+        // Act
+        item.AtualizarQuantidadeDisponivel(3);
+
+        // Assert
+        item.QuantidadeDisponivel.Should().Be(3);
+    }
+
+    [Fact]
+    public void Dado_QuantidadeDisponivelNegativa_Quando_AtualizarQuantidadeDisponivel_Entao_DeveLancarDomainException()
+    {
+        // Arrange
+        var item = EstoqueDomainTestDataFactory.CriarItemEstoquePadrao();
+
+        // Act
+        var acao = () => item.AtualizarQuantidadeDisponivel(-1);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(EstoqueErrorMessages.QuantidadeDisponivelNaoNegativa);
+    }
 }
