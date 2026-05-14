@@ -69,7 +69,9 @@ public class ConsultarItemEstoqueUseCaseTests
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
         repository.Verify(
-            repository => repository.ObterAsync(It.IsAny<CancellationToken>()),
+            repository => repository.ObterItemPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
     }
 

@@ -73,15 +73,6 @@ public sealed class Estoque
         return item;
     }
 
-    public ItemEstoque AtualizarQuantidadeDisponivel(Guid pecaInsumoCatalogoId, int quantidadeDisponivel)
-    {
-        var item = ObterItem(pecaInsumoCatalogoId);
-
-        item.AtualizarQuantidadeDisponivel(quantidadeDisponivel);
-
-        return item;
-    }
-
     public ItemEstoque ObterItem(Guid pecaInsumoCatalogoId)
     {
         return EncontrarItem(pecaInsumoCatalogoId)
@@ -96,12 +87,6 @@ public sealed class Estoque
         }
 
         return _itensEstoque.SingleOrDefault(item => item.PecaInsumoCatalogoId == pecaInsumoCatalogoId);
-    }
-
-    public ItemEstoque? ObterItemPorPecaInsumoCatalogoId(Guid pecaInsumoCatalogoId)
-    {
-        return _itensEstoque.FirstOrDefault(
-            item => item.PecaInsumoCatalogoId == pecaInsumoCatalogoId);
     }
 }
 
