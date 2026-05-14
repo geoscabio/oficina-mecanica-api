@@ -52,5 +52,33 @@ public sealed class Veiculo
 
         return new Veiculo(Guid.NewGuid(), clienteId, placa, marca.Trim(), modelo.Trim(), ano);
     }
+
+    public void Atualizar(Placa placa, string marca, string modelo, int ano)
+    {
+        if (placa is null)
+        {
+            throw new DomainException(VeiculoErrorMessages.PlacaObrigatoria);
+        }
+
+        if (string.IsNullOrWhiteSpace(marca))
+        {
+            throw new DomainException(VeiculoErrorMessages.MarcaObrigatoria);
+        }
+
+        if (string.IsNullOrWhiteSpace(modelo))
+        {
+            throw new DomainException(VeiculoErrorMessages.ModeloObrigatorio);
+        }
+
+        if (ano <= 0)
+        {
+            throw new DomainException(VeiculoErrorMessages.AnoInvalido);
+        }
+
+        Placa = placa;
+        Marca = marca.Trim();
+        Modelo = modelo.Trim();
+        Ano = ano;
+    }
 }
 

@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using OficinaMecanica.Application.Atendimento.VeiculoUseCases.AtualizarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculoPorPlaca;
@@ -15,11 +16,13 @@ public static class DependencyInjection
         services.AddScoped<IValidator<ConsultarVeiculoRequest>, ConsultarVeiculoValidator>();
         services.AddScoped<IValidator<ConsultarVeiculoPorPlacaRequest>, ConsultarVeiculoPorPlacaValidator>();
         services.AddScoped<IValidator<ListarVeiculosRequest>, ListarVeiculosValidator>();
+        services.AddScoped<IValidator<AtualizarVeiculoRequest>, AtualizarVeiculoValidator>();
 
         services.AddScoped<CadastrarVeiculoUseCase>();
         services.AddScoped<ConsultarVeiculoUseCase>();
         services.AddScoped<ConsultarVeiculoPorPlacaUseCase>();
         services.AddScoped<ListarVeiculosUseCase>();
+        services.AddScoped<AtualizarVeiculoUseCase>();
 
         return services;
     }
