@@ -12,5 +12,7 @@ public interface IVeiculoRepository
 
     Task<IReadOnlyCollection<Veiculo>> ListarAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default);
 
+    Task AtualizarAsync(Veiculo veiculo, CancellationToken cancellationToken = default);
+
     Task<int> ContarAsync(CancellationToken cancellationToken = default);
 }

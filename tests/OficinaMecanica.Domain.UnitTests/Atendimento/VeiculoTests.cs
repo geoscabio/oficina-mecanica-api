@@ -74,4 +74,61 @@ public class VeiculoTests
             .Throw<DomainException>()
             .WithMessage(VeiculoErrorMessages.MarcaObrigatoria);
     }
+
+    [Fact]
+    public void Dado_DadosValidos_Quando_AtualizarVeiculo_Entao_DeveAtualizarDados()
+    {
+        // Arrange
+        var veiculo = VeiculoTestDataFactory.CriarVeiculoPadrao();
+        var novaPlaca = VeiculoTestDataFactory.CriarPlacaPadrao();
+
+        // Act
+        veiculo.Atualizar(novaPlaca, "Honda", "Civic", 2022);
+
+        // Assert
+        veiculo.Placa.Should().Be(novaPlaca);
+        veiculo.Marca.Should().Be("Honda");
+        veiculo.Modelo.Should().Be("Civic");
+        veiculo.Ano.Should().Be(2022);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("  ")]
+    public void Dado_MarcaInvalida_Quando_AtualizarVeiculo_Entao_DeveLancarDomainException(string marca)
+    {
+        // Arrange
+        var veiculo = VeiculoTestDataFactory.CriarVeiculoPadrao();
+
+        // Act
+        var acao = () => veiculo.Atualizar(
+            VeiculoTestDataFactory.CriarPlacaPadrao(),
+            marca,
+            "Civic",
+            2022);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(VeiculoErrorMessages.MarcaObrigatoria);
+    }
+
+    [Fact]
+    public void Dado_AnoInvalido_Quando_AtualizarVeiculo_Entao_DeveLancarDomainException()
+    {
+        // Arrange
+        var veiculo = VeiculoTestDataFactory.CriarVeiculoPadrao();
+
+        // Act
+        var acao = () => veiculo.Atualizar(
+            VeiculoTestDataFactory.CriarPlacaPadrao(),
+            "Honda",
+            "Civic",
+            0);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(VeiculoErrorMessages.AnoInvalido);
+    }
 }
