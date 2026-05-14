@@ -2,7 +2,6 @@
 using FluentValidation;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.Responses;
-using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
 
 namespace OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ListarItensEstoque;
@@ -36,24 +35,17 @@ public sealed class ListarItensEstoqueUseCase
                 TipoErro.Validacao);
         }
 
-        var estoque = await _estoqueRepository.ObterAsync(cancellationToken);
+        var itensEstoque = await _estoqueRepository.ListarItensAsync(request.Pagina, request.TamanhoPagina, cancellationToken);
 
-        var itensEstoque = estoque?.ItensEstoque
-            .OrderBy(item => item.PecaInsumoCatalogoId)
-            .ToArray() ?? Array.Empty<ItemEstoque>();
+        var totalItens = await _estoqueRepository.ContarItensAsync(cancellationToken);
 
-        var itensPaginados = itensEstoque
-            .Skip((request.Pagina - 1) * request.TamanhoPagina)
-            .Take(request.TamanhoPagina)
-            .ToArray();
-
-        var response = _mapper.Map<IReadOnlyCollection<ItemEstoqueResponse>>(itensPaginados);
+        var response = _mapper.Map<IReadOnlyCollection<ItemEstoqueResponse>>(itensEstoque);
 
         var pagedResult = new PagedResult<ItemEstoqueResponse>(
             response,
             request.Pagina,
             request.TamanhoPagina,
-            itensEstoque.Length);
+            totalItens);
 
         return Result<PagedResult<ItemEstoqueResponse>>.Ok(pagedResult);
     }

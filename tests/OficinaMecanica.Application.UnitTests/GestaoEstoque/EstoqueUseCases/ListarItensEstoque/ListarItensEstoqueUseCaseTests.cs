@@ -4,7 +4,7 @@ using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ListarItensEstoque;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.GestaoEstoque.Builders;
-using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
+using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
 
 namespace OficinaMecanica.Application.UnitTests.GestaoEstoque.EstoqueUseCases.ListarItensEstoque;
@@ -16,7 +16,13 @@ public class ListarItensEstoqueUseCaseTests
     {
         // Arrange
         var estoque = EstoqueTestDataFactory.CriarEstoqueComItens(2);
-        var repository = CriarRepository(estoque);
+
+        var itensEstoque = estoque.ItensEstoque.ToArray();
+
+        var repository = CriarRepository(
+            itensEstoque,
+            itensEstoque.Length);
+
         var useCase = CriarUseCase(repository);
 
         // Act
@@ -29,15 +35,17 @@ public class ListarItensEstoqueUseCaseTests
         resultado.Valor.TamanhoPagina.Should().Be(10);
         resultado.Valor.TotalItens.Should().Be(2);
         resultado.Valor.Itens.Should().HaveCount(2);
-        resultado.Valor.Itens.Select(item => item.Id).Should().BeEquivalentTo(
-            estoque.ItensEstoque.Select(item => item.Id));
+        resultado.Valor.Itens.Select(item => item.Id).Should().BeEquivalentTo(estoque.ItensEstoque.Select(item => item.Id));
     }
 
     [Fact]
     public async Task Dado_NenhumItem_Quando_ListarItensEstoque_Entao_DeveRetornarListaVazia()
     {
         // Arrange
-        var repository = CriarRepository(null);
+        var itensEstoque = Array.Empty<ItemEstoque>();
+
+        var repository = CriarRepository(itensEstoque, 0);
+
         var useCase = CriarUseCase(repository);
 
         // Act
@@ -84,13 +92,23 @@ public class ListarItensEstoqueUseCaseTests
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
     }
 
-    private static Mock<IEstoqueRepository> CriarRepository(Estoque? estoque)
+    private static Mock<IEstoqueRepository> CriarRepository(
+        IReadOnlyCollection<ItemEstoque> itensEstoque,
+        int totalItens)
     {
         var repository = new Mock<IEstoqueRepository>();
 
         repository
-            .Setup(repo => repo.ObterAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(estoque);
+            .Setup(repo => repo.ListarItensAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(itensEstoque);
+
+        repository
+            .Setup(repo => repo.ContarItensAsync(
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(totalItens);
 
         return repository;
     }
