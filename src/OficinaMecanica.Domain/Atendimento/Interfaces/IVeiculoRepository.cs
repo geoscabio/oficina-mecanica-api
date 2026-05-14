@@ -14,5 +14,7 @@ public interface IVeiculoRepository
 
     Task AtualizarAsync(Veiculo veiculo, CancellationToken cancellationToken = default);
 
+    Task RemoverAsync(Veiculo veiculo, CancellationToken cancellationToken = default);
+
     Task<int> ContarAsync(CancellationToken cancellationToken = default);
 }

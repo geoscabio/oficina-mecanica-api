@@ -4,6 +4,7 @@ public static class VeiculoValidationMessages
 {
     public const string RequestCadastroVeiculoObrigatorio = "Request de cadastro de veículo é obrigatório.";
     public const string RequestAtualizarVeiculoObrigatorio = "Request de atualização de veículo é obrigatório.";
+    public const string RequestRemoverVeiculoObrigatorio = "Request de remoção de veículo é obrigatório.";
 
     public const string ClienteIdObrigatorio = "ClienteId é obrigatório.";
     public const string PlacaObrigatoria = "Placa é obrigatória.";
