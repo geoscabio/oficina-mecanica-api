@@ -15,4 +15,6 @@ public static class ClienteValidationMessages
     public const string CepObrigatorio = "CEP é obrigatório.";
     public const string IdClienteObrigatorio = "Id do cliente é obrigatório.";
     public const string DocumentoClienteObrigatorio = "Documento do cliente é obrigatório.";
+    public const string PaginaMaiorQueZero = "Página deve ser maior que zero.";
+    public const string TamanhoPaginaInvalido = "Tamanho da página deve estar entre 1 e 100.";
 }
