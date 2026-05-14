@@ -12,5 +12,7 @@ public interface IPecaInsumoCatalogoRepository
 
     Task AtualizarAsync(PecaInsumoCatalogo pecaInsumoCatalogo, CancellationToken cancellationToken = default);
 
+    Task RemoverAsync(PecaInsumoCatalogo pecaInsumoCatalogo, CancellationToken cancellationToken = default);
+
     Task<int> ContarAsync(CancellationToken cancellationToken = default);
 }

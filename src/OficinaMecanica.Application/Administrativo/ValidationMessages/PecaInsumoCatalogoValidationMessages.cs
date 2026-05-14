@@ -4,6 +4,8 @@ public static class PecaInsumoCatalogoValidationMessages
 {
     public const string RequestCadastrarPecaInsumoCatalogoObrigatorio = "Request para cadastrar peça ou insumo do catálogo é obrigatório.";
     public const string RequestAtualizarPecaInsumoCatalogoObrigatorio = "Request para atualizar peça ou insumo do catálogo é obrigatório.";
+    public const string RequestRemoverPecaInsumoCatalogoObrigatorio = "Request para remover peça ou insumo do catálogo é obrigatório.";
+
     public const string IdPecaInsumoCatalogoObrigatorio = "Id da peça ou insumo do catálogo é obrigatório.";
     public const string DescricaoObrigatoria = "Descrição da peça ou insumo é obrigatória.";
     public const string TipoInvalido = "Tipo da peça ou insumo é inválido.";

@@ -1,0 +1,3 @@
+﻿namespace OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.RemoverPecaInsumoCatalogo;
+
+public sealed record RemoverPecaInsumoCatalogoRequest(Guid PecaInsumoCatalogoId);
