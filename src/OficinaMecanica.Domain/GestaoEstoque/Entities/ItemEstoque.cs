@@ -70,6 +70,13 @@ public sealed class ItemEstoque
         QuantidadeReservada -= quantidade;
     }
 
+    public void RegistrarEntrada(int quantidade)
+    {
+        ValidarQuantidadePositiva(quantidade);
+
+        QuantidadeDisponivel += quantidade;
+    }
+
     private static void ValidarQuantidadePositiva(int quantidade)
     {
         if (quantidade <= 0)

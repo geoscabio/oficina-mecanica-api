@@ -13,10 +13,10 @@ public class ItemEstoqueTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
-        const int quantidadeDisponivel = EstoqueTestDataFactory.QuantidadeDisponivelPadrao;
+        const int quantidadeDisponivel = EstoqueDomainTestDataFactory.QuantidadeDisponivelPadrao;
 
         // Act
-        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao(
+        var item = EstoqueDomainTestDataFactory.CriarItemEstoquePadrao(
             pecaInsumoCatalogoId,
             quantidadeDisponivel);
 
@@ -32,7 +32,7 @@ public class ItemEstoqueTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.Empty;
-        const int quantidadeDisponivel = EstoqueTestDataFactory.QuantidadeDisponivelPadrao;
+        const int quantidadeDisponivel = EstoqueDomainTestDataFactory.QuantidadeDisponivelPadrao;
 
         // Act
         var acao = () => ItemEstoque.Criar(pecaInsumoCatalogoId, quantidadeDisponivel);
@@ -63,7 +63,7 @@ public class ItemEstoqueTests
     public void Dado_ItemComQuantidadeDisponivel_Quando_Reservar_Entao_DeveMoverQuantidadeParaReservada()
     {
         // Arrange
-        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao();
+        var item = EstoqueDomainTestDataFactory.CriarItemEstoquePadrao();
 
         // Act
         item.Reservar(4);
@@ -77,7 +77,7 @@ public class ItemEstoqueTests
     public void Dado_ItemSemQuantidadeDisponivelSuficiente_Quando_Reservar_Entao_DeveLancarDomainException()
     {
         // Arrange
-        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao(quantidadeDisponivel: 3);
+        var item = EstoqueDomainTestDataFactory.CriarItemEstoquePadrao(quantidadeDisponivel: 3);
 
         // Act
         var acao = () => item.Reservar(4);
@@ -92,7 +92,7 @@ public class ItemEstoqueTests
     public void Dado_ItemComQuantidadeReservada_Quando_Estornar_Entao_DeveRetornarQuantidadeParaDisponivel()
     {
         // Arrange
-        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao();
+        var item = EstoqueDomainTestDataFactory.CriarItemEstoquePadrao();
         item.Reservar(4);
 
         // Act
@@ -107,7 +107,7 @@ public class ItemEstoqueTests
     public void Dado_ItemComQuantidadeReservada_Quando_Baixar_Entao_DeveReduzirQuantidadeReservada()
     {
         // Arrange
-        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao();
+        var item = EstoqueDomainTestDataFactory.CriarItemEstoquePadrao();
         item.Reservar(4);
 
         // Act
@@ -116,5 +116,18 @@ public class ItemEstoqueTests
         // Assert
         item.QuantidadeDisponivel.Should().Be(6);
         item.QuantidadeReservada.Should().Be(1);
+    }
+
+    [Fact]
+    public void Dado_QuantidadeValida_Quando_RegistrarEntrada_Entao_DeveSomarQuantidadeDisponivel()
+    {
+        // Arrange
+        var item = EstoqueDomainTestDataFactory.CriarItemEstoquePadrao();
+
+        // Act
+        item.RegistrarEntrada(5);
+
+        // Assert
+        item.QuantidadeDisponivel.Should().Be(15);
     }
 }

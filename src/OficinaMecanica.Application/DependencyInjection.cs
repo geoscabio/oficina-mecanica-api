@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using OficinaMecanica.Application.Administrativo;
 using OficinaMecanica.Application.Atendimento;
+using OficinaMecanica.Application.GestaoEstoque;
 using OficinaMecanica.Application.GestaoOrdemServico;
 
 namespace OficinaMecanica.Application;
@@ -14,6 +15,7 @@ public static class DependencyInjection
         services.AddAdministrativoApplication();
         services.AddAtendimentoApplication();
         services.AddGestaoOrdemServicoApplication();
+        services.AddGestaoEstoqueApplication();
 
         return services;
     }
