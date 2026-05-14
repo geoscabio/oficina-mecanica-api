@@ -1,12 +1,24 @@
+using OficinaMecanica.Application.Administrativo.MecanicoUseCases.CadastrarMecanico;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 
 namespace OficinaMecanica.Application.UnitTests.Administrativo.Builders;
 
 internal static class MecanicoTestDataFactory
 {
-    public static Mecanico CriarMecanicoPadrao()
+    public const string NomePadrao = "Jose Santos";
+    public const string FuncionalPadrao = "MEC-001";
+
+    public static Mecanico CriarMecanicoPadrao(
+        string nome = NomePadrao,
+        string funcional = FuncionalPadrao)
     {
-        return Mecanico.Criar("Jose Santos", "MEC-001");
+        return Mecanico.Criar(nome, funcional);
+    }
+
+    public static CadastrarMecanicoRequest CriarCadastrarMecanicoRequestValido(
+        string nome = NomePadrao,
+        string funcional = FuncionalPadrao)
+    {
+        return new CadastrarMecanicoRequest(nome, funcional);
     }
 }
-
