@@ -12,5 +12,7 @@ public interface IMecanicoRepository
 
     Task AtualizarAsync(Mecanico mecanico, CancellationToken cancellationToken = default);
 
+    Task RemoverAsync(Mecanico mecanico, CancellationToken cancellationToken = default);
+
     Task<int> ContarAsync(CancellationToken cancellationToken = default);
 }
