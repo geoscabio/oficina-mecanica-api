@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.AtualizarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.CadastrarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.ListarPecasInsumosCatalogo;
 
@@ -11,9 +12,11 @@ public static class DependencyInjection
     {
         services.AddScoped<IValidator<CadastrarPecaInsumoCatalogoRequest>, CadastrarPecaInsumoCatalogoValidator>();
         services.AddScoped<IValidator<ListarPecasInsumosCatalogoRequest>, ListarPecasInsumosCatalogoValidator>();
+        services.AddScoped<IValidator<AtualizarPecaInsumoCatalogoRequest>, AtualizarPecaInsumoCatalogoValidator>();
 
         services.AddScoped<CadastrarPecaInsumoCatalogoUseCase>();
         services.AddScoped<ListarPecasInsumosCatalogoUseCase>();
+        services.AddScoped<AtualizarPecaInsumoCatalogoUseCase>();
 
         return services;
     }

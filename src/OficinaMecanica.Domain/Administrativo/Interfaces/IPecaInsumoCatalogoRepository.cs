@@ -10,5 +10,7 @@ public interface IPecaInsumoCatalogoRepository
 
     Task<IReadOnlyCollection<PecaInsumoCatalogo>> ListarAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default);
 
+    Task AtualizarAsync(PecaInsumoCatalogo pecaInsumoCatalogo, CancellationToken cancellationToken = default);
+
     Task<int> ContarAsync(CancellationToken cancellationToken = default);
 }
