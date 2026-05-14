@@ -77,6 +77,16 @@ public sealed class ItemEstoque
         QuantidadeDisponivel += quantidade;
     }
 
+    public void AtualizarQuantidadeDisponivel(int quantidadeDisponivel)
+    {
+        if (quantidadeDisponivel < 0)
+        {
+            throw new DomainException(EstoqueErrorMessages.QuantidadeDisponivelNaoNegativa);
+        }
+
+        QuantidadeDisponivel = quantidadeDisponivel;
+    }
+
     private static void ValidarQuantidadePositiva(int quantidade)
     {
         if (quantidade <= 0)
