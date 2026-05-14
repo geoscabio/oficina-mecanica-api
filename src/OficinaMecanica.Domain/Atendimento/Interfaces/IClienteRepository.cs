@@ -14,5 +14,7 @@ public interface IClienteRepository
 
     Task AtualizarAsync(Cliente cliente, CancellationToken cancellationToken = default);
 
+    Task RemoverAsync(Cliente cliente, CancellationToken cancellationToken = default);
+
     Task<int> ContarAsync(CancellationToken cancellationToken = default);
 }
