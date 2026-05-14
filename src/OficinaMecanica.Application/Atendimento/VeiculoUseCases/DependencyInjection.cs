@@ -5,6 +5,7 @@ using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculoPorPlaca;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ListarVeiculos;
+using OficinaMecanica.Application.Atendimento.VeiculoUseCases.RemoverVeiculo;
 
 namespace OficinaMecanica.Application.Atendimento.VeiculoUseCases;
 
@@ -17,12 +18,14 @@ public static class DependencyInjection
         services.AddScoped<IValidator<ConsultarVeiculoPorPlacaRequest>, ConsultarVeiculoPorPlacaValidator>();
         services.AddScoped<IValidator<ListarVeiculosRequest>, ListarVeiculosValidator>();
         services.AddScoped<IValidator<AtualizarVeiculoRequest>, AtualizarVeiculoValidator>();
+        services.AddScoped<IValidator<RemoverVeiculoRequest>, RemoverVeiculoValidator>();
 
         services.AddScoped<CadastrarVeiculoUseCase>();
         services.AddScoped<ConsultarVeiculoUseCase>();
         services.AddScoped<ConsultarVeiculoPorPlacaUseCase>();
         services.AddScoped<ListarVeiculosUseCase>();
         services.AddScoped<AtualizarVeiculoUseCase>();
+        services.AddScoped<RemoverVeiculoUseCase>();
 
         return services;
     }
