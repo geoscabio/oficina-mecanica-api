@@ -16,7 +16,7 @@ public sealed class ConsultarClientePorDocumentoValidator : AbstractValidator<Co
         {
             RuleFor(request => request.Documento)
                 .NotEmpty()
-                .WithMessage(ClienteValidationMessages.DocumentoClienteObrigatorio);
+                .WithMessage(ClienteValidationMessages.DocumentoObrigatorio);
         });
     }
 }

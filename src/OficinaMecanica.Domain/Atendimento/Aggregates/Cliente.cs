@@ -43,5 +43,18 @@ public sealed class Cliente
             telefone ?? throw new DomainException(ClienteErrorMessages.TelefoneObrigatorio),
             email ?? throw new DomainException(ClienteErrorMessages.EmailObrigatorio));
     }
+
+    public void Atualizar(string nome, Endereco endereco, Telefone telefone, Email email)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+        {
+            throw new DomainException(ClienteErrorMessages.NomeObrigatorio);
+        }
+
+        Nome = nome.Trim();
+        Endereco = endereco ?? throw new DomainException(ClienteErrorMessages.EnderecoObrigatorio);
+        Telefone = telefone ?? throw new DomainException(ClienteErrorMessages.TelefoneObrigatorio);
+        Email = email ?? throw new DomainException(ClienteErrorMessages.EmailObrigatorio);
+    }
 }
 
