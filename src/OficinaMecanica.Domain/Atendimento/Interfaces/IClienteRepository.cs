@@ -7,4 +7,11 @@ public interface IClienteRepository
     Task AdicionarAsync(Cliente cliente, CancellationToken cancellationToken = default);
     Task<Cliente?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Cliente?> ObterPorDocumentoAsync(string documento, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<Cliente>> ListarAsync(
+        int pagina,
+        int tamanhoPagina,
+        CancellationToken cancellationToken = default);
+
+    Task<int> ContarAsync(CancellationToken cancellationToken = default);
 }
