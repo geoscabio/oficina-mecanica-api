@@ -80,4 +80,51 @@ public class PecaInsumoCatalogoTests
             .Throw<DomainException>()
             .WithMessage(PecaInsumoCatalogoErrorMessages.TipoInvalido);
     }
+
+    [Fact]
+    public void Dado_DadosValidos_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveAtualizarDados()
+    {
+        // Arrange
+        var item = PecaInsumoCatalogo.Criar("Filtro de óleo", TipoPecaInsumo.PECA, 45m);
+
+        // Act
+        item.Atualizar("Óleo 5W30", TipoPecaInsumo.INSUMO, 38m);
+
+        // Assert
+        item.Descricao.Should().Be("Óleo 5W30");
+        item.Tipo.Should().Be(TipoPecaInsumo.INSUMO);
+        item.Valor.Should().Be(38m);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("  ")]
+    public void Dado_DescricaoInvalida_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveLancarDomainException(string descricao)
+    {
+        // Arrange
+        var item = PecaInsumoCatalogo.Criar("Filtro de óleo", TipoPecaInsumo.PECA, 45m);
+
+        // Act
+        var acao = () => item.Atualizar(descricao, TipoPecaInsumo.PECA, 45m);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(PecaInsumoCatalogoErrorMessages.DescricaoObrigatoria);
+    }
+
+    [Fact]
+    public void Dado_ValorInvalido_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveLancarDomainException()
+    {
+        // Arrange
+        var item = PecaInsumoCatalogo.Criar("Filtro de óleo", TipoPecaInsumo.PECA, 45m);
+
+        // Act
+        var acao = () => item.Atualizar("Filtro de óleo", TipoPecaInsumo.PECA, 0m);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(PecaInsumoCatalogoErrorMessages.ValorMaiorQueZero);
+    }
 }

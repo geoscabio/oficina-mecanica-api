@@ -38,5 +38,27 @@ public sealed class PecaInsumoCatalogo
 
         return new PecaInsumoCatalogo(Guid.NewGuid(), descricao.Trim(), tipo, valor);
     }
+
+    public void Atualizar(string descricao, TipoPecaInsumo tipo, decimal valor)
+    {
+        if (string.IsNullOrWhiteSpace(descricao))
+        {
+            throw new DomainException(PecaInsumoCatalogoErrorMessages.DescricaoObrigatoria);
+        }
+
+        if (!Enum.IsDefined(typeof(TipoPecaInsumo), tipo))
+        {
+            throw new DomainException(PecaInsumoCatalogoErrorMessages.TipoInvalido);
+        }
+
+        if (valor <= 0)
+        {
+            throw new DomainException(PecaInsumoCatalogoErrorMessages.ValorMaiorQueZero);
+        }
+
+        Descricao = descricao.Trim();
+        Tipo = tipo;
+        Valor = valor;
+    }
 }
 
