@@ -1,0 +1,3 @@
+﻿namespace OficinaMecanica.Application.Administrativo.MecanicoUseCases.ConsultarMecanico;
+
+public sealed record ConsultarMecanicoRequest(Guid MecanicoId);
