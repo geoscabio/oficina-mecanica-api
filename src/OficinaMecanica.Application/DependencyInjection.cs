@@ -3,6 +3,7 @@ using OficinaMecanica.Application.Administrativo;
 using OficinaMecanica.Application.Atendimento;
 using OficinaMecanica.Application.GestaoEstoque;
 using OficinaMecanica.Application.GestaoOrdemServico;
+using OficinaMecanica.Application.Identidade;
 
 namespace OficinaMecanica.Application;
 
@@ -16,6 +17,7 @@ public static class DependencyInjection
         services.AddAtendimentoApplication();
         services.AddGestaoOrdemServicoApplication();
         services.AddGestaoEstoqueApplication();
+        services.AddIdentidadeApplication();
 
         return services;
     }

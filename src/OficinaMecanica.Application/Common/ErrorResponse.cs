@@ -4,7 +4,8 @@ public enum TipoErro
 {
     Validacao = 1,
     NaoEncontrado = 2,
-    RegraNegocio = 3
+    RegraNegocio = 3,
+    NaoAutorizado = 4
 }
 
 public sealed record ErrorResponse(string Mensagem, TipoErro Tipo);
