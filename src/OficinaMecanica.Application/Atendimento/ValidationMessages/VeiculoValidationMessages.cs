@@ -10,4 +10,7 @@ public static class VeiculoValidationMessages
     public const string MarcaObrigatoria = "Marca é obrigatória.";
     public const string ModeloObrigatorio = "Modelo é obrigatório.";
     public const string AnoMaiorQueZero = "Ano deve ser maior que zero.";
+
+    public const string PaginaMaiorQueZero = "Página deve ser maior que zero.";
+    public const string TamanhoPaginaInvalido = "Tamanho da página deve estar entre 1 e 100.";
 }
