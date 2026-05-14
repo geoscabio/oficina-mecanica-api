@@ -36,10 +36,7 @@ public sealed class ConsultarItemEstoqueUseCase
                 TipoErro.Validacao);
         }
 
-        var estoque = await _estoqueRepository.ObterAsync(cancellationToken);
-
-        var itemEstoque = estoque?.ItensEstoque
-                                  .FirstOrDefault(item => item.Id == request.ItemEstoqueId);
+        var itemEstoque = await _estoqueRepository.ObterItemPorIdAsync(request.ItemEstoqueId, cancellationToken);
 
         if (itemEstoque is null)
         {

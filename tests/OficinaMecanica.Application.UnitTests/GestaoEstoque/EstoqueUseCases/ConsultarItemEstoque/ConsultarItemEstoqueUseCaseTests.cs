@@ -5,6 +5,7 @@ using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ConsultarItemEst
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.GestaoEstoque.Builders;
 using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
+using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
 
 namespace OficinaMecanica.Application.UnitTests.GestaoEstoque.EstoqueUseCases.ConsultarItemEstoque;
@@ -18,7 +19,7 @@ public class ConsultarItemEstoqueUseCaseTests
         var estoque = EstoqueTestDataFactory.CriarEstoqueComItens(1);
         var itemEstoque = estoque.ItensEstoque.First();
 
-        var repository = CriarRepository(estoque);
+        var repository = CriarRepository(itemEstoque);
 
         var useCase = CriarUseCase(repository);
 
@@ -36,9 +37,7 @@ public class ConsultarItemEstoqueUseCaseTests
     public async Task Dado_ItemInexistente_Quando_ConsultarItemEstoque_Entao_DeveRetornarNaoEncontrado()
     {
         // Arrange
-        var estoque = EstoqueTestDataFactory.CriarEstoqueComItens(1);
-
-        var repository = CriarRepository(estoque);
+        var repository = CriarRepository(null);
 
         var useCase = CriarUseCase(repository);
 
@@ -74,13 +73,15 @@ public class ConsultarItemEstoqueUseCaseTests
             Times.Never);
     }
 
-    private static Mock<IEstoqueRepository> CriarRepository(Estoque? estoque)
+    private static Mock<IEstoqueRepository> CriarRepository(ItemEstoque? itemEstoque)
     {
         var repository = new Mock<IEstoqueRepository>();
 
         repository
-            .Setup(repo => repo.ObterAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(estoque);
+            .Setup(repo => repo.ObterItemPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(itemEstoque);
 
         return repository;
     }
