@@ -57,4 +57,52 @@ public class MecanicoTests
             .Throw<DomainException>()
             .WithMessage(MecanicoErrorMessages.FuncionalObrigatorio);
     }
+
+    [Fact]
+    public void Dado_DadosValidos_Quando_AtualizarMecanico_Entao_DeveAtualizarDados()
+    {
+        // Arrange
+        var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
+
+        // Act
+        mecanico.Atualizar("Carlos Silva", "MEC-002");
+
+        // Assert
+        mecanico.Nome.Should().Be("Carlos Silva");
+        mecanico.Funcional.Should().Be("MEC-002");
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("  ")]
+    public void Dado_NomeInvalido_Quando_AtualizarMecanico_Entao_DeveLancarDomainException(string nome)
+    {
+        // Arrange
+        var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
+
+        // Act
+        var acao = () => mecanico.Atualizar(nome, MecanicoTestDataFactory.FuncionalPadrao);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(MecanicoErrorMessages.NomeObrigatorio);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("  ")]
+    public void Dado_FuncionalInvalido_Quando_AtualizarMecanico_Entao_DeveLancarDomainException(string funcional)
+    {
+        // Arrange
+        var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
+
+        // Act
+        var acao = () => mecanico.Atualizar(MecanicoTestDataFactory.NomePadrao, funcional);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(MecanicoErrorMessages.FuncionalObrigatorio);
+    }
 }

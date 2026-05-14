@@ -30,5 +30,21 @@ public sealed class Mecanico
 
         return new Mecanico(Guid.NewGuid(), nome.Trim(), funcional.Trim());
     }
+
+    public void Atualizar(string nome, string funcional)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+        {
+            throw new DomainException(MecanicoErrorMessages.NomeObrigatorio);
+        }
+
+        if (string.IsNullOrWhiteSpace(funcional))
+        {
+            throw new DomainException(MecanicoErrorMessages.FuncionalObrigatorio);
+        }
+
+        Nome = nome.Trim();
+        Funcional = funcional.Trim();
+    }
 }
 
