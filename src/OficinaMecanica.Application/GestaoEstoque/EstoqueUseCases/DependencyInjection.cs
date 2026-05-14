@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ConsultarItemEstoque;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ListarItensEstoque;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.RegistrarEntradaEstoque;
 
@@ -14,6 +15,9 @@ public static class DependencyInjection
 
         services.AddScoped<IValidator<ListarItensEstoqueRequest>, ListarItensEstoqueValidator>();
         services.AddScoped<ListarItensEstoqueUseCase>();
+
+        services.AddScoped<IValidator<ConsultarItemEstoqueRequest>, ConsultarItemEstoqueValidator>();
+        services.AddScoped<ConsultarItemEstoqueUseCase>();
 
         return services;
     }

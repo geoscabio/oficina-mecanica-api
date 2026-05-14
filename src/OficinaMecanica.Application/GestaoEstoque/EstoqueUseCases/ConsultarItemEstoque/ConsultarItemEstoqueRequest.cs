@@ -1,0 +1,3 @@
+﻿namespace OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ConsultarItemEstoque;
+
+public sealed record ConsultarItemEstoqueRequest(Guid ItemEstoqueId);
