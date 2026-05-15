@@ -22,36 +22,61 @@ public class CancelarOrdemServicoUseCaseTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
+
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacaoComPecaInsumoReservado(
             pecaInsumoCatalogoId);
-        var estoque = EstoqueTestDataFactory.CriarEstoqueComItemReservado(pecaInsumoCatalogoId);
-        var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
-        var estoqueRepository = new Mock<IEstoqueRepository>();
-        ordemServicoRepository
-            .Setup(repo => repo.ObterPorIdAsync(ordemServico.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(ordemServico);
-        estoqueRepository
-            .Setup(repo => repo.ObterAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(estoque);
 
-        var useCase = CriarUseCase(ordemServicoRepository, estoqueRepository);
+        var estoque = EstoqueTestDataFactory.CriarEstoqueComItemReservado(
+            pecaInsumoCatalogoId);
+
+        var ordemServicoRepository = CriarOrdemServicoRepository(ordemServico);
+
+        var estoqueRepository = CriarEstoqueRepository(estoque);
+
+        var useCase = CriarUseCase(
+            ordemServicoRepository,
+            estoqueRepository);
+
+        var request = OrdemServicoTestDataFactory.CriarCancelarOrdemServicoRequestValido(
+            ordemServico.Id,
+            MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
 
         // Act
-        var resultado = await useCase.ExecuteAsync(new CancelarOrdemServicoRequest(
-            ordemServico.Id,
-            MotivoCancelamentoOrdemServico.ReprovacaoOrcamento));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeTrue();
-        resultado.Valor!.Status.Should().Be("CANCELADA");
+        resultado.Valor.Should().NotBeNull();
+        resultado.Valor!.Status.Should().Be(OrdemServicoTestDataFactory.StatusCancelada);
+
         ordemServico.MotivoCancelamento.Should().Be(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
         estoque.ObterItem(pecaInsumoCatalogoId).QuantidadeReservada.Should().Be(0);
         estoque.ObterItem(pecaInsumoCatalogoId).QuantidadeDisponivel.Should().Be(10);
 
-        ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.Is<OrdemServico>(ordemServicoAtualizada =>
-            ordemServicoAtualizada.Id == ordemServico.Id
-            && ordemServicoAtualizada.Status.ToString() == "CANCELADA"), It.IsAny<CancellationToken>()), Times.Once);
-        estoqueRepository.Verify(repo => repo.AtualizarAsync(estoque, It.IsAny<CancellationToken>()), Times.Once);
+        ordemServicoRepository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.OrdemServicoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        estoqueRepository.Verify(
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        ordemServicoRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.Is<OrdemServico>(ordemServicoAtualizada =>
+                    ordemServicoAtualizada.Id == ordemServico.Id
+                    && ordemServicoAtualizada.Status.ToString() == OrdemServicoTestDataFactory.StatusCancelada
+                    && ordemServicoAtualizada.MotivoCancelamento == MotivoCancelamentoOrdemServico.ReprovacaoOrcamento),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        estoqueRepository.Verify(
+            repo => repo.AtualizarAsync(
+                estoque,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -59,29 +84,56 @@ public class CancelarOrdemServicoUseCaseTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
+
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacaoComPecaInsumoReservado(
             pecaInsumoCatalogoId);
-        var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
-        var estoqueRepository = new Mock<IEstoqueRepository>();
-        ordemServicoRepository
-            .Setup(repo => repo.ObterPorIdAsync(ordemServico.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(ordemServico);
 
-        var useCase = CriarUseCase(ordemServicoRepository, estoqueRepository);
+        var ordemServicoRepository = CriarOrdemServicoRepository(ordemServico);
+
+        var estoqueRepository = new Mock<IEstoqueRepository>();
+
+        var useCase = CriarUseCase(
+            ordemServicoRepository,
+            estoqueRepository);
+
+        var request = OrdemServicoTestDataFactory.CriarCancelarOrdemServicoRequestValido(
+            ordemServico.Id,
+            MotivoCancelamentoOrdemServico.EstoqueInsuficiente);
 
         // Act
-        var resultado = await useCase.ExecuteAsync(new CancelarOrdemServicoRequest(
-            ordemServico.Id,
-            MotivoCancelamentoOrdemServico.EstoqueInsuficiente));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeTrue();
-        resultado.Valor!.Status.Should().Be("CANCELADA");
+        resultado.Valor.Should().NotBeNull();
+        resultado.Valor!.Status.Should().Be(OrdemServicoTestDataFactory.StatusCancelada);
+
         ordemServico.MotivoCancelamento.Should().Be(MotivoCancelamentoOrdemServico.EstoqueInsuficiente);
 
-        ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Once);
-        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
-        estoqueRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
+        ordemServicoRepository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.OrdemServicoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        estoqueRepository.Verify(
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        ordemServicoRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.Is<OrdemServico>(ordemServicoAtualizada =>
+                    ordemServicoAtualizada.Id == ordemServico.Id
+                    && ordemServicoAtualizada.Status.ToString() == OrdemServicoTestDataFactory.StatusCancelada
+                    && ordemServicoAtualizada.MotivoCancelamento == MotivoCancelamentoOrdemServico.EstoqueInsuficiente),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        estoqueRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Estoque>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -89,78 +141,196 @@ public class CancelarOrdemServicoUseCaseTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
+
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacaoComPecaInsumoReservado(
             pecaInsumoCatalogoId);
-        var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
-        var estoqueRepository = new Mock<IEstoqueRepository>();
-        ordemServicoRepository
-            .Setup(repo => repo.ObterPorIdAsync(ordemServico.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(ordemServico);
 
-        var useCase = CriarUseCase(ordemServicoRepository, estoqueRepository);
+        var ordemServicoRepository = CriarOrdemServicoRepository(ordemServico);
+
+        var estoqueRepository = CriarEstoqueRepository(null);
+
+        var useCase = CriarUseCase(
+            ordemServicoRepository,
+            estoqueRepository);
+
+        var request = OrdemServicoTestDataFactory.CriarCancelarOrdemServicoRequestValido(
+            ordemServico.Id,
+            MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
 
         // Act
-        var resultado = await useCase.ExecuteAsync(new CancelarOrdemServicoRequest(
-            ordemServico.Id,
-            MotivoCancelamentoOrdemServico.ReprovacaoOrcamento));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Mensagem.Should().Be(EstoqueErrorMessages.EstoqueNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
-        estoqueRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
+        ordemServicoRepository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.OrdemServicoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        estoqueRepository.Verify(
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        ordemServicoRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        estoqueRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Estoque>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
     public async Task Dado_OrdemServicoInexistente_Quando_Cancelar_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
+        var ordemServicoRepository = CriarOrdemServicoRepository(null);
+
         var estoqueRepository = new Mock<IEstoqueRepository>();
-        var useCase = CriarUseCase(ordemServicoRepository, estoqueRepository);
+
+        var useCase = CriarUseCase(
+            ordemServicoRepository,
+            estoqueRepository);
+
+        var request = OrdemServicoTestDataFactory.CriarCancelarOrdemServicoRequestValido(
+            motivo: MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
 
         // Act
-        var resultado = await useCase.ExecuteAsync(new CancelarOrdemServicoRequest(
-            Guid.NewGuid(),
-            MotivoCancelamentoOrdemServico.ReprovacaoOrcamento));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
-        ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
+        ordemServicoRepository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.OrdemServicoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        estoqueRepository.Verify(
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        ordemServicoRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        estoqueRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Estoque>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
     public async Task Dado_OrdemServicoFinalizada_Quando_Cancelar_Entao_DeveLancarDomainException()
     {
         // Arrange
-        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmExecucaoComServicoFinalizado();
-        ordemServico.Finalizar();
-        var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
-        var estoqueRepository = new Mock<IEstoqueRepository>();
-        ordemServicoRepository
-            .Setup(repo => repo.ObterPorIdAsync(ordemServico.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(ordemServico);
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoFinalizada();
 
-        var useCase = CriarUseCase(ordemServicoRepository, estoqueRepository);
+        var ordemServicoRepository = CriarOrdemServicoRepository(ordemServico);
+
+        var estoqueRepository = new Mock<IEstoqueRepository>();
+
+        var useCase = CriarUseCase(
+            ordemServicoRepository,
+            estoqueRepository);
+
+        var request = OrdemServicoTestDataFactory.CriarCancelarOrdemServicoRequestValido(
+            ordemServico.Id,
+            MotivoCancelamentoOrdemServico.EstoqueInsuficiente);
 
         // Act
-        var acao = () => useCase.ExecuteAsync(new CancelarOrdemServicoRequest(
-            ordemServico.Id,
-            MotivoCancelamentoOrdemServico.EstoqueInsuficiente));
+        var acao = () => useCase.ExecuteAsync(request);
 
         // Assert
         await acao.Should()
             .ThrowAsync<DomainException>()
             .WithMessage(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
 
-        ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
-        estoqueRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
+        ordemServicoRepository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.OrdemServicoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        estoqueRepository.Verify(
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        ordemServicoRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        estoqueRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Estoque>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task Dado_IdVazio_Quando_Cancelar_Entao_DeveRetornarFalhaDeValidacao()
+    {
+        // Arrange
+        var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
+
+        var estoqueRepository = new Mock<IEstoqueRepository>();
+
+        var useCase = CriarUseCase(
+            ordemServicoRepository,
+            estoqueRepository);
+
+        var request = OrdemServicoTestDataFactory.CriarCancelarOrdemServicoRequestValido(
+            ordemServicoId: Guid.Empty,
+            motivo: MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        ordemServicoRepository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        estoqueRepository.Verify(
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        ordemServicoRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        estoqueRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Estoque>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -168,18 +338,71 @@ public class CancelarOrdemServicoUseCaseTests
     {
         // Arrange
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
+
         var estoqueRepository = new Mock<IEstoqueRepository>();
-        var useCase = CriarUseCase(ordemServicoRepository, estoqueRepository);
+
+        var useCase = CriarUseCase(
+            ordemServicoRepository,
+            estoqueRepository);
+
+        var request = OrdemServicoTestDataFactory.CriarCancelarOrdemServicoRequestValido(
+            motivo: (MotivoCancelamentoOrdemServico)99);
 
         // Act
-        var resultado = await useCase.ExecuteAsync(new CancelarOrdemServicoRequest(
-            Guid.NewGuid(),
-            (MotivoCancelamentoOrdemServico)99));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        ordemServicoRepository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        estoqueRepository.Verify(
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        ordemServicoRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        estoqueRepository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Estoque>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    private static Mock<IOrdemServicoRepository> CriarOrdemServicoRepository(
+        OrdemServico? ordemServico)
+    {
+        var repository = new Mock<IOrdemServicoRepository>();
+
+        repository
+            .Setup(repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ordemServico);
+
+        return repository;
+    }
+
+    private static Mock<IEstoqueRepository> CriarEstoqueRepository(Estoque? estoque)
+    {
+        var repository = new Mock<IEstoqueRepository>();
+
+        repository
+            .Setup(repo => repo.ObterAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(estoque);
+
+        return repository;
     }
 
     private static CancelarOrdemServicoUseCase CriarUseCase(
