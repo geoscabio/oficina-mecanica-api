@@ -17,14 +17,12 @@ public class AtualizarVeiculoUseCaseTests
     {
         // Arrange
         var veiculo = VeiculoTestDataFactory.CriarVeiculoPadrao();
-        var repository = new Mock<IVeiculoRepository>();
 
-        repository
-            .Setup(repo => repo.ObterPorIdAsync(veiculo.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(veiculo);
+        var repository = CriarRepository(veiculo);
 
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(veiculo.Id);
+
+        var request = VeiculoTestDataFactory.CriarAtualizarVeiculoRequestValido(veiculo.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -33,16 +31,22 @@ public class AtualizarVeiculoUseCaseTests
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(veiculo.Id);
-        resultado.Valor.Placa.Should().Be("XYZ9876");
+        resultado.Valor.Placa.Should().Be(VeiculoTestDataFactory.PlacaAtualizadaNormalizada);
         resultado.Valor.Marca.Should().Be(request.Marca);
         resultado.Valor.Modelo.Should().Be(request.Modelo);
         resultado.Valor.Ano.Should().Be(request.Ano);
 
         repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.VeiculoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
             repo => repo.AtualizarAsync(
                 It.Is<Veiculo>(veiculoAtualizado =>
                     veiculoAtualizado.Id == veiculo.Id
-                    && veiculoAtualizado.Placa.NumeroPlaca == "XYZ9876"
+                    && veiculoAtualizado.Placa.NumeroPlaca == VeiculoTestDataFactory.PlacaAtualizadaNormalizada
                     && veiculoAtualizado.Marca == request.Marca
                     && veiculoAtualizado.Modelo == request.Modelo
                     && veiculoAtualizado.Ano == request.Ano),
@@ -54,30 +58,11 @@ public class AtualizarVeiculoUseCaseTests
     public async Task Dado_VeiculoInexistente_Quando_AtualizarVeiculo_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var repository = new Mock<IVeiculoRepository>();
+        var repository = CriarRepository(null);
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.NewGuid());
 
-        // Act
-        var resultado = await useCase.ExecuteAsync(request);
-
-        // Assert
-        resultado.Sucesso.Should().BeFalse();
-        resultado.Erro!.Mensagem.Should().Be(VeiculoErrorMessages.VeiculoNaoEncontrado);
-        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
-
-        repository.Verify(
-            repo => repo.AtualizarAsync(It.IsAny<Veiculo>(), It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
-
-    [Fact]
-    public async Task Dado_IdVazio_Quando_AtualizarVeiculo_Entao_DeveRetornarFalhaDeValidacao()
-    {
-        // Arange
-        var repository = new Mock<IVeiculoRepository>();
-        var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.Empty);
+        var request = VeiculoTestDataFactory.CriarAtualizarVeiculoRequestValido();
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -85,7 +70,52 @@ public class AtualizarVeiculoUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().Be(VeiculoErrorMessages.VeiculoNaoEncontrado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.VeiculoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Veiculo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task Dado_IdVazio_Quando_AtualizarVeiculo_Entao_DeveRetornarFalhaDeValidacao()
+    {
+        // Arrange
+        var repository = new Mock<IVeiculoRepository>();
+
+        var useCase = CriarUseCase(repository);
+
+        var request = VeiculoTestDataFactory.CriarAtualizarVeiculoRequestValido(Guid.Empty);
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Veiculo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Theory]
@@ -93,10 +123,13 @@ public class AtualizarVeiculoUseCaseTests
     [InlineData("  ")]
     public async Task Dado_MarcaInvalida_Quando_AtualizarVeiculo_Entao_DeveRetornarFalhaDeValidacao(string marca)
     {
-        // Arange
+        // Arrange
         var repository = new Mock<IVeiculoRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.NewGuid()) with { Marca = marca };
+
+        var request = VeiculoTestDataFactory.CriarAtualizarVeiculoRequestValido(
+            marca: marca);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -104,7 +137,33 @@ public class AtualizarVeiculoUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Veiculo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    private static Mock<IVeiculoRepository> CriarRepository(Veiculo? veiculo)
+    {
+        var repository = new Mock<IVeiculoRepository>();
+
+        repository
+            .Setup(repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(veiculo);
+
+        return repository;
     }
 
     private static AtualizarVeiculoUseCase CriarUseCase(Mock<IVeiculoRepository> repository)
@@ -113,15 +172,5 @@ public class AtualizarVeiculoUseCaseTests
             repository.Object,
             new AtualizarVeiculoValidator(),
             MapperFactory.Criar());
-    }
-
-    private static AtualizarVeiculoRequest CriarRequestValido(Guid veiculoId)
-    {
-        return new AtualizarVeiculoRequest(
-            VeiculoId: veiculoId,
-            Placa: "XYZ-9876",
-            Marca: "Honda",
-            Modelo: "Civic",
-            Ano: 2022);
     }
 }
