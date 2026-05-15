@@ -9,32 +9,57 @@ namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico;
 public class PecaInsumoTests
 {
     [Fact]
-    public void Dado_DadosValidos_Quando_CriarPecaInsumo_Entao_DeveRegistrarQuantidadeEValor()
+    public void Dado_DadosValidos_Quando_CriarPecaInsumo_Entao_DeveRegistrarQuantidadeValorEValorTotal()
     {
         // Arrange
-        var catalogoId = Guid.NewGuid();
+        var pecaInsumoCatalogoId = Guid.NewGuid();
 
         // Act
-        var pecaInsumo = OrdemServicoTestDataFactory.CriarPecaInsumoPadrao(catalogoId);
+        var pecaInsumo = PecaInsumo.Criar(
+            pecaInsumoCatalogoId,
+            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
+            OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
 
         // Assert
         pecaInsumo.Id.Should().NotBeEmpty();
-        pecaInsumo.PecaInsumoCatalogoId.Should().Be(catalogoId);
+        pecaInsumo.PecaInsumoCatalogoId.Should().Be(pecaInsumoCatalogoId);
         pecaInsumo.Quantidade.Should().Be(OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao);
         pecaInsumo.ValorUnitario.Should().Be(OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
         pecaInsumo.ValorTotal.Should().Be(90m);
     }
 
     [Fact]
-    public void Dado_QuantidadeInvalida_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException()
+    public void Dado_PecaInsumoCatalogoIdVazio_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException()
     {
         // Arrange
-        var catalogoId = Guid.NewGuid();
-        const int quantidade = 0;
-        const decimal valorUnitario = OrdemServicoTestDataFactory.ValorPecaInsumoPadrao;
+        var pecaInsumoCatalogoId = Guid.Empty;
 
         // Act
-        var acao = () => PecaInsumo.Criar(catalogoId, quantidade, valorUnitario);
+        var acao = () => PecaInsumo.Criar(
+            pecaInsumoCatalogoId,
+            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
+            OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(OrdemServicoErrorMessages.PecaInsumoCatalogoObrigatorio);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Dado_QuantidadeInvalida_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException(
+        int quantidade)
+    {
+        // Arrange
+        var pecaInsumoCatalogoId = Guid.NewGuid();
+
+        // Act
+        var acao = () => PecaInsumo.Criar(
+            pecaInsumoCatalogoId,
+            quantidade,
+            OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
 
         // Assert
         acao.Should()
@@ -42,16 +67,20 @@ public class PecaInsumoTests
             .WithMessage(OrdemServicoErrorMessages.QuantidadePecaInsumoMaiorQueZero);
     }
 
-    [Fact]
-    public void Dado_ValorUnitarioInvalido_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Dado_ValorUnitarioInvalido_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException(
+        decimal valorUnitario)
     {
         // Arrange
-        var catalogoId = Guid.NewGuid();
-        const int quantidade = OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao;
-        const decimal valorUnitario = 0m;
+        var pecaInsumoCatalogoId = Guid.NewGuid();
 
         // Act
-        var acao = () => PecaInsumo.Criar(catalogoId, quantidade, valorUnitario);
+        var acao = () => PecaInsumo.Criar(
+            pecaInsumoCatalogoId,
+            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
+            valorUnitario);
 
         // Assert
         acao.Should()
