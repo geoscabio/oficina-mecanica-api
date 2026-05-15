@@ -22,20 +22,34 @@ public class ListarMecanicosUseCaseTests
         };
 
         var repository = CriarRepository(mecanicos, totalItens: mecanicos.Length);
+
         var useCase = CriarUseCase(repository);
 
+        var request = MecanicoTestDataFactory.CriarListarMecanicosRequestValido();
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ListarMecanicosRequest());
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
-        resultado.Valor!.Pagina.Should().Be(1);
-        resultado.Valor.TamanhoPagina.Should().Be(10);
+        resultado.Valor!.Pagina.Should().Be(MecanicoTestDataFactory.PaginaPadrao);
+        resultado.Valor.TamanhoPagina.Should().Be(MecanicoTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(mecanicos.Length);
         resultado.Valor.Itens.Should().HaveCount(mecanicos.Length);
         resultado.Valor.Itens.Select(mecanico => mecanico.Id).Should().BeEquivalentTo(
             mecanicos.Select(mecanico => mecanico.Id));
+
+        repository.Verify(
+            repo => repo.ListarAsync(
+                MecanicoTestDataFactory.PaginaPadrao,
+                MecanicoTestDataFactory.TamanhoPaginaPadrao,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -43,16 +57,32 @@ public class ListarMecanicosUseCaseTests
     {
         // Arrange
         var repository = CriarRepository(Array.Empty<Mecanico>(), totalItens: 0);
+
         var useCase = CriarUseCase(repository);
 
+        var request = MecanicoTestDataFactory.CriarListarMecanicosRequestValido();
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ListarMecanicosRequest());
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Itens.Should().BeEmpty();
+        resultado.Valor.Pagina.Should().Be(MecanicoTestDataFactory.PaginaPadrao);
+        resultado.Valor.TamanhoPagina.Should().Be(MecanicoTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(0);
+
+        repository.Verify(
+            repo => repo.ListarAsync(
+                MecanicoTestDataFactory.PaginaPadrao,
+                MecanicoTestDataFactory.TamanhoPaginaPadrao,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -60,15 +90,31 @@ public class ListarMecanicosUseCaseTests
     {
         // Arrange
         var repository = new Mock<IMecanicoRepository>();
+
         var useCase = CriarUseCase(repository);
 
+        var request = MecanicoTestDataFactory.CriarListarMecanicosRequestValido(
+            pagina: 0);
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ListarMecanicosRequest(Pagina: 0));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ListarAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -76,15 +122,31 @@ public class ListarMecanicosUseCaseTests
     {
         // Arrange
         var repository = new Mock<IMecanicoRepository>();
+
         var useCase = CriarUseCase(repository);
 
+        var request = MecanicoTestDataFactory.CriarListarMecanicosRequestValido(
+            tamanhoPagina: 101);
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ListarMecanicosRequest(TamanhoPagina: 101));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ListarAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     private static Mock<IMecanicoRepository> CriarRepository(
@@ -94,7 +156,10 @@ public class ListarMecanicosUseCaseTests
         var repository = new Mock<IMecanicoRepository>();
 
         repository
-            .Setup(repo => repo.ListarAsync(1, 10, It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ListarAsync(
+                MecanicoTestDataFactory.PaginaPadrao,
+                MecanicoTestDataFactory.TamanhoPaginaPadrao,
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(mecanicos);
 
         repository
