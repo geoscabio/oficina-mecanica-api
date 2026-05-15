@@ -17,13 +17,13 @@ public class AtualizarServicoCatalogoUseCaseTests
     {
         // Arrange
         var servicoCatalogo = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
-        var repository = new Mock<IServicoCatalogoRepository>();
-        repository
-            .Setup(repo => repo.ObterPorIdAsync(servicoCatalogo.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(servicoCatalogo);
+
+        var repository = CriarRepository(servicoCatalogo);
 
         var useCase = CriarUseCase(repository);
-        var request = new AtualizarServicoCatalogoRequest(servicoCatalogo.Id, "Alinhamento", 90m);
+
+        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(
+            servicoCatalogo.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -34,6 +34,13 @@ public class AtualizarServicoCatalogoUseCaseTests
         resultado.Valor!.Id.Should().Be(servicoCatalogo.Id);
         resultado.Valor.Descricao.Should().Be(request.Descricao);
         resultado.Valor.Valor.Should().Be(request.Valor);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.ServicoCatalogoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
         repository.Verify(
             repo => repo.AtualizarAsync(
                 It.Is<ServicoCatalogo>(servico =>
@@ -48,17 +55,32 @@ public class AtualizarServicoCatalogoUseCaseTests
     public async Task Dado_ServicoCatalogoInexistente_Quando_AtualizarServicoCatalogo_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var repository = new Mock<IServicoCatalogoRepository>();
+        var repository = CriarRepository(null);
+
         var useCase = CriarUseCase(repository);
-        var request = new AtualizarServicoCatalogoRequest(Guid.NewGuid(), "Alinhamento", 90m);
+
+        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido();
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Mensagem.Should().Be(ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.ServicoCatalogoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<ServicoCatalogo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -66,8 +88,11 @@ public class AtualizarServicoCatalogoUseCaseTests
     {
         // Arrange
         var repository = new Mock<IServicoCatalogoRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = new AtualizarServicoCatalogoRequest(Guid.Empty, "Alinhamento", 90m);
+
+        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(
+            Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -75,16 +100,35 @@ public class AtualizarServicoCatalogoUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<ServicoCatalogo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
-    [Fact]
-    public async Task Dado_DescricaoVazia_Quando_AtualizarServicoCatalogo_Entao_DeveRetornarFalhaDeValidacao()
+    [Theory]
+    [InlineData("")]
+    [InlineData("  ")]
+    public async Task Dado_DescricaoInvalida_Quando_AtualizarServicoCatalogo_Entao_DeveRetornarFalhaDeValidacao(
+        string descricao)
     {
         // Arrange
         var repository = new Mock<IServicoCatalogoRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = new AtualizarServicoCatalogoRequest(Guid.NewGuid(), string.Empty, 90m);
+
+        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(
+            descricao: descricao);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -92,7 +136,20 @@ public class AtualizarServicoCatalogoUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<ServicoCatalogo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -100,8 +157,11 @@ public class AtualizarServicoCatalogoUseCaseTests
     {
         // Arrange
         var repository = new Mock<IServicoCatalogoRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = new AtualizarServicoCatalogoRequest(Guid.NewGuid(), "Alinhamento", 0m);
+
+        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(
+            valor: 0m);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -109,10 +169,38 @@ public class AtualizarServicoCatalogoUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<ServicoCatalogo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
-    private static AtualizarServicoCatalogoUseCase CriarUseCase(Mock<IServicoCatalogoRepository> repository)
+    private static Mock<IServicoCatalogoRepository> CriarRepository(
+        ServicoCatalogo? servicoCatalogo)
+    {
+        var repository = new Mock<IServicoCatalogoRepository>();
+
+        repository
+            .Setup(repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(servicoCatalogo);
+
+        return repository;
+    }
+
+    private static AtualizarServicoCatalogoUseCase CriarUseCase(
+        Mock<IServicoCatalogoRepository> repository)
     {
         return new AtualizarServicoCatalogoUseCase(
             repository.Object,
