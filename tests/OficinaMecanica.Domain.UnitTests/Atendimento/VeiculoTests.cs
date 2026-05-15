@@ -27,6 +27,7 @@ public class VeiculoTests
         veiculo.Id.Should().NotBeEmpty();
         veiculo.ClienteId.Should().Be(clienteId);
         veiculo.Placa.Should().Be(placa);
+        veiculo.Placa.NumeroPlaca.Should().Be(VeiculoTestDataFactory.PlacaNormalizadaPadrao);
         veiculo.Marca.Should().Be(VeiculoTestDataFactory.MarcaPadrao);
         veiculo.Modelo.Should().Be(VeiculoTestDataFactory.ModeloPadrao);
         veiculo.Ano.Should().Be(VeiculoTestDataFactory.AnoPadrao);
@@ -80,16 +81,21 @@ public class VeiculoTests
     {
         // Arrange
         var veiculo = VeiculoTestDataFactory.CriarVeiculoPadrao();
-        var novaPlaca = VeiculoTestDataFactory.CriarPlacaPadrao();
+        var novaPlaca = VeiculoTestDataFactory.CriarPlacaAtualizada();
 
         // Act
-        veiculo.Atualizar(novaPlaca, "Honda", "Civic", 2022);
+        veiculo.Atualizar(
+            novaPlaca,
+            VeiculoTestDataFactory.MarcaAtualizada,
+            VeiculoTestDataFactory.ModeloAtualizado,
+            VeiculoTestDataFactory.AnoAtualizado);
 
         // Assert
         veiculo.Placa.Should().Be(novaPlaca);
-        veiculo.Marca.Should().Be("Honda");
-        veiculo.Modelo.Should().Be("Civic");
-        veiculo.Ano.Should().Be(2022);
+        veiculo.Placa.NumeroPlaca.Should().Be(VeiculoTestDataFactory.PlacaAtualizadaNormalizada);
+        veiculo.Marca.Should().Be(VeiculoTestDataFactory.MarcaAtualizada);
+        veiculo.Modelo.Should().Be(VeiculoTestDataFactory.ModeloAtualizado);
+        veiculo.Ano.Should().Be(VeiculoTestDataFactory.AnoAtualizado);
     }
 
     [Theory]
@@ -104,8 +110,8 @@ public class VeiculoTests
         var acao = () => veiculo.Atualizar(
             VeiculoTestDataFactory.CriarPlacaPadrao(),
             marca,
-            "Civic",
-            2022);
+            VeiculoTestDataFactory.ModeloAtualizado,
+            VeiculoTestDataFactory.AnoAtualizado);
 
         // Assert
         acao.Should()
@@ -122,8 +128,8 @@ public class VeiculoTests
         // Act
         var acao = () => veiculo.Atualizar(
             VeiculoTestDataFactory.CriarPlacaPadrao(),
-            "Honda",
-            "Civic",
+            VeiculoTestDataFactory.MarcaAtualizada,
+            VeiculoTestDataFactory.ModeloAtualizado,
             0);
 
         // Assert

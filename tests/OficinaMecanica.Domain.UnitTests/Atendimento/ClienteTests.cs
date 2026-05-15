@@ -29,9 +29,11 @@ public class ClienteTests
         // Assert
         cliente.Id.Should().NotBeEmpty();
         cliente.Documento.Should().Be(documento);
+        cliente.Documento.Numero.Should().Be(ClienteTestDataFactory.DocumentoNormalizadoPadrao);
         cliente.Nome.Should().Be(ClienteTestDataFactory.NomePadrao);
         cliente.Endereco.Should().Be(endereco);
         cliente.Telefone.Should().Be(telefone);
+        cliente.Telefone.Numero.Should().Be(ClienteTestDataFactory.TelefoneNormalizadoPadrao);
         cliente.Email.Should().Be(email);
     }
 
@@ -47,7 +49,12 @@ public class ClienteTests
         var email = ClienteTestDataFactory.CriarEmailPadrao();
 
         // Act
-        var acao = () => Cliente.Criar(documento, nome, endereco, telefone, email);
+        var acao = () => Cliente.Criar(
+            documento,
+            nome,
+            endereco,
+            telefone,
+            email);
 
         // Assert
         acao.Should()
@@ -60,18 +67,24 @@ public class ClienteTests
     {
         // Arrange
         var cliente = ClienteTestDataFactory.CriarClientePadrao();
-        var novoEndereco = new Endereco("Rua B", "200", "Bairro Novo", "Santo Andre", "09000000");
-        var novoTelefone = Telefone.Criar("(11) 98888-7777");
-        var novoEmail = Email.Criar("novo@email.com");
+        var novoEndereco = ClienteTestDataFactory.CriarEnderecoAtualizado();
+        var novoTelefone = ClienteTestDataFactory.CriarTelefoneAtualizado();
+        var novoEmail = ClienteTestDataFactory.CriarEmailAtualizado();
 
         // Act
-        cliente.Atualizar("Cliente Atualizado", novoEndereco, novoTelefone, novoEmail);
+        cliente.Atualizar(
+            ClienteTestDataFactory.NomeAtualizado,
+            novoEndereco,
+            novoTelefone,
+            novoEmail);
 
         // Assert
-        cliente.Nome.Should().Be("Cliente Atualizado");
+        cliente.Nome.Should().Be(ClienteTestDataFactory.NomeAtualizado);
         cliente.Endereco.Should().Be(novoEndereco);
         cliente.Telefone.Should().Be(novoTelefone);
+        cliente.Telefone.Numero.Should().Be(ClienteTestDataFactory.TelefoneAtualizadoNormalizado);
         cliente.Email.Should().Be(novoEmail);
+        cliente.Email.Endereco.Should().Be(ClienteTestDataFactory.EmailAtualizado);
     }
 
     [Theory]
