@@ -2,6 +2,7 @@
 using Moq;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.AtualizarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Common;
+using OficinaMecanica.Application.UnitTests.Administrativo.Factories;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Enums;
@@ -16,15 +17,14 @@ public class AtualizarPecaInsumoCatalogoUseCaseTests
     public async Task Dado_DadosValidos_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveAtualizarPecaInsumoCatalogo()
     {
         // Arrange
-        var item = PecaInsumoCatalogo.Criar("Filtro de óleo", TipoPecaInsumo.PECA, 45m);
-        var repository = new Mock<IPecaInsumoCatalogoRepository>();
+        var item = PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao();
 
-        repository
-            .Setup(repo => repo.ObterPorIdAsync(item.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(item);
+        var repository = CriarRepository(item);
 
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(item.Id);
+
+        var request = PecaInsumoCatalogoTestDataFactory.CriarAtualizarPecaInsumoCatalogoRequestValido(
+            item.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -36,6 +36,12 @@ public class AtualizarPecaInsumoCatalogoUseCaseTests
         resultado.Valor.Descricao.Should().Be(request.Descricao);
         resultado.Valor.Tipo.Should().Be(request.Tipo);
         resultado.Valor.Valor.Should().Be(request.Valor);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.PecaInsumoCatalogoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
 
         repository.Verify(
             repo => repo.AtualizarAsync(
@@ -52,20 +58,31 @@ public class AtualizarPecaInsumoCatalogoUseCaseTests
     public async Task Dado_PecaInsumoCatalogoInexistente_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var repository = new Mock<IPecaInsumoCatalogoRepository>();
+        var repository = CriarRepository(null);
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.NewGuid());
+
+        var request = PecaInsumoCatalogoTestDataFactory.CriarAtualizarPecaInsumoCatalogoRequestValido();
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Mensagem.Should().Be(PecaInsumoCatalogoErrorMessages.PecaInsumoCatalogoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
         repository.Verify(
-            repo => repo.AtualizarAsync(It.IsAny<PecaInsumoCatalogo>(), It.IsAny<CancellationToken>()),
+            repo => repo.ObterPorIdAsync(
+                request.PecaInsumoCatalogoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<PecaInsumoCatalogo>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -74,8 +91,11 @@ public class AtualizarPecaInsumoCatalogoUseCaseTests
     {
         // Arrange
         var repository = new Mock<IPecaInsumoCatalogoRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.Empty);
+
+        var request = PecaInsumoCatalogoTestDataFactory.CriarAtualizarPecaInsumoCatalogoRequestValido(
+            Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -83,18 +103,35 @@ public class AtualizarPecaInsumoCatalogoUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<PecaInsumoCatalogo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public async Task Dado_DescricaoInvalida_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveRetornarFalhaDeValidacao(string descricao)
+    public async Task Dado_DescricaoInvalida_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveRetornarFalhaDeValidacao(
+        string descricao)
     {
         // Arrange
         var repository = new Mock<IPecaInsumoCatalogoRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.NewGuid()) with { Descricao = descricao };
+
+        var request = PecaInsumoCatalogoTestDataFactory.CriarAtualizarPecaInsumoCatalogoRequestValido(
+            descricao: descricao);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -102,7 +139,100 @@ public class AtualizarPecaInsumoCatalogoUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<PecaInsumoCatalogo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task Dado_TipoInvalido_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveRetornarFalhaDeValidacao()
+    {
+        // Arrange
+        var repository = new Mock<IPecaInsumoCatalogoRepository>();
+
+        var useCase = CriarUseCase(repository);
+
+        var request = PecaInsumoCatalogoTestDataFactory.CriarAtualizarPecaInsumoCatalogoRequestValido(
+            tipo: (TipoPecaInsumo)99);
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<PecaInsumoCatalogo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task Dado_ValorInvalido_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveRetornarFalhaDeValidacao()
+    {
+        // Arrange
+        var repository = new Mock<IPecaInsumoCatalogoRepository>();
+
+        var useCase = CriarUseCase(repository);
+
+        var request = PecaInsumoCatalogoTestDataFactory.CriarAtualizarPecaInsumoCatalogoRequestValido(
+            valor: 0m);
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<PecaInsumoCatalogo>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    private static Mock<IPecaInsumoCatalogoRepository> CriarRepository(
+        PecaInsumoCatalogo? item)
+    {
+        var repository = new Mock<IPecaInsumoCatalogoRepository>();
+
+        repository
+            .Setup(repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(item);
+
+        return repository;
     }
 
     private static AtualizarPecaInsumoCatalogoUseCase CriarUseCase(
@@ -112,14 +242,5 @@ public class AtualizarPecaInsumoCatalogoUseCaseTests
             repository.Object,
             new AtualizarPecaInsumoCatalogoValidator(),
             MapperFactory.Criar());
-    }
-
-    private static AtualizarPecaInsumoCatalogoRequest CriarRequestValido(Guid itemId)
-    {
-        return new AtualizarPecaInsumoCatalogoRequest(
-            PecaInsumoCatalogoId: itemId,
-            Descricao: "Óleo 5W30",
-            Tipo: TipoPecaInsumo.INSUMO,
-            Valor: 38m);
     }
 }
