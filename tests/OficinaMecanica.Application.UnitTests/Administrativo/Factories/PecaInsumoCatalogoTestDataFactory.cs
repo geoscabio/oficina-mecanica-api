@@ -1,7 +1,7 @@
-using OficinaMecanica.Domain.Administrativo.Aggregates;
+﻿using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Enums;
 
-namespace OficinaMecanica.Domain.UnitTests.Administrativo.Builders;
+namespace OficinaMecanica.Application.UnitTests.Administrativo.Factories;
 
 internal static class PecaInsumoCatalogoTestDataFactory
 {

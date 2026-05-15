@@ -1,6 +1,6 @@
 ﻿using OficinaMecanica.Application.Identidade.UsuarioUseCases.AutenticarUsuario;
 
-namespace OficinaMecanica.Application.UnitTests.Identidade.Builders;
+namespace OficinaMecanica.Application.UnitTests.Identidade.Factories;
 
 public static class AutenticacaoTestDataFactory
 {

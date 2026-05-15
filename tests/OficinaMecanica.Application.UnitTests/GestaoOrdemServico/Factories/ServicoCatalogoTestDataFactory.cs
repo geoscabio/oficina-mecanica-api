@@ -1,6 +1,6 @@
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 
-namespace OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
+namespace OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Factories;
 
 internal static class ServicoCatalogoTestDataFactory
 {

@@ -5,7 +5,7 @@ using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 using OficinaMecanica.Domain.Administrativo.Messages;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.DefinirServicos;
 using OficinaMecanica.Application.UnitTests.Common;
-using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
+using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Factories;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;

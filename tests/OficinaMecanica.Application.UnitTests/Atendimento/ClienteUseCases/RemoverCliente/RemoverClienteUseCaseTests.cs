@@ -2,7 +2,7 @@
 using Moq;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.RemoverCliente;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
+using OficinaMecanica.Application.UnitTests.Atendimento.Factories;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;

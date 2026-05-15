@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using Moq;
-using OficinaMecanica.Application.UnitTests.Administrativo.Builders;
+using OficinaMecanica.Application.UnitTests.Administrativo.Factories;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.CadastrarMecanico;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.UnitTests.Common;

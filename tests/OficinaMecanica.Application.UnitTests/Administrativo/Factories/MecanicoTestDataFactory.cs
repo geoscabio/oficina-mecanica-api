@@ -1,7 +1,7 @@
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.CadastrarMecanico;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 
-namespace OficinaMecanica.Application.UnitTests.Administrativo.Builders;
+namespace OficinaMecanica.Application.UnitTests.Administrativo.Factories;
 
 internal static class MecanicoTestDataFactory
 {

@@ -1,7 +1,7 @@
 ﻿using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
 
-namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque.Builders;
+namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque.Factories;
 
 internal static class EstoqueDomainTestDataFactory
 {

@@ -3,7 +3,7 @@ using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
 using OficinaMecanica.Domain.Shared.Exceptions;
-using OficinaMecanica.Domain.UnitTests.Atendimento.Builders;
+using OficinaMecanica.Domain.UnitTests.Atendimento.Factories;
 
 namespace OficinaMecanica.Domain.UnitTests.Atendimento;
 

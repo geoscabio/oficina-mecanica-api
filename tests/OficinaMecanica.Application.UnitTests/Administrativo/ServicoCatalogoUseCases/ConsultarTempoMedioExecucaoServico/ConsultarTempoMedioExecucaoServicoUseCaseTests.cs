@@ -2,7 +2,7 @@ using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ConsultarTempoMedioExecucaoServico;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Application.UnitTests.Administrativo.Builders;
+using OficinaMecanica.Application.UnitTests.Administrativo.Factories;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
 using OficinaMecanica.Domain.Administrativo.Messages;

@@ -1,7 +1,7 @@
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Entities;
 
-namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Builders;
+namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Factories;
 
 internal static class OrdemServicoTestDataFactory
 {

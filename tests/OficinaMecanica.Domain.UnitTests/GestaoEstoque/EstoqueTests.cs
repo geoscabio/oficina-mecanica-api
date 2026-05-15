@@ -3,7 +3,7 @@ using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.GestaoEstoque.Messages;
 using OficinaMecanica.Domain.Shared.Exceptions;
-using OficinaMecanica.Domain.UnitTests.GestaoEstoque.Builders;
+using OficinaMecanica.Domain.UnitTests.GestaoEstoque.Factories;
 
 namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque;
 

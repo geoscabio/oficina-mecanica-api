@@ -2,7 +2,7 @@ using FluentAssertions;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Messages;
 using OficinaMecanica.Domain.Shared.Exceptions;
-using OficinaMecanica.Domain.UnitTests.Administrativo.Builders;
+using OficinaMecanica.Domain.UnitTests.Administrativo.Factories;
 
 namespace OficinaMecanica.Domain.UnitTests.Administrativo;
 

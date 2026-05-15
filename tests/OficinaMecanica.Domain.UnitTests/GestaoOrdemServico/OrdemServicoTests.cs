@@ -3,7 +3,7 @@ using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 using OficinaMecanica.Domain.Shared.Exceptions;
-using OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Builders;
+using OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Factories;
 
 namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico;
 

@@ -3,7 +3,7 @@ using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.AtualizarEstoque;
 using OficinaMecanica.Application.UnitTests.Common;
-using OficinaMecanica.Application.UnitTests.GestaoEstoque.Builders;
+using OficinaMecanica.Application.UnitTests.GestaoEstoque.Factories;
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
 
@@ -16,10 +16,14 @@ public class AtualizarEstoqueUseCaseTests
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
+
         var itemEstoque = EstoqueTestDataFactory.CriarItemEstoquePadrao(pecaInsumoCatalogoId);
+
         var repository = CriarRepository(itemEstoque);
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(pecaInsumoCatalogoId);
+
+        var request = EstoqueTestDataFactory.CriarAtualizarEstoqueRequestValido(pecaInsumoCatalogoId);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -40,8 +44,10 @@ public class AtualizarEstoqueUseCaseTests
     {
         // Arrange
         var repository = CriarRepository(null);
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.NewGuid());
+
+        var request = EstoqueTestDataFactory.CriarAtualizarEstoqueRequestValido();
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -52,7 +58,9 @@ public class AtualizarEstoqueUseCaseTests
         resultado.Erro!.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
         repository.Verify(
-            repo => repo.AtualizarItemAsync(It.IsAny<ItemEstoque>(), It.IsAny<CancellationToken>()),
+            repo => repo.AtualizarItemAsync(
+                It.IsAny<ItemEstoque>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -61,8 +69,11 @@ public class AtualizarEstoqueUseCaseTests
     {
         // Arrange
         var repository = new Mock<IEstoqueRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.Empty);
+
+        var request = EstoqueTestDataFactory.CriarAtualizarEstoqueRequestValido(
+            Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -79,7 +90,9 @@ public class AtualizarEstoqueUseCaseTests
             Times.Never);
 
         repository.Verify(
-            repo => repo.AtualizarItemAsync(It.IsAny<ItemEstoque>(), It.IsAny<CancellationToken>()),
+            repo => repo.AtualizarItemAsync(
+                It.IsAny<ItemEstoque>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -88,8 +101,11 @@ public class AtualizarEstoqueUseCaseTests
     {
         // Arrange
         var repository = new Mock<IEstoqueRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.NewGuid()) with { QuantidadeDisponivel = -1 };
+
+        var request = EstoqueTestDataFactory.CriarAtualizarEstoqueRequestValido(
+            quantidadeDisponivel: -1);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -106,7 +122,9 @@ public class AtualizarEstoqueUseCaseTests
             Times.Never);
 
         repository.Verify(
-            repo => repo.AtualizarItemAsync(It.IsAny<ItemEstoque>(), It.IsAny<CancellationToken>()),
+            repo => repo.AtualizarItemAsync(
+                It.IsAny<ItemEstoque>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -129,12 +147,5 @@ public class AtualizarEstoqueUseCaseTests
             repository.Object,
             new AtualizarEstoqueValidator(),
             MapperFactory.Criar());
-    }
-
-    private static AtualizarEstoqueRequest CriarRequestValido(Guid pecaInsumoCatalogoId)
-    {
-        return new AtualizarEstoqueRequest(
-            pecaInsumoCatalogoId,
-            QuantidadeDisponivel: 3);
     }
 }

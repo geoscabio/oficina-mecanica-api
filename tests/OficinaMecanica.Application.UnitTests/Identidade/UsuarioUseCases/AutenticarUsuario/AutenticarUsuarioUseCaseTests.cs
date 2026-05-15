@@ -4,7 +4,7 @@ using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.Identidade.Interfaces;
 using OficinaMecanica.Application.Identidade.UsuarioUseCases.AutenticarUsuario;
 using OficinaMecanica.Application.Identidade.ValidationMessages;
-using OficinaMecanica.Application.UnitTests.Identidade.Builders;
+using OficinaMecanica.Application.UnitTests.Identidade.Factories;
 
 namespace OficinaMecanica.Application.UnitTests.Identidade.UsuarioUseCases.AutenticarUsuario;
 
