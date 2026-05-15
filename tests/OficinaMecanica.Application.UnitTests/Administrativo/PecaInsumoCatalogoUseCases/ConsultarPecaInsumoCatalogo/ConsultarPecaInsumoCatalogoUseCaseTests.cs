@@ -14,6 +14,7 @@ public class ConsultarPecaInsumoCatalogoUseCaseTests
     [Fact]
     public async Task Dado_PecaInsumoCatalogoExistente_Quando_ConsultarPecaInsumoCatalogo_Entao_DeveRetornarPecaInsumoCatalogo()
     {
+        // Arrange
         var item = PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao();
         var repository = new Mock<IPecaInsumoCatalogoRepository>();
 
@@ -23,8 +24,10 @@ public class ConsultarPecaInsumoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
+        // Act
         var resultado = await useCase.ExecuteAsync(new ConsultarPecaInsumoCatalogoRequest(item.Id));
 
+        // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(item.Id);
@@ -36,11 +39,14 @@ public class ConsultarPecaInsumoCatalogoUseCaseTests
     [Fact]
     public async Task Dado_PecaInsumoCatalogoInexistente_Quando_ConsultarPecaInsumoCatalogo_Entao_DeveRetornarFalha()
     {
+        //  Arrange
         var repository = new Mock<IPecaInsumoCatalogoRepository>();
         var useCase = CriarUseCase(repository);
 
+        //  Act
         var resultado = await useCase.ExecuteAsync(new ConsultarPecaInsumoCatalogoRequest(Guid.NewGuid()));
 
+        //  Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro!.Mensagem.Should().Be(PecaInsumoCatalogoErrorMessages.PecaInsumoCatalogoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
@@ -49,11 +55,14 @@ public class ConsultarPecaInsumoCatalogoUseCaseTests
     [Fact]
     public async Task Dado_IdVazio_Quando_ConsultarPecaInsumoCatalogo_Entao_DeveRetornarFalhaDeValidacao()
     {
+        //  Arrange
         var repository = new Mock<IPecaInsumoCatalogoRepository>();
         var useCase = CriarUseCase(repository);
 
+        //  Act
         var resultado = await useCase.ExecuteAsync(new ConsultarPecaInsumoCatalogoRequest(Guid.Empty));
 
+        //  Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);

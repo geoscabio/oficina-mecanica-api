@@ -15,6 +15,7 @@ public class AtualizarVeiculoUseCaseTests
     [Fact]
     public async Task Dado_DadosValidos_Quando_AtualizarVeiculo_Entao_DeveAtualizarVeiculo()
     {
+        // Arrange
         var veiculo = VeiculoTestDataFactory.CriarVeiculoPadrao();
         var repository = new Mock<IVeiculoRepository>();
 
@@ -25,8 +26,10 @@ public class AtualizarVeiculoUseCaseTests
         var useCase = CriarUseCase(repository);
         var request = CriarRequestValido(veiculo.Id);
 
+        // Act
         var resultado = await useCase.ExecuteAsync(request);
 
+        // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(veiculo.Id);
@@ -50,12 +53,15 @@ public class AtualizarVeiculoUseCaseTests
     [Fact]
     public async Task Dado_VeiculoInexistente_Quando_AtualizarVeiculo_Entao_DeveRetornarFalha()
     {
+        // Arrange
         var repository = new Mock<IVeiculoRepository>();
         var useCase = CriarUseCase(repository);
         var request = CriarRequestValido(Guid.NewGuid());
 
+        // Act
         var resultado = await useCase.ExecuteAsync(request);
 
+        // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro!.Mensagem.Should().Be(VeiculoErrorMessages.VeiculoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
@@ -68,12 +74,15 @@ public class AtualizarVeiculoUseCaseTests
     [Fact]
     public async Task Dado_IdVazio_Quando_AtualizarVeiculo_Entao_DeveRetornarFalhaDeValidacao()
     {
+        // Arange
         var repository = new Mock<IVeiculoRepository>();
         var useCase = CriarUseCase(repository);
         var request = CriarRequestValido(Guid.Empty);
 
+        // Act
         var resultado = await useCase.ExecuteAsync(request);
 
+        // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
@@ -84,12 +93,15 @@ public class AtualizarVeiculoUseCaseTests
     [InlineData("  ")]
     public async Task Dado_MarcaInvalida_Quando_AtualizarVeiculo_Entao_DeveRetornarFalhaDeValidacao(string marca)
     {
+        // Arange
         var repository = new Mock<IVeiculoRepository>();
         var useCase = CriarUseCase(repository);
         var request = CriarRequestValido(Guid.NewGuid()) with { Marca = marca };
 
+        // Act
         var resultado = await useCase.ExecuteAsync(request);
 
+        // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
