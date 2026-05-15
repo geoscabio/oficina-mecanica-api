@@ -1,12 +1,12 @@
 using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
 using OficinaMecanica.Application.UnitTests.Common;
-using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
+using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Factories;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
+using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 
 namespace OficinaMecanica.Application.UnitTests.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
 
@@ -17,43 +17,68 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoRecebida();
-        var repository = new Mock<IOrdemServicoRepository>();
-        repository
-            .Setup(repo => repo.ObterPorIdAsync(ordemServico.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(ordemServico);
+
+        var repository = CriarRepository(ordemServico);
 
         var useCase = CriarUseCase(repository);
 
+        var request = OrdemServicoTestDataFactory.CriarIniciarDiagnosticoOrdemServicoRequestValido(
+            ordemServico.Id);
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new IniciarDiagnosticoOrdemServicoRequest(ordemServico.Id));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(ordemServico.Id);
-        resultado.Valor.Status.Should().Be("EM_DIAGNOSTICO");
+        resultado.Valor.Status.Should().Be(OrdemServicoTestDataFactory.StatusEmDiagnostico);
 
-        repository.Verify(repo => repo.AtualizarAsync(It.Is<OrdemServico>(ordemServicoAtualizada =>
-            ordemServicoAtualizada.Id == ordemServico.Id
-            && ordemServicoAtualizada.Status.ToString() == "EM_DIAGNOSTICO"), It.IsAny<CancellationToken>()), Times.Once);
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.OrdemServicoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.Is<OrdemServico>(ordemServicoAtualizada =>
+                    ordemServicoAtualizada.Id == ordemServico.Id
+                    && ordemServicoAtualizada.Status.ToString() == OrdemServicoTestDataFactory.StatusEmDiagnostico),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
     public async Task Dado_OrdemServicoInexistente_Quando_IniciarDiagnostico_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var repository = new Mock<IOrdemServicoRepository>();
+        var repository = CriarRepository(null);
+
         var useCase = CriarUseCase(repository);
 
+        var request = OrdemServicoTestDataFactory.CriarIniciarDiagnosticoOrdemServicoRequestValido();
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new IniciarDiagnosticoOrdemServicoRequest(Guid.NewGuid()));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.OrdemServicoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -61,19 +86,49 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
     {
         // Arrange
         var repository = new Mock<IOrdemServicoRepository>();
+
         var useCase = CriarUseCase(repository);
 
+        var request = OrdemServicoTestDataFactory.CriarIniciarDiagnosticoOrdemServicoRequestValido(
+            Guid.Empty);
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new IniciarDiagnosticoOrdemServicoRequest(Guid.Empty));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
-    private static IniciarDiagnosticoOrdemServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
+    private static Mock<IOrdemServicoRepository> CriarRepository(OrdemServico? ordemServico)
+    {
+        var repository = new Mock<IOrdemServicoRepository>();
+
+        repository
+            .Setup(repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ordemServico);
+
+        return repository;
+    }
+
+    private static IniciarDiagnosticoOrdemServicoUseCase CriarUseCase(
+        Mock<IOrdemServicoRepository> repository)
     {
         return new IniciarDiagnosticoOrdemServicoUseCase(
             repository.Object,
@@ -81,10 +136,3 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
             MapperFactory.Criar());
     }
 }
-
-
-
-
-
-
-

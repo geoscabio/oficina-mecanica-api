@@ -1,12 +1,12 @@
 using FluentAssertions;
 using Moq;
-using OficinaMecanica.Application.Common;
-using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Application.UnitTests.Atendimento.Factories;
 using OficinaMecanica.Application.UnitTests.Common;
-using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
+using OficinaMecanica.Domain.Atendimento.Messages;
 
 namespace OficinaMecanica.Application.UnitTests.Atendimento.ClienteUseCases.CadastrarCliente;
 
@@ -16,13 +16,11 @@ public class CadastrarClienteUseCaseTests
     public async Task Dado_RequestValido_Quando_CadastrarCliente_Entao_DevePersistirClienteERetornarSucesso()
     {
         // Arrange
-        var repository = new Mock<IClienteRepository>();
-        repository
-            .Setup(repo => repo.ObterPorDocumentoAsync("52998224725", It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Cliente?)null);
+        var repository = CriarRepository(null);
 
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido();
+
+        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido();
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -31,12 +29,16 @@ public class CadastrarClienteUseCaseTests
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().NotBeEmpty();
-        resultado.Valor.Documento.Should().Be("52998224725");
-        resultado.Valor.Nome.Should().Be("Maria Silva");
+        resultado.Valor.Documento.Should().Be(ClienteTestDataFactory.DocumentoNormalizadoPadrao);
+        resultado.Valor.Nome.Should().Be(ClienteTestDataFactory.NomePadrao);
 
-        repository.Verify(repo => repo.AdicionarAsync(It.Is<Cliente>(cliente =>
-            cliente.Documento.Numero == "52998224725"
-            && cliente.Nome == "Maria Silva"), It.IsAny<CancellationToken>()), Times.Once);
+        repository.Verify(
+            repo => repo.AdicionarAsync(
+                It.Is<Cliente>(cliente =>
+                    cliente.Documento.Numero == ClienteTestDataFactory.DocumentoNormalizadoPadrao
+                    && cliente.Nome == ClienteTestDataFactory.NomePadrao),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -44,23 +46,27 @@ public class CadastrarClienteUseCaseTests
     {
         // Arrange
         var clienteExistente = ClienteTestDataFactory.CriarClientePadrao();
-        var repository = new Mock<IClienteRepository>();
-        repository
-            .Setup(repo => repo.ObterPorDocumentoAsync("52998224725", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(clienteExistente);
+
+        var repository = CriarRepository(clienteExistente);
 
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido();
+
+        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido();
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Mensagem.Should().Be(ClienteErrorMessages.ClienteDuplicado);
         resultado.Erro.Tipo.Should().Be(TipoErro.RegraNegocio);
 
-        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
+        repository.Verify(
+            repo => repo.AdicionarAsync(
+                It.IsAny<Cliente>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Theory]
@@ -70,8 +76,11 @@ public class CadastrarClienteUseCaseTests
     {
         // Arrange
         var repository = new Mock<IClienteRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido() with { Nome = nome };
+
+        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido(
+            nome: nome);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -81,6 +90,31 @@ public class CadastrarClienteUseCaseTests
         resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorDocumentoAsync(
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AdicionarAsync(
+                It.IsAny<Cliente>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    private static Mock<IClienteRepository> CriarRepository(Cliente? cliente)
+    {
+        var repository = new Mock<IClienteRepository>();
+
+        repository
+            .Setup(repo => repo.ObterPorDocumentoAsync(
+                ClienteTestDataFactory.DocumentoNormalizadoPadrao,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cliente);
+
+        return repository;
     }
 
     private static CadastrarClienteUseCase CriarUseCase(Mock<IClienteRepository> repository)
@@ -90,26 +124,4 @@ public class CadastrarClienteUseCaseTests
             new CadastrarClienteValidator(),
             MapperFactory.Criar());
     }
-
-    private static CadastrarClienteRequest CriarRequestValido()
-    {
-        return new CadastrarClienteRequest(
-            Documento: "529.982.247-25",
-            Nome: "Maria Silva",
-            Endereco: new EnderecoRequest(
-                Logradouro: "Rua A",
-                Numero: "100",
-                Bairro: "Centro",
-                Cidade: "Sao Paulo",
-                CEP: "01001-000"),
-            Telefone: "(11) 99999-9999",
-            Email: "maria@email.com");
-    }
 }
-
-
-
-
-
-
-

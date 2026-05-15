@@ -1,7 +1,7 @@
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
 
-namespace OficinaMecanica.Domain.UnitTests.Atendimento.Builders;
+namespace OficinaMecanica.Domain.UnitTests.Atendimento.Factories;
 
 internal static class VeiculoTestDataFactory
 {

@@ -4,7 +4,7 @@ using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.Identidade.Interfaces;
 using OficinaMecanica.Application.Identidade.UsuarioUseCases.AutenticarUsuario;
 using OficinaMecanica.Application.Identidade.ValidationMessages;
-using OficinaMecanica.Application.UnitTests.Identidade.Builders;
+using OficinaMecanica.Application.UnitTests.Identidade.Factories;
 
 namespace OficinaMecanica.Application.UnitTests.Identidade.UsuarioUseCases.AutenticarUsuario;
 
@@ -14,15 +14,15 @@ public class AutenticarUsuarioUseCaseTests
     public async Task Dado_CredenciaisValidas_Quando_AutenticarUsuario_Entao_DeveRetornarToken()
     {
         // Arrange
-        var usuario = AutenticacaoTestDataFactory.CriarUsuarioAutenticadoPadrao();
+        var usuario = IdentidadeTestDataFactory.CriarAutenticarUsuarioResponseValido();
 
         var usuarioService = CriarUsuarioService(usuario);
 
-        var tokenService = CriarTokenService("token-jwt");
+        var tokenService = CriarTokenService(IdentidadeTestDataFactory.TokenPadrao);
 
         var useCase = CriarUseCase(usuarioService, tokenService);
 
-        var request = AutenticacaoTestDataFactory.CriarRequestAutenticacaoValida();
+        var request = IdentidadeTestDataFactory.CriarAutenticarUsuarioRequestValido();
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -32,7 +32,7 @@ public class AutenticarUsuarioUseCaseTests
 
         resultado.Valor.Should().NotBeNull();
 
-        resultado.Valor!.Token.Should().Be("token-jwt");
+        resultado.Valor!.Token.Should().Be(IdentidadeTestDataFactory.TokenPadrao);
 
         resultado.Valor.UsuarioId.Should().Be(usuario.UsuarioId);
 
@@ -61,7 +61,7 @@ public class AutenticarUsuarioUseCaseTests
 
         var useCase = CriarUseCase(usuarioService, tokenService);
 
-        var request = AutenticacaoTestDataFactory.CriarRequestAutenticacaoValida();
+        var request = IdentidadeTestDataFactory.CriarAutenticarUsuarioRequestValido();
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -71,7 +71,8 @@ public class AutenticarUsuarioUseCaseTests
 
         resultado.Erro.Should().NotBeNull();
 
-        resultado.Erro!.Mensagem.Should().Be(IdentidadeValidationMessages.CredenciaisInvalidas);
+        resultado.Erro!.Mensagem.Should().Be(
+            IdentidadeValidationMessages.CredenciaisInvalidas);
 
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoAutorizado);
 
@@ -94,11 +95,8 @@ public class AutenticarUsuarioUseCaseTests
 
         var useCase = CriarUseCase(usuarioService, tokenService);
 
-        var request = AutenticacaoTestDataFactory
-            .CriarRequestAutenticacaoValida() with
-        {
-            Login = string.Empty
-        };
+        var request = IdentidadeTestDataFactory.CriarAutenticarUsuarioRequestValido(
+            login: string.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -128,11 +126,8 @@ public class AutenticarUsuarioUseCaseTests
 
         var useCase = CriarUseCase(usuarioService, tokenService);
 
-        var request = AutenticacaoTestDataFactory
-            .CriarRequestAutenticacaoValida() with
-        {
-            Senha = string.Empty
-        };
+        var request = IdentidadeTestDataFactory.CriarAutenticarUsuarioRequestValido(
+            senha: string.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);

@@ -1,6 +1,6 @@
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 
-namespace OficinaMecanica.Domain.UnitTests.Administrativo.Builders;
+namespace OficinaMecanica.Domain.UnitTests.Administrativo.Factories;
 
 internal static class MecanicoTestDataFactory
 {

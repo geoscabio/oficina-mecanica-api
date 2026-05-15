@@ -1,9 +1,8 @@
 ﻿using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.AtualizarCliente;
-using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
+using OficinaMecanica.Application.UnitTests.Atendimento.Factories;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -18,14 +17,12 @@ public class AtualizarClienteUseCaseTests
     {
         // Arrange
         var cliente = ClienteTestDataFactory.CriarClientePadrao();
-        var repository = new Mock<IClienteRepository>();
 
-        repository
-            .Setup(repo => repo.ObterPorIdAsync(cliente.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(cliente);
+        var repository = CriarRepository(cliente);
 
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(cliente.Id);
+
+        var request = ClienteTestDataFactory.CriarAtualizarClienteRequestValido(cliente.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -35,7 +32,7 @@ public class AtualizarClienteUseCaseTests
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(cliente.Id);
         resultado.Valor.Nome.Should().Be(request.Nome);
-        resultado.Valor.Telefone.Should().Be("11988887777");
+        resultado.Valor.Telefone.Should().Be(ClienteTestDataFactory.TelefoneAtualizadoNormalizado);
         resultado.Valor.Email.Should().Be(request.Email);
 
         repository.Verify(
@@ -43,7 +40,7 @@ public class AtualizarClienteUseCaseTests
                 It.Is<Cliente>(clienteAtualizado =>
                     clienteAtualizado.Id == cliente.Id
                     && clienteAtualizado.Nome == request.Nome
-                    && clienteAtualizado.Telefone.Numero == "11988887777"
+                    && clienteAtualizado.Telefone.Numero == ClienteTestDataFactory.TelefoneAtualizadoNormalizado
                     && clienteAtualizado.Email.Endereco == request.Email),
                 It.IsAny<CancellationToken>()),
             Times.Once);
@@ -53,20 +50,25 @@ public class AtualizarClienteUseCaseTests
     public async Task Dado_ClienteInexistente_Quando_AtualizarCliente_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var repository = new Mock<IClienteRepository>();
+        var repository = CriarRepository(null);
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.NewGuid());
+
+        var request = ClienteTestDataFactory.CriarAtualizarClienteRequestValido();
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Mensagem.Should().Be(ClienteErrorMessages.ClienteNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
         repository.Verify(
-            repo => repo.AtualizarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()),
+            repo => repo.AtualizarAsync(
+                It.IsAny<Cliente>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -75,8 +77,10 @@ public class AtualizarClienteUseCaseTests
     {
         // Arrange
         var repository = new Mock<IClienteRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.Empty);
+
+        var request = ClienteTestDataFactory.CriarAtualizarClienteRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -84,7 +88,20 @@ public class AtualizarClienteUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Cliente>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Theory]
@@ -94,8 +111,11 @@ public class AtualizarClienteUseCaseTests
     {
         // Arrange
         var repository = new Mock<IClienteRepository>();
+
         var useCase = CriarUseCase(repository);
-        var request = CriarRequestValido(Guid.NewGuid()) with { Nome = nome };
+
+        var request = ClienteTestDataFactory.CriarAtualizarClienteRequestValido(
+            nome: nome);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -103,7 +123,33 @@ public class AtualizarClienteUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Cliente>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    private static Mock<IClienteRepository> CriarRepository(Cliente? cliente)
+    {
+        var repository = new Mock<IClienteRepository>();
+
+        repository
+            .Setup(repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cliente);
+
+        return repository;
     }
 
     private static AtualizarClienteUseCase CriarUseCase(Mock<IClienteRepository> repository)
@@ -112,20 +158,5 @@ public class AtualizarClienteUseCaseTests
             repository.Object,
             new AtualizarClienteValidator(),
             MapperFactory.Criar());
-    }
-
-    private static AtualizarClienteRequest CriarRequestValido(Guid clienteId)
-    {
-        return new AtualizarClienteRequest(
-            ClienteId: clienteId,
-            Nome: "Cliente Atualizado",
-            Endereco: new EnderecoRequest(
-                Logradouro: "Rua B",
-                Numero: "200",
-                Bairro: "Bairro Novo",
-                Cidade: "Santo Andre",
-                CEP: "09000-000"),
-            Telefone: "(11) 98888-7777",
-            Email: "novo@email.com");
     }
 }

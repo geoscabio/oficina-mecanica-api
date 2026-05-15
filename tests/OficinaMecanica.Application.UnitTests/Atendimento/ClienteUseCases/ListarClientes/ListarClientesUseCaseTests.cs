@@ -2,7 +2,7 @@
 using Moq;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.ListarClientes;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
+using OficinaMecanica.Application.UnitTests.Atendimento.Factories;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -22,20 +22,33 @@ public class ListarClientesUseCaseTests
         };
 
         var repository = CriarRepository(clientes, totalItens: 2);
+
         var useCase = CriarUseCase(repository);
 
+        var request = ClienteTestDataFactory.CriarListarClientesRequestValido();
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ListarClientesRequest(1, 10));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
-        resultado.Valor!.Pagina.Should().Be(1);
-        resultado.Valor.TamanhoPagina.Should().Be(10);
+        resultado.Valor!.Pagina.Should().Be(ClienteTestDataFactory.PaginaPadrao);
+        resultado.Valor.TamanhoPagina.Should().Be(ClienteTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(2);
         resultado.Valor.Itens.Should().HaveCount(2);
-        resultado.Valor.Itens.Select(cliente => cliente.Id).Should().BeEquivalentTo(
-            clientes.Select(cliente => cliente.Id));
+        resultado.Valor.Itens.Select(cliente => cliente.Id).Should().BeEquivalentTo(clientes.Select(cliente => cliente.Id));
+
+        repository.Verify(
+            repo => repo.ListarAsync(
+                ClienteTestDataFactory.PaginaPadrao,
+                ClienteTestDataFactory.TamanhoPaginaPadrao,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -43,18 +56,32 @@ public class ListarClientesUseCaseTests
     {
         // Arrange
         var repository = CriarRepository(Array.Empty<Cliente>(), totalItens: 0);
+
         var useCase = CriarUseCase(repository);
 
+        var request = ClienteTestDataFactory.CriarListarClientesRequestValido();
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ListarClientesRequest(1, 10));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Itens.Should().BeEmpty();
-        resultado.Valor.Pagina.Should().Be(1);
-        resultado.Valor.TamanhoPagina.Should().Be(10);
+        resultado.Valor.Pagina.Should().Be(ClienteTestDataFactory.PaginaPadrao);
+        resultado.Valor.TamanhoPagina.Should().Be(ClienteTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(0);
+
+        repository.Verify(
+            repo => repo.ListarAsync(
+                ClienteTestDataFactory.PaginaPadrao,
+                ClienteTestDataFactory.TamanhoPaginaPadrao,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -62,15 +89,29 @@ public class ListarClientesUseCaseTests
     {
         // Arrange
         var repository = new Mock<IClienteRepository>();
+
         var useCase = CriarUseCase(repository);
 
+        var request = ClienteTestDataFactory.CriarListarClientesRequestValido(pagina: 0);
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ListarClientesRequest(0, 10));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ListarAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -78,15 +119,29 @@ public class ListarClientesUseCaseTests
     {
         // Arrange
         var repository = new Mock<IClienteRepository>();
+
         var useCase = CriarUseCase(repository);
 
+        var request = ClienteTestDataFactory.CriarListarClientesRequestValido(tamanhoPagina: 101);
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ListarClientesRequest(1, 101));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ListarAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     private static Mock<IClienteRepository> CriarRepository(
@@ -96,7 +151,10 @@ public class ListarClientesUseCaseTests
         var repository = new Mock<IClienteRepository>();
 
         repository
-            .Setup(repo => repo.ListarAsync(1, 10, It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ListarAsync(
+                ClienteTestDataFactory.PaginaPadrao,
+                ClienteTestDataFactory.TamanhoPaginaPadrao,
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(clientes);
 
         repository

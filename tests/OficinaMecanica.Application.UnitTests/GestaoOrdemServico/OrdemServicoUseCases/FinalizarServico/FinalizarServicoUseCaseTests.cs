@@ -3,7 +3,7 @@ using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.FinalizarServico;
 using OficinaMecanica.Application.UnitTests.Common;
-using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Builders;
+using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Factories;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
@@ -19,43 +19,72 @@ public class FinalizarServicoUseCaseTests
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmExecucaoComServicoEmExecucao();
+
         var servicoId = ordemServico.Servicos.Single().Id;
-        var repository = new Mock<IOrdemServicoRepository>();
-        repository
-            .Setup(repo => repo.ObterPorIdAsync(ordemServico.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(ordemServico);
+
+        var repository = CriarRepository(ordemServico);
 
         var useCase = CriarUseCase(repository);
 
+        var request = OrdemServicoTestDataFactory.CriarFinalizarServicoRequestValido(
+            ordemServico.Id,
+            servicoId);
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new FinalizarServicoRequest(ordemServico.Id, servicoId));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
+        resultado.Valor!.Id.Should().Be(ordemServico.Id);
         ordemServico.Servicos.Single().Status.Should().Be(StatusServico.FINALIZADO);
 
-        repository.Verify(repo => repo.AtualizarAsync(It.Is<OrdemServico>(ordemServicoAtualizada =>
-            ordemServicoAtualizada.Id == ordemServico.Id
-            && ordemServicoAtualizada.Servicos.Single().Status == StatusServico.FINALIZADO), It.IsAny<CancellationToken>()), Times.Once);
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.OrdemServicoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.Is<OrdemServico>(ordemServicoAtualizada =>
+                    ordemServicoAtualizada.Id == ordemServico.Id
+                    && ordemServicoAtualizada.Servicos.Single().Id == servicoId
+                    && ordemServicoAtualizada.Servicos.Single().Status == StatusServico.FINALIZADO),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
     public async Task Dado_OrdemServicoInexistente_Quando_FinalizarServico_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var repository = new Mock<IOrdemServicoRepository>();
+        var repository = CriarRepository(null);
+
         var useCase = CriarUseCase(repository);
 
+        var request = OrdemServicoTestDataFactory.CriarFinalizarServicoRequestValido();
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new FinalizarServicoRequest(Guid.NewGuid(), Guid.NewGuid()));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.OrdemServicoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -63,42 +92,119 @@ public class FinalizarServicoUseCaseTests
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmExecucaoComServicoPendente();
+
         var servicoId = ordemServico.Servicos.Single().Id;
-        var repository = new Mock<IOrdemServicoRepository>();
-        repository
-            .Setup(repo => repo.ObterPorIdAsync(ordemServico.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(ordemServico);
+
+        var repository = CriarRepository(ordemServico);
 
         var useCase = CriarUseCase(repository);
 
+        var request = OrdemServicoTestDataFactory.CriarFinalizarServicoRequestValido(
+            ordemServico.Id,
+            servicoId);
+
         // Act
-        var acao = () => useCase.ExecuteAsync(new FinalizarServicoRequest(ordemServico.Id, servicoId));
+        var acao = () => useCase.ExecuteAsync(request);
 
         // Assert
         await acao.Should()
             .ThrowAsync<DomainException>()
             .WithMessage(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
 
-        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.OrdemServicoId,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
-    public async Task Dado_IdVazio_Quando_FinalizarServico_Entao_DeveRetornarFalhaDeValidacao()
+    public async Task Dado_OrdemServicoIdVazio_Quando_FinalizarServico_Entao_DeveRetornarFalhaDeValidacao()
     {
         // Arrange
         var repository = new Mock<IOrdemServicoRepository>();
+
         var useCase = CriarUseCase(repository);
 
+        var request = OrdemServicoTestDataFactory.CriarFinalizarServicoRequestValido(
+            ordemServicoId: Guid.Empty);
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new FinalizarServicoRequest(Guid.Empty, Guid.NewGuid()));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
-    private static FinalizarServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
+    [Fact]
+    public async Task Dado_ServicoIdVazio_Quando_FinalizarServico_Entao_DeveRetornarFalhaDeValidacao()
+    {
+        // Arrange
+        var repository = new Mock<IOrdemServicoRepository>();
+
+        var useCase = CriarUseCase(repository);
+
+        var request = OrdemServicoTestDataFactory.CriarFinalizarServicoRequestValido(
+            servicoId: Guid.Empty);
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<OrdemServico>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    private static Mock<IOrdemServicoRepository> CriarRepository(OrdemServico? ordemServico)
+    {
+        var repository = new Mock<IOrdemServicoRepository>();
+
+        repository
+            .Setup(repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ordemServico);
+
+        return repository;
+    }
+
+    private static FinalizarServicoUseCase CriarUseCase(
+        Mock<IOrdemServicoRepository> repository)
     {
         return new FinalizarServicoUseCase(
             repository.Object,

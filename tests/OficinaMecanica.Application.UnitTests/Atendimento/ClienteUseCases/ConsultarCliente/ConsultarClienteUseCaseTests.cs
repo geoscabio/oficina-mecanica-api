@@ -1,11 +1,12 @@
 using FluentAssertions;
 using Moq;
-using OficinaMecanica.Application.Common;
-using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarCliente;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Application.UnitTests.Atendimento.Factories;
 using OficinaMecanica.Application.UnitTests.Common;
-using OficinaMecanica.Application.UnitTests.Atendimento.Builders;
+using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
+using OficinaMecanica.Domain.Atendimento.Messages;
 
 namespace OficinaMecanica.Application.UnitTests.Atendimento.ClienteUseCases.ConsultarCliente;
 
@@ -16,45 +17,75 @@ public class ConsultarClienteUseCaseTests
     {
         // Arrange
         var cliente = ClienteTestDataFactory.CriarClientePadrao();
-        var repository = new Mock<IClienteRepository>();
-        repository
-            .Setup(repo => repo.ObterPorIdAsync(cliente.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(cliente);
+
+        var repository = CriarRepository(cliente);
 
         var useCase = CriarUseCase(repository);
 
+        var request = ClienteTestDataFactory.CriarConsultarClienteRequestValido(cliente.Id);
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ConsultarClienteRequest(cliente.Id));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeTrue();
+
         resultado.Valor.Should().NotBeNull();
+
         resultado.Valor!.Id.Should().Be(cliente.Id);
-        resultado.Valor.Documento.Should().Be("52998224725");
-        resultado.Valor.Nome.Should().Be("Maria Silva");
-        resultado.Valor.Endereco.Logradouro.Should().Be("Rua A");
-        resultado.Valor.Endereco.Numero.Should().Be("100");
-        resultado.Valor.Endereco.Bairro.Should().Be("Centro");
-        resultado.Valor.Endereco.Cidade.Should().Be("Sao Paulo");
-        resultado.Valor.Endereco.CEP.Should().Be("01001000");
-        resultado.Valor.Telefone.Should().Be("11999999999");
-        resultado.Valor.Email.Should().Be("maria@email.com");
+
+        resultado.Valor.Documento.Should().Be(ClienteTestDataFactory.DocumentoNormalizadoPadrao);
+
+        resultado.Valor.Nome.Should().Be(ClienteTestDataFactory.NomePadrao);
+
+        resultado.Valor.Endereco.Logradouro.Should().Be(ClienteTestDataFactory.LogradouroPadrao);
+
+        resultado.Valor.Endereco.Numero.Should().Be(ClienteTestDataFactory.NumeroPadrao);
+
+        resultado.Valor.Endereco.Bairro.Should().Be(ClienteTestDataFactory.BairroPadrao);
+
+        resultado.Valor.Endereco.Cidade.Should().Be(ClienteTestDataFactory.CidadePadrao);
+
+        resultado.Valor.Endereco.CEP.Should().Be(ClienteTestDataFactory.CepNormalizadoPadrao);
+
+        resultado.Valor.Telefone.Should().Be(ClienteTestDataFactory.TelefoneNormalizadoPadrao);
+
+        resultado.Valor.Email.Should().Be(ClienteTestDataFactory.EmailPadrao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.Id,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
     public async Task Dado_ClienteInexistente_Quando_ConsultarCliente_Entao_DeveRetornarFalha()
     {
         // Arrange
-        var repository = new Mock<IClienteRepository>();
+        var repository = CriarRepository(null);
+
         var useCase = CriarUseCase(repository);
 
+        var request = ClienteTestDataFactory.CriarConsultarClienteRequestValido();
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ConsultarClienteRequest(Guid.NewGuid()));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
+
+        resultado.Erro.Should().NotBeNull();
+
         resultado.Erro!.Mensagem.Should().Be(ClienteErrorMessages.ClienteNaoEncontrado);
+
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                request.Id,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -62,16 +93,41 @@ public class ConsultarClienteUseCaseTests
     {
         // Arrange
         var repository = new Mock<IClienteRepository>();
+
         var useCase = CriarUseCase(repository);
 
+        var request = ClienteTestDataFactory.CriarConsultarClienteRequestValido(Guid.Empty);
+
         // Act
-        var resultado = await useCase.ExecuteAsync(new ConsultarClienteRequest(Guid.Empty));
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
         resultado.Sucesso.Should().BeFalse();
+
         resultado.Erro.Should().NotBeNull();
+
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    private static Mock<IClienteRepository> CriarRepository(Cliente? cliente)
+    {
+        var repository = new Mock<IClienteRepository>();
+
+        repository
+            .Setup(repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cliente);
+
+        return repository;
     }
 
     private static ConsultarClienteUseCase CriarUseCase(Mock<IClienteRepository> repository)
@@ -82,10 +138,3 @@ public class ConsultarClienteUseCaseTests
             MapperFactory.Criar());
     }
 }
-
-
-
-
-
-
-
