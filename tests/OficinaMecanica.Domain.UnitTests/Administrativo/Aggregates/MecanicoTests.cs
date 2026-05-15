@@ -4,7 +4,7 @@ using OficinaMecanica.Domain.Administrativo.Messages;
 using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.Administrativo.Factories;
 
-namespace OficinaMecanica.Domain.UnitTests.Administrativo;
+namespace OficinaMecanica.Domain.UnitTests.Administrativo.Aggregates;
 
 public class MecanicoTests
 {
@@ -12,16 +12,18 @@ public class MecanicoTests
     public void Dado_DadosValidos_Quando_CriarMecanico_Entao_DeveRegistrarMecanicoComIdentidade()
     {
         // Arrange
-        const string nomeEsperado = MecanicoTestDataFactory.NomePadrao;
-        const string funcionalEsperado = MecanicoTestDataFactory.FuncionalPadrao;
+        const string nome = MecanicoTestDataFactory.NomePadrao;
+        const string funcional = MecanicoTestDataFactory.FuncionalPadrao;
 
         // Act
-        var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
+        var mecanico = Mecanico.Criar(
+            nome,
+            funcional);
 
         // Assert
         mecanico.Id.Should().NotBeEmpty();
-        mecanico.Nome.Should().Be(nomeEsperado);
-        mecanico.Funcional.Should().Be(funcionalEsperado);
+        mecanico.Nome.Should().Be(MecanicoTestDataFactory.NomePadrao);
+        mecanico.Funcional.Should().Be(MecanicoTestDataFactory.FuncionalPadrao);
     }
 
     [Theory]
@@ -33,7 +35,9 @@ public class MecanicoTests
         const string funcional = MecanicoTestDataFactory.FuncionalPadrao;
 
         // Act
-        var acao = () => Mecanico.Criar(nome, funcional);
+        var acao = () => Mecanico.Criar(
+            nome,
+            funcional);
 
         // Assert
         acao.Should()
@@ -44,13 +48,16 @@ public class MecanicoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_FuncionalInvalido_Quando_CriarMecanico_Entao_DeveLancarDomainException(string funcional)
+    public void Dado_FuncionalInvalido_Quando_CriarMecanico_Entao_DeveLancarDomainException(
+        string funcional)
     {
         // Arrange
         const string nome = MecanicoTestDataFactory.NomePadrao;
 
         // Act
-        var acao = () => Mecanico.Criar(nome, funcional);
+        var acao = () => Mecanico.Criar(
+            nome,
+            funcional);
 
         // Assert
         acao.Should()
@@ -65,23 +72,28 @@ public class MecanicoTests
         var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
 
         // Act
-        mecanico.Atualizar("Carlos Silva", "MEC-002");
+        mecanico.Atualizar(
+            MecanicoTestDataFactory.NomeAtualizado,
+            MecanicoTestDataFactory.FuncionalAtualizado);
 
         // Assert
-        mecanico.Nome.Should().Be("Carlos Silva");
-        mecanico.Funcional.Should().Be("MEC-002");
+        mecanico.Nome.Should().Be(MecanicoTestDataFactory.NomeAtualizado);
+        mecanico.Funcional.Should().Be(MecanicoTestDataFactory.FuncionalAtualizado);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_NomeInvalido_Quando_AtualizarMecanico_Entao_DeveLancarDomainException(string nome)
+    public void Dado_NomeInvalido_Quando_AtualizarMecanico_Entao_DeveLancarDomainException(
+        string nome)
     {
         // Arrange
         var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
 
         // Act
-        var acao = () => mecanico.Atualizar(nome, MecanicoTestDataFactory.FuncionalPadrao);
+        var acao = () => mecanico.Atualizar(
+            nome,
+            MecanicoTestDataFactory.FuncionalAtualizado);
 
         // Assert
         acao.Should()
@@ -92,13 +104,16 @@ public class MecanicoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_FuncionalInvalido_Quando_AtualizarMecanico_Entao_DeveLancarDomainException(string funcional)
+    public void Dado_FuncionalInvalido_Quando_AtualizarMecanico_Entao_DeveLancarDomainException(
+        string funcional)
     {
         // Arrange
         var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
 
         // Act
-        var acao = () => mecanico.Atualizar(MecanicoTestDataFactory.NomePadrao, funcional);
+        var acao = () => mecanico.Atualizar(
+            MecanicoTestDataFactory.NomeAtualizado,
+            funcional);
 
         // Assert
         acao.Should()

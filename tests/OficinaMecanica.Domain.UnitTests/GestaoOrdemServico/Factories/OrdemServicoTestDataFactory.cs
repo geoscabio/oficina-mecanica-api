@@ -5,27 +5,61 @@ namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Factories;
 
 internal static class OrdemServicoTestDataFactory
 {
+    public const int NumeroPadrao = 1;
+
     public const decimal ValorServicoPadrao = 150m;
+    public const decimal ValorServicoAtualizado = 80m;
+
     public const decimal ValorPecaInsumoPadrao = 45m;
     public const int QuantidadePecaInsumoPadrao = 2;
 
-    public static OrdemServico CriarOrdemServicoPadrao()
+    public static OrdemServico CriarOrdemServicoPadrao(
+        int numero = NumeroPadrao,
+        Guid? veiculoId = null,
+        Guid? mecanicoId = null)
     {
-        return OrdemServico.Abrir(1, Guid.NewGuid(), Guid.NewGuid());
+        return OrdemServico.Abrir(
+            numero,
+            veiculoId ?? Guid.NewGuid(),
+            mecanicoId ?? Guid.NewGuid());
     }
 
     public static OrdemServico CriarOrdemServicoEmDiagnostico()
     {
         var ordemServico = CriarOrdemServicoPadrao();
+
         ordemServico.IniciarDiagnostico();
+
+        return ordemServico;
+    }
+
+    public static OrdemServico CriarOrdemServicoEmDiagnosticoComServico()
+    {
+        var ordemServico = CriarOrdemServicoEmDiagnostico();
+
+        ordemServico.DefinirServico(
+            Guid.NewGuid(),
+            ValorServicoPadrao);
+
+        return ordemServico;
+    }
+
+    public static OrdemServico CriarOrdemServicoEmDiagnosticoComServicoEPecaInsumo()
+    {
+        var ordemServico = CriarOrdemServicoEmDiagnosticoComServico();
+
+        ordemServico.ReservarPecaInsumo(
+            Guid.NewGuid(),
+            QuantidadePecaInsumoPadrao,
+            ValorPecaInsumoPadrao);
 
         return ordemServico;
     }
 
     public static OrdemServico CriarOrdemServicoAguardandoAprovacao()
     {
-        var ordemServico = CriarOrdemServicoEmDiagnostico();
-        ordemServico.DefinirServico(Guid.NewGuid(), ValorServicoPadrao);
+        var ordemServico = CriarOrdemServicoEmDiagnosticoComServico();
+
         ordemServico.AguardarAprovacao();
 
         return ordemServico;
@@ -34,41 +68,87 @@ internal static class OrdemServicoTestDataFactory
     public static OrdemServico CriarOrdemServicoEmExecucao()
     {
         var ordemServico = CriarOrdemServicoAguardandoAprovacao();
+
         ordemServico.IniciarExecucao();
+
+        return ordemServico;
+    }
+
+    public static OrdemServico CriarOrdemServicoEmExecucaoComServicoEmExecucao()
+    {
+        var ordemServico = CriarOrdemServicoEmExecucao();
+
+        var servicoId = ordemServico.Servicos.Single().Id;
+
+        ordemServico.IniciarExecucaoServico(servicoId);
+
+        return ordemServico;
+    }
+
+    public static OrdemServico CriarOrdemServicoEmExecucaoComServicoFinalizado()
+    {
+        var ordemServico = CriarOrdemServicoEmExecucaoComServicoEmExecucao();
+
+        var servicoId = ordemServico.Servicos.Single().Id;
+
+        ordemServico.FinalizarServico(servicoId);
 
         return ordemServico;
     }
 
     public static OrdemServico CriarOrdemServicoFinalizada()
     {
-        var ordemServico = CriarOrdemServicoEmExecucao();
-        var servicoId = ordemServico.Servicos.Single().Id;
+        var ordemServico = CriarOrdemServicoEmExecucaoComServicoFinalizado();
 
-        ordemServico.IniciarExecucaoServico(servicoId);
-        ordemServico.FinalizarServico(servicoId);
         ordemServico.Finalizar();
 
         return ordemServico;
     }
 
-    public static Servico CriarServicoPadrao(Guid? servicoCatalogoId = null)
+    public static OrdemServico CriarOrdemServicoEntregue()
     {
-        return Servico.Criar(servicoCatalogoId ?? Guid.NewGuid(), ValorServicoPadrao);
+        var ordemServico = CriarOrdemServicoFinalizada();
+
+        ordemServico.Entregar();
+
+        return ordemServico;
+    }
+
+    public static Servico CriarServicoPadrao(
+        Guid? servicoCatalogoId = null,
+        decimal valor = ValorServicoPadrao)
+    {
+        return Servico.Criar(
+            servicoCatalogoId ?? Guid.NewGuid(),
+            valor);
     }
 
     public static Servico CriarServicoEmExecucao()
     {
         var servico = CriarServicoPadrao();
+
         servico.IniciarExecucao();
 
         return servico;
     }
 
-    public static PecaInsumo CriarPecaInsumoPadrao(Guid? pecaInsumoCatalogoId = null)
+    public static Servico CriarServicoFinalizado()
+    {
+        var servico = CriarServicoEmExecucao();
+
+        servico.Finalizar();
+
+        return servico;
+    }
+
+    public static PecaInsumo CriarPecaInsumoPadrao(
+        Guid? pecaInsumoCatalogoId = null,
+        int quantidade = QuantidadePecaInsumoPadrao,
+        decimal valorUnitario = ValorPecaInsumoPadrao)
     {
         return PecaInsumo.Criar(
             pecaInsumoCatalogoId ?? Guid.NewGuid(),
-            QuantidadePecaInsumoPadrao,
-            ValorPecaInsumoPadrao);
+            quantidade,
+            valorUnitario);
     }
 }

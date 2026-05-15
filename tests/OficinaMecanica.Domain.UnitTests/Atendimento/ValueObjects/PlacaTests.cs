@@ -1,16 +1,19 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.Atendimento.Messages;
-using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
+using OficinaMecanica.Domain.Shared.Exceptions;
+using OficinaMecanica.Domain.UnitTests.Atendimento.Factories;
 
-namespace OficinaMecanica.Domain.UnitTests.Atendimento;
+namespace OficinaMecanica.Domain.UnitTests.Atendimento.ValueObjects;
 
 public class PlacaTests
 {
     [Theory]
-    [InlineData("ABC-1234", "ABC1234")]
+    [InlineData("ABC-1234", VeiculoTestDataFactory.PlacaNormalizadaPadrao)]
     [InlineData("abc1d23", "ABC1D23")]
-    public void Dado_PlacaValida_Quando_Criar_Entao_DeveNormalizarNumeroDaPlaca(string numero, string esperado)
+    public void Dado_PlacaValida_Quando_Criar_Entao_DeveNormalizarNumeroDaPlaca(
+        string numero,
+        string esperado)
     {
         // Arrange
         var numeroInformado = numero;
@@ -24,6 +27,7 @@ public class PlacaTests
 
     [Theory]
     [InlineData("")]
+    [InlineData("  ")]
     [InlineData("ABC123")]
     [InlineData("ABCD123")]
     [InlineData("ABC12D4")]
@@ -45,8 +49,8 @@ public class PlacaTests
     public void Dado_PlacasComMesmosCaracteres_Quando_Comparar_Entao_DevemSerIguaisPorValor()
     {
         // Arrange
-        var placaComMascara = Placa.Criar("ABC-1234");
-        var placaSemMascara = Placa.Criar("abc1234");
+        var placaComMascara = Placa.Criar(VeiculoTestDataFactory.PlacaPadrao);
+        var placaSemMascara = Placa.Criar(VeiculoTestDataFactory.PlacaNormalizadaPadrao.ToLowerInvariant());
 
         // Act
         var placasIguais = placaComMascara.Equals(placaSemMascara);

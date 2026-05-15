@@ -6,11 +6,21 @@ namespace OficinaMecanica.Domain.UnitTests.Administrativo.Factories;
 internal static class PecaInsumoCatalogoTestDataFactory
 {
     public const string DescricaoPadrao = "Filtro de oleo";
+    public const TipoPecaInsumo TipoPadrao = TipoPecaInsumo.PECA;
     public const decimal ValorPadrao = 45m;
 
+    public const string DescricaoAtualizada = "Oleo 5W30";
+    public const TipoPecaInsumo TipoAtualizado = TipoPecaInsumo.INSUMO;
+    public const decimal ValorAtualizado = 38m;
+
     public static PecaInsumoCatalogo CriarPecaInsumoCatalogoPadrao(
-        TipoPecaInsumo tipo = TipoPecaInsumo.PECA)
+        string descricao = DescricaoPadrao,
+        TipoPecaInsumo tipo = TipoPadrao,
+        decimal valor = ValorPadrao)
     {
-        return PecaInsumoCatalogo.Criar(DescricaoPadrao, tipo, ValorPadrao);
+        return PecaInsumoCatalogo.Criar(
+            descricao,
+            tipo,
+            valor);
     }
 }
