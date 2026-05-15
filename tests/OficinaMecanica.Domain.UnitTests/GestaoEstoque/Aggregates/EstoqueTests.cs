@@ -5,7 +5,7 @@ using OficinaMecanica.Domain.GestaoEstoque.Messages;
 using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.GestaoEstoque.Factories;
 
-namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque;
+namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque.Aggregates;
 
 public class EstoqueTests
 {

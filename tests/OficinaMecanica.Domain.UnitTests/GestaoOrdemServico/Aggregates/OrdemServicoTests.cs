@@ -5,7 +5,7 @@ using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Factories;
 
-namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico;
+namespace OficinaMecanica.Domain.UnitTests.GestaoOrdemServico.Aggregates;
 
 public class OrdemServicoTests
 {

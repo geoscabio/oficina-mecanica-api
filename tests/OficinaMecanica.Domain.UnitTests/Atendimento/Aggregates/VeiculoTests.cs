@@ -4,7 +4,7 @@ using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.UnitTests.Atendimento.Factories;
 
-namespace OficinaMecanica.Domain.UnitTests.Atendimento;
+namespace OficinaMecanica.Domain.UnitTests.Atendimento.Aggregates;
 
 public class VeiculoTests
 {
