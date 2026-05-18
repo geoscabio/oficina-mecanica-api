@@ -6,6 +6,13 @@ namespace OficinaMecanica.Domain.Atendimento.Aggregates;
 
 public sealed class Veiculo
 {
+    private Veiculo()
+    {
+        Placa = null!;
+        Marca = string.Empty;
+        Modelo = string.Empty;
+    }
+
     private Veiculo(Guid id, Guid clienteId, Placa placa, string marca, string modelo, int ano)
     {
         Id = id;

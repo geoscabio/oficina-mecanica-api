@@ -10,6 +10,10 @@ public sealed class OrdemServico
     private readonly List<Servico> _servicos = new();
     private readonly List<PecaInsumo> _pecasInsumos = new();
 
+    private OrdemServico()
+    {
+    }
+
     private OrdemServico(Guid id, int numero, Guid veiculoId, Guid mecanicoId)
     {
         Id = id;

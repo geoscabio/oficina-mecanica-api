@@ -5,13 +5,13 @@ namespace OficinaMecanica.Domain.Atendimento.ValueObjects;
 
 public sealed record Endereco
 {
-    public Endereco(string logradouro, string numero, string bairro, string cidade, string cep)
+    public Endereco(string logradouro, string numero, string bairro, string cidade, string CEP)
     {
         if (string.IsNullOrWhiteSpace(logradouro)
             || string.IsNullOrWhiteSpace(numero)
             || string.IsNullOrWhiteSpace(bairro)
             || string.IsNullOrWhiteSpace(cidade)
-            || string.IsNullOrWhiteSpace(cep))
+            || string.IsNullOrWhiteSpace(CEP))
         {
             throw new DomainException(ClienteErrorMessages.EnderecoInvalido);
         }
@@ -20,7 +20,7 @@ public sealed record Endereco
         Numero = numero.Trim();
         Bairro = bairro.Trim();
         Cidade = cidade.Trim();
-        CEP = NormalizarCep(cep);
+        this.CEP = NormalizarCep(CEP);
     }
 
     public string Logradouro { get; }
