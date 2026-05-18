@@ -8,6 +8,11 @@ public sealed class Estoque
 {
     private readonly List<ItemEstoque> _itensEstoque;
 
+    private Estoque()
+    {
+        _itensEstoque = new List<ItemEstoque>();
+    }
+
     private Estoque(Guid id, IEnumerable<ItemEstoque> itensEstoque)
     {
         Id = id;

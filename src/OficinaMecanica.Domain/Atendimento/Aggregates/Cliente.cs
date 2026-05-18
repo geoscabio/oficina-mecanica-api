@@ -6,6 +6,15 @@ namespace OficinaMecanica.Domain.Atendimento.Aggregates;
 
 public sealed class Cliente
 {
+    private Cliente()
+    {
+        Documento = null!;
+        Nome = string.Empty;
+        Endereco = null!;
+        Telefone = null!;
+        Email = null!;
+    }
+
     private Cliente(Guid id, CpfCnpj documento, string nome, Endereco endereco, Telefone telefone, Email email)
     {
         Id = id;
