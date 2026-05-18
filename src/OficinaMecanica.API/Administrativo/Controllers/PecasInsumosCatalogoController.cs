@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Administrativo.Requests;
 using OficinaMecanica.API.Common;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.AtualizarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.CadastrarPecaInsumoCatalogo;
@@ -58,15 +57,11 @@ public sealed class PecasInsumosCatalogoController : ControllerBase
     public async Task<IActionResult> Atualizar(
         [FromServices] AtualizarPecaInsumoCatalogoUseCase useCase,
         Guid pecaInsumoCatalogoId,
-        [FromBody] AtualizarPecaInsumoCatalogoApiRequest request,
+        [FromBody] AtualizarPecaInsumoCatalogoRequest request,
         CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(
-            new AtualizarPecaInsumoCatalogoRequest(
-                pecaInsumoCatalogoId,
-                request.Descricao,
-                request.Tipo,
-                request.Valor),
+            request with { PecaInsumoCatalogoId = pecaInsumoCatalogoId },
             cancellationToken);
 
         return this.ToActionResult(result);

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Atendimento.Requests;
 using OficinaMecanica.API.Common;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.AtualizarCliente;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
@@ -68,11 +67,11 @@ public sealed class ClientesController : ControllerBase
     public async Task<IActionResult> Atualizar(
         [FromServices] AtualizarClienteUseCase useCase,
         Guid clienteId,
-        [FromBody] AtualizarClienteApiRequest request,
+        [FromBody] AtualizarClienteRequest request,
         CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(
-            new AtualizarClienteRequest(clienteId, request.Nome, request.Endereco, request.Telefone, request.Email),
+            request with { ClienteId = clienteId },
             cancellationToken);
 
         return this.ToActionResult(result);
