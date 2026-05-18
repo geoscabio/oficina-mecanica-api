@@ -1,7 +1,7 @@
 using FluentValidation;
-using OficinaMecanica.Application.Administrativo.ValidationMessages;
+using OficinaMecanica.Application.GestaoOrdemServico.ValidationMessages;
 
-namespace OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ConsultarTempoMedioExecucaoServico;
+namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ConsultarTempoMedioExecucaoServico;
 
 public sealed class ConsultarTempoMedioExecucaoServicoValidator : AbstractValidator<ConsultarTempoMedioExecucaoServicoRequest>
 {
@@ -9,13 +9,13 @@ public sealed class ConsultarTempoMedioExecucaoServicoValidator : AbstractValida
     {
         RuleFor(request => request)
             .NotNull()
-            .WithMessage(ServicoCatalogoValidationMessages.RequestConsultarTempoMedioExecucaoServicoObrigatorio);
+            .WithMessage(OrdemServicoValidationMessages.RequestConsultarTempoMedioExecucaoServicoObrigatorio);
 
         When(request => request is not null, () =>
         {
             RuleFor(request => request.ServicoCatalogoId)
                 .NotEmpty()
-                .WithMessage(ServicoCatalogoValidationMessages.ServicoCatalogoIdObrigatorio);
+                .WithMessage(OrdemServicoValidationMessages.ServicoCatalogoIdObrigatorio);
         });
     }
 }

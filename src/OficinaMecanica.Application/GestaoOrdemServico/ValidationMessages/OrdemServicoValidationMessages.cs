@@ -16,6 +16,8 @@ public static class OrdemServicoValidationMessages
     public const string RequestDetalharOrdemServicoObrigatorio = "Request para detalhar ordem de serviço é obrigatório.";
     public const string RequestListarOrdensServicoObrigatorio = "Request para listar ordens de serviço é obrigatório.";
     public const string RequestConsultarStatusOrdemServicoObrigatorio = "Request para consultar status da ordem de serviço é obrigatório.";
+    public const string RequestConsultarTempoMedioExecucaoServicoObrigatorio = "Request para consultar tempo médio de execução do serviço é obrigatório.";
+    public const string RequestListarTempoMedioExecucaoServicosObrigatorio = "Request para listar tempos médios de execução dos serviços é obrigatório.";
     public const string VeiculoIdObrigatorio = "VeículoId é obrigatório.";
     public const string MecanicoIdObrigatorio = "MecânicoId é obrigatório.";
     public const string OrdemServicoIdObrigatorio = "OrdemServicoId é obrigatório.";

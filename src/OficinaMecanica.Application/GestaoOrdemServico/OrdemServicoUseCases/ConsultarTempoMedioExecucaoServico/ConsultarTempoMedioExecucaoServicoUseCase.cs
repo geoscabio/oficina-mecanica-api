@@ -1,13 +1,13 @@
 using AutoMapper;
 using FluentValidation;
-using OficinaMecanica.Application.Administrativo.Mappings;
-using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.Responses;
 using OficinaMecanica.Application.Common;
+using OficinaMecanica.Application.GestaoOrdemServico.Mappings;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
 using OficinaMecanica.Domain.Administrativo.Messages;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 
-namespace OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ConsultarTempoMedioExecucaoServico;
+namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ConsultarTempoMedioExecucaoServico;
 
 public sealed class ConsultarTempoMedioExecucaoServicoUseCase
 {
@@ -57,7 +57,7 @@ public sealed class ConsultarTempoMedioExecucaoServicoUseCase
             cancellationToken);
         var response = _mapper.Map<TempoMedioExecucaoServicoResponse>(
             servicoCatalogo,
-            opcao => opcao.Items[ServicoCatalogoMappingProfile.TempoMedioExecucaoEmMinutosKey] = tempoMedio);
+            opcao => opcao.Items[OrdemServicoMappingProfile.TempoMedioExecucaoEmMinutosKey] = tempoMedio);
 
         return Result<TempoMedioExecucaoServicoResponse>.Ok(response);
     }

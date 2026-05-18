@@ -1,14 +1,14 @@
 using FluentAssertions;
 using Moq;
-using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ListarTempoMedioExecucaoServicos;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Application.UnitTests.Administrativo.Factories;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ListarTempoMedioExecucaoServicos;
 using OficinaMecanica.Application.UnitTests.Common;
+using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Factories;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 
-namespace OficinaMecanica.Application.UnitTests.Administrativo.ServicoCatalogoUseCases.ListarTempoMedioExecucaoServicos;
+namespace OficinaMecanica.Application.UnitTests.GestaoOrdemServico.OrdemServicoUseCases.ListarTempoMedioExecucaoServicos;
 
 public class ListarTempoMedioExecucaoServicosUseCaseTests
 {
