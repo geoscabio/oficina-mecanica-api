@@ -5,6 +5,12 @@ namespace OficinaMecanica.Domain.Administrativo.Aggregates;
 
 public sealed class Mecanico
 {
+    private Mecanico()
+    {
+        Nome = string.Empty;
+        Funcional = string.Empty;
+    }
+
     private Mecanico(Guid id, string nome, string funcional)
     {
         Id = id;

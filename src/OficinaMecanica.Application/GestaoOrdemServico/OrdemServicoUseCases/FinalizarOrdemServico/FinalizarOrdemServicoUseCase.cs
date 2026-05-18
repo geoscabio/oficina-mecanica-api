@@ -46,19 +46,22 @@ public sealed class FinalizarOrdemServicoUseCase
             return Result<OrdemServicoResponse>.Falha(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada, TipoErro.NaoEncontrado);
         }
 
-        var estoque = await _estoqueRepository.ObterAsync(cancellationToken);
+        var possuiPecasInsumos = ordemServico.PecasInsumos.Count > 0;
+        var estoque = possuiPecasInsumos
+            ? await _estoqueRepository.ObterAsync(cancellationToken)
+            : null;
 
-        if (ordemServico.PecasInsumos.Count > 0 && estoque is null)
+        if (possuiPecasInsumos && estoque is null)
         {
             return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
+
+        ordemServico.Finalizar();
 
         foreach (var pecaInsumo in ordemServico.PecasInsumos)
         {
             estoque!.BaixarItens(pecaInsumo.PecaInsumoCatalogoId, pecaInsumo.Quantidade);
         }
-
-        ordemServico.Finalizar();
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
         if (estoque is not null)

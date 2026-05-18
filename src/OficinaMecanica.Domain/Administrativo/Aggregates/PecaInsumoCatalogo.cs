@@ -6,6 +6,11 @@ namespace OficinaMecanica.Domain.Administrativo.Aggregates;
 
 public sealed class PecaInsumoCatalogo
 {
+    private PecaInsumoCatalogo()
+    {
+        Descricao = string.Empty;
+    }
+
     private PecaInsumoCatalogo(Guid id, string descricao, TipoPecaInsumo tipo, decimal valor)
     {
         Id = id;

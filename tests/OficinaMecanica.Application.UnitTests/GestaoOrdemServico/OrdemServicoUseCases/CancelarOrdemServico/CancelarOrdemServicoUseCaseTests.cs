@@ -80,7 +80,7 @@ public class CancelarOrdemServicoUseCaseTests
     }
 
     [Fact]
-    public async Task Dado_OrdemServicoAguardandoAprovacaoComPecaReservada_Quando_CancelarPorOutroMotivo_Entao_NaoDeveEstornarEstoque()
+    public async Task Dado_OrdemServicoAguardandoAprovacaoComPecaReservada_Quando_CancelarPorOutroMotivo_Entao_DeveEstornarEstoque()
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
@@ -88,9 +88,12 @@ public class CancelarOrdemServicoUseCaseTests
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacaoComPecaInsumoReservado(
             pecaInsumoCatalogoId);
 
+        var estoque = EstoqueTestDataFactory.CriarEstoqueComItemReservado(
+            pecaInsumoCatalogoId);
+
         var ordemServicoRepository = CriarOrdemServicoRepository(ordemServico);
 
-        var estoqueRepository = new Mock<IEstoqueRepository>();
+        var estoqueRepository = CriarEstoqueRepository(estoque);
 
         var useCase = CriarUseCase(
             ordemServicoRepository,
@@ -109,6 +112,8 @@ public class CancelarOrdemServicoUseCaseTests
         resultado.Valor!.Status.Should().Be(OrdemServicoTestDataFactory.StatusCancelada);
 
         ordemServico.MotivoCancelamento.Should().Be(MotivoCancelamentoOrdemServico.EstoqueInsuficiente);
+        estoque.ObterItem(pecaInsumoCatalogoId).QuantidadeReservada.Should().Be(0);
+        estoque.ObterItem(pecaInsumoCatalogoId).QuantidadeDisponivel.Should().Be(10);
 
         ordemServicoRepository.Verify(
             repo => repo.ObterPorIdAsync(
@@ -118,7 +123,7 @@ public class CancelarOrdemServicoUseCaseTests
 
         estoqueRepository.Verify(
             repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+            Times.Once);
 
         ordemServicoRepository.Verify(
             repo => repo.AtualizarAsync(
@@ -131,9 +136,9 @@ public class CancelarOrdemServicoUseCaseTests
 
         estoqueRepository.Verify(
             repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
+                estoque,
                 It.IsAny<CancellationToken>()),
-            Times.Never);
+            Times.Once);
     }
 
     [Fact]
