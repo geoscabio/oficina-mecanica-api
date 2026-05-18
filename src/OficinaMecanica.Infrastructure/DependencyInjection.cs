@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OficinaMecanica.Infrastructure.Administrativo;
 using OficinaMecanica.Infrastructure.Persistence;
 
 namespace OficinaMecanica.Infrastructure;
@@ -13,6 +14,7 @@ public static class DependencyInjection
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' nao configurada.");
 
         services.AddDbContext<OficinaMecanicaDbContext>(options => options.UseSqlServer(connectionString));
+        services.AddAdministrativoInfrastructure();
 
         return services;
     }
