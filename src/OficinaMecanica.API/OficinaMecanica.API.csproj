@@ -11,4 +11,8 @@
     <ProjectReference Include="..\OficinaMecanica.Infrastructure\OficinaMecanica.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,94 @@
+using Microsoft.AspNetCore.Mvc;
+using OficinaMecanica.API.Atendimento.Requests;
+using OficinaMecanica.API.Common;
+using OficinaMecanica.Application.Atendimento.VeiculoUseCases.AtualizarVeiculo;
+using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
+using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;
+using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculoPorPlaca;
+using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ListarVeiculos;
+using OficinaMecanica.Application.Atendimento.VeiculoUseCases.RemoverVeiculo;
+
+namespace OficinaMecanica.API.Atendimento.Controllers;
+
+[ApiController]
+[Route("api/v1/atendimento/veiculos")]
+public sealed class VeiculosController : ControllerBase
+{
+    [HttpPost]
+    public async Task<IActionResult> Cadastrar(
+        [FromServices] CadastrarVeiculoUseCase useCase,
+        [FromBody] CadastrarVeiculoRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(request, cancellationToken);
+
+        return this.ToCreatedAtActionResult(
+            result,
+            nameof(Consultar),
+            veiculo => new { veiculoId = veiculo.Id });
+    }
+
+    [HttpGet("{veiculoId:guid}")]
+    public async Task<IActionResult> Consultar(
+        [FromServices] ConsultarVeiculoUseCase useCase,
+        Guid veiculoId,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(new ConsultarVeiculoRequest(veiculoId), cancellationToken);
+
+        return this.ToActionResult(result);
+    }
+
+    [HttpGet("placa/{placa}")]
+    public async Task<IActionResult> ConsultarPorPlaca(
+        [FromServices] ConsultarVeiculoPorPlacaUseCase useCase,
+        string placa,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(new ConsultarVeiculoPorPlacaRequest(placa), cancellationToken);
+
+        return this.ToActionResult(result);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Listar(
+        [FromServices] ListarVeiculosUseCase useCase,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanhoPagina = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await useCase.ExecuteAsync(new ListarVeiculosRequest(pagina, tamanhoPagina), cancellationToken);
+
+        return this.ToActionResult(result);
+    }
+
+    [HttpPut("{veiculoId:guid}")]
+    public async Task<IActionResult> Atualizar(
+        [FromServices] AtualizarVeiculoUseCase useCase,
+        Guid veiculoId,
+        [FromBody] AtualizarVeiculoApiRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(
+            new AtualizarVeiculoRequest(
+                veiculoId,
+                request.Placa,
+                request.Marca,
+                request.Modelo,
+                request.Ano),
+            cancellationToken);
+
+        return this.ToActionResult(result);
+    }
+
+    [HttpDelete("{veiculoId:guid}")]
+    public async Task<IActionResult> Remover(
+        [FromServices] RemoverVeiculoUseCase useCase,
+        Guid veiculoId,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(new RemoverVeiculoRequest(veiculoId), cancellationToken);
+
+        return this.ToActionResult(result);
+    }
+}
