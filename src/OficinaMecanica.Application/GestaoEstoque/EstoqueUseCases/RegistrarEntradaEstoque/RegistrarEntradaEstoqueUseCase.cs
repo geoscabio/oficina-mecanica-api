@@ -41,13 +41,7 @@ public sealed class RegistrarEntradaEstoqueUseCase
 
         if (estoque is null)
         {
-            var item = ItemEstoque.Criar(request.PecaInsumoCatalogoId, request.Quantidade);
-
-            estoque = Estoque.Criar(new[] { item });
-
-            await _estoqueRepository.AtualizarAsync(estoque, cancellationToken);
-
-            return Result<ItemEstoqueResponse>.Ok(_mapper.Map<ItemEstoqueResponse>(item));
+            estoque = Estoque.Criar(Array.Empty<ItemEstoque>());
         }
 
         var itemEstoque = estoque.RegistrarEntrada(request.PecaInsumoCatalogoId, request.Quantidade);

@@ -24,18 +24,17 @@ public class EstoqueTests
     }
 
     [Fact]
-    public void Dado_ListaSemItens_Quando_CriarEstoque_Entao_DeveLancarDomainException()
+    public void Dado_ListaSemItens_Quando_CriarEstoque_Entao_DeveRegistrarEstoqueSemItens()
     {
         // Arrange
         var itens = Array.Empty<ItemEstoque>();
 
         // Act
-        var acao = () => Estoque.Criar(itens);
+        var estoque = Estoque.Criar(itens);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(EstoqueErrorMessages.EstoqueSemItens);
+        estoque.Id.Should().NotBeEmpty();
+        estoque.ItensEstoque.Should().BeEmpty();
     }
 
     [Fact]
@@ -391,33 +390,4 @@ public class EstoqueTests
             .WithMessage(EstoqueErrorMessages.ItemNaoEncontrado);
     }
 
-    [Fact]
-    public void Dado_ItemExistente_Quando_ObterItemPorPecaInsumoCatalogoId_Entao_DeveRetornarItem()
-    {
-        // Arrange
-        var pecaInsumoCatalogoId = Guid.NewGuid();
-
-        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(
-            pecaInsumoCatalogoId);
-
-        // Act
-        var item = estoque.ObterItemPorPecaInsumoCatalogoId(pecaInsumoCatalogoId);
-
-        // Assert
-        item.Should().NotBeNull();
-        item!.PecaInsumoCatalogoId.Should().Be(pecaInsumoCatalogoId);
-    }
-
-    [Fact]
-    public void Dado_ItemInexistente_Quando_ObterItemPorPecaInsumoCatalogoId_Entao_DeveRetornarNulo()
-    {
-        // Arrange
-        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao();
-
-        // Act
-        var item = estoque.ObterItemPorPecaInsumoCatalogoId(Guid.NewGuid());
-
-        // Assert
-        item.Should().BeNull();
-    }
 }

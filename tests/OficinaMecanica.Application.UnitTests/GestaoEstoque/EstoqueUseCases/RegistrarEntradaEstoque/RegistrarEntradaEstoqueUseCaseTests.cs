@@ -89,6 +89,42 @@ public class RegistrarEntradaEstoqueUseCaseTests
     }
 
     [Fact]
+    public async Task Dado_EstoqueInexistente_Quando_RegistrarEntradaEstoque_Entao_DeveCriarEstoqueComItem()
+    {
+        // Arrange
+        var repository = new Mock<IEstoqueRepository>();
+
+        repository
+            .Setup(repo => repo.ObterAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Estoque?)null);
+
+        var useCase = CriarUseCase(repository);
+
+        var request =
+            EstoqueTestDataFactory.CriarRegistrarEntradaEstoqueRequestValido();
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeTrue();
+
+        resultado.Valor.Should().NotBeNull();
+
+        resultado.Valor!.PecaInsumoCatalogoId.Should().Be(request.PecaInsumoCatalogoId);
+
+        resultado.Valor.QuantidadeDisponivel.Should().Be(request.Quantidade);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.Is<Estoque>(estoque =>
+                    estoque.ItensEstoque.Any(item =>
+                        item.PecaInsumoCatalogoId == request.PecaInsumoCatalogoId)),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
     public async Task Dado_PecaInsumoCatalogoIdVazio_Quando_RegistrarEntradaEstoque_Entao_DeveRetornarFalhaDeValidacao()
     {
         // Arrange
