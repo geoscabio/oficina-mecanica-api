@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Administrativo.Requests;
 using OficinaMecanica.API.Common;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.AtualizarServicoCatalogo;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.CadastrarServicoCatalogo;
@@ -58,11 +57,11 @@ public sealed class ServicosCatalogoController : ControllerBase
     public async Task<IActionResult> Atualizar(
         [FromServices] AtualizarServicoCatalogoUseCase useCase,
         Guid servicoCatalogoId,
-        [FromBody] AtualizarServicoCatalogoApiRequest request,
+        [FromBody] AtualizarServicoCatalogoRequest request,
         CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(
-            new AtualizarServicoCatalogoRequest(servicoCatalogoId, request.Descricao, request.Valor),
+            request with { ServicoCatalogoId = servicoCatalogoId },
             cancellationToken);
 
         return this.ToActionResult(result);

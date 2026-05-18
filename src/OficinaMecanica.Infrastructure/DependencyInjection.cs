@@ -5,6 +5,7 @@ using OficinaMecanica.Infrastructure.Administrativo;
 using OficinaMecanica.Infrastructure.Atendimento;
 using OficinaMecanica.Infrastructure.GestaoEstoque;
 using OficinaMecanica.Infrastructure.GestaoOrdemServico;
+using OficinaMecanica.Infrastructure.Identidade;
 using OficinaMecanica.Infrastructure.Persistence;
 
 namespace OficinaMecanica.Infrastructure;
@@ -21,6 +22,7 @@ public static class DependencyInjection
         services.AddAtendimentoInfrastructure();
         services.AddGestaoEstoqueInfrastructure();
         services.AddGestaoOrdemServicoInfrastructure();
+        services.AddIdentidadeInfrastructure();
 
         return services;
     }
