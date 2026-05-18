@@ -26,11 +26,6 @@ public sealed class Estoque
     {
         var itens = itensEstoque?.ToList() ?? new List<ItemEstoque>();
 
-        if (itens.Count == 0)
-        {
-            throw new DomainException(EstoqueErrorMessages.EstoqueSemItens);
-        }
-
         if (itens.Any(item => item is null))
         {
             throw new DomainException(EstoqueErrorMessages.EstoqueComItemNulo);
@@ -102,11 +97,4 @@ public sealed class Estoque
 
         return _itensEstoque.SingleOrDefault(item => item.PecaInsumoCatalogoId == pecaInsumoCatalogoId);
     }
-
-    public ItemEstoque? ObterItemPorPecaInsumoCatalogoId(Guid pecaInsumoCatalogoId)
-    {
-        return _itensEstoque.FirstOrDefault(
-            item => item.PecaInsumoCatalogoId == pecaInsumoCatalogoId);
-    }
 }
-

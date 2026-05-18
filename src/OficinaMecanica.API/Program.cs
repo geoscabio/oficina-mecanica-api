@@ -1,9 +1,8 @@
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using OficinaMecanica.API.Middlewares;
 using OficinaMecanica.Application;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Infrastructure;
 using OficinaMecanica.Infrastructure.Persistence;
 
@@ -29,25 +28,7 @@ var app = builder.Build();
 
 await app.Services.InitializeDatabaseAsync(builder.Configuration);
 
-app.UseExceptionHandler(errorApp =>
-{
-    errorApp.Run(async context =>
-    {
-        var exception = context.Features.Get<IExceptionHandlerPathFeature>()?.Error;
-        var isDomainException = exception is DomainException;
-
-        context.Response.StatusCode = isDomainException
-            ? StatusCodes.Status409Conflict
-            : StatusCodes.Status500InternalServerError;
-
-        var error = isDomainException
-            ? new ErrorResponse(exception!.Message, TipoErro.RegraNegocio)
-            : new ErrorResponse("Erro interno inesperado.", TipoErro.RegraNegocio);
-
-        await context.Response.WriteAsJsonAsync(error);
-    });
-});
-
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
 

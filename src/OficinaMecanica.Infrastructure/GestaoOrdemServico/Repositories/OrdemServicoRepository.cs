@@ -36,6 +36,15 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
             .SingleOrDefaultAsync(ordemServico => ordemServico.Id == id, cancellationToken);
     }
 
+    public async Task<int> ObterProximoNumeroAsync(CancellationToken cancellationToken = default)
+    {
+        var ultimoNumero = await _dbContext.OrdensServico
+            .Select(ordemServico => (int?)ordemServico.Numero)
+            .MaxAsync(cancellationToken);
+
+        return (ultimoNumero ?? 0) + 1;
+    }
+
     public async Task<IReadOnlyCollection<OrdemServico>> ListarAsync(
         int pagina,
         int tamanhoPagina,

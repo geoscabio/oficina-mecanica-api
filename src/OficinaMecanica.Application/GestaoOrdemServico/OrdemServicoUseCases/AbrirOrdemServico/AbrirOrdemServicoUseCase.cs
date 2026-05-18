@@ -56,16 +56,12 @@ public sealed class AbrirOrdemServicoUseCase
             return Result<OrdemServicoResponse>.Falha(MecanicoErrorMessages.MecanicoNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
-        var ordemServico = OrdemServico.Abrir(GerarNumeroProvisorio(), request.VeiculoId, request.MecanicoId);
+        var numero = await _ordemServicoRepository.ObterProximoNumeroAsync(cancellationToken);
+        var ordemServico = OrdemServico.Abrir(numero, request.VeiculoId, request.MecanicoId);
 
         await _ordemServicoRepository.AdicionarAsync(ordemServico, cancellationToken);
 
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
-    }
-
-    private static int GerarNumeroProvisorio()
-    {
-        return Math.Abs(Guid.NewGuid().GetHashCode());
     }
 }
 

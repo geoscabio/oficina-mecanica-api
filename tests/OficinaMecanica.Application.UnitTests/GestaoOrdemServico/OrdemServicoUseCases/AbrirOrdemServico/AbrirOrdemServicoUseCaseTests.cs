@@ -19,6 +19,8 @@ namespace OficinaMecanica.Application.UnitTests.GestaoOrdemServico.OrdemServicoU
 
 public class AbrirOrdemServicoUseCaseTests
 {
+    private const int ProximoNumeroOrdemServico = 123;
+
     [Fact]
     public async Task Dado_RequestValido_Quando_AbrirOrdemServico_Entao_DevePersistirOrdemServicoERetornarSucesso()
     {
@@ -28,6 +30,10 @@ public class AbrirOrdemServicoUseCaseTests
         var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
 
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
+
+        ordemServicoRepository
+            .Setup(repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ProximoNumeroOrdemServico);
 
         var veiculoRepository = CriarVeiculoRepository(veiculo);
 
@@ -49,7 +55,7 @@ public class AbrirOrdemServicoUseCaseTests
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().NotBeEmpty();
-        resultado.Valor.Numero.Should().BeGreaterThan(0);
+        resultado.Valor.Numero.Should().Be(ProximoNumeroOrdemServico);
         resultado.Valor.Status.Should().Be(OrdemServicoTestDataFactory.StatusRecebida);
         resultado.Valor.ValorTotal.Should().Be(0);
         resultado.Valor.DataInicio.Should().NotBeNull();
@@ -70,10 +76,15 @@ public class AbrirOrdemServicoUseCaseTests
             Times.Once);
 
         ordemServicoRepository.Verify(
+            repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        ordemServicoRepository.Verify(
             repo => repo.AdicionarAsync(
                 It.Is<OrdemServico>(ordemServico =>
                     ordemServico.VeiculoId == veiculo.Id
-                    && ordemServico.MecanicoId == mecanico.Id),
+                    && ordemServico.MecanicoId == mecanico.Id
+                    && ordemServico.Numero == ProximoNumeroOrdemServico),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -117,6 +128,10 @@ public class AbrirOrdemServicoUseCaseTests
             repo => repo.ObterPorIdAsync(
                 It.IsAny<Guid>(),
                 It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        ordemServicoRepository.Verify(
+            repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()),
             Times.Never);
 
         ordemServicoRepository.Verify(
@@ -168,6 +183,10 @@ public class AbrirOrdemServicoUseCaseTests
             Times.Once);
 
         ordemServicoRepository.Verify(
+            repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        ordemServicoRepository.Verify(
             repo => repo.AdicionarAsync(
                 It.IsAny<OrdemServico>(),
                 It.IsAny<CancellationToken>()),
@@ -211,6 +230,10 @@ public class AbrirOrdemServicoUseCaseTests
             repo => repo.ObterPorIdAsync(
                 It.IsAny<Guid>(),
                 It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        ordemServicoRepository.Verify(
+            repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()),
             Times.Never);
 
         ordemServicoRepository.Verify(
