@@ -1,12 +1,12 @@
 using AutoMapper;
 using FluentValidation;
-using OficinaMecanica.Application.Administrativo.Mappings;
-using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.Responses;
 using OficinaMecanica.Application.Common;
-using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
+using OficinaMecanica.Application.GestaoOrdemServico.Mappings;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.Administrativo.Interfaces;
+using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 
-namespace OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ListarTempoMedioExecucaoServicos;
+namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ListarTempoMedioExecucaoServicos;
 
 public sealed class ListarTempoMedioExecucaoServicosUseCase
 {
@@ -63,7 +63,7 @@ public sealed class ListarTempoMedioExecucaoServicosUseCase
 
                 return _mapper.Map<TempoMedioExecucaoServicoResponse>(
                     servicoCatalogo,
-                    opcao => opcao.Items[ServicoCatalogoMappingProfile.TempoMedioExecucaoEmMinutosKey] = tempoMedio);
+                    opcao => opcao.Items[OrdemServicoMappingProfile.TempoMedioExecucaoEmMinutosKey] = tempoMedio);
             })
             .ToArray();
         var pagedResult = new PagedResult<TempoMedioExecucaoServicoResponse>(

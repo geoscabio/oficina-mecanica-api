@@ -1,7 +1,7 @@
 using FluentValidation;
-using OficinaMecanica.Application.Administrativo.ValidationMessages;
+using OficinaMecanica.Application.GestaoOrdemServico.ValidationMessages;
 
-namespace OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ListarTempoMedioExecucaoServicos;
+namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ListarTempoMedioExecucaoServicos;
 
 public sealed class ListarTempoMedioExecucaoServicosValidator : AbstractValidator<ListarTempoMedioExecucaoServicosRequest>
 {
@@ -9,10 +9,10 @@ public sealed class ListarTempoMedioExecucaoServicosValidator : AbstractValidato
     {
         RuleFor(request => request.Pagina)
             .GreaterThan(0)
-            .WithMessage(ServicoCatalogoValidationMessages.PaginaMaiorQueZero);
+            .WithMessage(OrdemServicoValidationMessages.PaginaMaiorQueZero);
 
         RuleFor(request => request.TamanhoPagina)
             .InclusiveBetween(1, 100)
-            .WithMessage(ServicoCatalogoValidationMessages.TamanhoPaginaInvalido);
+            .WithMessage(OrdemServicoValidationMessages.TamanhoPaginaInvalido);
     }
 }

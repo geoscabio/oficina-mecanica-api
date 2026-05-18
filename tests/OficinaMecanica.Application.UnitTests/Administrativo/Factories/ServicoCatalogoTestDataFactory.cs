@@ -1,9 +1,7 @@
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.AtualizarServicoCatalogo;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.CadastrarServicoCatalogo;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ConsultarServicoCatalogo;
-using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ConsultarTempoMedioExecucaoServico;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ListarServicosCatalogo;
-using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ListarTempoMedioExecucaoServicos;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.RemoverServicoCatalogo;
 using OficinaMecanica.Domain.Administrativo.Aggregates;
 
@@ -13,11 +11,9 @@ internal static class ServicoCatalogoTestDataFactory
 {
     public const string DescricaoPadrao = "Troca de oleo";
     public const decimal ValorPadrao = 150m;
-    public const double TempoMedioExecucaoPadrao = 120d;
 
     public const string DescricaoAtualizada = "Alinhamento";
     public const decimal ValorAtualizado = 90m;
-    public const double TempoMedioExecucaoAtualizado = 75d;
 
     public const int PaginaPadrao = 1;
     public const int TamanhoPaginaPadrao = 10;
@@ -58,27 +54,11 @@ internal static class ServicoCatalogoTestDataFactory
             servicoCatalogoId ?? Guid.NewGuid());
     }
 
-    public static ConsultarTempoMedioExecucaoServicoRequest CriarConsultarTempoMedioExecucaoServicoRequestValido(
-        Guid? servicoCatalogoId = null)
-    {
-        return new ConsultarTempoMedioExecucaoServicoRequest(
-            servicoCatalogoId ?? Guid.NewGuid());
-    }
-
     public static ListarServicosCatalogoRequest CriarListarServicosCatalogoRequestValido(
         int pagina = PaginaPadrao,
         int tamanhoPagina = TamanhoPaginaPadrao)
     {
         return new ListarServicosCatalogoRequest(
-            pagina,
-            tamanhoPagina);
-    }
-
-    public static ListarTempoMedioExecucaoServicosRequest CriarListarTempoMedioExecucaoServicosRequestValido(
-        int pagina = PaginaPadrao,
-        int tamanhoPagina = TamanhoPaginaPadrao)
-    {
-        return new ListarTempoMedioExecucaoServicosRequest(
             pagina,
             tamanhoPagina);
     }

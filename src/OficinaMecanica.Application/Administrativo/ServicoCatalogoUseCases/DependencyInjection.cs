@@ -3,9 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.AtualizarServicoCatalogo;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.CadastrarServicoCatalogo;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ConsultarServicoCatalogo;
-using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ConsultarTempoMedioExecucaoServico;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ListarServicosCatalogo;
-using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ListarTempoMedioExecucaoServicos;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.RemoverServicoCatalogo;
 
 namespace OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases;
@@ -19,16 +17,12 @@ public static class DependencyInjection
         services.AddScoped<IValidator<ConsultarServicoCatalogoRequest>, ConsultarServicoCatalogoValidator>();
         services.AddScoped<IValidator<ListarServicosCatalogoRequest>, ListarServicosCatalogoValidator>();
         services.AddScoped<IValidator<RemoverServicoCatalogoRequest>, RemoverServicoCatalogoValidator>();
-        services.AddScoped<IValidator<ConsultarTempoMedioExecucaoServicoRequest>, ConsultarTempoMedioExecucaoServicoValidator>();
-        services.AddScoped<IValidator<ListarTempoMedioExecucaoServicosRequest>, ListarTempoMedioExecucaoServicosValidator>();
 
         services.AddScoped<AtualizarServicoCatalogoUseCase>();
         services.AddScoped<CadastrarServicoCatalogoUseCase>();
         services.AddScoped<ConsultarServicoCatalogoUseCase>();
         services.AddScoped<ListarServicosCatalogoUseCase>();
         services.AddScoped<RemoverServicoCatalogoUseCase>();
-        services.AddScoped<ConsultarTempoMedioExecucaoServicoUseCase>();
-        services.AddScoped<ListarTempoMedioExecucaoServicosUseCase>();
 
         return services;
     }
