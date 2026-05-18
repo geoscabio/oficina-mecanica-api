@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace OficinaMecanica.Infrastructure.Persistence;
 
@@ -10,70 +10,42 @@ public sealed class DesignTimeOficinaMecanicaDbContextFactory : IDesignTimeDbCon
 
     public OficinaMecanicaDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<OficinaMecanicaDbContext>();
-        var connectionString = ObterConnectionString()
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(ObterCaminhoProjetoApi())
+            .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
+
+        var connectionString = configuration.GetConnectionString(ConnectionStringName)
             ?? throw new InvalidOperationException($"Connection string '{ConnectionStringName}' nao configurada.");
 
+        var optionsBuilder = new DbContextOptionsBuilder<OficinaMecanicaDbContext>();
         optionsBuilder.UseSqlServer(connectionString);
 
         return new OficinaMecanicaDbContext(optionsBuilder.Options);
     }
 
-    private static string? ObterConnectionString()
+    private static string ObterCaminhoProjetoApi()
     {
-        return Environment.GetEnvironmentVariable($"ConnectionStrings__{ConnectionStringName}")
-            ?? LerConnectionStringDeAppsettings("appsettings.Development.json")
-            ?? LerConnectionStringDeAppsettings("appsettings.json");
-    }
-
-    private static string? LerConnectionStringDeAppsettings(string fileName)
-    {
-        foreach (var directory in ObterDiretoriosCandidatos())
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var caminhosCandidatos = new[]
         {
-            var path = Path.Combine(directory, fileName);
+            currentDirectory,
+            Path.Combine(currentDirectory, "src", "OficinaMecanica.API"),
+            Path.Combine(currentDirectory, "..", "OficinaMecanica.API")
+        };
 
-            if (!File.Exists(path))
+        foreach (var caminho in caminhosCandidatos)
+        {
+            var caminhoCompleto = Path.GetFullPath(caminho);
+
+            if (File.Exists(Path.Combine(caminhoCompleto, "appsettings.json")))
             {
-                continue;
-            }
-
-            using var stream = File.OpenRead(path);
-            using var document = JsonDocument.Parse(stream);
-
-            if (document.RootElement.TryGetProperty("ConnectionStrings", out var connectionStrings)
-                && connectionStrings.TryGetProperty(ConnectionStringName, out var connectionString))
-            {
-                return connectionString.GetString();
+                return caminhoCompleto;
             }
         }
 
-        return null;
-    }
-
-    private static IEnumerable<string> ObterDiretoriosCandidatos()
-    {
-        var directories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var currentDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
-
-        while (currentDirectory is not null)
-        {
-            AdicionarSeExistir(directories, currentDirectory.FullName);
-            AdicionarSeExistir(directories, Path.Combine(currentDirectory.FullName, "src", "OficinaMecanica.API"));
-            AdicionarSeExistir(directories, Path.Combine(currentDirectory.FullName, "..", "OficinaMecanica.API"));
-
-            currentDirectory = currentDirectory.Parent;
-        }
-
-        return directories;
-    }
-
-    private static void AdicionarSeExistir(HashSet<string> directories, string path)
-    {
-        var fullPath = Path.GetFullPath(path);
-
-        if (Directory.Exists(fullPath))
-        {
-            directories.Add(fullPath);
-        }
+        throw new InvalidOperationException("Projeto OficinaMecanica.API nao encontrado.");
     }
 }
