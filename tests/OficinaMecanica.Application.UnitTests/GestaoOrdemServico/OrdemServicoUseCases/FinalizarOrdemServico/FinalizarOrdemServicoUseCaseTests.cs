@@ -51,7 +51,7 @@ public class FinalizarOrdemServicoUseCaseTests
 
         estoqueRepository.Verify(
             repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+            Times.Never);
 
         ordemServicoRepository.Verify(
             repo => repo.AtualizarAsync(
@@ -259,7 +259,7 @@ public class FinalizarOrdemServicoUseCaseTests
 
         estoqueRepository.Verify(
             repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+            Times.Never);
 
         ordemServicoRepository.Verify(
             repo => repo.AtualizarAsync(

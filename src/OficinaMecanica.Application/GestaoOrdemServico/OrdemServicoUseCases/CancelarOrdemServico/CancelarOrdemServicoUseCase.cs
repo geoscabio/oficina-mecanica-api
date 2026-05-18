@@ -4,7 +4,6 @@ using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
 using OficinaMecanica.Domain.GestaoEstoque.Messages;
-using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 
@@ -47,8 +46,7 @@ public sealed class CancelarOrdemServicoUseCase
             return Result<OrdemServicoResponse>.Falha(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada, TipoErro.NaoEncontrado);
         }
 
-        var deveEstornarEstoque = DeveEstornarEstoque(request.Motivo)
-            && ordemServico.PecasInsumos.Count > 0;
+        var deveEstornarEstoque = ordemServico.PecasInsumos.Count > 0;
         var estoque = deveEstornarEstoque
             ? await _estoqueRepository.ObterAsync(cancellationToken)
             : null;
@@ -77,8 +75,4 @@ public sealed class CancelarOrdemServicoUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 
-    private static bool DeveEstornarEstoque(MotivoCancelamentoOrdemServico motivo)
-    {
-        return motivo == MotivoCancelamentoOrdemServico.ReprovacaoOrcamento;
-    }
 }
