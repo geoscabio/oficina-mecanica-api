@@ -13,17 +13,20 @@ public sealed class FinalizarOrdemServicoUseCase
 {
     private readonly IOrdemServicoRepository _ordemServicoRepository;
     private readonly IEstoqueRepository _estoqueRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<FinalizarOrdemServicoRequest> _validator;
     private readonly IMapper _mapper;
 
     public FinalizarOrdemServicoUseCase(
         IOrdemServicoRepository ordemServicoRepository,
         IEstoqueRepository estoqueRepository,
+        IUnitOfWork unitOfWork,
         IValidator<FinalizarOrdemServicoRequest> validator,
         IMapper mapper)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _estoqueRepository = estoqueRepository;
+        _unitOfWork = unitOfWork;
         _validator = validator;
         _mapper = mapper;
     }
@@ -63,10 +66,19 @@ public sealed class FinalizarOrdemServicoUseCase
             estoque!.BaixarItens(pecaInsumo.PecaInsumoCatalogoId, pecaInsumo.Quantidade);
         }
 
-        await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
-        if (estoque is not null)
+        if (estoque is null)
         {
-            await _estoqueRepository.AtualizarAsync(estoque, cancellationToken);
+            await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
+        }
+        else
+        {
+            await _unitOfWork.ExecutarEmTransacaoAsync(
+                async transactionCancellationToken =>
+                {
+                    await _ordemServicoRepository.AtualizarAsync(ordemServico, transactionCancellationToken);
+                    await _estoqueRepository.AtualizarAsync(estoque, transactionCancellationToken);
+                },
+                cancellationToken);
         }
 
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));

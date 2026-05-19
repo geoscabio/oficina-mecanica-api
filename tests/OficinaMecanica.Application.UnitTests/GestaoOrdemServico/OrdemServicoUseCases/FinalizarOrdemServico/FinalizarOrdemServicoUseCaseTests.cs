@@ -26,9 +26,12 @@ public class FinalizarOrdemServicoUseCaseTests
 
         var estoqueRepository = CriarEstoqueRepository(null);
 
+        var unitOfWork = CriarUnitOfWork();
+
         var useCase = CriarUseCase(
             ordemServicoRepository,
-            estoqueRepository);
+            estoqueRepository,
+            unitOfWork);
 
         var request = OrdemServicoTestDataFactory.CriarFinalizarOrdemServicoRequestValido(
             ordemServico.Id);
@@ -67,6 +70,12 @@ public class FinalizarOrdemServicoUseCaseTests
                 It.IsAny<Estoque>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
+
+        unitOfWork.Verify(
+            uow => uow.ExecutarEmTransacaoAsync(
+                It.IsAny<Func<CancellationToken, Task>>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -85,9 +94,12 @@ public class FinalizarOrdemServicoUseCaseTests
 
         var estoqueRepository = CriarEstoqueRepository(estoque);
 
+        var unitOfWork = CriarUnitOfWork();
+
         var useCase = CriarUseCase(
             ordemServicoRepository,
-            estoqueRepository);
+            estoqueRepository,
+            unitOfWork);
 
         var request = OrdemServicoTestDataFactory.CriarFinalizarOrdemServicoRequestValido(
             ordemServico.Id);
@@ -124,6 +136,12 @@ public class FinalizarOrdemServicoUseCaseTests
         estoqueRepository.Verify(
             repo => repo.AtualizarAsync(
                 estoque,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        unitOfWork.Verify(
+            uow => uow.ExecutarEmTransacaoAsync(
+                It.IsAny<Func<CancellationToken, Task>>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -346,13 +364,31 @@ public class FinalizarOrdemServicoUseCaseTests
         return repository;
     }
 
+    private static Mock<IUnitOfWork> CriarUnitOfWork()
+    {
+        var unitOfWork = new Mock<IUnitOfWork>();
+
+        unitOfWork
+            .Setup(uow => uow.ExecutarEmTransacaoAsync(
+                It.IsAny<Func<CancellationToken, Task>>(),
+                It.IsAny<CancellationToken>()))
+            .Returns<Func<CancellationToken, Task>, CancellationToken>(
+                (operacao, cancellationToken) => operacao(cancellationToken));
+
+        return unitOfWork;
+    }
+
     private static FinalizarOrdemServicoUseCase CriarUseCase(
         Mock<IOrdemServicoRepository> ordemServicoRepository,
-        Mock<IEstoqueRepository> estoqueRepository)
+        Mock<IEstoqueRepository> estoqueRepository,
+        Mock<IUnitOfWork>? unitOfWork = null)
     {
+        unitOfWork ??= CriarUnitOfWork();
+
         return new FinalizarOrdemServicoUseCase(
             ordemServicoRepository.Object,
             estoqueRepository.Object,
+            unitOfWork.Object,
             new FinalizarOrdemServicoValidator(),
             MapperFactory.Criar());
     }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OficinaMecanica.Application.Common;
 using OficinaMecanica.Infrastructure.Administrativo;
 using OficinaMecanica.Infrastructure.Atendimento;
 using OficinaMecanica.Infrastructure.GestaoEstoque;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         }
 
         services.AddDbContext<OficinaMecanicaDbContext>(options => options.UseSqlServer(connectionString));
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddAdministrativoInfrastructure();
         services.AddAtendimentoInfrastructure();
         services.AddGestaoEstoqueInfrastructure();
