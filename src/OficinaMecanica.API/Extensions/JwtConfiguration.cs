@@ -63,7 +63,7 @@ public static class JwtConfiguration
                 Scheme = "bearer",
                 BearerFormat = "JWT",
                 In = ParameterLocation.Header,
-                Description = "Informe o token JWT no formato: Bearer {token}"
+                Description = "Cole apenas o token JWT gerado no login."
             });
 
         options.OperationFilter<AuthorizeOperationFilter>();
@@ -94,7 +94,7 @@ public static class JwtConfiguration
             operation.Security.Add(
                 new OpenApiSecurityRequirement
                 {
-                    [new OpenApiSecuritySchemeReference(BearerScheme, null!, null)] = []
+                    [new OpenApiSecuritySchemeReference(BearerScheme, context.Document, null)] = []
                 });
         }
     }
