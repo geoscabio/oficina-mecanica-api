@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Common;
+using OficinaMecanica.API.Extensions;
+using OficinaMecanica.API.Identidade;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.AtualizarMecanico;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.CadastrarMecanico;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.ConsultarMecanico;
@@ -9,10 +11,11 @@ using OficinaMecanica.Application.Administrativo.MecanicoUseCases.RemoverMecanic
 namespace OficinaMecanica.API.Administrativo.Controllers;
 
 [ApiController]
+[Authorize(Roles = PerfisAcesso.Administrador)]
 [Route("api/v1/administrativo/mecanicos")]
 public sealed class MecanicosController : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("cadastrar")]
     public async Task<IActionResult> Cadastrar(
         [FromServices] CadastrarMecanicoUseCase useCase,
         [FromBody] CadastrarMecanicoRequest request,
@@ -26,7 +29,7 @@ public sealed class MecanicosController : ControllerBase
             mecanico => new { mecanicoId = mecanico.Id });
     }
 
-    [HttpGet("{mecanicoId:guid}")]
+    [HttpGet("consultar/{mecanicoId:guid}")]
     public async Task<IActionResult> Consultar(
         [FromServices] ConsultarMecanicoUseCase useCase,
         Guid mecanicoId,
@@ -37,7 +40,7 @@ public sealed class MecanicosController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet]
+    [HttpGet("listar")]
     public async Task<IActionResult> Listar(
         [FromServices] ListarMecanicosUseCase useCase,
         [FromQuery] int pagina = 1,
@@ -49,7 +52,7 @@ public sealed class MecanicosController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPut("{mecanicoId:guid}")]
+    [HttpPut("{mecanicoId:guid}/atualizar")]
     public async Task<IActionResult> Atualizar(
         [FromServices] AtualizarMecanicoUseCase useCase,
         Guid mecanicoId,
@@ -63,7 +66,7 @@ public sealed class MecanicosController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpDelete("{mecanicoId:guid}")]
+    [HttpDelete("{mecanicoId:guid}/remover")]
     public async Task<IActionResult> Remover(
         [FromServices] RemoverMecanicoUseCase useCase,
         Guid mecanicoId,

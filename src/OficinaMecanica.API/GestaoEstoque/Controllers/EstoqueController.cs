@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Common;
+using OficinaMecanica.API.Extensions;
+using OficinaMecanica.API.Identidade;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.AtualizarEstoque;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ConsultarItemEstoque;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ListarItensEstoque;
@@ -8,6 +10,7 @@ using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.RegistrarEntrada
 namespace OficinaMecanica.API.GestaoEstoque.Controllers;
 
 [ApiController]
+[Authorize(Roles = PerfisAcesso.AdministradorAtendente)]
 [Route("api/v1/gestao-estoque/estoque")]
 public sealed class EstoqueController : ControllerBase
 {
@@ -25,7 +28,7 @@ public sealed class EstoqueController : ControllerBase
             itemEstoque => new { itemEstoqueId = itemEstoque.Id });
     }
 
-    [HttpGet("itens/{itemEstoqueId:guid}")]
+    [HttpGet("consultar-item/{itemEstoqueId:guid}")]
     public async Task<IActionResult> ConsultarItem(
         [FromServices] ConsultarItemEstoqueUseCase useCase,
         Guid itemEstoqueId,
@@ -36,7 +39,7 @@ public sealed class EstoqueController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet("itens")]
+    [HttpGet("listar-itens")]
     public async Task<IActionResult> ListarItens(
         [FromServices] ListarItensEstoqueUseCase useCase,
         [FromQuery] int pagina = 1,
@@ -48,7 +51,7 @@ public sealed class EstoqueController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPut("itens/{pecaInsumoCatalogoId:guid}/quantidade-disponivel")]
+    [HttpPut("{pecaInsumoCatalogoId:guid}/atualizar-quantidade-disponivel")]
     public async Task<IActionResult> AtualizarQuantidadeDisponivel(
         [FromServices] AtualizarEstoqueUseCase useCase,
         Guid pecaInsumoCatalogoId,

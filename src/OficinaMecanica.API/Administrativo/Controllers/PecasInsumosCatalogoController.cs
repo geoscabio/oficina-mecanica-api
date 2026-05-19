@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Common;
+using OficinaMecanica.API.Extensions;
+using OficinaMecanica.API.Identidade;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.AtualizarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.CadastrarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.ConsultarPecaInsumoCatalogo;
@@ -9,10 +11,11 @@ using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.Remo
 namespace OficinaMecanica.API.Administrativo.Controllers;
 
 [ApiController]
+[Authorize(Roles = PerfisAcesso.Administrador)]
 [Route("api/v1/administrativo/pecas-insumos-catalogo")]
 public sealed class PecasInsumosCatalogoController : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("cadastrar")]
     public async Task<IActionResult> Cadastrar(
         [FromServices] CadastrarPecaInsumoCatalogoUseCase useCase,
         [FromBody] CadastrarPecaInsumoCatalogoRequest request,
@@ -26,7 +29,7 @@ public sealed class PecasInsumosCatalogoController : ControllerBase
             pecaInsumo => new { pecaInsumoCatalogoId = pecaInsumo.Id });
     }
 
-    [HttpGet("{pecaInsumoCatalogoId:guid}")]
+    [HttpGet("consultar/{pecaInsumoCatalogoId:guid}")]
     public async Task<IActionResult> Consultar(
         [FromServices] ConsultarPecaInsumoCatalogoUseCase useCase,
         Guid pecaInsumoCatalogoId,
@@ -39,7 +42,7 @@ public sealed class PecasInsumosCatalogoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet]
+    [HttpGet("listar")]
     public async Task<IActionResult> Listar(
         [FromServices] ListarPecasInsumosCatalogoUseCase useCase,
         [FromQuery] int pagina = 1,
@@ -53,7 +56,7 @@ public sealed class PecasInsumosCatalogoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPut("{pecaInsumoCatalogoId:guid}")]
+    [HttpPut("{pecaInsumoCatalogoId:guid}/atualizar")]
     public async Task<IActionResult> Atualizar(
         [FromServices] AtualizarPecaInsumoCatalogoUseCase useCase,
         Guid pecaInsumoCatalogoId,
@@ -67,7 +70,7 @@ public sealed class PecasInsumosCatalogoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpDelete("{pecaInsumoCatalogoId:guid}")]
+    [HttpDelete("{pecaInsumoCatalogoId:guid}/remover")]
     public async Task<IActionResult> Remover(
         [FromServices] RemoverPecaInsumoCatalogoUseCase useCase,
         Guid pecaInsumoCatalogoId,

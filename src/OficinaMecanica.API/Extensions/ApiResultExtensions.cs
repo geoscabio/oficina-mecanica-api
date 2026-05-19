@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OficinaMecanica.Application.Common;
 
-namespace OficinaMecanica.API.Common;
+namespace OficinaMecanica.API.Extensions;
 
 public static class ApiResultExtensions
 {

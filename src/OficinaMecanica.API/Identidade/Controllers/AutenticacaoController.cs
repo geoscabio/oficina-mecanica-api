@@ -1,5 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Common;
+using OficinaMecanica.API.Extensions;
 using OficinaMecanica.Application.Identidade.UsuarioUseCases.AutenticarUsuario;
 
 namespace OficinaMecanica.API.Identidade.Controllers;
@@ -9,6 +10,7 @@ namespace OficinaMecanica.API.Identidade.Controllers;
 public sealed class AutenticacaoController : ControllerBase
 {
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Autenticar(
         [FromServices] AutenticarUsuarioUseCase useCase,
         [FromBody] AutenticarUsuarioRequest request,

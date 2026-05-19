@@ -22,7 +22,7 @@ public static class DependencyInjection
         services.AddAtendimentoInfrastructure();
         services.AddGestaoEstoqueInfrastructure();
         services.AddGestaoOrdemServicoInfrastructure();
-        services.AddIdentidadeInfrastructure();
+        services.AddIdentidadeInfrastructure(configuration);
 
         return services;
     }
