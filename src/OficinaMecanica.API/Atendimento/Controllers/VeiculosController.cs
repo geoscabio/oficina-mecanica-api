@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OficinaMecanica.API.Extensions;
-using OficinaMecanica.API.Identidade;
+using OficinaMecanica.Application.Identidade;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.AtualizarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;

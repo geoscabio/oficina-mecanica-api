@@ -34,6 +34,29 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
     }
 
     [Fact]
+    public async Task Dado_MesmoUsuarioDemo_Quando_AutenticarDuasVezes_Entao_DeveRetornarMesmoUsuarioId()
+    {
+        // Arrange
+        var request = AutenticacaoRequestBuilder.Novo().Build();
+
+        // Act
+        var primeiraAutenticacao = await PostJsonAsync(
+            "/api/v1/identidade/autenticacao/login",
+            request,
+            HttpStatusCode.OK);
+
+        var segundaAutenticacao = await PostJsonAsync(
+            "/api/v1/identidade/autenticacao/login",
+            request,
+            HttpStatusCode.OK);
+
+        // Assert
+        ObterString(primeiraAutenticacao, "usuarioId")
+            .Should()
+            .Be(ObterString(segundaAutenticacao, "usuarioId"));
+    }
+
+    [Fact]
     public async Task Dado_CredenciaisInvalidas_Quando_Autenticar_Entao_DeveRetornarNaoAutorizado()
     {
         // Arrange

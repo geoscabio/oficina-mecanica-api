@@ -20,6 +20,11 @@ public sealed class GlobalExceptionMiddleware
         }
         catch (DomainException exception)
         {
+            if (context.Response.HasStarted)
+            {
+                throw;
+            }
+
             await WriteErrorAsync(
                 context,
                 StatusCodes.Status422UnprocessableEntity,
@@ -27,10 +32,15 @@ public sealed class GlobalExceptionMiddleware
         }
         catch
         {
+            if (context.Response.HasStarted)
+            {
+                throw;
+            }
+
             await WriteErrorAsync(
                 context,
                 StatusCodes.Status500InternalServerError,
-                new ErrorResponse("Erro interno inesperado.", TipoErro.RegraNegocio));
+                new ErrorResponse("Erro interno inesperado.", TipoErro.ErroInterno));
         }
     }
 
@@ -40,6 +50,7 @@ public sealed class GlobalExceptionMiddleware
         ErrorResponse error)
     {
         context.Response.StatusCode = statusCode;
+        context.Response.ContentType = "application/json";
 
         await context.Response.WriteAsJsonAsync(error);
     }

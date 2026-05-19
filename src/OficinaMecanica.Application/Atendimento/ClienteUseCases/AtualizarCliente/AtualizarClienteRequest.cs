@@ -1,4 +1,4 @@
-﻿using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
+using OficinaMecanica.Application.Atendimento.Common;
 
 namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.AtualizarCliente;
 

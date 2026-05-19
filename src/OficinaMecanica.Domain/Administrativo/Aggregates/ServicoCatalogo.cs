@@ -5,6 +5,11 @@ namespace OficinaMecanica.Domain.Administrativo.Aggregates;
 
 public sealed class ServicoCatalogo
 {
+    private ServicoCatalogo()
+    {
+        Descricao = string.Empty;
+    }
+
     private ServicoCatalogo(Guid id, string descricao, decimal valor)
     {
         Id = id;

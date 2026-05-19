@@ -1,3 +1,5 @@
+using OficinaMecanica.Application.Atendimento.Common;
+
 namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
 
 public sealed record CadastrarClienteRequest(
@@ -6,10 +8,3 @@ public sealed record CadastrarClienteRequest(
     EnderecoRequest Endereco,
     string Telefone,
     string Email);
-
-public sealed record EnderecoRequest(
-    string Logradouro,
-    string Numero,
-    string Bairro,
-    string Cidade,
-    string CEP);

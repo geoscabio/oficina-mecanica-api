@@ -1,4 +1,5 @@
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.AtualizarCliente;
+using OficinaMecanica.Application.Atendimento.Common;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
 
 namespace OficinaMecanica.API.IntegrationTests.Atendimento.Builders;

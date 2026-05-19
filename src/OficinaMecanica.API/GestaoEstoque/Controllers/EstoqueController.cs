@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OficinaMecanica.API.Extensions;
-using OficinaMecanica.API.Identidade;
+using OficinaMecanica.Application.Identidade;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.AtualizarEstoque;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ConsultarItemEstoque;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ListarItensEstoque;
