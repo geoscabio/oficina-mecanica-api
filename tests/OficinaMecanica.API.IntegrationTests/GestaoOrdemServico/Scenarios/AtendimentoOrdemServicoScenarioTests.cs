@@ -57,7 +57,7 @@ public sealed class AtendimentoOrdemServicoScenarioTests : ApiIntegrationTestBas
         var definicaoServicos = OrdemServicoRequestBuilder.Novo()
             .ComServicoCatalogoId(servicoCatalogoId)
             .BuildDefinicaoServicos(ordemServicoId);
-        await PutJsonAsync(
+        var ordemComServicos = await PutJsonAsync(
             $"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/definir-servicos",
             definicaoServicos);
 
@@ -73,7 +73,7 @@ public sealed class AtendimentoOrdemServicoScenarioTests : ApiIntegrationTestBas
         var reservaPecas = OrdemServicoRequestBuilder.Novo()
             .ComPecaInsumo(pecaInsumoCatalogoId, quantidade: 1)
             .BuildReservaPecasInsumos(ordemServicoId);
-        await PostJsonAsync(
+        var ordemComPecasInsumos = await PostJsonAsync(
             $"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/reservar-pecas-insumos",
             reservaPecas);
 
@@ -109,6 +109,8 @@ public sealed class AtendimentoOrdemServicoScenarioTests : ApiIntegrationTestBas
         // Assert
         ObterString(statusRecebida, "status").Should().Be("RECEBIDA");
         ObterString(statusComServico, "status").Should().Be("EM_DIAGNOSTICO");
+        ordemComServicos.GetProperty("servicos").EnumerateArray().Should().ContainSingle();
+        ordemComPecasInsumos.GetProperty("pecasInsumos").EnumerateArray().Should().ContainSingle();
         ObterString(ordemFinalizada, "status").Should().Be("FINALIZADA");
         ObterString(ordemEntregue, "status").Should().Be("ENTREGUE");
         tempoMedio.GetProperty("tempoMedioExecucaoEmMinutos").ValueKind.Should().NotBe(JsonValueKind.Null);

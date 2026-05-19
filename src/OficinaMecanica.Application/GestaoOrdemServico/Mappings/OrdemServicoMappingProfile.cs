@@ -16,6 +16,11 @@ public sealed class OrdemServicoMappingProfile : Profile
         CreateMap<OrdemServico, OrdemServicoResponse>()
             .ForCtorParam(nameof(OrdemServicoResponse.Status), opcao => opcao.MapFrom(origem => origem.Status.ToString()));
 
+        CreateMap<Servico, ServicoOrdemServicoResponse>()
+            .ForCtorParam(nameof(ServicoOrdemServicoResponse.Status), opcao => opcao.MapFrom(origem => origem.Status.ToString()));
+
+        CreateMap<PecaInsumo, PecaInsumoOrdemServicoResponse>();
+
         CreateMap<Servico, ServicoStatusResponse>()
             .ForCtorParam(nameof(ServicoStatusResponse.ServicoId), opcao => opcao.MapFrom(origem => origem.Id))
             .ForCtorParam(nameof(ServicoStatusResponse.Status), opcao => opcao.MapFrom(origem => origem.Status.ToString()));

@@ -48,6 +48,16 @@ public class DefinirServicosUseCaseTests
         resultado.Valor!.Id.Should().Be(ordemServico.Id);
         resultado.Valor.ValorTotal.Should().Be(230m);
         resultado.Valor.Status.Should().Be(OrdemServicoTestDataFactory.StatusEmDiagnostico);
+        resultado.Valor.Servicos.Should().HaveCount(2);
+        resultado.Valor.Servicos.Should().Contain(servico =>
+            servico.ServicoCatalogoId == trocaOleo.Id
+            && servico.Valor == trocaOleo.Valor
+            && servico.Status == OrdemServicoTestDataFactory.StatusPendente);
+        resultado.Valor.Servicos.Should().Contain(servico =>
+            servico.ServicoCatalogoId == alinhamento.Id
+            && servico.Valor == alinhamento.Valor
+            && servico.Status == OrdemServicoTestDataFactory.StatusPendente);
+        resultado.Valor.PecasInsumos.Should().BeEmpty();
 
         ordemServicoRepository.Verify(
             repo => repo.ObterPorIdAsync(
