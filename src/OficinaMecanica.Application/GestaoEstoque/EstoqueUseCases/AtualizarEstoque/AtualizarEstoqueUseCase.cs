@@ -36,18 +36,19 @@ public sealed class AtualizarEstoqueUseCase
                 TipoErro.Validacao);
         }
 
-        var itemEstoque = await _estoqueRepository.ObterItemPorPecaInsumoCatalogoIdAsync(
-            request.PecaInsumoCatalogoId,
-            cancellationToken);
+        var estoque = await _estoqueRepository.ObterAsync(cancellationToken);
 
-        if (itemEstoque is null)
+        if (estoque is null
+            || !estoque.ItensEstoque.Any(item => item.PecaInsumoCatalogoId == request.PecaInsumoCatalogoId))
         {
             return Result<ItemEstoqueResponse>.Falha(EstoqueValidationMessages.ItemEstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
-        itemEstoque.AtualizarQuantidadeDisponivel(request.QuantidadeDisponivel);
+        var itemEstoque = estoque.AtualizarQuantidadeDisponivel(
+            request.PecaInsumoCatalogoId,
+            request.QuantidadeDisponivel);
 
-        await _estoqueRepository.AtualizarItemAsync(itemEstoque, cancellationToken);
+        await _estoqueRepository.AtualizarAsync(estoque, cancellationToken);
 
         return Result<ItemEstoqueResponse>.Ok(_mapper.Map<ItemEstoqueResponse>(itemEstoque));
     }
