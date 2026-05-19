@@ -25,6 +25,7 @@ internal static class OrdemServicoTestDataFactory
     public const int QuantidadePecaInsumoPadrao = 2;
 
     public const string StatusRecebida = "RECEBIDA";
+    public const string StatusPendente = "PENDENTE";
     public const string StatusEmDiagnostico = "EM_DIAGNOSTICO";
     public const string StatusAguardandoAprovacao = "AGUARDANDO_APROVACAO";
     public const string StatusEmExecucao = "EM_EXECUCAO";

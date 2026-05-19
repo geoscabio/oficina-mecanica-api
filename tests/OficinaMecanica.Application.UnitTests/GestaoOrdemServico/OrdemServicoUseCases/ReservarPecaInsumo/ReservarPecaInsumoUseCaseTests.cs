@@ -56,6 +56,11 @@ public class ReservarPecaInsumoUseCaseTests
         resultado.Valor!.Id.Should().Be(ordemServico.Id);
         resultado.Valor.ValorTotal.Should().Be(90m);
         resultado.Valor.Status.Should().Be(OrdemServicoTestDataFactory.StatusEmDiagnostico);
+        resultado.Valor.PecasInsumos.Should().ContainSingle();
+        resultado.Valor.PecasInsumos.Single().PecaInsumoCatalogoId.Should().Be(pecaInsumoCatalogo.Id);
+        resultado.Valor.PecasInsumos.Single().Quantidade.Should().Be(OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao);
+        resultado.Valor.PecasInsumos.Single().ValorUnitario.Should().Be(pecaInsumoCatalogo.Valor);
+        resultado.Valor.PecasInsumos.Single().ValorTotal.Should().Be(90m);
 
         estoque.ObterItem(pecaInsumoCatalogo.Id).QuantidadeDisponivel.Should().Be(8);
         estoque.ObterItem(pecaInsumoCatalogo.Id).QuantidadeReservada.Should().Be(2);

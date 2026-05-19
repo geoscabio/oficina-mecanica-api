@@ -62,6 +62,8 @@ public class AbrirOrdemServicoUseCaseTests
         resultado.Valor.DataFim.Should().BeNull();
         resultado.Valor.VeiculoId.Should().Be(veiculo.Id);
         resultado.Valor.MecanicoId.Should().Be(mecanico.Id);
+        resultado.Valor.Servicos.Should().BeEmpty();
+        resultado.Valor.PecasInsumos.Should().BeEmpty();
 
         veiculoRepository.Verify(
             repo => repo.ObterPorIdAsync(
