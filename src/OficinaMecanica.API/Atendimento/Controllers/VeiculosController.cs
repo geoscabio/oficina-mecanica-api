@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Common;
+using OficinaMecanica.API.Extensions;
+using OficinaMecanica.API.Identidade;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.AtualizarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ConsultarVeiculo;
@@ -10,10 +12,11 @@ using OficinaMecanica.Application.Atendimento.VeiculoUseCases.RemoverVeiculo;
 namespace OficinaMecanica.API.Atendimento.Controllers;
 
 [ApiController]
+[Authorize(Roles = PerfisAcesso.AdministradorAtendente)]
 [Route("api/v1/atendimento/veiculos")]
 public sealed class VeiculosController : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("cadastrar")]
     public async Task<IActionResult> Cadastrar(
         [FromServices] CadastrarVeiculoUseCase useCase,
         [FromBody] CadastrarVeiculoRequest request,
@@ -27,7 +30,7 @@ public sealed class VeiculosController : ControllerBase
             veiculo => new { veiculoId = veiculo.Id });
     }
 
-    [HttpGet("{veiculoId:guid}")]
+    [HttpGet("consultar/{veiculoId:guid}")]
     public async Task<IActionResult> Consultar(
         [FromServices] ConsultarVeiculoUseCase useCase,
         Guid veiculoId,
@@ -38,7 +41,7 @@ public sealed class VeiculosController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet("placa/{placa}")]
+    [HttpGet("consultar-por-placa/{placa}")]
     public async Task<IActionResult> ConsultarPorPlaca(
         [FromServices] ConsultarVeiculoPorPlacaUseCase useCase,
         string placa,
@@ -49,7 +52,7 @@ public sealed class VeiculosController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet]
+    [HttpGet("listar")]
     public async Task<IActionResult> Listar(
         [FromServices] ListarVeiculosUseCase useCase,
         [FromQuery] int pagina = 1,
@@ -61,7 +64,7 @@ public sealed class VeiculosController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPut("{veiculoId:guid}")]
+    [HttpPut("{veiculoId:guid}/atualizar")]
     public async Task<IActionResult> Atualizar(
         [FromServices] AtualizarVeiculoUseCase useCase,
         Guid veiculoId,
@@ -75,7 +78,7 @@ public sealed class VeiculosController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpDelete("{veiculoId:guid}")]
+    [HttpDelete("{veiculoId:guid}/remover")]
     public async Task<IActionResult> Remover(
         [FromServices] RemoverVeiculoUseCase useCase,
         Guid veiculoId,

@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Common;
+using OficinaMecanica.API.Extensions;
+using OficinaMecanica.API.Identidade;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AguardarAprovacaoOrcamento;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.CancelarOrdemServico;
@@ -20,10 +22,12 @@ using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Reserv
 namespace OficinaMecanica.API.GestaoOrdemServico.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/v1/gestao-ordem-servico")]
 public sealed class OrdensServicoController : ControllerBase
 {
-    [HttpPost("ordens-servico")]
+    [HttpPost("ordens-servico/cadastrar")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendente)]
     public async Task<IActionResult> Abrir(
         [FromServices] AbrirOrdemServicoUseCase useCase,
         [FromBody] AbrirOrdemServicoRequest request,
@@ -37,7 +41,8 @@ public sealed class OrdensServicoController : ControllerBase
             ordemServico => new { ordemServicoId = ordemServico.Id });
     }
 
-    [HttpGet("ordens-servico/{ordemServicoId:guid}")]
+    [HttpGet("ordens-servico/consultar/{ordemServicoId:guid}")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanico)]
     public async Task<IActionResult> Detalhar(
         [FromServices] DetalharOrdemServicoUseCase useCase,
         Guid ordemServicoId,
@@ -48,7 +53,8 @@ public sealed class OrdensServicoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet("ordens-servico/{ordemServicoId:guid}/status")]
+    [HttpGet("ordens-servico/{ordemServicoId:guid}/consultar-status")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanicoCliente)]
     public async Task<IActionResult> ConsultarStatus(
         [FromServices] ConsultarStatusOrdemServicoUseCase useCase,
         Guid ordemServicoId,
@@ -59,7 +65,8 @@ public sealed class OrdensServicoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet("ordens-servico")]
+    [HttpGet("ordens-servico/listar")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanico)]
     public async Task<IActionResult> Listar(
         [FromServices] ListarOrdensServicoUseCase useCase,
         [FromQuery] int pagina = 1,
@@ -71,7 +78,8 @@ public sealed class OrdensServicoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPost("ordens-servico/{ordemServicoId:guid}/diagnostico/iniciar")]
+    [HttpPost("ordens-servico/{ordemServicoId:guid}/iniciar-diagnostico")]
+    [Authorize(Roles = PerfisAcesso.AdministradorMecanico)]
     public async Task<IActionResult> IniciarDiagnostico(
         [FromServices] IniciarDiagnosticoOrdemServicoUseCase useCase,
         Guid ordemServicoId,
@@ -82,7 +90,8 @@ public sealed class OrdensServicoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPut("ordens-servico/{ordemServicoId:guid}/servicos/definir")]
+    [HttpPut("ordens-servico/{ordemServicoId:guid}/definir-servicos")]
+    [Authorize(Roles = PerfisAcesso.AdministradorMecanico)]
     public async Task<IActionResult> DefinirServicos(
         [FromServices] DefinirServicosUseCase useCase,
         Guid ordemServicoId,
@@ -96,7 +105,8 @@ public sealed class OrdensServicoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPost("ordens-servico/{ordemServicoId:guid}/pecas-insumos/reservar")]
+    [HttpPost("ordens-servico/{ordemServicoId:guid}/reservar-pecas-insumos")]
+    [Authorize(Roles = PerfisAcesso.AdministradorMecanico)]
     public async Task<IActionResult> ReservarPecasInsumos(
         [FromServices] ReservarPecaInsumoUseCase useCase,
         Guid ordemServicoId,
@@ -111,6 +121,7 @@ public sealed class OrdensServicoController : ControllerBase
     }
 
     [HttpPost("ordens-servico/{ordemServicoId:guid}/aguardar-aprovacao")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendente)]
     public async Task<IActionResult> AguardarAprovacaoOrcamento(
         [FromServices] AguardarAprovacaoOrcamentoUseCase useCase,
         Guid ordemServicoId,
@@ -121,7 +132,8 @@ public sealed class OrdensServicoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPost("ordens-servico/{ordemServicoId:guid}/execucao/iniciar")]
+    [HttpPost("ordens-servico/{ordemServicoId:guid}/iniciar-execucao")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendente)]
     public async Task<IActionResult> IniciarExecucao(
         [FromServices] IniciarExecucaoOrdemServicoUseCase useCase,
         Guid ordemServicoId,
@@ -132,7 +144,8 @@ public sealed class OrdensServicoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPost("ordens-servico/{ordemServicoId:guid}/servicos/{servicoId:guid}/execucao/iniciar")]
+    [HttpPost("ordens-servico/{ordemServicoId:guid}/servicos/{servicoId:guid}/iniciar-execucao")]
+    [Authorize(Roles = PerfisAcesso.AdministradorMecanico)]
     public async Task<IActionResult> IniciarExecucaoServico(
         [FromServices] IniciarExecucaoServicoUseCase useCase,
         Guid ordemServicoId,
@@ -145,6 +158,7 @@ public sealed class OrdensServicoController : ControllerBase
     }
 
     [HttpPost("ordens-servico/{ordemServicoId:guid}/servicos/{servicoId:guid}/finalizar")]
+    [Authorize(Roles = PerfisAcesso.AdministradorMecanico)]
     public async Task<IActionResult> FinalizarServico(
         [FromServices] FinalizarServicoUseCase useCase,
         Guid ordemServicoId,
@@ -157,6 +171,7 @@ public sealed class OrdensServicoController : ControllerBase
     }
 
     [HttpPost("ordens-servico/{ordemServicoId:guid}/finalizar")]
+    [Authorize(Roles = PerfisAcesso.AdministradorMecanico)]
     public async Task<IActionResult> Finalizar(
         [FromServices] FinalizarOrdemServicoUseCase useCase,
         Guid ordemServicoId,
@@ -168,6 +183,7 @@ public sealed class OrdensServicoController : ControllerBase
     }
 
     [HttpPost("ordens-servico/{ordemServicoId:guid}/entregar")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendente)]
     public async Task<IActionResult> Entregar(
         [FromServices] EntregarOrdemServicoUseCase useCase,
         Guid ordemServicoId,
@@ -179,6 +195,7 @@ public sealed class OrdensServicoController : ControllerBase
     }
 
     [HttpPost("ordens-servico/{ordemServicoId:guid}/cancelar")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanico)]
     public async Task<IActionResult> Cancelar(
         [FromServices] CancelarOrdemServicoUseCase useCase,
         Guid ordemServicoId,
@@ -192,7 +209,8 @@ public sealed class OrdensServicoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet("servicos/{servicoCatalogoId:guid}/tempo-medio")]
+    [HttpGet("tempo-medio-servicos/consultar/{servicoCatalogoId:guid}")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanico)]
     public async Task<IActionResult> ConsultarTempoMedio(
         [FromServices] ConsultarTempoMedioExecucaoServicoUseCase useCase,
         Guid servicoCatalogoId,
@@ -205,7 +223,8 @@ public sealed class OrdensServicoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet("servicos/tempo-medio")]
+    [HttpGet("tempo-medio-servicos/listar")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanico)]
     public async Task<IActionResult> ListarTempoMedio(
         [FromServices] ListarTempoMedioExecucaoServicosUseCase useCase,
         [FromQuery] int pagina = 1,

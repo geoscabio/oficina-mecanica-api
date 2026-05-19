@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Common;
+using OficinaMecanica.API.Extensions;
+using OficinaMecanica.API.Identidade;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.AtualizarServicoCatalogo;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.CadastrarServicoCatalogo;
 using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.ConsultarServicoCatalogo;
@@ -9,10 +11,11 @@ using OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.Remover
 namespace OficinaMecanica.API.Administrativo.Controllers;
 
 [ApiController]
+[Authorize(Roles = PerfisAcesso.Administrador)]
 [Route("api/v1/administrativo/servicos-catalogo")]
 public sealed class ServicosCatalogoController : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("cadastrar")]
     public async Task<IActionResult> Cadastrar(
         [FromServices] CadastrarServicoCatalogoUseCase useCase,
         [FromBody] CadastrarServicoCatalogoRequest request,
@@ -26,7 +29,7 @@ public sealed class ServicosCatalogoController : ControllerBase
             servico => new { servicoCatalogoId = servico.Id });
     }
 
-    [HttpGet("{servicoCatalogoId:guid}")]
+    [HttpGet("consultar/{servicoCatalogoId:guid}")]
     public async Task<IActionResult> Consultar(
         [FromServices] ConsultarServicoCatalogoUseCase useCase,
         Guid servicoCatalogoId,
@@ -39,7 +42,7 @@ public sealed class ServicosCatalogoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet]
+    [HttpGet("listar")]
     public async Task<IActionResult> Listar(
         [FromServices] ListarServicosCatalogoUseCase useCase,
         [FromQuery] int pagina = 1,
@@ -53,7 +56,7 @@ public sealed class ServicosCatalogoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPut("{servicoCatalogoId:guid}")]
+    [HttpPut("{servicoCatalogoId:guid}/atualizar")]
     public async Task<IActionResult> Atualizar(
         [FromServices] AtualizarServicoCatalogoUseCase useCase,
         Guid servicoCatalogoId,
@@ -67,7 +70,7 @@ public sealed class ServicosCatalogoController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpDelete("{servicoCatalogoId:guid}")]
+    [HttpDelete("{servicoCatalogoId:guid}/remover")]
     public async Task<IActionResult> Remover(
         [FromServices] RemoverServicoCatalogoUseCase useCase,
         Guid servicoCatalogoId,

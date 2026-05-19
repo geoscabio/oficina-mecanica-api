@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Common;
+using OficinaMecanica.API.Extensions;
+using OficinaMecanica.API.Identidade;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.AtualizarCliente;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.ConsultarCliente;
@@ -10,10 +12,11 @@ using OficinaMecanica.Application.Atendimento.ClienteUseCases.RemoverCliente;
 namespace OficinaMecanica.API.Atendimento.Controllers;
 
 [ApiController]
+[Authorize(Roles = PerfisAcesso.AdministradorAtendente)]
 [Route("api/v1/atendimento/clientes")]
 public sealed class ClientesController : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("cadastrar")]
     public async Task<IActionResult> Cadastrar(
         [FromServices] CadastrarClienteUseCase useCase,
         [FromBody] CadastrarClienteRequest request,
@@ -27,7 +30,7 @@ public sealed class ClientesController : ControllerBase
             cliente => new { clienteId = cliente.Id });
     }
 
-    [HttpGet("{clienteId:guid}")]
+    [HttpGet("consultar/{clienteId:guid}")]
     public async Task<IActionResult> Consultar(
         [FromServices] ConsultarClienteUseCase useCase,
         Guid clienteId,
@@ -38,7 +41,7 @@ public sealed class ClientesController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet("documento/{documento}")]
+    [HttpGet("consultar-por-documento/{documento}")]
     public async Task<IActionResult> ConsultarPorDocumento(
         [FromServices] ConsultarClientePorDocumentoUseCase useCase,
         string documento,
@@ -51,7 +54,7 @@ public sealed class ClientesController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpGet]
+    [HttpGet("listar")]
     public async Task<IActionResult> Listar(
         [FromServices] ListarClientesUseCase useCase,
         [FromQuery] int pagina = 1,
@@ -63,7 +66,7 @@ public sealed class ClientesController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpPut("{clienteId:guid}")]
+    [HttpPut("{clienteId:guid}/atualizar")]
     public async Task<IActionResult> Atualizar(
         [FromServices] AtualizarClienteUseCase useCase,
         Guid clienteId,
@@ -77,7 +80,7 @@ public sealed class ClientesController : ControllerBase
         return this.ToActionResult(result);
     }
 
-    [HttpDelete("{clienteId:guid}")]
+    [HttpDelete("{clienteId:guid}/remover")]
     public async Task<IActionResult> Remover(
         [FromServices] RemoverClienteUseCase useCase,
         Guid clienteId,
