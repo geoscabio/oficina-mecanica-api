@@ -2,8 +2,10 @@
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.AtualizarEstoque;
+using OficinaMecanica.Application.GestaoEstoque.ValidationMessages;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.GestaoEstoque.Factories;
+using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
 
@@ -17,9 +19,9 @@ public class AtualizarEstoqueUseCaseTests
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
 
-        var itemEstoque = EstoqueTestDataFactory.CriarItemEstoquePadrao(pecaInsumoCatalogoId);
+        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId);
 
-        var repository = CriarRepository(itemEstoque);
+        var repository = CriarRepository(estoque);
 
         var useCase = CriarUseCase(repository);
 
@@ -33,14 +35,61 @@ public class AtualizarEstoqueUseCaseTests
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.PecaInsumoCatalogoId.Should().Be(pecaInsumoCatalogoId);
         resultado.Valor.QuantidadeDisponivel.Should().Be(request.QuantidadeDisponivel);
+        estoque.ObterItem(pecaInsumoCatalogoId).QuantidadeDisponivel.Should().Be(request.QuantidadeDisponivel);
 
         repository.Verify(
-            repo => repo.AtualizarItemAsync(itemEstoque, It.IsAny<CancellationToken>()),
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
             Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(estoque, It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarItemAsync(
+                It.IsAny<ItemEstoque>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
     public async Task Dado_ItemInexistente_Quando_AtualizarEstoque_Entao_DeveRetornarFalha()
+    {
+        // Arrange
+        var repository = CriarRepository(EstoqueTestDataFactory.CriarEstoquePadrao());
+
+        var useCase = CriarUseCase(repository);
+
+        var request = EstoqueTestDataFactory.CriarAtualizarEstoqueRequestValido();
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().Be(EstoqueValidationMessages.ItemEstoqueNaoEncontrado);
+        resultado.Erro!.Tipo.Should().Be(TipoErro.NaoEncontrado);
+
+        repository.Verify(
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Estoque>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        repository.Verify(
+            repo => repo.AtualizarItemAsync(
+                It.IsAny<ItemEstoque>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task Dado_EstoqueInexistente_Quando_AtualizarEstoque_Entao_DeveRetornarFalha()
     {
         // Arrange
         var repository = CriarRepository(null);
@@ -55,7 +104,18 @@ public class AtualizarEstoqueUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
-        resultado.Erro!.Tipo.Should().Be(TipoErro.NaoEncontrado);
+        resultado.Erro!.Mensagem.Should().Be(EstoqueValidationMessages.ItemEstoqueNaoEncontrado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
+
+        repository.Verify(
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        repository.Verify(
+            repo => repo.AtualizarAsync(
+                It.IsAny<Estoque>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
 
         repository.Verify(
             repo => repo.AtualizarItemAsync(
@@ -81,17 +141,16 @@ public class AtualizarEstoqueUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().Be(EstoqueValidationMessages.PecaInsumoCatalogoObrigatorio);
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
         repository.Verify(
-            repo => repo.ObterItemPorPecaInsumoCatalogoIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
             Times.Never);
 
         repository.Verify(
-            repo => repo.AtualizarItemAsync(
-                It.IsAny<ItemEstoque>(),
+            repo => repo.AtualizarAsync(
+                It.IsAny<Estoque>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
     }
@@ -113,30 +172,27 @@ public class AtualizarEstoqueUseCaseTests
         // Assert
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().Be(EstoqueValidationMessages.QuantidadeDisponivelNaoNegativa);
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
         repository.Verify(
-            repo => repo.ObterItemPorPecaInsumoCatalogoIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
+            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
             Times.Never);
 
         repository.Verify(
-            repo => repo.AtualizarItemAsync(
-                It.IsAny<ItemEstoque>(),
+            repo => repo.AtualizarAsync(
+                It.IsAny<Estoque>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
-    private static Mock<IEstoqueRepository> CriarRepository(ItemEstoque? itemEstoque)
+    private static Mock<IEstoqueRepository> CriarRepository(Estoque? estoque)
     {
         var repository = new Mock<IEstoqueRepository>();
 
         repository
-            .Setup(repo => repo.ObterItemPorPecaInsumoCatalogoIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(itemEstoque);
+            .Setup(repo => repo.ObterAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(estoque);
 
         return repository;
     }
