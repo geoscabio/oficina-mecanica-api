@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Extensions.Options;
 using OficinaMecanica.Application.Identidade.Interfaces;
 using OficinaMecanica.Application.Identidade.UsuarioUseCases.AutenticarUsuario;
@@ -54,11 +56,18 @@ public sealed class UsuarioDemoAutenticadoService : IUsuarioAutenticadoService
         }
 
         return new UsuarioDemo(
-            Guid.NewGuid(),
+            GerarUsuarioId(usuario.Login),
             usuario.Nome,
             usuario.Login,
             usuario.Senha,
             usuario.Perfil);
+    }
+
+    private static Guid GerarUsuarioId(string login)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(login.Trim().ToLowerInvariant()));
+
+        return new Guid(hash.AsSpan(0, 16));
     }
 
     private sealed record UsuarioDemo(

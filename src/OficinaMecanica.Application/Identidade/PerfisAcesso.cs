@@ -1,4 +1,4 @@
-namespace OficinaMecanica.API.Identidade;
+namespace OficinaMecanica.Application.Identidade;
 
 public static class PerfisAcesso
 {

@@ -35,6 +35,7 @@ public static class ApiResultExtensions
             TipoErro.NaoEncontrado => controller.NotFound(result.Erro),
             TipoErro.RegraNegocio => controller.Conflict(result.Erro),
             TipoErro.NaoAutorizado => controller.Unauthorized(result.Erro),
+            TipoErro.ErroInterno => controller.StatusCode(StatusCodes.Status500InternalServerError, result.Erro),
             _ => controller.BadRequest(result.Erro)
         };
     }
