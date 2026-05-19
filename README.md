@@ -15,6 +15,12 @@ O projeto segue a modelagem definida no contexto acadêmico:
 - Infrastructure com EF Core, SQL Server, repositories, migrations e seed demo
 - API REST com Swagger e autenticação JWT
 
+## Wiki Do Projeto
+
+A documentação arquitetural, backlog de débitos técnicos, decisões de evolução e acompanhamento da entrega ficam centralizados na wiki do projeto no Notion:
+
+[Sistema Integrado de Atendimento e Execução de Serviços em Oficina Mecânica - Wiki do Projeto](https://turquoise-syzygy-614.notion.site/Sistema-Integrado-de-Atendimento-e-Execu-o-de-Servi-os-em-Oficina-Mec-nica-Wiki-do-Projeto-329f64869829801cb424d26f19cf224f?source=copy_link)
+
 ## Pré-requisitos
 
 - Docker Desktop instalado e em execução
