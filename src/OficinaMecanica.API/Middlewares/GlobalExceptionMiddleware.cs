@@ -22,7 +22,7 @@ public sealed class GlobalExceptionMiddleware
         {
             await WriteErrorAsync(
                 context,
-                StatusCodes.Status409Conflict,
+                StatusCodes.Status422UnprocessableEntity,
                 new ErrorResponse(exception.Message, TipoErro.RegraNegocio));
         }
         catch

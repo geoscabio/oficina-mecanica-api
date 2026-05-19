@@ -6,6 +6,9 @@ TestResults/
 *.user
 *.suo
 *.nupkg
+.env
+.env.local
+*.env.local
 
 Contexto para IA.zip
 _contexto_para_ia_extracted/
