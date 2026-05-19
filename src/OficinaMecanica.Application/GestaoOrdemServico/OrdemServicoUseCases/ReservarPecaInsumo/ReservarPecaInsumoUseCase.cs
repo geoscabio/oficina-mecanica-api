@@ -18,6 +18,7 @@ public sealed class ReservarPecaInsumoUseCase
     private readonly IOrdemServicoRepository _ordemServicoRepository;
     private readonly IPecaInsumoCatalogoRepository _pecaInsumoCatalogoRepository;
     private readonly IEstoqueRepository _estoqueRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<ReservarPecaInsumoRequest> _validator;
     private readonly IMapper _mapper;
 
@@ -25,12 +26,14 @@ public sealed class ReservarPecaInsumoUseCase
         IOrdemServicoRepository ordemServicoRepository,
         IPecaInsumoCatalogoRepository pecaInsumoCatalogoRepository,
         IEstoqueRepository estoqueRepository,
+        IUnitOfWork unitOfWork,
         IValidator<ReservarPecaInsumoRequest> validator,
         IMapper mapper)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _pecaInsumoCatalogoRepository = pecaInsumoCatalogoRepository;
         _estoqueRepository = estoqueRepository;
+        _unitOfWork = unitOfWork;
         _validator = validator;
         _mapper = mapper;
     }
@@ -84,8 +87,13 @@ public sealed class ReservarPecaInsumoUseCase
             estoque.ReservarItens(pecaInsumoCatalogo.Id, pecaInsumo.Quantidade);
         }
 
-        await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
-        await _estoqueRepository.AtualizarAsync(estoque, cancellationToken);
+        await _unitOfWork.ExecutarEmTransacaoAsync(
+            async transactionCancellationToken =>
+            {
+                await _ordemServicoRepository.AtualizarAsync(ordemServico, transactionCancellationToken);
+                await _estoqueRepository.AtualizarAsync(estoque, transactionCancellationToken);
+            },
+            cancellationToken);
 
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }

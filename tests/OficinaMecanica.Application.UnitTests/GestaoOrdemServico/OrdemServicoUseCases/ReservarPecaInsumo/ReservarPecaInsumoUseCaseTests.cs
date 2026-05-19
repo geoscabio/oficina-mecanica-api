@@ -34,10 +34,13 @@ public class ReservarPecaInsumoUseCaseTests
 
         var estoqueRepository = CriarEstoqueRepository(estoque);
 
+        var unitOfWork = CriarUnitOfWork();
+
         var useCase = CriarUseCase(
             ordemServicoRepository,
             pecaInsumoCatalogoRepository,
-            estoqueRepository);
+            estoqueRepository,
+            unitOfWork);
 
         var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(
             ordemServico.Id,
@@ -85,6 +88,12 @@ public class ReservarPecaInsumoUseCaseTests
         estoqueRepository.Verify(
             repo => repo.AtualizarAsync(
                 estoque,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        unitOfWork.Verify(
+            uow => uow.ExecutarEmTransacaoAsync(
+                It.IsAny<Func<CancellationToken, Task>>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -627,15 +636,33 @@ public class ReservarPecaInsumoUseCaseTests
         return repository;
     }
 
+    private static Mock<IUnitOfWork> CriarUnitOfWork()
+    {
+        var unitOfWork = new Mock<IUnitOfWork>();
+
+        unitOfWork
+            .Setup(uow => uow.ExecutarEmTransacaoAsync(
+                It.IsAny<Func<CancellationToken, Task>>(),
+                It.IsAny<CancellationToken>()))
+            .Returns<Func<CancellationToken, Task>, CancellationToken>(
+                (operacao, cancellationToken) => operacao(cancellationToken));
+
+        return unitOfWork;
+    }
+
     private static ReservarPecaInsumoUseCase CriarUseCase(
         Mock<IOrdemServicoRepository> ordemServicoRepository,
         Mock<IPecaInsumoCatalogoRepository> pecaInsumoCatalogoRepository,
-        Mock<IEstoqueRepository> estoqueRepository)
+        Mock<IEstoqueRepository> estoqueRepository,
+        Mock<IUnitOfWork>? unitOfWork = null)
     {
+        unitOfWork ??= CriarUnitOfWork();
+
         return new ReservarPecaInsumoUseCase(
             ordemServicoRepository.Object,
             pecaInsumoCatalogoRepository.Object,
             estoqueRepository.Object,
+            unitOfWork.Object,
             new ReservarPecaInsumoValidator(),
             MapperFactory.Criar());
     }
