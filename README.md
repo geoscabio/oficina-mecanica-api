@@ -148,13 +148,13 @@ O fluxo recomendado para avaliação é executar a API e o banco de dados com **
 
 ### 1. Subir API e banco
 
-Na raiz do repositório, crie o arquivo `.env` a partir do exemplo versionado:
+Na raiz do repositório, execute o comando abaixo. Ele cria automaticamente o arquivo `.env` a partir do `.env.example`:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-O Docker Compose lê esse arquivo automaticamente. Se quiser trocar a senha do SQL Server ou o segredo JWT, edite o `.env` antes de subir os containers.
+O Docker Compose lê o arquivo `.env` automaticamente. Não é necessário criar o arquivo na mão. Se quiser trocar a senha do SQL Server ou o segredo JWT, edite os valores do `.env` antes de subir os containers.
 
 Depois execute:
 
@@ -300,7 +300,17 @@ dotnet test tests\OficinaMecanica.Application.UnitTests\OficinaMecanica.Applicat
 dotnet test tests\OficinaMecanica.API.IntegrationTests\OficinaMecanica.API.IntegrationTests.csproj
 ```
 
-Os testes integrados usam **Testcontainers** para subir um SQL Server temporário. Por isso, o Docker Desktop precisa estar em execução.
+Os testes integrados usam **Testcontainers** para subir um SQL Server temporário. Quando o Docker Desktop está em execução, eles rodam normalmente com `dotnet test`.
+
+Se o Docker não estiver acessível no ambiente local, os testes integrados que dependem de container são marcados como `Skipped` em vez de quebrar a suíte inteira. Isso não altera a execução da API com Docker Compose; afeta apenas a experiência ao rodar testes automatizados.
+
+Para pular intencionalmente os testes que dependem de Docker em uma execução local:
+
+```powershell
+$env:OFICINA_SKIP_DOCKER_TESTS = "true"
+dotnet test
+Remove-Item Env:OFICINA_SKIP_DOCKER_TESTS
+```
 
 ---
 
