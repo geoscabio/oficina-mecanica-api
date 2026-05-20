@@ -38,6 +38,15 @@ public sealed class ServicoCatalogoRepository : IServicoCatalogoRepository
             .SingleOrDefaultAsync(servico => servico.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<ServicoCatalogo>> ObterPorIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.ServicosCatalogo
+            .Where(servico => ids.Contains(servico.Id))
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<ServicoCatalogo>> ListarAsync(
         int pagina,
         int tamanhoPagina,

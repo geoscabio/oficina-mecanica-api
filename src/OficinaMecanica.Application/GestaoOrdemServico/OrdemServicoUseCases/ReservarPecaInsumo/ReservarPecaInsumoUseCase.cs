@@ -65,7 +65,7 @@ public sealed class ReservarPecaInsumoUseCase
 
         var pecasInsumosCatalogo = await ObterPecasInsumosCatalogoAsync(request.PecasInsumos, cancellationToken);
 
-        if (pecasInsumosCatalogo.Count != request.PecasInsumos.Count)
+        if (request.PecasInsumos.Any(pecaInsumo => !pecasInsumosCatalogo.ContainsKey(pecaInsumo.PecaInsumoCatalogoId)))
         {
             return Result<OrdemServicoResponse>.Falha(PecaInsumoCatalogoErrorMessages.PecaInsumoCatalogoNaoEncontrado, TipoErro.NaoEncontrado);
         }
@@ -102,21 +102,14 @@ public sealed class ReservarPecaInsumoUseCase
         IEnumerable<PecaInsumoRequest> pecasInsumos,
         CancellationToken cancellationToken)
     {
-        var pecasInsumosCatalogo = new Dictionary<Guid, PecaInsumoCatalogo>();
+        var ids = pecasInsumos
+            .Select(pecaInsumo => pecaInsumo.PecaInsumoCatalogoId)
+            .Distinct()
+            .ToArray();
 
-        foreach (var pecaInsumo in pecasInsumos)
-        {
-            var pecaInsumoCatalogo = await _pecaInsumoCatalogoRepository.ObterPorIdAsync(
-                pecaInsumo.PecaInsumoCatalogoId,
-                cancellationToken);
+        var pecasInsumosCatalogo = await _pecaInsumoCatalogoRepository.ObterPorIdsAsync(ids, cancellationToken);
 
-            if (pecaInsumoCatalogo is not null)
-            {
-                pecasInsumosCatalogo[pecaInsumoCatalogo.Id] = pecaInsumoCatalogo;
-            }
-        }
-
-        return pecasInsumosCatalogo;
+        return pecasInsumosCatalogo.ToDictionary(pecaInsumoCatalogo => pecaInsumoCatalogo.Id);
     }
 
     private static bool ExisteEstoqueDisponivel(

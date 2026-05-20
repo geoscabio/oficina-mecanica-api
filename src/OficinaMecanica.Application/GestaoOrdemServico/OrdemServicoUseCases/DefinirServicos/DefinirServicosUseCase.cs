@@ -49,13 +49,15 @@ public sealed class DefinirServicosUseCase
 
         var servicosCatalogo = await ObterServicosCatalogoAsync(request.ServicosCatalogoIds, cancellationToken);
 
-        if (servicosCatalogo.Count != request.ServicosCatalogoIds.Count)
+        if (request.ServicosCatalogoIds.Any(servicoCatalogoId => !servicosCatalogo.ContainsKey(servicoCatalogoId)))
         {
             return Result<OrdemServicoResponse>.Falha(ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
-        foreach (var servicoCatalogo in servicosCatalogo)
+        foreach (var servicoCatalogoId in request.ServicosCatalogoIds)
         {
+            var servicoCatalogo = servicosCatalogo[servicoCatalogoId];
+
             ordemServico.DefinirServico(servicoCatalogo.Id, servicoCatalogo.Valor);
         }
 
@@ -64,25 +66,17 @@ public sealed class DefinirServicosUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 
-    private async Task<List<ServicoCatalogo>> ObterServicosCatalogoAsync(
+    private async Task<Dictionary<Guid, ServicoCatalogo>> ObterServicosCatalogoAsync(
         IEnumerable<Guid> servicosCatalogoIds,
         CancellationToken cancellationToken)
     {
-        var servicosCatalogo = new List<ServicoCatalogo>();
+        var ids = servicosCatalogoIds
+            .Distinct()
+            .ToArray();
 
-        foreach (var servicoCatalogoId in servicosCatalogoIds)
-        {
-            var servicoCatalogo = await _servicoCatalogoRepository.ObterPorIdAsync(
-                servicoCatalogoId,
-                cancellationToken);
+        var servicosCatalogo = await _servicoCatalogoRepository.ObterPorIdsAsync(ids, cancellationToken);
 
-            if (servicoCatalogo is not null)
-            {
-                servicosCatalogo.Add(servicoCatalogo);
-            }
-        }
-
-        return servicosCatalogo;
+        return servicosCatalogo.ToDictionary(servicoCatalogo => servicoCatalogo.Id);
     }
 }
 
