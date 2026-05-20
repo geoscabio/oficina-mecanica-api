@@ -23,7 +23,7 @@ public sealed class AtualizarPecaInsumoCatalogoValidator : AbstractValidator<Atu
                 .WithMessage(PecaInsumoCatalogoValidationMessages.DescricaoObrigatoria);
 
             RuleFor(request => request.Tipo)
-                .Must(tipo => Enum.IsDefined(typeof(TipoPecaInsumo), tipo))
+                .Must(tipo => Enum.IsDefined(tipo))
                 .WithMessage(PecaInsumoCatalogoValidationMessages.TipoInvalido);
 
             RuleFor(request => request.Valor)

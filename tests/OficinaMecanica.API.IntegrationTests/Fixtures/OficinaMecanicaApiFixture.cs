@@ -116,7 +116,7 @@ public sealed class OficinaMecanicaApiFixture : IAsyncLifetime
         }
     }
 
-    private static IReadOnlyDictionary<string, string?> CriarConfiguracaoTeste(string connectionString)
+    private static Dictionary<string, string?> CriarConfiguracaoTeste(string connectionString)
     {
         return new Dictionary<string, string?>
         {

@@ -19,7 +19,7 @@ public sealed class CancelarOrdemServicoValidator : AbstractValidator<CancelarOr
                 .WithMessage(OrdemServicoValidationMessages.OrdemServicoIdObrigatorio);
 
             RuleFor(request => request.Motivo)
-                .Must(motivo => Enum.IsDefined(typeof(MotivoCancelamentoOrdemServico), motivo))
+                .Must(motivo => Enum.IsDefined(motivo))
                 .WithMessage(OrdemServicoValidationMessages.MotivoCancelamentoObrigatorio);
         });
     }

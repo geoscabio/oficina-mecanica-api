@@ -42,7 +42,7 @@ public sealed class CadastrarClienteUseCase
         var cliente = Cliente.Criar(
             documento,
             request.Nome,
-            new Endereco(request.Endereco.Logradouro, request.Endereco.Numero, request.Endereco.Bairro, request.Endereco.Cidade, request.Endereco.CEP),
+            Endereco.Criar(request.Endereco.Logradouro, request.Endereco.Numero, request.Endereco.Bairro, request.Endereco.Cidade, request.Endereco.CEP),
             Telefone.Criar(request.Telefone),
             Email.Criar(request.Email));
 

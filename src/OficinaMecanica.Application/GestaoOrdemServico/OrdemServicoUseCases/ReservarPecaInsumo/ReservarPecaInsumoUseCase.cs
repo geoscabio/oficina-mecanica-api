@@ -107,15 +107,7 @@ public sealed class ReservarPecaInsumoUseCase
 
     private static bool ExisteEstoqueDisponivel(Estoque estoque, IEnumerable<PecaInsumoRequest> pecasInsumos)
     {
-        foreach (var pecaInsumo in pecasInsumos)
-        {
-            if (!estoque.VerificarDisponibilidade(pecaInsumo.PecaInsumoCatalogoId, pecaInsumo.Quantidade))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return pecasInsumos.All(pecaInsumo => estoque.VerificarDisponibilidade(pecaInsumo.PecaInsumoCatalogoId, pecaInsumo.Quantidade));
     }
 }
 

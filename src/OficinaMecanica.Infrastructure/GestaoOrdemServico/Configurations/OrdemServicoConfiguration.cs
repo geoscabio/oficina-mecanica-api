@@ -28,7 +28,8 @@ public sealed class OrdemServicoConfiguration : IEntityTypeConfiguration<OrdemSe
             .HasPrecision(18, 2)
             .IsRequired();
 
-        builder.Property(ordemServico => ordemServico.DataInicio);
+        builder.Property(ordemServico => ordemServico.DataInicio)
+            .IsRequired();
         builder.Property(ordemServico => ordemServico.DataFim);
 
         builder.Property(ordemServico => ordemServico.MotivoCancelamento)

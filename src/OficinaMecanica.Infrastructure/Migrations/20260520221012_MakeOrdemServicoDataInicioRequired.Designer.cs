@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OficinaMecanica.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using OficinaMecanica.Infrastructure.Persistence;
 namespace OficinaMecanica.Infrastructure.Migrations
 {
     [DbContext(typeof(OficinaMecanicaDbContext))]
-    partial class OficinaMecanicaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260520221012_MakeOrdemServicoDataInicioRequired")]
+    partial class MakeOrdemServicoDataInicioRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

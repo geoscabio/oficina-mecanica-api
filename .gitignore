@@ -2,7 +2,9 @@ bin/
 obj/
 .vs/
 .vscode/
+.sonarqube/
 TestResults/
+docs/
 *.user
 *.suo
 *.nupkg

@@ -11,43 +11,45 @@ namespace OficinaMecanica.Infrastructure.GestaoOrdemServico.Seed;
 
 internal static class OrdemServicoSeedData
 {
+    private readonly record struct OrdemSeedInfo(int Numero, Guid VeiculoId, Guid MecanicoId);
+
     public static async Task SeedAsync(OficinaMecanicaDbContext dbContext, AdministrativoSeedResult administrativo, AtendimentoSeedResult atendimento, EstoqueSeedResult estoqueSeed, CancellationToken cancellationToken)
     {
         var estoque = estoqueSeed.Estoque;
 
-        await CriarOrdemRecebidaAsync(dbContext, 9001, atendimento.VeiculoCivic.Id, administrativo.MecanicoPrincipal.Id, cancellationToken);
+        await CriarOrdemRecebidaAsync(dbContext, new OrdemSeedInfo(9001, atendimento.VeiculoCivic.Id, administrativo.MecanicoPrincipal.Id), cancellationToken);
 
-        await CriarOrdemEmDiagnosticoAsync(dbContext, 9002, atendimento.VeiculoOnix.Id, administrativo.MecanicoDiagnostico.Id, cancellationToken);
+        await CriarOrdemEmDiagnosticoAsync(dbContext, new OrdemSeedInfo(9002, atendimento.VeiculoOnix.Id, administrativo.MecanicoDiagnostico.Id), cancellationToken);
 
-        await CriarOrdemAguardandoAprovacaoAsync(dbContext, estoque, administrativo.ServicoTrocaOleo.Id, administrativo.PecaFiltroOleo.Id, 9003, atendimento.VeiculoCorolla.Id, administrativo.MecanicoPrincipal.Id, cancellationToken);
+        await CriarOrdemAguardandoAprovacaoAsync(dbContext, estoque, administrativo.ServicoTrocaOleo.Id, administrativo.PecaFiltroOleo.Id, new OrdemSeedInfo(9003, atendimento.VeiculoCorolla.Id, administrativo.MecanicoPrincipal.Id), cancellationToken);
 
-        await CriarOrdemEmExecucaoAsync(dbContext, estoque, administrativo.ServicoTrocaOleo.Id, administrativo.InsumoOleoMotor.Id, 9004, atendimento.VeiculoCivic.Id, administrativo.MecanicoDiagnostico.Id, cancellationToken);
+        await CriarOrdemEmExecucaoAsync(dbContext, estoque, administrativo.ServicoTrocaOleo.Id, administrativo.InsumoOleoMotor.Id, new OrdemSeedInfo(9004, atendimento.VeiculoCivic.Id, administrativo.MecanicoDiagnostico.Id), cancellationToken);
 
-        await CriarOrdemFinalizadaAsync(dbContext, estoque, administrativo.ServicoTrocaOleo.Id, administrativo.PecaPastilhaFreio.Id, 9005, atendimento.VeiculoOnix.Id, administrativo.MecanicoPrincipal.Id, cancellationToken);
+        await CriarOrdemFinalizadaAsync(dbContext, estoque, administrativo.ServicoTrocaOleo.Id, administrativo.PecaPastilhaFreio.Id, new OrdemSeedInfo(9005, atendimento.VeiculoOnix.Id, administrativo.MecanicoPrincipal.Id), cancellationToken);
 
-        await CriarOrdemEntregueAsync(dbContext, estoque, administrativo.ServicoTrocaOleo.Id, administrativo.PecaPastilhaFreio.Id, 9006, atendimento.VeiculoCorolla.Id, administrativo.MecanicoDiagnostico.Id, cancellationToken);
+        await CriarOrdemEntregueAsync(dbContext, estoque, administrativo.ServicoTrocaOleo.Id, administrativo.PecaPastilhaFreio.Id, new OrdemSeedInfo(9006, atendimento.VeiculoCorolla.Id, administrativo.MecanicoDiagnostico.Id), cancellationToken);
 
-        await CriarOrdemCanceladaAsync(dbContext, estoque, administrativo.ServicoTrocaOleo.Id, administrativo.PecaFiltroOleo.Id, 9007, atendimento.VeiculoCivic.Id, administrativo.MecanicoPrincipal.Id, cancellationToken);
+        await CriarOrdemCanceladaAsync(dbContext, estoque, administrativo.ServicoTrocaOleo.Id, administrativo.PecaFiltroOleo.Id, new OrdemSeedInfo(9007, atendimento.VeiculoCivic.Id, administrativo.MecanicoPrincipal.Id), cancellationToken);
     }
 
-    private static async Task CriarOrdemRecebidaAsync(OficinaMecanicaDbContext dbContext, int numero, Guid veiculoId, Guid mecanicoId, CancellationToken cancellationToken)
+    private static async Task CriarOrdemRecebidaAsync(OficinaMecanicaDbContext dbContext, OrdemSeedInfo ordem, CancellationToken cancellationToken)
     {
-        if (await OrdemServicoExisteAsync(dbContext, numero, cancellationToken))
+        if (await OrdemServicoExisteAsync(dbContext, ordem.Numero, cancellationToken))
         {
             return;
         }
 
-        dbContext.OrdensServico.Add(OrdemServico.Abrir(numero, veiculoId, mecanicoId));
+        dbContext.OrdensServico.Add(OrdemServico.Abrir(ordem.Numero, ordem.VeiculoId, ordem.MecanicoId));
     }
 
-    private static async Task CriarOrdemEmDiagnosticoAsync(OficinaMecanicaDbContext dbContext, int numero, Guid veiculoId, Guid mecanicoId, CancellationToken cancellationToken)
+    private static async Task CriarOrdemEmDiagnosticoAsync(OficinaMecanicaDbContext dbContext, OrdemSeedInfo ordem, CancellationToken cancellationToken)
     {
-        if (await OrdemServicoExisteAsync(dbContext, numero, cancellationToken))
+        if (await OrdemServicoExisteAsync(dbContext, ordem.Numero, cancellationToken))
         {
             return;
         }
 
-        var ordemServico = OrdemServico.Abrir(numero, veiculoId, mecanicoId);
+        var ordemServico = OrdemServico.Abrir(ordem.Numero, ordem.VeiculoId, ordem.MecanicoId);
         ordemServico.IniciarDiagnostico();
 
         dbContext.OrdensServico.Add(ordemServico);
@@ -58,17 +60,15 @@ internal static class OrdemServicoSeedData
         Estoque estoque,
         Guid servicoCatalogoId,
         Guid pecaInsumoCatalogoId,
-        int numero,
-        Guid veiculoId,
-        Guid mecanicoId,
+        OrdemSeedInfo ordem,
         CancellationToken cancellationToken)
     {
-        if (await OrdemServicoExisteAsync(dbContext, numero, cancellationToken))
+        if (await OrdemServicoExisteAsync(dbContext, ordem.Numero, cancellationToken))
         {
             return;
         }
 
-        var ordemServico = CriarOrdemDiagnosticada(numero, veiculoId, mecanicoId, servicoCatalogoId);
+        var ordemServico = CriarOrdemDiagnosticada(ordem, servicoCatalogoId);
         ReservarPecaInsumo(ordemServico, estoque, pecaInsumoCatalogoId, 1, 45m);
         ordemServico.AguardarAprovacao();
 
@@ -80,17 +80,15 @@ internal static class OrdemServicoSeedData
         Estoque estoque,
         Guid servicoCatalogoId,
         Guid pecaInsumoCatalogoId,
-        int numero,
-        Guid veiculoId,
-        Guid mecanicoId,
+        OrdemSeedInfo ordem,
         CancellationToken cancellationToken)
     {
-        if (await OrdemServicoExisteAsync(dbContext, numero, cancellationToken))
+        if (await OrdemServicoExisteAsync(dbContext, ordem.Numero, cancellationToken))
         {
             return;
         }
 
-        var ordemServico = CriarOrdemDiagnosticada(numero, veiculoId, mecanicoId, servicoCatalogoId);
+        var ordemServico = CriarOrdemDiagnosticada(ordem, servicoCatalogoId);
         ReservarPecaInsumo(ordemServico, estoque, pecaInsumoCatalogoId, 2, 65m);
         ordemServico.AguardarAprovacao();
         ordemServico.IniciarExecucao();
@@ -104,17 +102,15 @@ internal static class OrdemServicoSeedData
         Estoque estoque,
         Guid servicoCatalogoId,
         Guid pecaInsumoCatalogoId,
-        int numero,
-        Guid veiculoId,
-        Guid mecanicoId,
+        OrdemSeedInfo ordem,
         CancellationToken cancellationToken)
     {
-        if (await OrdemServicoExisteAsync(dbContext, numero, cancellationToken))
+        if (await OrdemServicoExisteAsync(dbContext, ordem.Numero, cancellationToken))
         {
             return;
         }
 
-        var ordemServico = CriarOrdemExecutadaComServicoFinalizado(numero, veiculoId, mecanicoId, estoque, servicoCatalogoId, pecaInsumoCatalogoId);
+        var ordemServico = CriarOrdemExecutadaComServicoFinalizado(ordem, estoque, servicoCatalogoId, pecaInsumoCatalogoId);
 
         BaixarPecasReservadas(ordemServico, estoque);
         ordemServico.Finalizar();
@@ -122,14 +118,14 @@ internal static class OrdemServicoSeedData
         dbContext.OrdensServico.Add(ordemServico);
     }
 
-    private static async Task CriarOrdemEntregueAsync(OficinaMecanicaDbContext dbContext, Estoque estoque, Guid servicoCatalogoId, Guid pecaInsumoCatalogoId, int numero, Guid veiculoId, Guid mecanicoId, CancellationToken cancellationToken)
+    private static async Task CriarOrdemEntregueAsync(OficinaMecanicaDbContext dbContext, Estoque estoque, Guid servicoCatalogoId, Guid pecaInsumoCatalogoId, OrdemSeedInfo ordem, CancellationToken cancellationToken)
     {
-        if (await OrdemServicoExisteAsync(dbContext, numero, cancellationToken))
+        if (await OrdemServicoExisteAsync(dbContext, ordem.Numero, cancellationToken))
         {
             return;
         }
 
-        var ordemServico = CriarOrdemExecutadaComServicoFinalizado(numero, veiculoId, mecanicoId, estoque, servicoCatalogoId, pecaInsumoCatalogoId);
+        var ordemServico = CriarOrdemExecutadaComServicoFinalizado(ordem, estoque, servicoCatalogoId, pecaInsumoCatalogoId);
 
         BaixarPecasReservadas(ordemServico, estoque);
         ordemServico.Finalizar();
@@ -138,14 +134,14 @@ internal static class OrdemServicoSeedData
         dbContext.OrdensServico.Add(ordemServico);
     }
 
-    private static async Task CriarOrdemCanceladaAsync(OficinaMecanicaDbContext dbContext, Estoque estoque, Guid servicoCatalogoId, Guid pecaInsumoCatalogoId, int numero, Guid veiculoId, Guid mecanicoId, CancellationToken cancellationToken)
+    private static async Task CriarOrdemCanceladaAsync(OficinaMecanicaDbContext dbContext, Estoque estoque, Guid servicoCatalogoId, Guid pecaInsumoCatalogoId, OrdemSeedInfo ordem, CancellationToken cancellationToken)
     {
-        if (await OrdemServicoExisteAsync(dbContext, numero, cancellationToken))
+        if (await OrdemServicoExisteAsync(dbContext, ordem.Numero, cancellationToken))
         {
             return;
         }
 
-        var ordemServico = CriarOrdemDiagnosticada(numero, veiculoId, mecanicoId, servicoCatalogoId);
+        var ordemServico = CriarOrdemDiagnosticada(ordem, servicoCatalogoId);
         ReservarPecaInsumo(ordemServico, estoque, pecaInsumoCatalogoId, 1, 45m);
         ordemServico.AguardarAprovacao();
         ordemServico.Cancelar(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
@@ -154,18 +150,18 @@ internal static class OrdemServicoSeedData
         dbContext.OrdensServico.Add(ordemServico);
     }
 
-    private static OrdemServico CriarOrdemDiagnosticada(int numero, Guid veiculoId, Guid mecanicoId, Guid servicoCatalogoId)
+    private static OrdemServico CriarOrdemDiagnosticada(OrdemSeedInfo ordem, Guid servicoCatalogoId)
     {
-        var ordemServico = OrdemServico.Abrir(numero, veiculoId, mecanicoId);
+        var ordemServico = OrdemServico.Abrir(ordem.Numero, ordem.VeiculoId, ordem.MecanicoId);
         ordemServico.IniciarDiagnostico();
         ordemServico.DefinirServico(servicoCatalogoId, 120m);
 
         return ordemServico;
     }
 
-    private static OrdemServico CriarOrdemExecutadaComServicoFinalizado(int numero, Guid veiculoId, Guid mecanicoId, Estoque estoque, Guid servicoCatalogoId, Guid pecaInsumoCatalogoId)
+    private static OrdemServico CriarOrdemExecutadaComServicoFinalizado(OrdemSeedInfo ordem, Estoque estoque, Guid servicoCatalogoId, Guid pecaInsumoCatalogoId)
     {
-        var ordemServico = CriarOrdemDiagnosticada(numero, veiculoId, mecanicoId, servicoCatalogoId);
+        var ordemServico = CriarOrdemDiagnosticada(ordem, servicoCatalogoId);
         ReservarPecaInsumo(ordemServico, estoque, pecaInsumoCatalogoId, 1, 220m);
         ordemServico.AguardarAprovacao();
         ordemServico.IniciarExecucao();

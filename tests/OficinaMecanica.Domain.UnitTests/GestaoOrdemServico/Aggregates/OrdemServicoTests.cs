@@ -25,7 +25,7 @@ public class OrdemServicoTests
         ordemServico.VeiculoId.Should().Be(veiculoId);
         ordemServico.MecanicoId.Should().Be(mecanicoId);
         ordemServico.Status.Should().Be(StatusOrdemServico.Recebida);
-        ordemServico.DataInicio.Should().NotBeNull();
+        ordemServico.DataInicio.Should().NotBe(default);
         ordemServico.DataFim.Should().BeNull();
         ordemServico.MotivoCancelamento.Should().BeNull();
         ordemServico.ValorTotal.Should().Be(0m);

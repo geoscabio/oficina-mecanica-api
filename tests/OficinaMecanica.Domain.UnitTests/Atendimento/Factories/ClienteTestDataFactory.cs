@@ -46,12 +46,12 @@ internal static class ClienteTestDataFactory
 
     public static Endereco CriarEnderecoPadrao()
     {
-        return new Endereco(LogradouroPadrao, NumeroPadrao, BairroPadrao, CidadePadrao, CepPadrao);
+        return Endereco.Criar(LogradouroPadrao, NumeroPadrao, BairroPadrao, CidadePadrao, CepPadrao);
     }
 
     public static Endereco CriarEnderecoAtualizado()
     {
-        return new Endereco(LogradouroAtualizado, NumeroAtualizado, BairroAtualizado, CidadeAtualizada, CepAtualizado);
+        return Endereco.Criar(LogradouroAtualizado, NumeroAtualizado, BairroAtualizado, CidadeAtualizada, CepAtualizado);
     }
 
     public static Telefone CriarTelefonePadrao()

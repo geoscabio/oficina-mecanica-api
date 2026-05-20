@@ -33,6 +33,7 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
         return _dbContext.OrdensServico
             .Include(ordemServico => ordemServico.Servicos)
             .Include(ordemServico => ordemServico.PecasInsumos)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(ordemServico => ordemServico.Id == id, cancellationToken);
     }
 
@@ -51,6 +52,7 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
             .AsNoTracking()
             .Include(ordemServico => ordemServico.Servicos)
             .Include(ordemServico => ordemServico.PecasInsumos)
+            .AsSplitQuery()
             .OrderByDescending(ordemServico => ordemServico.DataInicio)
             .ThenByDescending(ordemServico => ordemServico.Numero)
             .Skip((pagina - 1) * tamanhoPagina)

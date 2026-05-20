@@ -5,6 +5,10 @@ namespace OficinaMecanica.Domain.GestaoEstoque.Entities;
 
 public sealed class ItemEstoque
 {
+    private ItemEstoque()
+    {
+    }
+
     private ItemEstoque(Guid id, Guid pecaInsumoCatalogoId, int quantidadeDisponivel, int quantidadeReservada)
     {
         Id = id;

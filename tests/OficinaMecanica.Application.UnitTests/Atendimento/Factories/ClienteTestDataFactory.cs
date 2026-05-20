@@ -42,7 +42,7 @@ internal static class ClienteTestDataFactory
 
     public static Cliente CriarClientePadrao()
     {
-        return Cliente.Criar(CpfCnpj.Criar(DocumentoPadrao), NomePadrao, new Endereco(LogradouroPadrao, NumeroPadrao, BairroPadrao, CidadePadrao, CepPadrao), Telefone.Criar(TelefonePadrao), Email.Criar(EmailPadrao));
+        return Cliente.Criar(CpfCnpj.Criar(DocumentoPadrao), NomePadrao, Endereco.Criar(LogradouroPadrao, NumeroPadrao, BairroPadrao, CidadePadrao, CepPadrao), Telefone.Criar(TelefonePadrao), Email.Criar(EmailPadrao));
     }
 
     public static CadastrarClienteRequest CriarCadastrarClienteRequestValido(string documento = DocumentoPadrao, string nome = NomePadrao, string telefone = TelefonePadrao, string email = EmailPadrao)

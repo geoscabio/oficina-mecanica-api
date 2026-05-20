@@ -31,7 +31,7 @@ internal static class ClienteSeedData
             return clienteExistente;
         }
 
-        var cliente = Cliente.Criar(CpfCnpj.Criar(seed.Documento), seed.Nome, new Endereco(seed.Logradouro, seed.Numero, seed.Bairro, seed.Cidade, seed.Cep), Telefone.Criar(seed.Telefone), Email.Criar(seed.Email));
+        var cliente = Cliente.Criar(CpfCnpj.Criar(seed.Documento), seed.Nome, Endereco.Criar(seed.Logradouro, seed.Numero, seed.Bairro, seed.Cidade, seed.Cep), Telefone.Criar(seed.Telefone), Email.Criar(seed.Email));
 
         dbContext.Clientes.Add(cliente);
 

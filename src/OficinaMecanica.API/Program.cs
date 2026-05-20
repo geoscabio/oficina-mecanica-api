@@ -23,6 +23,14 @@ startupLogger.LogInformation("API pronta. Swagger disponivel em /swagger.");
 app.UseApiMiddlewares();
 app.MapApiEndpoints();
 
-app.Run();
+await app.RunAsync();
 
-public partial class Program;
+#pragma warning disable ASP0027
+// Public Program keeps WebApplicationFactory<Program> available to integration tests.
+public partial class Program
+{
+    protected Program()
+    {
+    }
+}
+#pragma warning restore ASP0027

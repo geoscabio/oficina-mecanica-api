@@ -51,7 +51,7 @@ public sealed class PecaInsumoCatalogo
             throw new DomainException(PecaInsumoCatalogoErrorMessages.DescricaoObrigatoria);
         }
 
-        if (!Enum.IsDefined(typeof(TipoPecaInsumo), tipo))
+        if (!Enum.IsDefined(tipo))
         {
             throw new DomainException(PecaInsumoCatalogoErrorMessages.TipoInvalido);
         }

@@ -14,10 +14,11 @@ Projeto desenvolvido para o **Tech Challenge da Pós Tech FIAP - Arquitetura de 
 - [Tecnologias](#-tecnologias)
 - [Estrutura do repositório](#-estrutura-do-repositório)
 - [Como executar localmente](#-como-executar-localmente)
-- [Como acessar o banco pelo SSMS](#-como-acessar-o-banco-pelo-ssms)
+- [Como acessar o banco local](#-como-acessar-o-banco-local)
 - [Autenticação](#-autenticação)
 - [Como testar a API](#-como-testar-a-api)
 - [Testes automatizados](#-testes-automatizados)
+- [Qualidade e evidências](#qualidade-e-evidências)
 - [Banco de dados e seed](#-banco-de-dados-e-seed)
 - [Documentação complementar](#-documentação-complementar)
 - [Observações acadêmicas](#-observações-acadêmicas)
@@ -48,8 +49,7 @@ O sistema permite que diferentes perfis interajam com o fluxo da oficina:
 | **Atendimento** | Cadastro e consulta de clientes e veículos |
 | **Administrativo** | Cadastro de mecânicos, serviços do catálogo e peças/insumos |
 | **Gestão de Estoque** | Entrada, consulta, reserva, baixa e estorno de itens |
-| **Gestão de OS** | Abertura, diagnóstico, orçamento, aprovação, execução, finalização, entrega e cancelamento |
-| **Indicadores** | Consulta de tempo médio de execução dos serviços |
+| **Gestão de Ordem de Serviço** | Abertura, diagnóstico, orçamento, aprovação, execução, finalização, entrega, cancelamento, acompanhamento de status e consulta de tempo médio de execução dos serviços |
 
 ### Fluxo principal atendido
 
@@ -101,13 +101,14 @@ A ideia principal é manter o domínio protegido de detalhes externos, como HTTP
 | Categoria | Tecnologias |
 | --- | --- |
 | Linguagem e plataforma | C#, .NET 10, ASP.NET Core Web API |
-| Banco de dados | SQL Server |
+| Banco de dados | SQL Server 2022 |
 | ORM | Entity Framework Core |
-| Documentação da API | Swagger e Postman |
-| Segurança | JWT Bearer Authentication e Authorization |
-| Validação e mapeamento | FluentValidation e AutoMapper |
-| Testes | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
-| Execução local | Docker e Docker Compose |
+| Documentacao da API | Swagger/OpenAPI com Swashbuckle |
+| Seguranca | JWT Bearer, autorizacao por perfis e headers HTTP de seguranca |
+| Validacao e mapeamento | FluentValidation e AutoMapper |
+| Testes automatizados | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
+| Qualidade e evidencias | SonarQube, OWASP ZAP e `dotnet format` |
+| Execucao local | Docker, Docker Compose e .NET SDK |
 
 ---
 
@@ -138,27 +139,35 @@ O fluxo recomendado para avaliação é executar a API e o banco de dados com **
 
 ### Pré-requisitos
 
-| Item | Obrigatório? | Observação |
-| --- | --- | --- |
-| Docker Desktop | Sim | Necessário para subir API, SQL Server e testes integrados |
-| .NET SDK 10 | Sim | Necessário para executar os testes automatizados |
-| SQL Server Management Studio | Opcional | Usado apenas para visualizar o banco localmente |
-| Porta `5093` livre | Sim | Porta da API |
-| Porta `14333` livre | Sim | Porta local do SQL Server |
+| Item | Obrigatório para Docker Compose? | Obrigatório para build/testes locais? | Observação |
+| --- | --- | --- | --- |
+| Docker Desktop | Sim | Sim, para testes integrados | Necessário para subir API, SQL Server e containers de teste |
+| .NET SDK 10 | Não | Sim | Necessário para `dotnet build`, `dotnet test`, EF Core e SonarScanner |
+| Cliente SQL | Opcional | Opcional | SSMS no Windows, ou Azure Data Studio, DBeaver e `sqlcmd` no Linux/macOS |
+| Porta `5093` livre | Sim | Não | Porta da API |
+| Porta `14333` livre | Sim | Não | Porta local do SQL Server |
 
 ### 1. Subir API e banco
 
-Na raiz do repositório, execute o comando abaixo. Ele cria automaticamente o arquivo `.env` a partir do `.env.example`:
+Na raiz do repositório, execute um dos comandos abaixo conforme seu sistema operacional. O comando cria o arquivo `.env` para você a partir do `.env.example`; não é necessário criar o arquivo manualmente.
+
+Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
+Bash, macOS ou Linux:
+
+```bash
+cp .env.example .env
+```
+
 O Docker Compose lê o arquivo `.env` automaticamente. Não é necessário criar o arquivo na mão. Se quiser trocar a senha do SQL Server ou o segredo JWT, edite os valores do `.env` antes de subir os containers.
 
-Depois execute:
+Depois execute. Este comando é igual no Windows, macOS e Linux:
 
-```powershell
+```bash
 docker compose up --build
 ```
 
@@ -188,7 +197,9 @@ Ao iniciar, a aplicação:
 
 ---
 
-## 🗄️ Como acessar o banco pelo SSMS
+## 🗄️ Como acessar o banco local
+
+### Windows com SSMS
 
 Com os containers em execução, abra o **SQL Server Management Studio** e preencha a janela **Connect to Server** assim:
 
@@ -207,6 +218,24 @@ Depois de conectar:
 2. Expanda **Databases**.
 3. Selecione o banco **OficinaMecanicaDb**.
 4. Expanda **Tables** para visualizar as tabelas criadas pelas migrations.
+
+### Linux, macOS ou alternativa ao SSMS
+
+Se não estiver no Windows, pode usar **Azure Data Studio**, **DBeaver** ou `sqlcmd` com os mesmos dados de conexão:
+
+| Campo | Valor |
+| --- | --- |
+| Host | `localhost` |
+| Porta | `14333` |
+| Usuario | `sa` |
+| Senha | Valor definido em `OFICINA_SQL_SA_PASSWORD` no arquivo `.env` |
+| Banco | `OficinaMecanicaDb` |
+
+Exemplo com `sqlcmd`:
+
+```bash
+sqlcmd -S localhost,14333 -U sa -P "<valor-de-OFICINA_SQL_SA_PASSWORD-no-.env>" -C -Q "SELECT name FROM sys.databases"
+```
 
 ---
 
@@ -272,7 +301,7 @@ O Swagger apresenta os contratos atualizados dos endpoints e deve ser usado para
 </details>
 <br>
 
-A collection completa do Postman será adicionada posteriormente em `docs/postman` para facilitar a demonstração do fluxo completo.
+O Swagger é a referência principal para demonstração manual dos endpoints. Uma collection do Postman pode ser criada como melhoria complementar, mas não é necessária para executar o fluxo de entrega.
 
 ---
 
@@ -288,16 +317,8 @@ O projeto possui testes para domínio, aplicação e API integrada.
 
 Para rodar todos os testes:
 
-```powershell
+```bash
 dotnet test
-```
-
-Para rodar por projeto:
-
-```powershell
-dotnet test tests\OficinaMecanica.Domain.UnitTests\OficinaMecanica.Domain.UnitTests.csproj
-dotnet test tests\OficinaMecanica.Application.UnitTests\OficinaMecanica.Application.UnitTests.csproj
-dotnet test tests\OficinaMecanica.API.IntegrationTests\OficinaMecanica.API.IntegrationTests.csproj
 ```
 
 Os testes integrados usam **Testcontainers** para subir um SQL Server temporário. Quando o Docker Desktop está em execução, eles rodam normalmente com `dotnet test`.
@@ -306,17 +327,41 @@ Se o Docker não estiver acessível no ambiente local, os testes integrados que 
 
 Para pular intencionalmente os testes que dependem de Docker em uma execução local:
 
+Windows PowerShell:
+
 ```powershell
 $env:OFICINA_SKIP_DOCKER_TESTS = "true"
 dotnet test
 Remove-Item Env:OFICINA_SKIP_DOCKER_TESTS
 ```
 
+Bash, macOS ou Linux:
+
+```bash
+export OFICINA_SKIP_DOCKER_TESTS=true
+dotnet test
+unset OFICINA_SKIP_DOCKER_TESTS
+```
+
+---
+
+## Qualidade e evidências
+
+Além dos testes automatizados, o projeto foi validado com evidências de cobertura, qualidade estática e análise dinâmica de segurança.
+
+| Evidência | Ferramenta | Resultado validado |
+| --- | --- | --- |
+| Build e testes | `dotnet build`, `dotnet test` e Coverlet | Compilação sem erros e suíte automatizada aprovada |
+| Qualidade estática | SonarQube | Quality Gate aprovado, sem bugs, vulnerabilidades, security hotspots ou code smells abertos |
+| Segurança dinâmica | OWASP ZAP Baseline | Nenhuma falha crítica bloqueante; warnings residuais documentados como limitação do MVP |
+
+Os relatórios gerados serão enviados junto ao PDF de entrega exigido no Tech Challenge.
+
 ---
 
 ## 🧱 Banco de dados e seed
 
-A aplicação usa **EF Core** com **SQL Server**.
+A aplicação usa **EF Core** com **SQL Server 2022**. A versão validada no Docker Compose e nos Testcontainers é `mcr.microsoft.com/mssql/server:2022-latest`.
 
 | Configuração | Função |
 | --- | --- |
@@ -346,7 +391,22 @@ Este projeto foi desenvolvido para fins acadêmicos. Algumas decisões foram fei
 - A autenticação usa JWT com usuários demo, podendo evoluir para ASP.NET Identity ou provedor externo.
 - A solução é um monólito, mas foi organizada internamente por contextos, camadas e responsabilidades.
 - O Swagger documenta os contratos da API e auxilia na execução manual dos endpoints.
-- A collection do Postman será adicionada como documentação complementar para facilitar a demonstração do fluxo completo.
+- O Swagger é a documentação principal de execução manual; uma collection do Postman fica como melhoria complementar pós-MVP.
+
+### Limitações assumidas no MVP
+
+| Item | Decisão para o MVP | Evolução recomendada |
+| --- | --- | --- |
+| Aprovação de orçamento | A chamada de iniciar execução representa que o orçamento foi aprovado fora do sistema | Criar endpoint/evento explícito de aprovação ou reprovação do cliente |
+| Estoque insuficiente | A reserva retorna erro e bloqueia a operação | Avaliar cancelamento automático da OS quando essa regra for obrigatória |
+| Consulta de status pelo cliente | O usuário demo `Cliente` consulta por ID da OS | Vincular usuário autenticado a `ClienteId` real e validar posse da OS |
+| Numeração da OS | O número é gerado com base no maior número existente | Usar sequence/identity transacional para alta concorrência |
+| Persistência | Repositórios simples ainda salvam diretamente; fluxos transacionais usam `IUnitOfWork` | Padronizar toda persistência em torno do Unit of Work |
+| Login demo | Usuários e senhas existem para facilitar avaliação local | Evoluir para hash de senha, ASP.NET Identity ou provedor externo |
+| Resposta de autenticação | Retorna token, login e perfil para deixar o demo mais explícito | Simplificar contrato conforme necessidade dos consumidores |
+| Estoque global | O estoque é tratado como agregado único no MVP | Reavaliar modelagem por filial/localidade quando houver escala |
+| Logging | Logs atuais cobrem startup, migrations e seed | Adicionar correlação por request e logging estruturado |
+| OWASP ZAP | Baseline executado com `0` falhas e warnings residuais ligados principalmente ao Swagger UI | Endurecer CSP sem `unsafe-inline` e acompanhar atualização do Swagger UI/DOMPurify |
 
 ---
 
