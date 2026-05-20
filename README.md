@@ -141,24 +141,24 @@ O fluxo recomendado para avaliação é executar a API e o banco de dados com **
 | Item | Obrigatório? | Observação |
 | --- | --- | --- |
 | Docker Desktop | Sim | Necessário para subir API, SQL Server e testes integrados |
-| .NET SDK 10 | Sim | Necessário para executar testes ou rodar a API fora do container |
+| .NET SDK 10 | Sim | Necessário para executar os testes automatizados |
 | SQL Server Management Studio | Opcional | Usado apenas para visualizar o banco localmente |
 | Porta `5093` livre | Sim | Porta da API |
 | Porta `14333` livre | Sim | Porta local do SQL Server |
 
 ### 1. Subir API e banco
 
-Na raiz do repositório, execute no **PowerShell**:
+Na raiz do repositório, crie o arquivo `.env` a partir do exemplo versionado:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Depois exporte as variaveis (ou ajuste os valores direto no arquivo `.env`) e suba o compose:
+O Docker Compose lê esse arquivo automaticamente. Se quiser trocar a senha do SQL Server ou o segredo JWT, edite o `.env` antes de subir os containers.
+
+Depois execute:
 
 ```powershell
-$env:OFICINA_SQL_SA_PASSWORD = "OficinaMecanicaDbLocal@2026";
-$env:OFICINA_JWT_SECRET = "oficina-mecanica-jwt-secret-local-2026";
 docker compose up --build
 ```
 
@@ -186,65 +186,6 @@ Ao iniciar, a aplicação:
 | Parar containers e apagar o volume do banco | `docker compose down -v` |
 | Subir novamente do zero | repetir o comando de subida |
 
-<details>
-<summary>🧑‍💻 Execução alternativa pela IDE ou dotnet CLI</summary>
-
-Este fluxo é opcional e serve para quando você quiser executar ou depurar a API diretamente pelo **Visual Studio** ou pelo **terminal**, mantendo apenas o SQL Server no Docker.
-
-O fluxo recomendado para avaliação continua sendo o Docker Compose completo, porque exige menos configuração manual.
-
-| Componente | Onde executa |
-| --- | --- |
-| SQL Server | Docker |
-| API | Visual Studio ou `dotnet run` |
-
-#### 1. Subir apenas o SQL Server
-
-Na raiz do repositório, execute no **PowerShell**:
-
-```powershell
-$env:OFICINA_SQL_SA_PASSWORD = "OficinaMecanicaDbLocal@2026";
-$env:OFICINA_JWT_SECRET = "oficina-mecanica-jwt-secret-local-2026";
-$env:OFICINA_DEFAULT_CONNECTION = "Server=localhost,14333;Database=OficinaMecanicaDb;User Id=sa;Password=$env:OFICINA_SQL_SA_PASSWORD;TrustServerCertificate=True;";
-docker compose up -d sqlserver
-```
-
-#### 2. Configurar os User Secrets da API
-
-Ainda no **PowerShell**, execute:
-
-```powershell
-$apiProject = "src\OficinaMecanica.API\OficinaMecanica.API.csproj";
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "$env:OFICINA_DEFAULT_CONNECTION" --project $apiProject;
-dotnet user-secrets set "Jwt:Secret" "$env:OFICINA_JWT_SECRET" --project $apiProject;
-```
-
-Essas configurações ficam salvas localmente no ambiente de desenvolvimento e não são versionadas no repositório.
-
-#### 3. Executar pelo Visual Studio
-
-1. Abra a solução `OficinaMecanica.sln`.
-2. Defina `OficinaMecanica.API` como projeto de inicialização.
-3. Selecione o profile `http`.
-4. Execute com `F5` ou `Ctrl + F5`.
-5. Acesse o Swagger em `http://localhost:5093/swagger`.
-
-#### 4. Executar pelo terminal
-
-```powershell
-dotnet restore;
-dotnet run --project src\OficinaMecanica.API\OficinaMecanica.API.csproj --launch-profile http
-```
-
-Depois acesse:
-
-```text
-http://localhost:5093/swagger
-```
-
-</details>
-<br>
-
 ---
 
 ## 🗄️ Como acessar o banco pelo SSMS
@@ -257,7 +198,7 @@ Com os containers em execução, abra o **SQL Server Management Studio** e preen
 | Server name | `localhost,14333` |
 | Authentication | `SQL Server Authentication` |
 | Login | `sa` |
-| Password | Valor definido em `$env:OFICINA_SQL_SA_PASSWORD` |
+| Password | Valor definido em `OFICINA_SQL_SA_PASSWORD` no arquivo `.env` |
 | Trust server certificate | Marcado |
 
 Depois de conectar:
