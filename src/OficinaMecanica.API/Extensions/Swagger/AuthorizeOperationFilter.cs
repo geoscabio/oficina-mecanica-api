@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
-using OficinaMecanica.API.Extensions.Security;
+using OficinaMecanica.API.Extensions.Responses;
+using OficinaMecanica.API.Responses;
+using OficinaMecanica.Application.Common;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace OficinaMecanica.API.Extensions.Swagger;
@@ -24,10 +26,16 @@ internal sealed class AuthorizeOperationFilter : IOperationFilter
         operation.Responses ??= [];
         operation.Responses.TryAdd(
             StatusCodes.Status401Unauthorized.ToString(),
-            new OpenApiResponse { Description = JwtErrorMessages.NaoAutorizado });
+            OpenApiErrorResponseFactory.Create(
+                context,
+                ApiResponseMessages.NaoAutorizado,
+                TipoErro.NaoAutorizado));
         operation.Responses.TryAdd(
-            StatusCodes.Status403Forbidden.ToString(),
-            new OpenApiResponse { Description = JwtErrorMessages.AcessoProibido });
+            TipoErro.AcessoProibido.ToHttpStatusCode().ToString(),
+            OpenApiErrorResponseFactory.Create(
+                context,
+                ApiResponseMessages.AcessoProibido,
+                TipoErro.AcessoProibido));
 
         operation.Security ??= [];
         operation.Security.Add(

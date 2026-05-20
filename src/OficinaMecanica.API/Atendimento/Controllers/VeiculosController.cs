@@ -86,6 +86,6 @@ public sealed class VeiculosController : ControllerBase
     {
         var result = await useCase.ExecuteAsync(new RemoverVeiculoRequest(veiculoId), cancellationToken);
 
-        return this.ToActionResult(result);
+        return this.ToNoContentResult(result);
     }
 }

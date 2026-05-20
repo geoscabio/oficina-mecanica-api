@@ -46,7 +46,7 @@ public sealed class ClientesControllerTests : ApiIntegrationTestBase
             $"/api/v1/atendimento/clientes/{clienteId}/atualizar",
             atualizacao);
 
-        await DeleteJsonAsync($"/api/v1/atendimento/clientes/{clienteId}/remover");
+        await DeleteAsync($"/api/v1/atendimento/clientes/{clienteId}/remover");
         var consultaAposRemocao = await Client.GetAsync($"/api/v1/atendimento/clientes/consultar/{clienteId}");
 
         // Assert

@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OficinaMecanica.API.Extensions.Responses;
+using OficinaMecanica.API.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Infrastructure.Identidade.Options;
 
@@ -51,14 +52,14 @@ public static class JwtAuthenticationExtensions
                         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
                         return context.Response.WriteApiErrorResponseAsJsonAsync(
-                            new ErrorResponse(JwtErrorMessages.NaoAutorizado, TipoErro.NaoAutorizado));
+                            new ErrorResponse(ApiResponseMessages.NaoAutorizado, TipoErro.NaoAutorizado));
                     },
                     OnForbidden = context =>
                     {
                         context.Response.StatusCode = StatusCodes.Status403Forbidden;
 
                         return context.Response.WriteApiErrorResponseAsJsonAsync(
-                            new ErrorResponse(JwtErrorMessages.AcessoProibido, TipoErro.NaoAutorizado));
+                            new ErrorResponse(ApiResponseMessages.AcessoProibido, TipoErro.AcessoProibido));
                     }
                 };
             });

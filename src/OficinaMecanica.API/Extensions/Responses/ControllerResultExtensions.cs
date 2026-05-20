@@ -36,4 +36,14 @@ public static class ControllerResultExtensions
 
         return controller.StatusCode(result.Erro.Tipo.ToHttpStatusCode(), result.Erro);
     }
+
+    public static IActionResult ToNoContentResult<T>(this ControllerBase controller, Result<T> result)
+    {
+        if (result.Sucesso)
+        {
+            return controller.NoContent();
+        }
+
+        return controller.ToActionResult(result);
+    }
 }

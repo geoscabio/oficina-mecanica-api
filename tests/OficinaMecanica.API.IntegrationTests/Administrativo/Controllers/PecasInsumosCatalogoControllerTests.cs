@@ -46,7 +46,7 @@ public sealed class PecasInsumosCatalogoControllerTests : ApiIntegrationTestBase
             $"/api/v1/administrativo/pecas-insumos-catalogo/{pecaInsumoCatalogoId}/atualizar",
             atualizacao);
 
-        await DeleteJsonAsync($"/api/v1/administrativo/pecas-insumos-catalogo/{pecaInsumoCatalogoId}/remover");
+        await DeleteAsync($"/api/v1/administrativo/pecas-insumos-catalogo/{pecaInsumoCatalogoId}/remover");
         var consultaAposRemocao = await Client.GetAsync(
             $"/api/v1/administrativo/pecas-insumos-catalogo/consultar/{pecaInsumoCatalogoId}");
 

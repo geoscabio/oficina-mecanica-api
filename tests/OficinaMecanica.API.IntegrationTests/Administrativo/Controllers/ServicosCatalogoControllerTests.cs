@@ -44,7 +44,7 @@ public sealed class ServicosCatalogoControllerTests : ApiIntegrationTestBase
             $"/api/v1/administrativo/servicos-catalogo/{servicoCatalogoId}/atualizar",
             atualizacao);
 
-        await DeleteJsonAsync($"/api/v1/administrativo/servicos-catalogo/{servicoCatalogoId}/remover");
+        await DeleteAsync($"/api/v1/administrativo/servicos-catalogo/{servicoCatalogoId}/remover");
         var consultaAposRemocao = await Client.GetAsync(
             $"/api/v1/administrativo/servicos-catalogo/consultar/{servicoCatalogoId}");
 

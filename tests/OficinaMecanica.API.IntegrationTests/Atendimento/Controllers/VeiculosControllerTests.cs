@@ -48,7 +48,7 @@ public sealed class VeiculosControllerTests : ApiIntegrationTestBase
             $"/api/v1/atendimento/veiculos/{veiculoId}/atualizar",
             atualizacao);
 
-        await DeleteJsonAsync($"/api/v1/atendimento/veiculos/{veiculoId}/remover");
+        await DeleteAsync($"/api/v1/atendimento/veiculos/{veiculoId}/remover");
         var consultaAposRemocao = await Client.GetAsync($"/api/v1/atendimento/veiculos/consultar/{veiculoId}");
 
         // Assert

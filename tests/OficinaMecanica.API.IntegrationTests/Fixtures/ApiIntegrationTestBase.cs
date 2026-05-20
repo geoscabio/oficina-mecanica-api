@@ -79,15 +79,19 @@ public abstract class ApiIntegrationTestBase : IAsyncLifetime
         return await LerJsonAsync(response);
     }
 
-    protected async Task<JsonElement> DeleteJsonAsync(
+    protected async Task DeleteAsync(
         string endpoint,
-        HttpStatusCode expectedStatusCode = HttpStatusCode.OK)
+        HttpStatusCode expectedStatusCode = HttpStatusCode.NoContent)
     {
         var response = await Client.DeleteAsync(endpoint);
 
         response.StatusCode.Should().Be(expectedStatusCode);
 
-        return await LerJsonAsync(response);
+        if (expectedStatusCode == HttpStatusCode.NoContent)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            content.Should().BeEmpty();
+        }
     }
 
     protected static Guid ObterGuid(JsonElement json, string propertyName)
