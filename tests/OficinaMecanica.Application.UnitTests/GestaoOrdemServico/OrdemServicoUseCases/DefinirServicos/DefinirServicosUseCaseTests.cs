@@ -66,16 +66,19 @@ public class DefinirServicosUseCaseTests
             Times.Once);
 
         servicoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                trocaOleo.Id,
+            repo => repo.ObterPorIdsAsync(
+                It.Is<IReadOnlyCollection<Guid>>(ids =>
+                    ids.Contains(trocaOleo.Id)
+                    && ids.Contains(alinhamento.Id)
+                    && ids.Count == 2),
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
         servicoCatalogoRepository.Verify(
             repo => repo.ObterPorIdAsync(
-                alinhamento.Id,
+                It.IsAny<Guid>(),
                 It.IsAny<CancellationToken>()),
-            Times.Once);
+            Times.Never);
 
         ordemServicoRepository.Verify(
             repo => repo.AtualizarAsync(
@@ -122,8 +125,8 @@ public class DefinirServicosUseCaseTests
             Times.Once);
 
         servicoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
+            repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
 
@@ -174,16 +177,19 @@ public class DefinirServicosUseCaseTests
             Times.Once);
 
         servicoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                servicoCatalogo.Id,
+            repo => repo.ObterPorIdsAsync(
+                It.Is<IReadOnlyCollection<Guid>>(ids =>
+                    ids.Contains(servicoCatalogo.Id)
+                    && ids.Contains(servicoCatalogoInexistenteId)
+                    && ids.Count == 2),
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
         servicoCatalogoRepository.Verify(
             repo => repo.ObterPorIdAsync(
-                servicoCatalogoInexistenteId,
+                It.IsAny<Guid>(),
                 It.IsAny<CancellationToken>()),
-            Times.Once);
+            Times.Never);
 
         ordemServicoRepository.Verify(
             repo => repo.AtualizarAsync(
@@ -223,8 +229,8 @@ public class DefinirServicosUseCaseTests
             Times.Never);
 
         servicoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
+            repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
 
@@ -266,8 +272,8 @@ public class DefinirServicosUseCaseTests
             Times.Never);
 
         servicoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
+            repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
 
@@ -309,8 +315,8 @@ public class DefinirServicosUseCaseTests
             Times.Never);
 
         servicoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
+            repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
 
@@ -340,14 +346,15 @@ public class DefinirServicosUseCaseTests
     {
         var repository = new Mock<IServicoCatalogoRepository>();
 
-        foreach (var servicoCatalogo in servicosCatalogo)
-        {
-            repository
-                .Setup(repo => repo.ObterPorIdAsync(
-                    servicoCatalogo.Id,
-                    It.IsAny<CancellationToken>()))
-                .ReturnsAsync(servicoCatalogo);
-        }
+        repository
+            .Setup(repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                (IReadOnlyCollection<Guid> ids, CancellationToken _) =>
+                    servicosCatalogo
+                        .Where(servicoCatalogo => ids.Contains(servicoCatalogo.Id))
+                        .ToArray());
 
         return repository;
     }

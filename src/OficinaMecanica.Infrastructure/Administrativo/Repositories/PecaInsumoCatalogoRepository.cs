@@ -26,6 +26,15 @@ public sealed class PecaInsumoCatalogoRepository : IPecaInsumoCatalogoRepository
             .SingleOrDefaultAsync(pecaInsumo => pecaInsumo.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<PecaInsumoCatalogo>> ObterPorIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.PecasInsumosCatalogo
+            .Where(pecaInsumo => ids.Contains(pecaInsumo.Id))
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<PecaInsumoCatalogo>> ListarAsync(
         int pagina,
         int tamanhoPagina,

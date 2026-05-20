@@ -76,10 +76,18 @@ public class ReservarPecaInsumoUseCaseTests
             Times.Once);
 
         pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                pecaInsumoCatalogo.Id,
+            repo => repo.ObterPorIdsAsync(
+                It.Is<IReadOnlyCollection<Guid>>(ids =>
+                    ids.Contains(pecaInsumoCatalogo.Id)
+                    && ids.Count == 1),
                 It.IsAny<CancellationToken>()),
             Times.Once);
+
+        pecaInsumoCatalogoRepository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
 
         ordemServicoRepository.Verify(
             repo => repo.AtualizarAsync(
@@ -111,7 +119,7 @@ public class ReservarPecaInsumoUseCaseTests
 
         var ordemServicoRepository = CriarOrdemServicoRepository(null);
 
-        var pecaInsumoCatalogoRepository = new Mock<IPecaInsumoCatalogoRepository>();
+        var pecaInsumoCatalogoRepository = CriarPecaInsumoCatalogoRepository();
 
         var estoqueRepository = new Mock<IEstoqueRepository>();
 
@@ -144,8 +152,8 @@ public class ReservarPecaInsumoUseCaseTests
             Times.Never);
 
         pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
+            repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
 
@@ -172,7 +180,7 @@ public class ReservarPecaInsumoUseCaseTests
 
         var ordemServicoRepository = CriarOrdemServicoRepository(ordemServico);
 
-        var pecaInsumoCatalogoRepository = new Mock<IPecaInsumoCatalogoRepository>();
+        var pecaInsumoCatalogoRepository = CriarPecaInsumoCatalogoRepository();
 
         var estoqueRepository = CriarEstoqueRepository(null);
 
@@ -207,8 +215,8 @@ public class ReservarPecaInsumoUseCaseTests
             Times.Once);
 
         pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
+            repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
 
@@ -237,7 +245,7 @@ public class ReservarPecaInsumoUseCaseTests
 
         var ordemServicoRepository = CriarOrdemServicoRepository(ordemServico);
 
-        var pecaInsumoCatalogoRepository = new Mock<IPecaInsumoCatalogoRepository>();
+        var pecaInsumoCatalogoRepository = CriarPecaInsumoCatalogoRepository();
 
         var estoqueRepository = CriarEstoqueRepository(estoque);
 
@@ -273,10 +281,18 @@ public class ReservarPecaInsumoUseCaseTests
             Times.Once);
 
         pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                pecaInsumoCatalogoId,
+            repo => repo.ObterPorIdsAsync(
+                It.Is<IReadOnlyCollection<Guid>>(ids =>
+                    ids.Contains(pecaInsumoCatalogoId)
+                    && ids.Count == 1),
                 It.IsAny<CancellationToken>()),
             Times.Once);
+
+        pecaInsumoCatalogoRepository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
 
         ordemServicoRepository.Verify(
             repo => repo.AtualizarAsync(
@@ -341,10 +357,18 @@ public class ReservarPecaInsumoUseCaseTests
             Times.Once);
 
         pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                pecaInsumoCatalogo.Id,
+            repo => repo.ObterPorIdsAsync(
+                It.Is<IReadOnlyCollection<Guid>>(ids =>
+                    ids.Contains(pecaInsumoCatalogo.Id)
+                    && ids.Count == 1),
                 It.IsAny<CancellationToken>()),
             Times.Once);
+
+        pecaInsumoCatalogoRepository.Verify(
+            repo => repo.ObterPorIdAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
 
         ordemServicoRepository.Verify(
             repo => repo.AtualizarAsync(
@@ -397,8 +421,8 @@ public class ReservarPecaInsumoUseCaseTests
             Times.Never);
 
         pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
+            repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
 
@@ -454,8 +478,8 @@ public class ReservarPecaInsumoUseCaseTests
             Times.Never);
 
         pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
+            repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
     }
@@ -498,8 +522,8 @@ public class ReservarPecaInsumoUseCaseTests
             Times.Never);
 
         pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
+            repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
     }
@@ -542,8 +566,8 @@ public class ReservarPecaInsumoUseCaseTests
             Times.Never);
 
         pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
+            repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
     }
@@ -618,14 +642,15 @@ public class ReservarPecaInsumoUseCaseTests
     {
         var repository = new Mock<IPecaInsumoCatalogoRepository>();
 
-        foreach (var pecaInsumoCatalogo in pecasInsumosCatalogo)
-        {
-            repository
-                .Setup(repo => repo.ObterPorIdAsync(
-                    pecaInsumoCatalogo.Id,
-                    It.IsAny<CancellationToken>()))
-                .ReturnsAsync(pecaInsumoCatalogo);
-        }
+        repository
+            .Setup(repo => repo.ObterPorIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                (IReadOnlyCollection<Guid> ids, CancellationToken _) =>
+                    pecasInsumosCatalogo
+                        .Where(pecaInsumoCatalogo => ids.Contains(pecaInsumoCatalogo.Id))
+                        .ToArray());
 
         return repository;
     }

@@ -8,6 +8,10 @@ public interface IServicoCatalogoRepository
     Task AtualizarAsync(ServicoCatalogo servico, CancellationToken cancellationToken = default);
     Task RemoverAsync(ServicoCatalogo servico, CancellationToken cancellationToken = default);
     Task<ServicoCatalogo?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<ServicoCatalogo>> ObterPorIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyCollection<ServicoCatalogo>> ListarAsync(
         int pagina,
         int tamanhoPagina,
