@@ -2,6 +2,8 @@ using System.Net;
 using FluentAssertions;
 using OficinaMecanica.API.IntegrationTests.Atendimento.Builders;
 using OficinaMecanica.API.IntegrationTests.Fixtures;
+using OficinaMecanica.Application.Atendimento.ValidationMessages;
+using OficinaMecanica.Application.Common;
 
 namespace OficinaMecanica.API.IntegrationTests.Atendimento.Controllers;
 
@@ -55,6 +57,35 @@ public sealed class ClientesControllerTests : ApiIntegrationTestBase
         ListagemDevePossuirItens(clientes);
         ObterString(clienteAtualizado, "nome").Should().Be(atualizacao.Nome);
         consultaAposRemocao.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [RequiresDockerFact]
+    public async Task Dado_ClienteComMultiplosCamposInvalidos_Quando_Cadastrar_Entao_DeveRetornarTodosErrosDeValidacao()
+    {
+        // Arrange
+        var cadastro = ClienteRequestBuilder.Novo()
+            .ComDocumento(string.Empty)
+            .ComNome(string.Empty)
+            .ComTelefone(string.Empty)
+            .ComEmail(string.Empty)
+            .BuildCadastro();
+
+        // Act
+        var response = await PostJsonAsync(
+            "/api/v1/atendimento/clientes/cadastrar",
+            cadastro,
+            HttpStatusCode.BadRequest);
+
+        // Assert
+        response.GetProperty("tipo").GetString().Should().Be(TipoErro.Validacao.ToString());
+        response.GetProperty("erros").EnumerateArray()
+            .Select(erro => erro.GetString())
+            .Should()
+            .BeEquivalentTo(
+                ClienteValidationMessages.DocumentoObrigatorio,
+                ClienteValidationMessages.NomeObrigatorio,
+                ClienteValidationMessages.TelefoneObrigatorio,
+                ClienteValidationMessages.EmailObrigatorio);
     }
 }
 

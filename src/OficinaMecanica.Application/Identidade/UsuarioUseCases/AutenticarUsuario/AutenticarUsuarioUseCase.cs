@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.Identidade.Interfaces;
 using OficinaMecanica.Application.Identidade.ValidationMessages;
@@ -30,7 +30,7 @@ public sealed class AutenticarUsuarioUseCase
         if (!validationResult.IsValid)
         {
             return Result<AutenticarUsuarioResponse>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 

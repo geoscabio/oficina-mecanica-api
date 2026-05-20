@@ -37,7 +37,7 @@ public sealed class ConsultarTempoMedioExecucaoServicoUseCase
         if (!validationResult.IsValid)
         {
             return Result<TempoMedioExecucaoServicoResponse>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 
@@ -62,3 +62,4 @@ public sealed class ConsultarTempoMedioExecucaoServicoUseCase
         return Result<TempoMedioExecucaoServicoResponse>.Ok(response);
     }
 }
+

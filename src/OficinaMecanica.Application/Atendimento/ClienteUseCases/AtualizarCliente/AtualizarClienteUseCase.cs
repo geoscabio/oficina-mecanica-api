@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.Responses;
 using OficinaMecanica.Application.Common;
@@ -32,7 +32,7 @@ public sealed class AtualizarClienteUseCase
 
         if (!validationResult.IsValid)
         {
-            return Result<ClienteResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<ClienteResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var cliente = await _clienteRepository.ObterPorIdAsync(request.ClienteId, cancellationToken);

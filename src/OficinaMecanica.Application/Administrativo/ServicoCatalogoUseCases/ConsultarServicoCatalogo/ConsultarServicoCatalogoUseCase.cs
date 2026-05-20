@@ -32,7 +32,7 @@ public sealed class ConsultarServicoCatalogoUseCase
         if (!validationResult.IsValid)
         {
             return Result<ServicoCatalogoResponse>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 
@@ -50,3 +50,4 @@ public sealed class ConsultarServicoCatalogoUseCase
         return Result<ServicoCatalogoResponse>.Ok(_mapper.Map<ServicoCatalogoResponse>(servicoCatalogo));
     }
 }
+

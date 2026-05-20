@@ -31,7 +31,7 @@ public sealed class ConsultarVeiculoUseCase
 
         if (!validationResult.IsValid)
         {
-            return Result<VeiculoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<VeiculoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var veiculo = await _veiculoRepository.ObterPorIdAsync(request.Id, cancellationToken);
@@ -44,6 +44,7 @@ public sealed class ConsultarVeiculoUseCase
         return Result<VeiculoResponse>.Ok(_mapper.Map<VeiculoResponse>(veiculo));
     }
 }
+
 
 
 

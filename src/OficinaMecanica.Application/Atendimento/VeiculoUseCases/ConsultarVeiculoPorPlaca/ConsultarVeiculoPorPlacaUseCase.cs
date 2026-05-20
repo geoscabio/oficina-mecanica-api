@@ -32,7 +32,7 @@ public sealed class ConsultarVeiculoPorPlacaUseCase
 
         if (!validationResult.IsValid)
         {
-            return Result<VeiculoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<VeiculoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var placa = Placa.Criar(request.Placa);
@@ -46,6 +46,7 @@ public sealed class ConsultarVeiculoPorPlacaUseCase
         return Result<VeiculoResponse>.Ok(_mapper.Map<VeiculoResponse>(veiculo));
     }
 }
+
 
 
 

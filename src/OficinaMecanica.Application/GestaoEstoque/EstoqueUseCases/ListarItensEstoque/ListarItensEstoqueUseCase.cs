@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.Responses;
@@ -31,7 +31,7 @@ public sealed class ListarItensEstoqueUseCase
         if (!validationResult.IsValid)
         {
             return Result<PagedResult<ItemEstoqueResponse>>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 

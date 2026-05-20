@@ -31,7 +31,7 @@ public sealed class ConsultarStatusOrdemServicoUseCase
         if (!validationResult.IsValid)
         {
             return Result<ConsultarStatusOrdemServicoResponse>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 
@@ -48,3 +48,4 @@ public sealed class ConsultarStatusOrdemServicoUseCase
             _mapper.Map<ConsultarStatusOrdemServicoResponse>(ordemServico));
     }
 }
+

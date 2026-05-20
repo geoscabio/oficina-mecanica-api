@@ -36,7 +36,7 @@ public sealed class CadastrarVeiculoUseCase
 
         if (!validationResult.IsValid)
         {
-            return Result<VeiculoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<VeiculoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var cliente = await _clienteRepository.ObterPorIdAsync(request.ClienteId, cancellationToken);
@@ -61,6 +61,7 @@ public sealed class CadastrarVeiculoUseCase
         return Result<VeiculoResponse>.Ok(_mapper.Map<VeiculoResponse>(veiculo));
     }
 }
+
 
 
 

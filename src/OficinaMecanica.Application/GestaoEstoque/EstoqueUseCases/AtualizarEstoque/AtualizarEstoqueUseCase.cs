@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.Responses;
@@ -32,7 +32,7 @@ public sealed class AtualizarEstoqueUseCase
         if (!validationResult.IsValid)
         {
             return Result<ItemEstoqueResponse>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 
@@ -53,3 +53,4 @@ public sealed class AtualizarEstoqueUseCase
         return Result<ItemEstoqueResponse>.Ok(_mapper.Map<ItemEstoqueResponse>(itemEstoque));
     }
 }
+

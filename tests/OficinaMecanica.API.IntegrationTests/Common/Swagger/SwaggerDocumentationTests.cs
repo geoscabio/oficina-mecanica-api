@@ -36,6 +36,7 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
         RespostaDeErroDevePossuirSchema(responses, "404");
         RespostaDeErroDevePossuirSchema(responses, "422");
         RespostaDeErroDevePossuirSchema(responses, "500");
+        RespostaDeErroValidacaoDevePossuirListaErros(responses);
         RespostaDeErroDevePossuirExemplo(
             responses,
             "403",
@@ -122,6 +123,19 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
 
         example.GetProperty("mensagem").GetString().Should().Be(mensagem);
         example.GetProperty("tipo").GetString().Should().Be(tipoErro.ToString());
+    }
+
+    private static void RespostaDeErroValidacaoDevePossuirListaErros(JsonElement responses)
+    {
+        var example = responses
+            .GetProperty("400")
+            .GetProperty("content")
+            .GetProperty(ApiResponseContentTypes.Json)
+            .GetProperty("example");
+
+        example.GetProperty("erros").EnumerateArray()
+            .Should()
+            .NotBeEmpty();
     }
 }
 

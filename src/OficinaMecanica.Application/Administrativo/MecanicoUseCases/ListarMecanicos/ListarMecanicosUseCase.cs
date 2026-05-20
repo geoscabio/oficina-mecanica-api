@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.Responses;
 using OficinaMecanica.Application.Common;
@@ -31,7 +31,7 @@ public sealed class ListarMecanicosUseCase
         if (!validationResult.IsValid)
         {
             return Result<PagedResult<MecanicoResponse>>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 

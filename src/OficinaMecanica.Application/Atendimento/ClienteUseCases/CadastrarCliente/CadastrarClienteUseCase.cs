@@ -33,7 +33,7 @@ public sealed class CadastrarClienteUseCase
 
         if (!validationResult.IsValid)
         {
-            return Result<ClienteResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<ClienteResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var documento = CpfCnpj.Criar(request.Documento);
@@ -61,6 +61,7 @@ public sealed class CadastrarClienteUseCase
         return Result<ClienteResponse>.Ok(_mapper.Map<ClienteResponse>(cliente));
     }
 }
+
 
 
 

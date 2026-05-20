@@ -31,7 +31,7 @@ public sealed class ListarServicosCatalogoUseCase
         if (!validationResult.IsValid)
         {
             return Result<PagedResult<ServicoCatalogoResponse>>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 
@@ -50,3 +50,4 @@ public sealed class ListarServicosCatalogoUseCase
         return Result<PagedResult<ServicoCatalogoResponse>>.Ok(pagedResult);
     }
 }
+

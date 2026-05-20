@@ -13,6 +13,17 @@ internal static class OpenApiErrorResponseFactory
         string description,
         TipoErro tipoErro)
     {
+        var example = new JsonObject
+        {
+            ["mensagem"] = description,
+            ["tipo"] = tipoErro.ToString()
+        };
+
+        if (tipoErro == TipoErro.Validacao)
+        {
+            example["erros"] = new JsonArray(description);
+        }
+
         return new OpenApiResponse
         {
             Description = description,
@@ -23,11 +34,7 @@ internal static class OpenApiErrorResponseFactory
                     Schema = context.SchemaGenerator.GenerateSchema(
                         typeof(ErrorResponse),
                         context.SchemaRepository),
-                    Example = new JsonObject
-                    {
-                        ["mensagem"] = description,
-                        ["tipo"] = tipoErro.ToString()
-                    }
+                    Example = example
                 }
             }
         };

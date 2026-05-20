@@ -25,10 +25,21 @@ public static class ApiServiceCollectionExtensions
 
         services.Configure<ApiBehaviorOptions>(options =>
         {
-            options.InvalidModelStateResponseFactory = _ =>
-                new BadRequestObjectResult(new ErrorResponse(
+            options.InvalidModelStateResponseFactory = context =>
+            {
+                var erros = context.ModelState
+                    .SelectMany(item => item.Value?.Errors ?? [])
+                    .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage)
+                        ? ValidationErrorMessages.RequestInvalido
+                        : error.ErrorMessage)
+                    .Distinct()
+                    .ToArray();
+
+                return new BadRequestObjectResult(new ErrorResponse(
                     ValidationErrorMessages.RequestInvalido,
-                    TipoErro.Validacao));
+                    TipoErro.Validacao,
+                    erros));
+            };
         });
 
         return services;

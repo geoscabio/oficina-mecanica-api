@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.Responses;
 using OficinaMecanica.Application.Common;
@@ -33,7 +33,7 @@ public sealed class AtualizarVeiculoUseCase
         if (!validationResult.IsValid)
         {
             return Result<VeiculoResponse>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 

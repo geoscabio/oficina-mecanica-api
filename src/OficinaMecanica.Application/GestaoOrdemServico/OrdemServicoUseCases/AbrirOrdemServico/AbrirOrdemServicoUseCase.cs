@@ -41,7 +41,7 @@ public sealed class AbrirOrdemServicoUseCase
 
         if (!validationResult.IsValid)
         {
-            return Result<OrdemServicoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<OrdemServicoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var veiculo = await _veiculoRepository.ObterPorIdAsync(request.VeiculoId, cancellationToken);
@@ -64,6 +64,7 @@ public sealed class AbrirOrdemServicoUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }
+
 
 
 

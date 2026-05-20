@@ -31,7 +31,7 @@ public sealed class ListarOrdensServicoUseCase
         if (!validationResult.IsValid)
         {
             return Result<PagedResult<OrdemServicoResponse>>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 
@@ -50,3 +50,4 @@ public sealed class ListarOrdensServicoUseCase
         return Result<PagedResult<OrdemServicoResponse>>.Ok(pagedResult);
     }
 }
+

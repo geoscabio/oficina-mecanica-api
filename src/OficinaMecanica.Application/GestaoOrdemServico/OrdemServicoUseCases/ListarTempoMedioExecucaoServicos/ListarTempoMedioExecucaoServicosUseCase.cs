@@ -36,7 +36,7 @@ public sealed class ListarTempoMedioExecucaoServicosUseCase
         if (!validationResult.IsValid)
         {
             return Result<PagedResult<TempoMedioExecucaoServicoResponse>>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 
@@ -75,3 +75,4 @@ public sealed class ListarTempoMedioExecucaoServicosUseCase
         return Result<PagedResult<TempoMedioExecucaoServicoResponse>>.Ok(pagedResult);
     }
 }
+

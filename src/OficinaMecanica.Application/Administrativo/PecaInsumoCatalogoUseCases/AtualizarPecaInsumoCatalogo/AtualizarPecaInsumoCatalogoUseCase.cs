@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.Responses;
 using OficinaMecanica.Application.Common;
@@ -32,7 +32,7 @@ public sealed class AtualizarPecaInsumoCatalogoUseCase
         if (!validationResult.IsValid)
         {
             return Result<PecaInsumoCatalogoResponse>.Falha(
-                validationResult.Errors.First().ErrorMessage,
+                validationResult.ObterMensagensErro(),
                 TipoErro.Validacao);
         }
 

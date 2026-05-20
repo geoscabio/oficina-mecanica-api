@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
+using OficinaMecanica.Application.Atendimento.ValidationMessages;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.UnitTests.Atendimento.Factories;
 using OficinaMecanica.Application.UnitTests.Common;
@@ -96,6 +97,40 @@ public class CadastrarClienteUseCaseTests
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
+
+        repository.Verify(
+            repo => repo.AdicionarAsync(
+                It.IsAny<Cliente>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task Dado_MultiplosCamposInvalidos_Quando_CadastrarCliente_Entao_DeveRetornarTodosErrosDeValidacao()
+    {
+        // Arrange
+        var repository = new Mock<IClienteRepository>();
+
+        var useCase = CriarUseCase(repository);
+
+        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido(
+            documento: string.Empty,
+            nome: string.Empty,
+            telefone: string.Empty,
+            email: string.Empty);
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro.Erros.Should().BeEquivalentTo(
+            ClienteValidationMessages.DocumentoObrigatorio,
+            ClienteValidationMessages.NomeObrigatorio,
+            ClienteValidationMessages.TelefoneObrigatorio,
+            ClienteValidationMessages.EmailObrigatorio);
 
         repository.Verify(
             repo => repo.AdicionarAsync(
