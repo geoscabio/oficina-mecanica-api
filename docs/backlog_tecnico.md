@@ -27,7 +27,7 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | DT-011 | Enums em `SCREAMING_CASE` | Pendente | Corrigido | `StatusOrdemServico` e `StatusServico` renomeados para PascalCase |
 | DT-013 | Padronizar formatacao global | Pendente | Corrigido | Quebras compactadas em `src` e `tests`; `.editorconfig` adicionado; `dotnet format` passou |
 | DT-040 | Consolidar backlog final de entrega | Nao existia | Corrigido | Itens P0/P1/P2 do consolidado final adicionados com IDs rastreaveis |
-| DT-014 | Evidencia SonarQube | Pendente | Em andamento | Analise publicada em SonarQube local; metricas registradas em `docs/evidencias/sonarqube_analise_2026-05-20.md`; falta exportar PDF do dashboard |
+| DT-014 | Evidencia SonarQube | Pendente | Corrigido | Analise final com Quality Gate `OK`, bugs `0`, vulnerabilities `0`, hotspots `0`, code smells `0`, coverage `89.9%`; PDF gerado localmente em `docs/evidencias/sonarqube_dashboard_2026-05-20.pdf` |
 | DT-025 | README com `.env` multiplataforma | Pendente | Corrigido | README mostra `Copy-Item .env.example .env` e `cp .env.example .env` |
 | DT-026 | README diferenciando Docker de .NET SDK local | Pendente | Corrigido | Pre-requisitos separados por fluxo Docker Compose e build/testes locais |
 | DT-029 | Arquivos locais/snapshot fora do versionamento | Pendente | Corrigido | `git ls-files .vs "*.csproj.user" "*snapshot*" "Contexto para IA.zip"` sem retorno |
@@ -44,12 +44,14 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | DT-032 | `Endereco` com factory de Value Object | Pendente | Corrigido | Construtor tornado privado e consumidores migrados para `Endereco.Criar(...)` |
 | DT-035..DT-039 | Limitacoes MVP de ordem de servico | Pendente | Documentado | README registra aprovacao implicita, estoque insuficiente, consulta por cliente, numeracao e persistencia como limitacoes/evolucoes |
 | DT-017..DT-020 | Limitacoes tecnicas pos-MVP | Pendente | Documentado | README registra logging, login demo, response de autenticacao e modelagem de estoque como evolucoes |
+| DT-016 | Analise OWASP ZAP | Pendente | Corrigido | Baseline executado com `0` FAIL, `5` WARN e `62` PASS; relatorios em `docs/evidencias/zap` |
+| DT-048 | Headers de seguranca HTTP | Nao existia | Corrigido | Headers CSP, X-Frame-Options, X-Content-Type-Options, Permissions-Policy e Cross-Origin adicionados |
 
 ## P0 - Obrigatorio Antes Da Entrega
 
 | ID | Origem | Item | Status | Evidencia atual | Proxima acao |
 | --- | --- | --- | --- | --- | --- |
-| DT-014 | Tech Challenge / Backlog | Gerar evidencia SonarQube com Quality Gate, bugs, vulnerabilities, security hotspots, code smells, coverage e duplications | Em andamento | Dashboard local gerado; Quality Gate `OK`, bugs `0`, vulnerabilities `0`, hotspots `1`, code smells `17`, coverage `89.9%`, duplications `0.2%`; evidencia em `docs/evidencias/sonarqube_analise_2026-05-20.md` | Exportar o dashboard do SonarQube em PDF pelo navegador |
+| DT-014 | Tech Challenge / Backlog | Gerar evidencia SonarQube com Quality Gate, bugs, vulnerabilities, security hotspots, code smells, coverage e duplications | Corrigido | Dashboard local gerado; Quality Gate `OK`, bugs `0`, vulnerabilities `0`, hotspots `0`, code smells `0`, coverage `89.9%`, duplications `0.2%`; evidencia Markdown e PDF em `docs/evidencias` local | Nenhuma |
 | DT-025 | Review final | README com criacao de `.env` multiplataforma | Corrigido | README documenta PowerShell e Bash/Git Bash/macOS/Linux | Nenhuma |
 | DT-026 | Review final | README diferenciando Docker de .NET SDK local | Corrigido | README separa pre-requisitos de Docker Compose e build/testes locais | Nenhuma |
 | DT-027 | Review final | Revisar TODOs de entrega e documentacao | Corrigido | Busca por `TODO`, `FIXME`, `HACK`, `posteriormente` e `SQL Server 2025` executada; pendencia de Postman removida do README | Nenhuma |
@@ -75,7 +77,7 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | DT-037 | Auditoria final | Cliente com role `Cliente` pode consultar status de qualquer OS conhecendo o ID | Documentado | README registra limitacao do usuario demo `Cliente` por ID da OS | Vincular usuario autenticado a `ClienteId` real pos-MVP |
 | DT-038 | Auditoria final | Repositories chamam `SaveChangesAsync` mesmo existindo `IUnitOfWork` | Documentado | README registra persistencia mista como decisao de MVP | Padronizar toda persistencia em torno do Unit of Work pos-MVP |
 | DT-039 | Auditoria final | Numero da OS via `MAX + 1` tem risco teorico de concorrencia | Documentado | README registra numeracao por maior numero existente como decisao de MVP | Usar sequence/identity transacional pos-MVP |
-| DT-016 | Backlog | Analise OWASP ZAP | Pendente | Sem relatorio de runtime | Rodar ZAP na API local e anexar saida se houver tempo |
+| DT-016 | Backlog | Analise OWASP ZAP | Corrigido | OWASP ZAP Baseline executado; `0` FAIL, `5` WARN, `62` PASS; evidencias em `docs/evidencias/owasp_zap_baseline_2026-05-20.md` e `docs/evidencias/zap` | Nenhuma |
 | DT-017 | Backlog | Logging estruturado | Documentado | README registra logs atuais e evolucao para correlacao por request | Implementar logging estruturado pos-MVP |
 | DT-018 | Backlog | Login demo com senha em texto puro | Documentado | README registra usuarios/senhas demo para avaliacao local | Evoluir para hash, ASP.NET Identity ou provedor externo |
 | DT-019 | Backlog | Response de autenticacao pode ser simplificado | Documentado | Mantido por compatibilidade e clareza do demo | Reavaliar contrato pos-MVP |
@@ -92,6 +94,7 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | DT-045 | `external_roslyn:CA2263` | Info | Validadores e entidades com `Enum.IsDefined` | Corrigido | Chamadas alteradas para overload generica |
 | DT-046 | `external_roslyn:CA1861` | Info | `CpfCnpj.cs` | Corrigido | Arrays de pesos de CNPJ movidos para campos `static readonly` |
 | DT-047 | `external_roslyn:CA1859` | Info | `OficinaMecanicaApiFixture.cs` | Corrigido | Metodo de configuracao retorna tipo concreto |
+| DT-048 | OWASP ZAP headers | Medium / Low | API e Swagger | Corrigido | Headers de seguranca adicionados; warnings residuais restritos principalmente ao Swagger UI |
 
 ## Checklist Final De Entrega
 
@@ -112,9 +115,10 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | Validacao | `dotnet build --nologo` passou apos ajustes finais | Corrigido |
 | Validacao | `dotnet test --nologo` passou apos ajustes finais | Corrigido |
 | Validacao | `docker compose up --build` validado | Corrigido |
-| Evidencias | SonarQube PDF para professor | Em andamento |
+| Evidencias | SonarQube PDF para professor | Corrigido |
 | Evidencias | Auditoria NuGet | Corrigido |
 | Evidencias | Evidencia de testes/build/Docker | Corrigido |
+| Evidencias | OWASP ZAP Baseline | Corrigido |
 
 ## Itens Ja Corrigidos (Resumo)
 
@@ -148,6 +152,8 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 - DT-034 SQL Server 2022 alinhado na documentacao (corrigido)
 - DT-035..DT-039 Limitacoes MVP de ordem de servico documentadas (documentado)
 - DT-017..DT-020 Limitacoes tecnicas pos-MVP documentadas (documentado)
+- DT-016 OWASP ZAP Baseline executado e evidenciado (corrigido)
+- DT-048 Headers de seguranca HTTP adicionados (corrigido)
 - DT-041 Achados Sonar em `Program.cs` tratados (corrigido)
 - DT-042 Security hotspot do Dockerfile tratado com usuario nao-root (corrigido)
 - DT-043 Seed de OS com parametros agrupados (corrigido)
@@ -186,3 +192,5 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 - Para forcar skip local dos cenarios que dependem de Docker, definir `OFICINA_SKIP_DOCKER_TESTS=true`.
 - Migrations geradas pelo Entity Framework nao devem ser reformatadas manualmente para evitar ruido em codigo gerado.
 - Evidencias SonarQube devem vir do dashboard/analise do SonarQube, nao apenas de `TestResults` do Coverlet.
+- Relatorios gerados em `docs/evidencias/**` devem ficar excluidos da analise SonarQube para nao medir HTML/PDF/JSON de evidencia como codigo-fonte.
+- `docs/evidencias/**` deve permanecer fora do Git; as evidencias sao anexos locais da entrega, nao artefatos versionados.

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using FluentAssertions;
 using OficinaMecanica.API.IntegrationTests.Fixtures;
@@ -92,6 +93,23 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
         response.TryGetProperty("content", out _).Should().BeFalse();
     }
 
+    [RequiresDockerFact]
+    public async Task Dado_RequisicaoHttp_Quando_ProcessarMiddlewares_Entao_DeveAplicarHeadersDeSeguranca()
+    {
+        // Act
+        var response = await Client.GetAsync("/swagger/index.html");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        HeaderDevePossuirValor(response, "Content-Security-Policy", "default-src 'self'");
+        HeaderDevePossuirValor(response, "Cross-Origin-Embedder-Policy", "require-corp");
+        HeaderDevePossuirValor(response, "Cross-Origin-Opener-Policy", "same-origin");
+        HeaderDevePossuirValor(response, "Cross-Origin-Resource-Policy", "same-origin");
+        HeaderDevePossuirValor(response, "Permissions-Policy", "camera=(), geolocation=(), microphone=()");
+        HeaderDevePossuirValor(response, "X-Content-Type-Options", "nosniff");
+        HeaderDevePossuirValor(response, "X-Frame-Options", "DENY");
+    }
+
     private static void RespostaDeErroDevePossuirSchema(JsonElement responses, string statusCode)
     {
         var response = responses.GetProperty(statusCode);
@@ -128,6 +146,12 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
         example.GetProperty("erros").EnumerateArray()
             .Should()
             .NotBeEmpty();
+    }
+
+    private static void HeaderDevePossuirValor(HttpResponseMessage response, string headerName, string expectedValue)
+    {
+        response.Headers.TryGetValues(headerName, out var values).Should().BeTrue();
+        values.Should().ContainSingle().Which.Should().Contain(expectedValue);
     }
 }
 

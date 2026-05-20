@@ -371,7 +371,7 @@ dotnet sonarscanner begin `
   /d:sonar.host.url="http://localhost:9000" `
   /d:sonar.token="$env:SONAR_TOKEN" `
   /d:sonar.cs.opencover.reportsPaths="TestResults/SonarCoverage/**/coverage.opencover.xml" `
-  /d:sonar.exclusions="**/Migrations/**,**/bin/**,**/obj/**" `
+  /d:sonar.exclusions="**/Migrations/**,**/bin/**,**/obj/**,docs/evidencias/**" `
   /d:sonar.coverage.exclusions="**/Migrations/**"
 
 dotnet build --nologo
@@ -394,7 +394,11 @@ http://localhost:9000/dashboard?id=oficina-mecanica-api
 
 Use `Ctrl + P` no navegador e selecione **Salvar como PDF** para anexar a evidência na entrega.
 
+A pasta `docs/evidencias/**` fica fora da análise porque contém relatórios gerados para entrega, como HTML do OWASP ZAP e PDF do SonarQube. Esses arquivos são evidência, não código-fonte da API.
+
 A evidência local da última análise registrada está em `docs/evidencias/sonarqube_analise_2026-05-20.md`.
+
+Essa pasta é ignorada pelo Git para manter o repositório enxuto. Use os arquivos de `docs/evidencias/` apenas como anexos locais da entrega.
 
 ---
 
@@ -445,7 +449,7 @@ Este projeto foi desenvolvido para fins acadêmicos. Algumas decisões foram fei
 | Resposta de autenticação | Retorna token, login e perfil para deixar o demo mais explícito | Simplificar contrato conforme necessidade dos consumidores |
 | Estoque global | O estoque é tratado como agregado único no MVP | Reavaliar modelagem por filial/localidade quando houver escala |
 | Logging | Logs atuais cobrem startup, migrations e seed | Adicionar correlação por request e logging estruturado |
-| OWASP ZAP | Não executado nesta consolidação final | Rodar análise dinâmica quando houver janela de tempo para evidência adicional |
+| OWASP ZAP | Baseline executado com `0` falhas e warnings residuais ligados principalmente ao Swagger UI | Endurecer CSP sem `unsafe-inline` e acompanhar atualização do Swagger UI/DOMPurify |
 
 ---
 
