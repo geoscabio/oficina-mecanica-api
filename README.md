@@ -101,7 +101,7 @@ A ideia principal é manter o domínio protegido de detalhes externos, como HTTP
 | Categoria | Tecnologias |
 | --- | --- |
 | Linguagem e plataforma | C#, .NET 10, ASP.NET Core Web API |
-| Banco de dados | SQL Server |
+| Banco de dados | SQL Server 2022 |
 | ORM | Entity Framework Core |
 | Documentação da API | Swagger e Postman |
 | Segurança | JWT Bearer Authentication e Authorization |
@@ -280,7 +280,7 @@ O Swagger apresenta os contratos atualizados dos endpoints e deve ser usado para
 </details>
 <br>
 
-A collection completa do Postman será adicionada posteriormente em `docs/postman` para facilitar a demonstração do fluxo completo.
+O Swagger é a referência principal para demonstração manual dos endpoints. Uma collection do Postman pode ser criada como melhoria complementar, mas não é necessária para executar o fluxo de entrega.
 
 ---
 
@@ -400,7 +400,7 @@ A evidência local da última análise registrada está em `docs/evidencias/sona
 
 ## 🧱 Banco de dados e seed
 
-A aplicação usa **EF Core** com **SQL Server**.
+A aplicação usa **EF Core** com **SQL Server 2022**. A versão validada no Docker Compose e nos Testcontainers é `mcr.microsoft.com/mssql/server:2022-latest`.
 
 | Configuração | Função |
 | --- | --- |
@@ -430,7 +430,22 @@ Este projeto foi desenvolvido para fins acadêmicos. Algumas decisões foram fei
 - A autenticação usa JWT com usuários demo, podendo evoluir para ASP.NET Identity ou provedor externo.
 - A solução é um monólito, mas foi organizada internamente por contextos, camadas e responsabilidades.
 - O Swagger documenta os contratos da API e auxilia na execução manual dos endpoints.
-- A collection do Postman será adicionada como documentação complementar para facilitar a demonstração do fluxo completo.
+- O Swagger é a documentação principal de execução manual; uma collection do Postman fica como melhoria complementar pós-MVP.
+
+### Limitações assumidas no MVP
+
+| Item | Decisão para o MVP | Evolução recomendada |
+| --- | --- | --- |
+| Aprovação de orçamento | A chamada de iniciar execução representa que o orçamento foi aprovado fora do sistema | Criar endpoint/evento explícito de aprovação ou reprovação do cliente |
+| Estoque insuficiente | A reserva retorna erro e bloqueia a operação | Avaliar cancelamento automático da OS quando essa regra for obrigatória |
+| Consulta de status pelo cliente | O usuário demo `Cliente` consulta por ID da OS | Vincular usuário autenticado a `ClienteId` real e validar posse da OS |
+| Numeração da OS | O número é gerado com base no maior número existente | Usar sequence/identity transacional para alta concorrência |
+| Persistência | Repositórios simples ainda salvam diretamente; fluxos transacionais usam `IUnitOfWork` | Padronizar toda persistência em torno do Unit of Work |
+| Login demo | Usuários e senhas existem para facilitar avaliação local | Evoluir para hash de senha, ASP.NET Identity ou provedor externo |
+| Resposta de autenticação | Retorna token, login e perfil para deixar o demo mais explícito | Simplificar contrato conforme necessidade dos consumidores |
+| Estoque global | O estoque é tratado como agregado único no MVP | Reavaliar modelagem por filial/localidade quando houver escala |
+| Logging | Logs atuais cobrem startup, migrations e seed | Adicionar correlação por request e logging estruturado |
+| OWASP ZAP | Não executado nesta consolidação final | Rodar análise dinâmica quando houver janela de tempo para evidência adicional |
 
 ---
 

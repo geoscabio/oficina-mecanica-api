@@ -6,6 +6,10 @@ namespace OficinaMecanica.Domain.GestaoOrdemServico.Entities;
 
 public sealed class Servico
 {
+    private Servico()
+    {
+    }
+
     private Servico(Guid id, Guid servicoCatalogoId, decimal valor)
     {
         Id = id;

@@ -5,7 +5,7 @@ namespace OficinaMecanica.Domain.Atendimento.ValueObjects;
 
 public sealed record Endereco
 {
-    public Endereco(string logradouro, string numero, string bairro, string cidade, string CEP)
+    private Endereco(string logradouro, string numero, string bairro, string cidade, string CEP)
     {
         if (string.IsNullOrWhiteSpace(logradouro)
             || string.IsNullOrWhiteSpace(numero)
@@ -28,6 +28,11 @@ public sealed record Endereco
     public string Bairro { get; }
     public string Cidade { get; }
     public string CEP { get; }
+
+    public static Endereco Criar(string logradouro, string numero, string bairro, string cidade, string CEP)
+    {
+        return new Endereco(logradouro, numero, bairro, cidade, CEP);
+    }
 
     private static string NormalizarCep(string cep)
     {

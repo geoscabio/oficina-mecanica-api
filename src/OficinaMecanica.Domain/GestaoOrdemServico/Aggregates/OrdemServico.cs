@@ -141,7 +141,7 @@ public sealed class OrdemServico
 
     public void Cancelar(MotivoCancelamentoOrdemServico motivo)
     {
-        if (!Enum.IsDefined(typeof(MotivoCancelamentoOrdemServico), motivo))
+        if (!Enum.IsDefined(motivo))
         {
             throw new DomainException(OrdemServicoErrorMessages.MotivoCancelamentoInvalido);
         }

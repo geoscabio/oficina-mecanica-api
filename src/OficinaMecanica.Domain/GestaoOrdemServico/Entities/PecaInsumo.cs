@@ -5,6 +5,10 @@ namespace OficinaMecanica.Domain.GestaoOrdemServico.Entities;
 
 public sealed class PecaInsumo
 {
+    private PecaInsumo()
+    {
+    }
+
     private PecaInsumo(Guid id, Guid pecaInsumoCatalogoId, int quantidade, decimal valorUnitario)
     {
         Id = id;

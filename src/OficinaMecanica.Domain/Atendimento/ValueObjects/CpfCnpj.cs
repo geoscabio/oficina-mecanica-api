@@ -6,6 +6,9 @@ namespace OficinaMecanica.Domain.Atendimento.ValueObjects;
 
 public sealed record CpfCnpj
 {
+    private static readonly int[] PrimeiroDigitoCnpjPesos = new[] { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+    private static readonly int[] SegundoDigitoCnpjPesos = new[] { 6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+
     private CpfCnpj(string numero, TipoDocumento tipo)
     {
         Numero = numero;
@@ -58,8 +61,8 @@ public sealed record CpfCnpj
             return false;
         }
 
-        var primeiroDigito = CalcularDigitoCnpj(numero[..12], new[] { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 });
-        var segundoDigito = CalcularDigitoCnpj(numero[..13], new[] { 6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 });
+        var primeiroDigito = CalcularDigitoCnpj(numero[..12], PrimeiroDigitoCnpjPesos);
+        var segundoDigito = CalcularDigitoCnpj(numero[..13], SegundoDigitoCnpjPesos);
 
         return numero[12] == DigitoParaChar(primeiroDigito)
             && numero[13] == DigitoParaChar(segundoDigito);
