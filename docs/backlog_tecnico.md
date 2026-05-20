@@ -166,12 +166,12 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 
 ## Riscos Residuais Aceitos Para MVP
 
-- Autorizacao de cliente ainda pode ser simplificada se nao houver vinculo real `UsuarioId -> ClienteId`.
+- Autorizacao de cliente por status de OS ainda exige vinculo real `UsuarioId -> ClienteId` para bloquear consulta por ID de OS de terceiros sem quebrar o fluxo demo do perfil `Cliente`.
 - Estoque como aggregate unico global.
 - Numero da OS via `MAX + 1` com risco teorico de concorrencia.
 - Repositories salvando diretamente com `SaveChangesAsync`, apesar do `IUnitOfWork`.
 - Login demo com senha em texto puro.
-- Ausencia de analise OWASP ZAP, se nao houver tempo para executar.
+- Warnings residuais do OWASP ZAP concentrados no Swagger UI/CSP permissiva para scripts inline do Swagger.
 - Logging ainda basico.
 - Envio real de orcamento ao cliente nao implementado, se o fluxo continuar externo/manual.
 - Aprovacao de orcamento implicita em `IniciarExecucao`.
