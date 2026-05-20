@@ -151,6 +151,12 @@ O fluxo recomendado para avaliação é executar a API e o banco de dados com **
 Na raiz do repositório, execute no **PowerShell**:
 
 ```powershell
+Copy-Item .env.example .env
+```
+
+Depois exporte as variaveis (ou ajuste os valores direto no arquivo `.env`) e suba o compose:
+
+```powershell
 $env:OFICINA_SQL_SA_PASSWORD = "OficinaMecanicaDbLocal@2026";
 $env:OFICINA_JWT_SECRET = "oficina-mecanica-jwt-secret-local-2026";
 docker compose up --build
