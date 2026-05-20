@@ -1,9 +1,10 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
-using OficinaMecanica.API.Extensions;
+using OficinaMecanica.API.Extensions.Security;
+using OficinaMecanica.API.Extensions.Swagger;
 using OficinaMecanica.Application.Common;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace OficinaMecanica.API.Extensions.Configuration;
 
 public static class ApiServiceCollectionExtensions
 {

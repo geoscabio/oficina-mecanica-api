@@ -1,3 +1,5 @@
+using OficinaMecanica.API.Extensions.Configuration;
+using OficinaMecanica.API.Extensions.Middlewares;
 using OficinaMecanica.Application;
 using OficinaMecanica.Infrastructure;
 using OficinaMecanica.Infrastructure.Persistence;
@@ -18,7 +20,7 @@ startupLogger.LogInformation("Inicializando OficinaMecanica API...");
 await app.Services.InitializeDatabaseAsync(builder.Configuration);
 startupLogger.LogInformation("API pronta. Swagger disponivel em /swagger.");
 
-app.UseApiPipeline();
+app.UseApiMiddlewares();
 app.MapApiEndpoints();
 
 app.Run();

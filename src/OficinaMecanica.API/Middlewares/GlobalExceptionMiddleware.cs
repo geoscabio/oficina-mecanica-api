@@ -1,4 +1,4 @@
-using OficinaMecanica.API.Extensions;
+using OficinaMecanica.API.Extensions.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Shared.Exceptions;
 
@@ -52,6 +52,6 @@ public sealed class GlobalExceptionMiddleware
     {
         context.Response.StatusCode = statusCode;
 
-        await context.Response.WriteErrorResponseAsJsonAsync(error);
+        await context.Response.WriteApiErrorResponseAsJsonAsync(error);
     }
 }

@@ -1,10 +1,10 @@
 using OficinaMecanica.API.Middlewares;
 
-namespace Microsoft.AspNetCore.Builder;
+namespace OficinaMecanica.API.Extensions.Middlewares;
 
 public static class ApiApplicationBuilderExtensions
 {
-    public static WebApplication UseApiPipeline(this WebApplication app)
+    public static WebApplication UseApiMiddlewares(this WebApplication app)
     {
         app.UseMiddleware<GlobalExceptionMiddleware>();
         app.UseSwagger();
