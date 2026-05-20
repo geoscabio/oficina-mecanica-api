@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using OficinaMecanica.Application.Common;
 
-namespace OficinaMecanica.API.Extensions;
+namespace OficinaMecanica.API.Extensions.Responses;
 
-public static class ApiResultExtensions
+public static class ControllerResultExtensions
 {
     public static IActionResult ToCreatedAtActionResult<T>(
         this ControllerBase controller,
