@@ -5,7 +5,7 @@ public sealed record OrdemServicoResponse(
     int Numero,
     string Status,
     decimal ValorTotal,
-    DateTime? DataInicio,
+    DateTime DataInicio,
     DateTime? DataFim,
     Guid VeiculoId,
     Guid MecanicoId,

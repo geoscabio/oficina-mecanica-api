@@ -61,7 +61,7 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | ID | Origem | Item | Status | Evidencia atual | Proxima acao |
 | --- | --- | --- | --- | --- | --- |
 | DT-030 | Claude | `Servico`, `PecaInsumo` e `ItemEstoque` sem construtor privado sem parametros | Corrigido | Construtores privados sem parametros adicionados nas entidades filhas | Nenhuma |
-| DT-031 | Claude | `OrdemServico.DataInicio` nullable sem necessidade | Pendente | `DataInicio` representa dado sempre preenchido no dominio | Alterar para `DateTime`, ajustar response/mapping/testes e manter `DataFim` nullable |
+| DT-031 | Claude | `OrdemServico.DataInicio` nullable sem necessidade | Corrigido | `DataInicio` alterado para `DateTime`, response atualizado e coluna marcada como obrigatoria no EF Core | Nenhuma |
 | DT-032 | Claude | `Endereco` Value Object com construtor publico | Corrigido | `Endereco.Criar(...)` criado, construtor tornado privado e consumidores/testes atualizados | Nenhuma |
 | DT-033 | Review final | Warnings EF Core por multiplos `Include` de colecoes | Corrigido | `.AsSplitQuery()` aplicado nas queries de OS com `Servicos` e `PecasInsumos` | Nenhuma |
 | DT-034 | Auditoria final | ADR/documentacao menciona SQL Server 2025, mas Docker/Testcontainers usam SQL Server 2022 | Corrigido | README alinhado para SQL Server 2022; Docker Compose e Testcontainers usam `mcr.microsoft.com/mssql/server:2022-latest` | Nenhuma |
@@ -98,7 +98,7 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | Area | Item | Status |
 | --- | --- | --- |
 | Codigo | Construtores EF em entidades filhas | Corrigido |
-| Codigo | `DataInicio` nao-nullable | Pendente |
+| Codigo | `DataInicio` nao-nullable | Corrigido |
 | Codigo | `Endereco` com factory de Value Object | Corrigido |
 | Codigo | `.AsSplitQuery()` em multiplos Includes de OS | Corrigido |
 | Codigo | Nenhum `.vs/` ou `.csproj.user` versionado | Corrigido |
@@ -142,6 +142,7 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 - DT-028 Evidencia final de build, testes, Docker Compose, Swagger e logs (corrigido)
 - DT-029 Arquivos locais e snapshots fora do versionamento (corrigido)
 - DT-030 Construtores privados EF em entidades filhas (corrigido)
+- DT-031 `OrdemServico.DataInicio` nao-nullable (corrigido)
 - DT-032 `Endereco` com factory e construtor privado (corrigido)
 - DT-033 `.AsSplitQuery()` em queries de OS com multiplas colecoes (corrigido)
 - DT-034 SQL Server 2022 alinhado na documentacao (corrigido)

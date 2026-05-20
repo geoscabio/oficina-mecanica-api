@@ -28,7 +28,7 @@ public sealed class OrdemServico
     public int Numero { get; private set; }
     public StatusOrdemServico Status { get; private set; }
     public decimal ValorTotal { get; private set; }
-    public DateTime? DataInicio { get; private set; }
+    public DateTime DataInicio { get; private set; }
     public DateTime? DataFim { get; private set; }
     public MotivoCancelamentoOrdemServico? MotivoCancelamento { get; private set; }
     public Guid VeiculoId { get; private set; }

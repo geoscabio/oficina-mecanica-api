@@ -53,7 +53,7 @@ public class AbrirOrdemServicoUseCaseTests
         resultado.Valor.Numero.Should().Be(ProximoNumeroOrdemServico);
         resultado.Valor.Status.Should().Be(OrdemServicoTestDataFactory.StatusRecebida);
         resultado.Valor.ValorTotal.Should().Be(0);
-        resultado.Valor.DataInicio.Should().NotBeNull();
+        resultado.Valor.DataInicio.Should().NotBe(default);
         resultado.Valor.DataFim.Should().BeNull();
         resultado.Valor.VeiculoId.Should().Be(veiculo.Id);
         resultado.Valor.MecanicoId.Should().Be(mecanico.Id);
