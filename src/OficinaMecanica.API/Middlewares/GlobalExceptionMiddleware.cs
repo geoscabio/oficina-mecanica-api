@@ -28,7 +28,7 @@ public sealed class GlobalExceptionMiddleware
 
             await WriteErrorAsync(
                 context,
-                StatusCodes.Status422UnprocessableEntity,
+                TipoErro.RegraNegocio.ToHttpStatusCode(),
                 new ErrorResponse(exception.Message, TipoErro.RegraNegocio));
         }
         catch
@@ -40,7 +40,7 @@ public sealed class GlobalExceptionMiddleware
 
             await WriteErrorAsync(
                 context,
-                StatusCodes.Status500InternalServerError,
+                TipoErro.ErroInterno.ToHttpStatusCode(),
                 new ErrorResponse("Erro interno inesperado.", TipoErro.ErroInterno));
         }
     }

@@ -29,14 +29,11 @@ public static class ControllerResultExtensions
             return controller.Ok(result.Valor);
         }
 
-        return result.Erro?.Tipo switch
+        if (result.Erro is null)
         {
-            TipoErro.Validacao => controller.BadRequest(result.Erro),
-            TipoErro.NaoEncontrado => controller.NotFound(result.Erro),
-            TipoErro.RegraNegocio => controller.Conflict(result.Erro),
-            TipoErro.NaoAutorizado => controller.Unauthorized(result.Erro),
-            TipoErro.ErroInterno => controller.StatusCode(StatusCodes.Status500InternalServerError, result.Erro),
-            _ => controller.BadRequest(result.Erro)
-        };
+            return controller.BadRequest();
+        }
+
+        return controller.StatusCode(result.Erro.Tipo.ToHttpStatusCode(), result.Erro);
     }
 }
