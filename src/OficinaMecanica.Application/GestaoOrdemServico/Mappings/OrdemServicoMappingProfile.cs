@@ -30,12 +30,8 @@ public sealed class OrdemServicoMappingProfile : Profile
             .ForCtorParam(nameof(ConsultarStatusOrdemServicoResponse.Status), opcao => opcao.MapFrom(origem => origem.Status.ToString()));
 
         CreateMap<ServicoCatalogo, TempoMedioExecucaoServicoResponse>()
-            .ForCtorParam(
-                nameof(TempoMedioExecucaoServicoResponse.ServicoCatalogoId),
-                opcao => opcao.MapFrom(origem => origem.Id))
-            .ForCtorParam(
-                nameof(TempoMedioExecucaoServicoResponse.TempoMedioExecucaoEmMinutos),
-                opcao => opcao.MapFrom((_, contexto) => ObterTempoMedio(contexto)));
+            .ForCtorParam(nameof(TempoMedioExecucaoServicoResponse.ServicoCatalogoId), opcao => opcao.MapFrom(origem => origem.Id))
+            .ForCtorParam(nameof(TempoMedioExecucaoServicoResponse.TempoMedioExecucaoEmMinutos), opcao => opcao.MapFrom((_, contexto) => ObterTempoMedio(contexto)));
     }
 
     private static double? ObterTempoMedio(ResolutionContext contexto)

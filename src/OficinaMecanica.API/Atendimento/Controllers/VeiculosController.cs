@@ -17,24 +17,15 @@ namespace OficinaMecanica.API.Atendimento.Controllers;
 public sealed class VeiculosController : ControllerBase
 {
     [HttpPost("cadastrar")]
-    public async Task<IActionResult> Cadastrar(
-        [FromServices] CadastrarVeiculoUseCase useCase,
-        [FromBody] CadastrarVeiculoRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Cadastrar([FromServices] CadastrarVeiculoUseCase useCase, [FromBody] CadastrarVeiculoRequest request, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
-        return this.ToCreatedAtActionResult(
-            result,
-            nameof(Consultar),
-            veiculo => new { veiculoId = veiculo.Id });
+        return this.ToCreatedAtActionResult(result, nameof(Consultar), veiculo => new { veiculoId = veiculo.Id });
     }
 
     [HttpGet("consultar/{veiculoId:guid}")]
-    public async Task<IActionResult> Consultar(
-        [FromServices] ConsultarVeiculoUseCase useCase,
-        Guid veiculoId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Consultar([FromServices] ConsultarVeiculoUseCase useCase, Guid veiculoId, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(new ConsultarVeiculoRequest(veiculoId), cancellationToken);
 
@@ -42,10 +33,7 @@ public sealed class VeiculosController : ControllerBase
     }
 
     [HttpGet("consultar-por-placa/{placa}")]
-    public async Task<IActionResult> ConsultarPorPlaca(
-        [FromServices] ConsultarVeiculoPorPlacaUseCase useCase,
-        string placa,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ConsultarPorPlaca([FromServices] ConsultarVeiculoPorPlacaUseCase useCase, string placa, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(new ConsultarVeiculoPorPlacaRequest(placa), cancellationToken);
 
@@ -53,11 +41,7 @@ public sealed class VeiculosController : ControllerBase
     }
 
     [HttpGet("listar")]
-    public async Task<IActionResult> Listar(
-        [FromServices] ListarVeiculosUseCase useCase,
-        [FromQuery] int pagina = 1,
-        [FromQuery] int tamanhoPagina = 10,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Listar([FromServices] ListarVeiculosUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
     {
         var result = await useCase.ExecuteAsync(new ListarVeiculosRequest(pagina, tamanhoPagina), cancellationToken);
 
@@ -65,24 +49,15 @@ public sealed class VeiculosController : ControllerBase
     }
 
     [HttpPut("{veiculoId:guid}/atualizar")]
-    public async Task<IActionResult> Atualizar(
-        [FromServices] AtualizarVeiculoUseCase useCase,
-        Guid veiculoId,
-        [FromBody] AtualizarVeiculoRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Atualizar([FromServices] AtualizarVeiculoUseCase useCase, Guid veiculoId, [FromBody] AtualizarVeiculoRequest request, CancellationToken cancellationToken)
     {
-        var result = await useCase.ExecuteAsync(
-            request with { VeiculoId = veiculoId },
-            cancellationToken);
+        var result = await useCase.ExecuteAsync(request with { VeiculoId = veiculoId }, cancellationToken);
 
         return this.ToActionResult(result);
     }
 
     [HttpDelete("{veiculoId:guid}/remover")]
-    public async Task<IActionResult> Remover(
-        [FromServices] RemoverVeiculoUseCase useCase,
-        Guid veiculoId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Remover([FromServices] RemoverVeiculoUseCase useCase, Guid veiculoId, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(new RemoverVeiculoRequest(veiculoId), cancellationToken);
 

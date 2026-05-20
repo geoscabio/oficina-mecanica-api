@@ -17,12 +17,7 @@ public sealed class CancelarOrdemServicoUseCase
     private readonly IValidator<CancelarOrdemServicoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public CancelarOrdemServicoUseCase(
-        IOrdemServicoRepository ordemServicoRepository,
-        IEstoqueRepository estoqueRepository,
-        IUnitOfWork unitOfWork,
-        IValidator<CancelarOrdemServicoRequest> validator,
-        IMapper mapper)
+    public CancelarOrdemServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IEstoqueRepository estoqueRepository, IUnitOfWork unitOfWork, IValidator<CancelarOrdemServicoRequest> validator, IMapper mapper)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _estoqueRepository = estoqueRepository;
@@ -31,9 +26,7 @@ public sealed class CancelarOrdemServicoUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(
-        CancelarOrdemServicoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(CancelarOrdemServicoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 

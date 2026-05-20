@@ -1,5 +1,3 @@
-﻿namespace OficinaMecanica.Application.Identidade.UsuarioUseCases.AutenticarUsuario;
+namespace OficinaMecanica.Application.Identidade.UsuarioUseCases.AutenticarUsuario;
 
-public sealed record AutenticarUsuarioRequest(
-    string Login,
-    string Senha);
+public sealed record AutenticarUsuarioRequest(string Login, string Senha);

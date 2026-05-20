@@ -15,7 +15,7 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | DT-024 | Evitar alteracoes diretas na `develop` | Pendente | Corrigido | Fluxo Git formalizado neste documento |
 | DT-012 | Retornar todos os erros de validacao | Pendente | Corrigido | `ErrorResponse` agora inclui `erros` e use cases retornam todas as mensagens do FluentValidation |
 | DT-011 | Enums em `SCREAMING_CASE` | Pendente | Corrigido | `StatusOrdemServico` e `StatusServico` renomeados para PascalCase |
-| DT-013 | Padronizar formatacao global | Pendente | Corrigido | `dotnet format OficinaMecanica.sln --verify-no-changes --no-restore` executado sem arquivos pendentes |
+| DT-013 | Padronizar formatacao global | Pendente | Corrigido | Quebras compactadas em `src`; `.editorconfig` adicionado; `dotnet format` passou |
 
 ## Status Atual Dos Itens Pendentes
 
@@ -42,7 +42,7 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 - DT-010 `PerfisAcesso` movido para Application (corrigido)
 - DT-011 Enums de status renomeados para PascalCase (corrigido)
 - DT-012 Erros de validacao retornam lista completa no campo `erros` (corrigido)
-- DT-013 Formatacao global verificada sem arquivos pendentes pelo `dotnet format` (corrigido)
+- DT-013 Formatacao global compactada em `src` com `.editorconfig` para preservar blocos de linha unica (corrigido)
 - DT-015 Auditoria de vulnerabilidade NuGet sem pacotes vulneraveis encontrados (corrigido)
 - DT-024 Fluxo Git formalizado com branch por tarefa, commits convencionais e PR (corrigido)
 

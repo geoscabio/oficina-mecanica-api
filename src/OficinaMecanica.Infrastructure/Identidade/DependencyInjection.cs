@@ -8,9 +8,7 @@ namespace OficinaMecanica.Infrastructure.Identidade;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddIdentidadeInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddIdentidadeInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddOptions<JwtOptions>()
@@ -21,9 +19,7 @@ public static class DependencyInjection
         services
             .AddOptions<IdentidadeOptions>()
             .Bind(configuration.GetSection(IdentidadeOptions.SectionName))
-            .Validate(
-                options => options.UsuariosDemo.Any(usuario => usuario.EhValido()),
-                "Configure ao menos um usuario demo valido para autenticacao do MVP.")
+            .Validate(options => options.UsuariosDemo.Any(usuario => usuario.EhValido()), "Configure ao menos um usuario demo valido para autenticacao do MVP.")
             .ValidateOnStart();
 
         services.AddScoped<IUsuarioAutenticadoService, UsuarioDemoAutenticadoService>();

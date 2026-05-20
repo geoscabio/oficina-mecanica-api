@@ -25,10 +25,7 @@ public sealed class MecanicoRepository : IMecanicoRepository
         return _dbContext.Mecanicos.SingleOrDefaultAsync(mecanico => mecanico.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<Mecanico>> ListarAsync(
-        int pagina,
-        int tamanhoPagina,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<Mecanico>> ListarAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Mecanicos
             .AsNoTracking()

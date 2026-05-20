@@ -5,9 +5,7 @@ namespace OficinaMecanica.Infrastructure.Administrativo.Seed;
 
 internal static class AdministrativoSeedData
 {
-    public static async Task<AdministrativoSeedResult> SeedAsync(
-        OficinaMecanicaDbContext dbContext,
-        CancellationToken cancellationToken)
+    public static async Task<AdministrativoSeedResult> SeedAsync(OficinaMecanicaDbContext dbContext, CancellationToken cancellationToken)
     {
         var mecanicoPrincipal = await MecanicoSeedData.ObterOuCriarPrincipalAsync(dbContext, cancellationToken);
         var mecanicoDiagnostico = await MecanicoSeedData.ObterOuCriarDiagnosticoAsync(dbContext, cancellationToken);
@@ -20,15 +18,7 @@ internal static class AdministrativoSeedData
         var pastilhaFreio = await PecaInsumoCatalogoSeedData.ObterOuCriarPastilhaFreioAsync(dbContext, cancellationToken);
         var oleoMotor = await PecaInsumoCatalogoSeedData.ObterOuCriarOleoMotorAsync(dbContext, cancellationToken);
 
-        return new AdministrativoSeedResult(
-            mecanicoPrincipal,
-            mecanicoDiagnostico,
-            trocaOleo,
-            alinhamento,
-            diagnostico,
-            filtroOleo,
-            pastilhaFreio,
-            oleoMotor);
+        return new AdministrativoSeedResult(mecanicoPrincipal, mecanicoDiagnostico, trocaOleo, alinhamento, diagnostico, filtroOleo, pastilhaFreio, oleoMotor);
     }
 }
 

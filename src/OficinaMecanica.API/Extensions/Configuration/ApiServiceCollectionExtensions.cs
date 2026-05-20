@@ -8,9 +8,7 @@ namespace OficinaMecanica.API.Extensions.Configuration;
 
 public static class ApiServiceCollectionExtensions
 {
-    public static IServiceCollection AddApi(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddApi(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddControllers()
@@ -35,10 +33,7 @@ public static class ApiServiceCollectionExtensions
                     .Distinct()
                     .ToArray();
 
-                return new BadRequestObjectResult(new ErrorResponse(
-                    ValidationErrorMessages.RequestInvalido,
-                    TipoErro.Validacao,
-                    erros));
+                return new BadRequestObjectResult(new ErrorResponse(ValidationErrorMessages.RequestInvalido, TipoErro.Validacao, erros));
             };
         });
 

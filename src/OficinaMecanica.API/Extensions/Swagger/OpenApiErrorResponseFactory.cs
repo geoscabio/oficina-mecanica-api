@@ -8,10 +8,7 @@ namespace OficinaMecanica.API.Extensions.Swagger;
 
 internal static class OpenApiErrorResponseFactory
 {
-    public static OpenApiResponse Create(
-        OperationFilterContext context,
-        string description,
-        TipoErro tipoErro)
+    public static OpenApiResponse Create(OperationFilterContext context, string description, TipoErro tipoErro)
     {
         var example = new JsonObject
         {
@@ -31,9 +28,7 @@ internal static class OpenApiErrorResponseFactory
             {
                 [ApiResponseContentTypes.Json] = new()
                 {
-                    Schema = context.SchemaGenerator.GenerateSchema(
-                        typeof(ErrorResponse),
-                        context.SchemaRepository),
+                    Schema = context.SchemaGenerator.GenerateSchema(typeof(ErrorResponse), context.SchemaRepository),
                     Example = example
                 }
             }

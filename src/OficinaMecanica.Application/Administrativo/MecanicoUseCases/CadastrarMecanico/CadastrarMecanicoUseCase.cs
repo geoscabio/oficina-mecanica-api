@@ -13,27 +13,20 @@ public sealed class CadastrarMecanicoUseCase
     private readonly IValidator<CadastrarMecanicoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public CadastrarMecanicoUseCase(
-        IMecanicoRepository mecanicoRepository,
-        IValidator<CadastrarMecanicoRequest> validator,
-        IMapper mapper)
+    public CadastrarMecanicoUseCase(IMecanicoRepository mecanicoRepository, IValidator<CadastrarMecanicoRequest> validator, IMapper mapper)
     {
         _mecanicoRepository = mecanicoRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<MecanicoResponse>> ExecuteAsync(
-        CadastrarMecanicoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<MecanicoResponse>> ExecuteAsync(CadastrarMecanicoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<MecanicoResponse>.Falha(
-                validationResult.ObterMensagensErro(),
-                TipoErro.Validacao);
+            return Result<MecanicoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var mecanico = Mecanico.Criar(request.Nome, request.Funcional);

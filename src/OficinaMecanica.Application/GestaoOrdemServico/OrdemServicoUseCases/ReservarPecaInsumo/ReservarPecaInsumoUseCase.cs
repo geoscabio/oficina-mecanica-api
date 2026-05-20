@@ -38,9 +38,7 @@ public sealed class ReservarPecaInsumoUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(
-        ReservarPecaInsumoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(ReservarPecaInsumoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
@@ -79,10 +77,7 @@ public sealed class ReservarPecaInsumoUseCase
         {
             var pecaInsumoCatalogo = pecasInsumosCatalogo[pecaInsumo.PecaInsumoCatalogoId];
 
-            ordemServico.ReservarPecaInsumo(
-                pecaInsumoCatalogo.Id,
-                pecaInsumo.Quantidade,
-                pecaInsumoCatalogo.Valor);
+            ordemServico.ReservarPecaInsumo(pecaInsumoCatalogo.Id, pecaInsumo.Quantidade, pecaInsumoCatalogo.Valor);
 
             estoque.ReservarItens(pecaInsumoCatalogo.Id, pecaInsumo.Quantidade);
         }
@@ -98,9 +93,7 @@ public sealed class ReservarPecaInsumoUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 
-    private async Task<Dictionary<Guid, PecaInsumoCatalogo>> ObterPecasInsumosCatalogoAsync(
-        IEnumerable<PecaInsumoRequest> pecasInsumos,
-        CancellationToken cancellationToken)
+    private async Task<Dictionary<Guid, PecaInsumoCatalogo>> ObterPecasInsumosCatalogoAsync(IEnumerable<PecaInsumoRequest> pecasInsumos, CancellationToken cancellationToken)
     {
         var ids = pecasInsumos
             .Select(pecaInsumo => pecaInsumo.PecaInsumoCatalogoId)
@@ -112,9 +105,7 @@ public sealed class ReservarPecaInsumoUseCase
         return pecasInsumosCatalogo.ToDictionary(pecaInsumoCatalogo => pecaInsumoCatalogo.Id);
     }
 
-    private static bool ExisteEstoqueDisponivel(
-        Estoque estoque,
-        IEnumerable<PecaInsumoRequest> pecasInsumos)
+    private static bool ExisteEstoqueDisponivel(Estoque estoque, IEnumerable<PecaInsumoRequest> pecasInsumos)
     {
         foreach (var pecaInsumo in pecasInsumos)
         {

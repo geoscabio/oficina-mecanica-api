@@ -32,10 +32,7 @@ public sealed class VeiculoRepository : IVeiculoRepository
             .SingleOrDefaultAsync(veiculo => veiculo.Placa.NumeroPlaca == placa, cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<Veiculo>> ListarAsync(
-        int pagina,
-        int tamanhoPagina,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<Veiculo>> ListarAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Veiculos
             .AsNoTracking()

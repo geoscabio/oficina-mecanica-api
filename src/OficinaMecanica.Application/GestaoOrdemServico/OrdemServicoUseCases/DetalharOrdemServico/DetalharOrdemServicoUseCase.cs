@@ -13,19 +13,14 @@ public sealed class DetalharOrdemServicoUseCase
     private readonly IValidator<DetalharOrdemServicoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public DetalharOrdemServicoUseCase(
-        IOrdemServicoRepository ordemServicoRepository,
-        IValidator<DetalharOrdemServicoRequest> validator,
-        IMapper mapper)
+    public DetalharOrdemServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IValidator<DetalharOrdemServicoRequest> validator, IMapper mapper)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(
-        DetalharOrdemServicoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(DetalharOrdemServicoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 

@@ -11,35 +11,22 @@ internal static class VeiculoSeedData
     private static readonly VeiculoSeed VeiculoOnix = new("BRA2E19", "Chevrolet", "Onix", 2022);
     private static readonly VeiculoSeed VeiculoCorolla = new("FIQ1A23", "Toyota", "Corolla", 2021);
 
-    public static Task<Veiculo> ObterOuCriarCivicAsync(
-        OficinaMecanicaDbContext dbContext,
-        Guid clienteId,
-        CancellationToken cancellationToken)
+    public static Task<Veiculo> ObterOuCriarCivicAsync(OficinaMecanicaDbContext dbContext, Guid clienteId, CancellationToken cancellationToken)
     {
         return ObterOuCriarAsync(dbContext, clienteId, VeiculoCivic, cancellationToken);
     }
 
-    public static Task<Veiculo> ObterOuCriarOnixAsync(
-        OficinaMecanicaDbContext dbContext,
-        Guid clienteId,
-        CancellationToken cancellationToken)
+    public static Task<Veiculo> ObterOuCriarOnixAsync(OficinaMecanicaDbContext dbContext, Guid clienteId, CancellationToken cancellationToken)
     {
         return ObterOuCriarAsync(dbContext, clienteId, VeiculoOnix, cancellationToken);
     }
 
-    public static Task<Veiculo> ObterOuCriarCorollaAsync(
-        OficinaMecanicaDbContext dbContext,
-        Guid clienteId,
-        CancellationToken cancellationToken)
+    public static Task<Veiculo> ObterOuCriarCorollaAsync(OficinaMecanicaDbContext dbContext, Guid clienteId, CancellationToken cancellationToken)
     {
         return ObterOuCriarAsync(dbContext, clienteId, VeiculoCorolla, cancellationToken);
     }
 
-    private static async Task<Veiculo> ObterOuCriarAsync(
-        OficinaMecanicaDbContext dbContext,
-        Guid clienteId,
-        VeiculoSeed seed,
-        CancellationToken cancellationToken)
+    private static async Task<Veiculo> ObterOuCriarAsync(OficinaMecanicaDbContext dbContext, Guid clienteId, VeiculoSeed seed, CancellationToken cancellationToken)
     {
         var placa = Placa.Criar(seed.Placa);
         var veiculoExistente = await dbContext.Veiculos

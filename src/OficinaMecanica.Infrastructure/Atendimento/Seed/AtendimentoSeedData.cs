@@ -5,9 +5,7 @@ namespace OficinaMecanica.Infrastructure.Atendimento.Seed;
 
 internal static class AtendimentoSeedData
 {
-    public static async Task<AtendimentoSeedResult> SeedAsync(
-        OficinaMecanicaDbContext dbContext,
-        CancellationToken cancellationToken)
+    public static async Task<AtendimentoSeedResult> SeedAsync(OficinaMecanicaDbContext dbContext, CancellationToken cancellationToken)
     {
         var maria = await ClienteSeedData.ObterOuCriarMariaAsync(dbContext, cancellationToken);
         var carlos = await ClienteSeedData.ObterOuCriarCarlosAsync(dbContext, cancellationToken);
@@ -20,9 +18,4 @@ internal static class AtendimentoSeedData
     }
 }
 
-internal sealed record AtendimentoSeedResult(
-    Cliente ClienteMaria,
-    Cliente ClienteCarlos,
-    Veiculo VeiculoCivic,
-    Veiculo VeiculoOnix,
-    Veiculo VeiculoCorolla);
+internal sealed record AtendimentoSeedResult(Cliente ClienteMaria, Cliente ClienteCarlos, Veiculo VeiculoCivic, Veiculo VeiculoOnix, Veiculo VeiculoCorolla);

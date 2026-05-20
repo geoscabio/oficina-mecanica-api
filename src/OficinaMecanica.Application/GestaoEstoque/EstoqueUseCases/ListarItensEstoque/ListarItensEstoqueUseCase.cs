@@ -12,27 +12,20 @@ public sealed class ListarItensEstoqueUseCase
     private readonly IValidator<ListarItensEstoqueRequest> _validator;
     private readonly IMapper _mapper;
 
-    public ListarItensEstoqueUseCase(
-        IEstoqueRepository estoqueRepository,
-        IValidator<ListarItensEstoqueRequest> validator,
-        IMapper mapper)
+    public ListarItensEstoqueUseCase(IEstoqueRepository estoqueRepository, IValidator<ListarItensEstoqueRequest> validator, IMapper mapper)
     {
         _estoqueRepository = estoqueRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<PagedResult<ItemEstoqueResponse>>> ExecuteAsync(
-        ListarItensEstoqueRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<PagedResult<ItemEstoqueResponse>>> ExecuteAsync(ListarItensEstoqueRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<PagedResult<ItemEstoqueResponse>>.Falha(
-                validationResult.ObterMensagensErro(),
-                TipoErro.Validacao);
+            return Result<PagedResult<ItemEstoqueResponse>>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var itensEstoque = await _estoqueRepository.ListarItensAsync(request.Pagina, request.TamanhoPagina, cancellationToken);
@@ -41,11 +34,7 @@ public sealed class ListarItensEstoqueUseCase
 
         var response = _mapper.Map<IReadOnlyCollection<ItemEstoqueResponse>>(itensEstoque);
 
-        var pagedResult = new PagedResult<ItemEstoqueResponse>(
-            response,
-            request.Pagina,
-            request.TamanhoPagina,
-            totalItens);
+        var pagedResult = new PagedResult<ItemEstoqueResponse>(response, request.Pagina, request.TamanhoPagina, totalItens);
 
         return Result<PagedResult<ItemEstoqueResponse>>.Ok(pagedResult);
     }

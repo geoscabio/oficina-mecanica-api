@@ -26,19 +26,14 @@ public sealed class PecaInsumoCatalogoRepository : IPecaInsumoCatalogoRepository
             .SingleOrDefaultAsync(pecaInsumo => pecaInsumo.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<PecaInsumoCatalogo>> ObterPorIdsAsync(
-        IReadOnlyCollection<Guid> ids,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<PecaInsumoCatalogo>> ObterPorIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default)
     {
         return await _dbContext.PecasInsumosCatalogo
             .Where(pecaInsumo => ids.Contains(pecaInsumo.Id))
             .ToArrayAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<PecaInsumoCatalogo>> ListarAsync(
-        int pagina,
-        int tamanhoPagina,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<PecaInsumoCatalogo>> ListarAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
     {
         return await _dbContext.PecasInsumosCatalogo
             .AsNoTracking()
@@ -48,17 +43,13 @@ public sealed class PecaInsumoCatalogoRepository : IPecaInsumoCatalogoRepository
             .ToArrayAsync(cancellationToken);
     }
 
-    public async Task AtualizarAsync(
-        PecaInsumoCatalogo pecaInsumoCatalogo,
-        CancellationToken cancellationToken = default)
+    public async Task AtualizarAsync(PecaInsumoCatalogo pecaInsumoCatalogo, CancellationToken cancellationToken = default)
     {
         _dbContext.PecasInsumosCatalogo.Update(pecaInsumoCatalogo);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task RemoverAsync(
-        PecaInsumoCatalogo pecaInsumoCatalogo,
-        CancellationToken cancellationToken = default)
+    public async Task RemoverAsync(PecaInsumoCatalogo pecaInsumoCatalogo, CancellationToken cancellationToken = default)
     {
         _dbContext.PecasInsumosCatalogo.Remove(pecaInsumoCatalogo);
         await _dbContext.SaveChangesAsync(cancellationToken);

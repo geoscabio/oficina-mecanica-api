@@ -12,7 +12,4 @@ public enum TipoErro
     AcessoProibido = 6
 }
 
-public sealed record ErrorResponse(
-    string Mensagem,
-    TipoErro Tipo,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyCollection<string>? Erros = null);
+public sealed record ErrorResponse(string Mensagem, TipoErro Tipo, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyCollection<string>? Erros = null);

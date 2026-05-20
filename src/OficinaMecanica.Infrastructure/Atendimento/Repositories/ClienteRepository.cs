@@ -32,10 +32,7 @@ public sealed class ClienteRepository : IClienteRepository
                          .SingleOrDefaultAsync(cliente => cliente.Documento.Numero == documento, cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<Cliente>> ListarAsync(
-        int pagina,
-        int tamanhoPagina,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<Cliente>> ListarAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Clientes
             .AsNoTracking()

@@ -15,19 +15,14 @@ public sealed class CadastrarClienteUseCase
     private readonly IValidator<CadastrarClienteRequest> _validator;
     private readonly IMapper _mapper;
 
-    public CadastrarClienteUseCase(
-        IClienteRepository clienteRepository,
-        IValidator<CadastrarClienteRequest> validator,
-        IMapper mapper)
+    public CadastrarClienteUseCase(IClienteRepository clienteRepository, IValidator<CadastrarClienteRequest> validator, IMapper mapper)
     {
         _clienteRepository = clienteRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<ClienteResponse>> ExecuteAsync(
-        CadastrarClienteRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<ClienteResponse>> ExecuteAsync(CadastrarClienteRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
@@ -47,12 +42,7 @@ public sealed class CadastrarClienteUseCase
         var cliente = Cliente.Criar(
             documento,
             request.Nome,
-            new Endereco(
-                request.Endereco.Logradouro,
-                request.Endereco.Numero,
-                request.Endereco.Bairro,
-                request.Endereco.Cidade,
-                request.Endereco.CEP),
+            new Endereco(request.Endereco.Logradouro, request.Endereco.Numero, request.Endereco.Bairro, request.Endereco.Cidade, request.Endereco.CEP),
             Telefone.Criar(request.Telefone),
             Email.Criar(request.Email));
 

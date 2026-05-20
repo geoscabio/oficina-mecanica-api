@@ -13,27 +13,20 @@ public sealed class CadastrarServicoCatalogoUseCase
     private readonly IValidator<CadastrarServicoCatalogoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public CadastrarServicoCatalogoUseCase(
-        IServicoCatalogoRepository servicoCatalogoRepository,
-        IValidator<CadastrarServicoCatalogoRequest> validator,
-        IMapper mapper)
+    public CadastrarServicoCatalogoUseCase(IServicoCatalogoRepository servicoCatalogoRepository, IValidator<CadastrarServicoCatalogoRequest> validator, IMapper mapper)
     {
         _servicoCatalogoRepository = servicoCatalogoRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<ServicoCatalogoResponse>> ExecuteAsync(
-        CadastrarServicoCatalogoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<ServicoCatalogoResponse>> ExecuteAsync(CadastrarServicoCatalogoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<ServicoCatalogoResponse>.Falha(
-                validationResult.ObterMensagensErro(),
-                TipoErro.Validacao);
+            return Result<ServicoCatalogoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var servicoCatalogo = ServicoCatalogo.Criar(request.Descricao, request.Valor);

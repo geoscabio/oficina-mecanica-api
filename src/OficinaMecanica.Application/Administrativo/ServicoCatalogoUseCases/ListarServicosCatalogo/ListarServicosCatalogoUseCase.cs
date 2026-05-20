@@ -12,40 +12,26 @@ public sealed class ListarServicosCatalogoUseCase
     private readonly IValidator<ListarServicosCatalogoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public ListarServicosCatalogoUseCase(
-        IServicoCatalogoRepository servicoCatalogoRepository,
-        IValidator<ListarServicosCatalogoRequest> validator,
-        IMapper mapper)
+    public ListarServicosCatalogoUseCase(IServicoCatalogoRepository servicoCatalogoRepository, IValidator<ListarServicosCatalogoRequest> validator, IMapper mapper)
     {
         _servicoCatalogoRepository = servicoCatalogoRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<PagedResult<ServicoCatalogoResponse>>> ExecuteAsync(
-        ListarServicosCatalogoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<PagedResult<ServicoCatalogoResponse>>> ExecuteAsync(ListarServicosCatalogoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<PagedResult<ServicoCatalogoResponse>>.Falha(
-                validationResult.ObterMensagensErro(),
-                TipoErro.Validacao);
+            return Result<PagedResult<ServicoCatalogoResponse>>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
-        var servicosCatalogo = await _servicoCatalogoRepository.ListarAsync(
-            request.Pagina,
-            request.TamanhoPagina,
-            cancellationToken);
+        var servicosCatalogo = await _servicoCatalogoRepository.ListarAsync(request.Pagina, request.TamanhoPagina, cancellationToken);
         var totalItens = await _servicoCatalogoRepository.ContarAsync(cancellationToken);
         var response = _mapper.Map<IReadOnlyCollection<ServicoCatalogoResponse>>(servicosCatalogo);
-        var pagedResult = new PagedResult<ServicoCatalogoResponse>(
-            response,
-            request.Pagina,
-            request.TamanhoPagina,
-            totalItens);
+        var pagedResult = new PagedResult<ServicoCatalogoResponse>(response, request.Pagina, request.TamanhoPagina, totalItens);
 
         return Result<PagedResult<ServicoCatalogoResponse>>.Ok(pagedResult);
     }

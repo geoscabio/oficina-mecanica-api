@@ -12,10 +12,7 @@ internal static class EstoqueSeedData
     private const int PastilhaFreioQuantidadeDisponivel = 12;
     private const int OleoMotorQuantidadeDisponivel = 30;
 
-    public static async Task<EstoqueSeedResult> SeedAsync(
-        OficinaMecanicaDbContext dbContext,
-        AdministrativoSeedResult administrativo,
-        CancellationToken cancellationToken)
+    public static async Task<EstoqueSeedResult> SeedAsync(OficinaMecanicaDbContext dbContext, AdministrativoSeedResult administrativo, CancellationToken cancellationToken)
     {
         var estoque = await ObterOuCriarAsync(
             dbContext,
@@ -30,10 +27,7 @@ internal static class EstoqueSeedData
         return new EstoqueSeedResult(estoque);
     }
 
-    private static async Task<Estoque> ObterOuCriarAsync(
-        OficinaMecanicaDbContext dbContext,
-        IReadOnlyCollection<ItemEstoqueSeed> itensSeed,
-        CancellationToken cancellationToken)
+    private static async Task<Estoque> ObterOuCriarAsync(OficinaMecanicaDbContext dbContext, IReadOnlyCollection<ItemEstoqueSeed> itensSeed, CancellationToken cancellationToken)
     {
         var estoqueExistente = await dbContext.Estoques
             .Include(estoque => estoque.ItensEstoque)

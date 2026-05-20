@@ -19,12 +19,7 @@ public sealed class AbrirOrdemServicoUseCase
     private readonly IValidator<AbrirOrdemServicoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public AbrirOrdemServicoUseCase(
-        IOrdemServicoRepository ordemServicoRepository,
-        IVeiculoRepository veiculoRepository,
-        IMecanicoRepository mecanicoRepository,
-        IValidator<AbrirOrdemServicoRequest> validator,
-        IMapper mapper)
+    public AbrirOrdemServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IVeiculoRepository veiculoRepository, IMecanicoRepository mecanicoRepository, IValidator<AbrirOrdemServicoRequest> validator, IMapper mapper)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _veiculoRepository = veiculoRepository;
@@ -33,9 +28,7 @@ public sealed class AbrirOrdemServicoUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(
-        AbrirOrdemServicoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(AbrirOrdemServicoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 

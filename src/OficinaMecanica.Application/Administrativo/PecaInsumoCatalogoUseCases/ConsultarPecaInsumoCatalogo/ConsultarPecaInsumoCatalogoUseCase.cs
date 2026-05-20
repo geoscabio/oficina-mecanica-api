@@ -13,38 +13,27 @@ public sealed class ConsultarPecaInsumoCatalogoUseCase
     private readonly IValidator<ConsultarPecaInsumoCatalogoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public ConsultarPecaInsumoCatalogoUseCase(
-        IPecaInsumoCatalogoRepository pecaInsumoCatalogoRepository,
-        IValidator<ConsultarPecaInsumoCatalogoRequest> validator,
-        IMapper mapper)
+    public ConsultarPecaInsumoCatalogoUseCase(IPecaInsumoCatalogoRepository pecaInsumoCatalogoRepository, IValidator<ConsultarPecaInsumoCatalogoRequest> validator, IMapper mapper)
     {
         _pecaInsumoCatalogoRepository = pecaInsumoCatalogoRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<PecaInsumoCatalogoResponse>> ExecuteAsync(
-        ConsultarPecaInsumoCatalogoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<PecaInsumoCatalogoResponse>> ExecuteAsync(ConsultarPecaInsumoCatalogoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<PecaInsumoCatalogoResponse>.Falha(
-                validationResult.ObterMensagensErro(),
-                TipoErro.Validacao);
+            return Result<PecaInsumoCatalogoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
-        var item = await _pecaInsumoCatalogoRepository.ObterPorIdAsync(
-            request.PecaInsumoCatalogoId,
-            cancellationToken);
+        var item = await _pecaInsumoCatalogoRepository.ObterPorIdAsync(request.PecaInsumoCatalogoId, cancellationToken);
 
         if (item is null)
         {
-            return Result<PecaInsumoCatalogoResponse>.Falha(
-                PecaInsumoCatalogoErrorMessages.PecaInsumoCatalogoNaoEncontrado,
-                TipoErro.NaoEncontrado);
+            return Result<PecaInsumoCatalogoResponse>.Falha(PecaInsumoCatalogoErrorMessages.PecaInsumoCatalogoNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         return Result<PecaInsumoCatalogoResponse>.Ok(_mapper.Map<PecaInsumoCatalogoResponse>(item));

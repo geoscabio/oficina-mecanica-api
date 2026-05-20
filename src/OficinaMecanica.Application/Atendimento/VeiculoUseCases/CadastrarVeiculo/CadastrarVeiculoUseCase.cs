@@ -16,11 +16,7 @@ public sealed class CadastrarVeiculoUseCase
     private readonly IValidator<CadastrarVeiculoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public CadastrarVeiculoUseCase(
-        IVeiculoRepository veiculoRepository,
-        IClienteRepository clienteRepository,
-        IValidator<CadastrarVeiculoRequest> validator,
-        IMapper mapper)
+    public CadastrarVeiculoUseCase(IVeiculoRepository veiculoRepository, IClienteRepository clienteRepository, IValidator<CadastrarVeiculoRequest> validator, IMapper mapper)
     {
         _veiculoRepository = veiculoRepository;
         _clienteRepository = clienteRepository;
@@ -28,9 +24,7 @@ public sealed class CadastrarVeiculoUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<VeiculoResponse>> ExecuteAsync(
-        CadastrarVeiculoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<VeiculoResponse>> ExecuteAsync(CadastrarVeiculoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 

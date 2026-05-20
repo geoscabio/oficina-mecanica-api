@@ -10,31 +10,22 @@ internal static class ServicoCatalogoSeedData
     private static readonly ServicoSeed ServicoAlinhamento = new("Alinhamento", 180m);
     private static readonly ServicoSeed ServicoDiagnostico = new("Diagnostico tecnico", 150m);
 
-    public static Task<ServicoCatalogo> ObterOuCriarTrocaOleoAsync(
-        OficinaMecanicaDbContext dbContext,
-        CancellationToken cancellationToken)
+    public static Task<ServicoCatalogo> ObterOuCriarTrocaOleoAsync(OficinaMecanicaDbContext dbContext, CancellationToken cancellationToken)
     {
         return ObterOuCriarAsync(dbContext, ServicoTrocaOleo, cancellationToken);
     }
 
-    public static Task<ServicoCatalogo> ObterOuCriarAlinhamentoAsync(
-        OficinaMecanicaDbContext dbContext,
-        CancellationToken cancellationToken)
+    public static Task<ServicoCatalogo> ObterOuCriarAlinhamentoAsync(OficinaMecanicaDbContext dbContext, CancellationToken cancellationToken)
     {
         return ObterOuCriarAsync(dbContext, ServicoAlinhamento, cancellationToken);
     }
 
-    public static Task<ServicoCatalogo> ObterOuCriarDiagnosticoAsync(
-        OficinaMecanicaDbContext dbContext,
-        CancellationToken cancellationToken)
+    public static Task<ServicoCatalogo> ObterOuCriarDiagnosticoAsync(OficinaMecanicaDbContext dbContext, CancellationToken cancellationToken)
     {
         return ObterOuCriarAsync(dbContext, ServicoDiagnostico, cancellationToken);
     }
 
-    private static async Task<ServicoCatalogo> ObterOuCriarAsync(
-        OficinaMecanicaDbContext dbContext,
-        ServicoSeed seed,
-        CancellationToken cancellationToken)
+    private static async Task<ServicoCatalogo> ObterOuCriarAsync(OficinaMecanicaDbContext dbContext, ServicoSeed seed, CancellationToken cancellationToken)
     {
         var servicoExistente = await dbContext.ServicosCatalogo
             .SingleOrDefaultAsync(servico => servico.Descricao == seed.Descricao, cancellationToken);

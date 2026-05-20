@@ -1,0 +1,9 @@
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# Preserve compact code when signatures, calls, and simple blocks are intentionally kept on one line.
+csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_statements = true

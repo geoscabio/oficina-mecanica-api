@@ -1,5 +1,3 @@
 namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.DefinirServicos;
 
-public sealed record DefinirServicosRequest(
-    Guid OrdemServicoId,
-    IReadOnlyCollection<Guid> ServicosCatalogoIds);
+public sealed record DefinirServicosRequest(Guid OrdemServicoId, IReadOnlyCollection<Guid> ServicosCatalogoIds);

@@ -13,38 +13,27 @@ public sealed class AtualizarServicoCatalogoUseCase
     private readonly IValidator<AtualizarServicoCatalogoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public AtualizarServicoCatalogoUseCase(
-        IServicoCatalogoRepository servicoCatalogoRepository,
-        IValidator<AtualizarServicoCatalogoRequest> validator,
-        IMapper mapper)
+    public AtualizarServicoCatalogoUseCase(IServicoCatalogoRepository servicoCatalogoRepository, IValidator<AtualizarServicoCatalogoRequest> validator, IMapper mapper)
     {
         _servicoCatalogoRepository = servicoCatalogoRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<ServicoCatalogoResponse>> ExecuteAsync(
-        AtualizarServicoCatalogoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<ServicoCatalogoResponse>> ExecuteAsync(AtualizarServicoCatalogoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<ServicoCatalogoResponse>.Falha(
-                validationResult.ObterMensagensErro(),
-                TipoErro.Validacao);
+            return Result<ServicoCatalogoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
-        var servicoCatalogo = await _servicoCatalogoRepository.ObterPorIdAsync(
-            request.ServicoCatalogoId,
-            cancellationToken);
+        var servicoCatalogo = await _servicoCatalogoRepository.ObterPorIdAsync(request.ServicoCatalogoId, cancellationToken);
 
         if (servicoCatalogo is null)
         {
-            return Result<ServicoCatalogoResponse>.Falha(
-                ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado,
-                TipoErro.NaoEncontrado);
+            return Result<ServicoCatalogoResponse>.Falha(ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         servicoCatalogo.Atualizar(request.Descricao, request.Valor);

@@ -12,40 +12,26 @@ public sealed class ListarOrdensServicoUseCase
     private readonly IValidator<ListarOrdensServicoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public ListarOrdensServicoUseCase(
-        IOrdemServicoRepository ordemServicoRepository,
-        IValidator<ListarOrdensServicoRequest> validator,
-        IMapper mapper)
+    public ListarOrdensServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IValidator<ListarOrdensServicoRequest> validator, IMapper mapper)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<PagedResult<OrdemServicoResponse>>> ExecuteAsync(
-        ListarOrdensServicoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<PagedResult<OrdemServicoResponse>>> ExecuteAsync(ListarOrdensServicoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<PagedResult<OrdemServicoResponse>>.Falha(
-                validationResult.ObterMensagensErro(),
-                TipoErro.Validacao);
+            return Result<PagedResult<OrdemServicoResponse>>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
-        var ordensServico = await _ordemServicoRepository.ListarAsync(
-            request.Pagina,
-            request.TamanhoPagina,
-            cancellationToken);
+        var ordensServico = await _ordemServicoRepository.ListarAsync(request.Pagina, request.TamanhoPagina, cancellationToken);
         var totalItens = await _ordemServicoRepository.ContarAsync(cancellationToken);
         var response = _mapper.Map<IReadOnlyCollection<OrdemServicoResponse>>(ordensServico);
-        var pagedResult = new PagedResult<OrdemServicoResponse>(
-            response,
-            request.Pagina,
-            request.TamanhoPagina,
-            totalItens);
+        var pagedResult = new PagedResult<OrdemServicoResponse>(response, request.Pagina, request.TamanhoPagina, totalItens);
 
         return Result<PagedResult<OrdemServicoResponse>>.Ok(pagedResult);
     }

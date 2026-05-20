@@ -13,19 +13,14 @@ public sealed class ConsultarVeiculoUseCase
     private readonly IValidator<ConsultarVeiculoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public ConsultarVeiculoUseCase(
-        IVeiculoRepository veiculoRepository,
-        IValidator<ConsultarVeiculoRequest> validator,
-        IMapper mapper)
+    public ConsultarVeiculoUseCase(IVeiculoRepository veiculoRepository, IValidator<ConsultarVeiculoRequest> validator, IMapper mapper)
     {
         _veiculoRepository = veiculoRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<VeiculoResponse>> ExecuteAsync(
-        ConsultarVeiculoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<VeiculoResponse>> ExecuteAsync(ConsultarVeiculoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 

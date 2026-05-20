@@ -15,24 +15,15 @@ namespace OficinaMecanica.API.GestaoEstoque.Controllers;
 public sealed class EstoqueController : ControllerBase
 {
     [HttpPost("registrar-entrada")]
-    public async Task<IActionResult> RegistrarEntrada(
-        [FromServices] RegistrarEntradaEstoqueUseCase useCase,
-        [FromBody] RegistrarEntradaEstoqueRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> RegistrarEntrada([FromServices] RegistrarEntradaEstoqueUseCase useCase, [FromBody] RegistrarEntradaEstoqueRequest request, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
-        return this.ToCreatedAtActionResult(
-            result,
-            nameof(ConsultarItem),
-            itemEstoque => new { itemEstoqueId = itemEstoque.Id });
+        return this.ToCreatedAtActionResult(result, nameof(ConsultarItem), itemEstoque => new { itemEstoqueId = itemEstoque.Id });
     }
 
     [HttpGet("consultar-item/{itemEstoqueId:guid}")]
-    public async Task<IActionResult> ConsultarItem(
-        [FromServices] ConsultarItemEstoqueUseCase useCase,
-        Guid itemEstoqueId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ConsultarItem([FromServices] ConsultarItemEstoqueUseCase useCase, Guid itemEstoqueId, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(new ConsultarItemEstoqueRequest(itemEstoqueId), cancellationToken);
 
@@ -40,11 +31,7 @@ public sealed class EstoqueController : ControllerBase
     }
 
     [HttpGet("listar-itens")]
-    public async Task<IActionResult> ListarItens(
-        [FromServices] ListarItensEstoqueUseCase useCase,
-        [FromQuery] int pagina = 1,
-        [FromQuery] int tamanhoPagina = 10,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ListarItens([FromServices] ListarItensEstoqueUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
     {
         var result = await useCase.ExecuteAsync(new ListarItensEstoqueRequest(pagina, tamanhoPagina), cancellationToken);
 
@@ -52,15 +39,9 @@ public sealed class EstoqueController : ControllerBase
     }
 
     [HttpPut("{pecaInsumoCatalogoId:guid}/atualizar-quantidade-disponivel")]
-    public async Task<IActionResult> AtualizarQuantidadeDisponivel(
-        [FromServices] AtualizarEstoqueUseCase useCase,
-        Guid pecaInsumoCatalogoId,
-        [FromBody] AtualizarEstoqueRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> AtualizarQuantidadeDisponivel([FromServices] AtualizarEstoqueUseCase useCase, Guid pecaInsumoCatalogoId, [FromBody] AtualizarEstoqueRequest request, CancellationToken cancellationToken)
     {
-        var result = await useCase.ExecuteAsync(
-            request with { PecaInsumoCatalogoId = pecaInsumoCatalogoId },
-            cancellationToken);
+        var result = await useCase.ExecuteAsync(request with { PecaInsumoCatalogoId = pecaInsumoCatalogoId }, cancellationToken);
 
         return this.ToActionResult(result);
     }

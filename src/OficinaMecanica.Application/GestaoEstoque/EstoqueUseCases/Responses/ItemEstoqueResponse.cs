@@ -1,7 +1,3 @@
-﻿namespace OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.Responses;
+namespace OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.Responses;
 
-public sealed record ItemEstoqueResponse(
-    Guid Id,
-    Guid PecaInsumoCatalogoId,
-    int QuantidadeDisponivel,
-    int QuantidadeReservada);
+public sealed record ItemEstoqueResponse(Guid Id, Guid PecaInsumoCatalogoId, int QuantidadeDisponivel, int QuantidadeReservada);

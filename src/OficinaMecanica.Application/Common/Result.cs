@@ -33,9 +33,6 @@ public sealed class Result<T>
         var mensagemPrincipal = mensagensNormalizadas.FirstOrDefault()
             ?? ValidationErrorMessages.RequestInvalido;
 
-        return new Result<T>(
-            false,
-            default!,
-            new ErrorResponse(mensagemPrincipal, tipo, mensagensNormalizadas));
+        return new Result<T>(false, default!, new ErrorResponse(mensagemPrincipal, tipo, mensagensNormalizadas));
     }
 }

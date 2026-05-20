@@ -12,9 +12,7 @@ public sealed class UnitOfWork : IUnitOfWork
         _dbContext = dbContext;
     }
 
-    public async Task ExecutarEmTransacaoAsync(
-        Func<CancellationToken, Task> operacao,
-        CancellationToken cancellationToken = default)
+    public async Task ExecutarEmTransacaoAsync(Func<CancellationToken, Task> operacao, CancellationToken cancellationToken = default)
     {
         var strategy = _dbContext.Database.CreateExecutionStrategy();
 

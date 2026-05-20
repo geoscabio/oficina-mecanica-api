@@ -24,18 +24,8 @@ internal sealed class AuthorizeOperationFilter : IOperationFilter
         }
 
         operation.Responses ??= [];
-        operation.Responses.TryAdd(
-            StatusCodes.Status401Unauthorized.ToString(),
-            OpenApiErrorResponseFactory.Create(
-                context,
-                ApiResponseMessages.NaoAutorizado,
-                TipoErro.NaoAutorizado));
-        operation.Responses.TryAdd(
-            TipoErro.AcessoProibido.ToHttpStatusCode().ToString(),
-            OpenApiErrorResponseFactory.Create(
-                context,
-                ApiResponseMessages.AcessoProibido,
-                TipoErro.AcessoProibido));
+        operation.Responses.TryAdd(StatusCodes.Status401Unauthorized.ToString(), OpenApiErrorResponseFactory.Create(context, ApiResponseMessages.NaoAutorizado, TipoErro.NaoAutorizado));
+        operation.Responses.TryAdd(TipoErro.AcessoProibido.ToHttpStatusCode().ToString(), OpenApiErrorResponseFactory.Create(context, ApiResponseMessages.AcessoProibido, TipoErro.AcessoProibido));
 
         operation.Security ??= [];
         operation.Security.Add(

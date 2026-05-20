@@ -10,9 +10,7 @@ namespace OficinaMecanica.API.Extensions.Security;
 
 public static class JwtAuthenticationExtensions
 {
-    public static IServiceCollection AddJwtAuthentication(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtOptions = new JwtOptions
         {
@@ -51,15 +49,13 @@ public static class JwtAuthenticationExtensions
                         context.HandleResponse();
                         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
-                        return context.Response.WriteApiErrorResponseAsJsonAsync(
-                            new ErrorResponse(ApiResponseMessages.NaoAutorizado, TipoErro.NaoAutorizado));
+                        return context.Response.WriteApiErrorResponseAsJsonAsync(new ErrorResponse(ApiResponseMessages.NaoAutorizado, TipoErro.NaoAutorizado));
                     },
                     OnForbidden = context =>
                     {
                         context.Response.StatusCode = StatusCodes.Status403Forbidden;
 
-                        return context.Response.WriteApiErrorResponseAsJsonAsync(
-                            new ErrorResponse(ApiResponseMessages.AcessoProibido, TipoErro.AcessoProibido));
+                        return context.Response.WriteApiErrorResponseAsJsonAsync(new ErrorResponse(ApiResponseMessages.AcessoProibido, TipoErro.AcessoProibido));
                     }
                 };
             });

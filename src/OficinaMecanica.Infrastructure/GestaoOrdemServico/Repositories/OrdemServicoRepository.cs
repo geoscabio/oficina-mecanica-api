@@ -45,10 +45,7 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
         return (ultimoNumero ?? 0) + 1;
     }
 
-    public async Task<IReadOnlyCollection<OrdemServico>> ListarAsync(
-        int pagina,
-        int tamanhoPagina,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<OrdemServico>> ListarAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
     {
         return await _dbContext.OrdensServico
             .AsNoTracking()
@@ -66,24 +63,18 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
         return _dbContext.OrdensServico.CountAsync(cancellationToken);
     }
 
-    public Task<double?> ObterTempoMedioExecucaoServicoAsync(
-        Guid servicoCatalogoId,
-        CancellationToken cancellationToken = default)
+    public Task<double?> ObterTempoMedioExecucaoServicoAsync(Guid servicoCatalogoId, CancellationToken cancellationToken = default)
     {
         return _dbContext.Set<Servico>()
             .Where(servico => servico.ServicoCatalogoId == servicoCatalogoId
                 && servico.Status == StatusServico.Finalizado
                 && servico.DataInicio.HasValue
                 && servico.DataFim.HasValue)
-            .Select(servico => (double?)EF.Functions.DateDiffMinute(
-                servico.DataInicio!.Value,
-                servico.DataFim!.Value))
+            .Select(servico => (double?)EF.Functions.DateDiffMinute(servico.DataInicio!.Value, servico.DataFim!.Value))
             .AverageAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyDictionary<Guid, double>> ListarTemposMediosExecucaoServicosAsync(
-        IReadOnlyCollection<Guid> servicosCatalogoIds,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyDictionary<Guid, double>> ListarTemposMediosExecucaoServicosAsync(IReadOnlyCollection<Guid> servicosCatalogoIds, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Set<Servico>()
             .Where(servico => servicosCatalogoIds.Contains(servico.ServicoCatalogoId)
@@ -94,15 +85,10 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
             .Select(grupo => new
             {
                 ServicoCatalogoId = grupo.Key,
-                TempoMedio = grupo.Average(servico => (double?)EF.Functions.DateDiffMinute(
-                    servico.DataInicio!.Value,
-                    servico.DataFim!.Value))
+                TempoMedio = grupo.Average(servico => (double?)EF.Functions.DateDiffMinute(servico.DataInicio!.Value, servico.DataFim!.Value))
             })
             .Where(item => item.TempoMedio.HasValue)
-            .ToDictionaryAsync(
-                item => item.ServicoCatalogoId,
-                item => item.TempoMedio!.Value,
-                cancellationToken);
+            .ToDictionaryAsync(item => item.ServicoCatalogoId, item => item.TempoMedio!.Value, cancellationToken);
     }
 }
 
