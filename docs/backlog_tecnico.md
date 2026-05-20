@@ -11,6 +11,8 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | DT-021 | Auto-skip de testes de integracao quando Docker nao estiver acessivel | Nao existia | Corrigido | `RequiresDockerFactAttribute` aplicado nos testes que dependem de container |
 | DT-023 | Remover metodos orfaos de `IEstoqueRepository` | Nao existia | Corrigido | `ObterItemPorPecaInsumoCatalogoIdAsync` e `AtualizarItemAsync` removidos de interface/repositorio/testes |
 | DT-022 | Dotnet test da solution falha sem Docker | Nao existia | Corrigido | Testes de integracao dependentes de Docker agora sao ignorados quando Docker nao estiver acessivel |
+| DT-015 | Auditoria de vulnerabilidade NuGet | Pendente | Corrigido | Evidencia registrada em `docs/evidencias/auditoria_nuget_vulnerabilidades.md` |
+| DT-024 | Evitar alteracoes diretas na `develop` | Pendente | Corrigido | Fluxo Git formalizado neste documento |
 
 ## Status Atual Dos Itens Pendentes
 
@@ -20,13 +22,11 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | DT-012 | P2 | UX/API | Retornar apenas primeiro erro de validacao | Pendente | 48 ocorrencias de `validationResult.Errors.First().ErrorMessage` | Evoluir contrato para lista de erros e atualizar testes/Swagger |
 | DT-013 | P2 | DevEx | Padronizar formatacao global | Pendente | Estilos de codigo ainda heterogeneos entre modulos | Rodar formatacao automatica e revisar diff por camada |
 | DT-014 | P2 | Qualidade | Relatorio Sonar/cobertura | Pendente | Sem evidencia versionada de analise estatica/cobertura | Gerar relatorio e anexar evidencias |
-| DT-015 | P2 | Seguranca | Auditoria de vulnerabilidade NuGet | Pendente | Sem evidencia versionada da varredura | Rodar `dotnet list package --vulnerable --include-transitive` |
 | DT-016 | P2 | Seguranca | Analise OWASP ZAP | Pendente | Sem relatorio de runtime | Rodar ZAP na API local e anexar saida |
 | DT-017 | P2 | Observabilidade | Logging estruturado | Pendente | Logs ainda focados em startup/seed/migrations | Definir layout de logs e correlacao de requisicoes |
 | DT-018 | P3 | Identidade | Login demo com senha em texto puro | Pendente | Modelo atual e academico | Evoluir para hash + provider de identidade em fase pos-MVP |
 | DT-019 | P3 | API | Response de autenticacao pode ser simplificado | Pendente | Retorna token + login + perfil | Reavaliar apos MVP e compatibilidade de clientes |
 | DT-020 | P3 | DDD/Escala | `Estoque` como aggregate unico global | Pendente | Modelo atual atende MVP | Reavaliar modelagem quando volume/carga aumentar |
-| DT-024 | P2 | DevEx/Git | Evitar alteracoes diretas na `develop` | Pendente | Fluxo foi quebrado pontualmente neste ciclo | Formalizar fluxo: branch por tarefa + commit convencional + PR obrigatorio |
 
 ## Itens Ja Corrigidos (Resumo)
 
@@ -40,6 +40,17 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 - DT-008 Construtor privado EF em `ServicoCatalogo` (corrigido)
 - DT-009 Desacoplamento de `EnderecoRequest` (corrigido)
 - DT-010 `PerfisAcesso` movido para Application (corrigido)
+- DT-015 Auditoria de vulnerabilidade NuGet sem pacotes vulneraveis encontrados (corrigido)
+- DT-024 Fluxo Git formalizado com branch por tarefa, commits convencionais e PR (corrigido)
+
+## Fluxo Git Do Projeto
+
+- Toda correcao deve sair de uma branch de trabalho criada a partir da base combinada.
+- Nao fazer commits diretamente na `develop`.
+- Usar commits convencionais no formato `<type>(scope): <description>`.
+- Separar commits por intencao tecnica quando houver mudancas de naturezas diferentes.
+- Antes de push ou PR, rodar ao menos `dotnet build --nologo` e os testes aplicaveis.
+- Abrir PR para revisao e merge, mantendo a `develop` como linha de integracao.
 
 ## Observacao Operacional
 
