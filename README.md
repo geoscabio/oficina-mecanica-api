@@ -14,10 +14,11 @@ Projeto desenvolvido para o **Tech Challenge da Pós Tech FIAP - Arquitetura de 
 - [Tecnologias](#-tecnologias)
 - [Estrutura do repositório](#-estrutura-do-repositório)
 - [Como executar localmente](#-como-executar-localmente)
-- [Como acessar o banco pelo SSMS](#-como-acessar-o-banco-pelo-ssms)
+- [Como acessar o banco local](#-como-acessar-o-banco-local)
 - [Autenticação](#-autenticação)
 - [Como testar a API](#-como-testar-a-api)
 - [Testes automatizados](#-testes-automatizados)
+- [Qualidade e evidências](#qualidade-e-evidências)
 - [Banco de dados e seed](#-banco-de-dados-e-seed)
 - [Documentação complementar](#-documentação-complementar)
 - [Observações acadêmicas](#-observações-acadêmicas)
@@ -48,8 +49,7 @@ O sistema permite que diferentes perfis interajam com o fluxo da oficina:
 | **Atendimento** | Cadastro e consulta de clientes e veículos |
 | **Administrativo** | Cadastro de mecânicos, serviços do catálogo e peças/insumos |
 | **Gestão de Estoque** | Entrada, consulta, reserva, baixa e estorno de itens |
-| **Gestão de OS** | Abertura, diagnóstico, orçamento, aprovação, execução, finalização, entrega e cancelamento |
-| **Indicadores** | Consulta de tempo médio de execução dos serviços |
+| **Gestão de Ordem de Serviço** | Abertura, diagnóstico, orçamento, aprovação, execução, finalização, entrega, cancelamento, acompanhamento de status e consulta de tempo médio de execução dos serviços |
 
 ### Fluxo principal atendido
 
@@ -103,11 +103,12 @@ A ideia principal é manter o domínio protegido de detalhes externos, como HTTP
 | Linguagem e plataforma | C#, .NET 10, ASP.NET Core Web API |
 | Banco de dados | SQL Server 2022 |
 | ORM | Entity Framework Core |
-| Documentação da API | Swagger e Postman |
-| Segurança | JWT Bearer Authentication e Authorization |
-| Validação e mapeamento | FluentValidation e AutoMapper |
-| Testes | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
-| Execução local | Docker e Docker Compose |
+| Documentacao da API | Swagger/OpenAPI com Swashbuckle |
+| Seguranca | JWT Bearer, autorizacao por perfis e headers HTTP de seguranca |
+| Validacao e mapeamento | FluentValidation e AutoMapper |
+| Testes automatizados | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
+| Qualidade e evidencias | SonarQube, OWASP ZAP e `dotnet format` |
+| Execucao local | Docker, Docker Compose e .NET SDK |
 
 ---
 
@@ -142,13 +143,13 @@ O fluxo recomendado para avaliação é executar a API e o banco de dados com **
 | --- | --- | --- | --- |
 | Docker Desktop | Sim | Sim, para testes integrados | Necessário para subir API, SQL Server e containers de teste |
 | .NET SDK 10 | Não | Sim | Necessário para `dotnet build`, `dotnet test`, EF Core e SonarScanner |
-| SQL Server Management Studio | Opcional | Opcional | Usado apenas para visualizar o banco localmente |
+| Cliente SQL | Opcional | Opcional | SSMS no Windows, ou Azure Data Studio, DBeaver e `sqlcmd` no Linux/macOS |
 | Porta `5093` livre | Sim | Não | Porta da API |
 | Porta `14333` livre | Sim | Não | Porta local do SQL Server |
 
 ### 1. Subir API e banco
 
-Na raiz do repositório, execute um dos comandos abaixo. O comando cria o arquivo `.env` para você a partir do `.env.example`; não é necessário criar o arquivo manualmente.
+Na raiz do repositório, execute um dos comandos abaixo conforme seu sistema operacional. O comando cria o arquivo `.env` para você a partir do `.env.example`; não é necessário criar o arquivo manualmente.
 
 Windows PowerShell:
 
@@ -156,7 +157,7 @@ Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-Bash, Git Bash, macOS ou Linux:
+Bash, macOS ou Linux:
 
 ```bash
 cp .env.example .env
@@ -164,9 +165,9 @@ cp .env.example .env
 
 O Docker Compose lê o arquivo `.env` automaticamente. Não é necessário criar o arquivo na mão. Se quiser trocar a senha do SQL Server ou o segredo JWT, edite os valores do `.env` antes de subir os containers.
 
-Depois execute:
+Depois execute. Este comando é igual no Windows, macOS e Linux:
 
-```powershell
+```bash
 docker compose up --build
 ```
 
@@ -196,7 +197,9 @@ Ao iniciar, a aplicação:
 
 ---
 
-## 🗄️ Como acessar o banco pelo SSMS
+## 🗄️ Como acessar o banco local
+
+### Windows com SSMS
 
 Com os containers em execução, abra o **SQL Server Management Studio** e preencha a janela **Connect to Server** assim:
 
@@ -215,6 +218,24 @@ Depois de conectar:
 2. Expanda **Databases**.
 3. Selecione o banco **OficinaMecanicaDb**.
 4. Expanda **Tables** para visualizar as tabelas criadas pelas migrations.
+
+### Linux, macOS ou alternativa ao SSMS
+
+Se não estiver no Windows, pode usar **Azure Data Studio**, **DBeaver** ou `sqlcmd` com os mesmos dados de conexão:
+
+| Campo | Valor |
+| --- | --- |
+| Host | `localhost` |
+| Porta | `14333` |
+| Usuario | `sa` |
+| Senha | Valor definido em `OFICINA_SQL_SA_PASSWORD` no arquivo `.env` |
+| Banco | `OficinaMecanicaDb` |
+
+Exemplo com `sqlcmd`:
+
+```bash
+sqlcmd -S localhost,14333 -U sa -P "<valor-de-OFICINA_SQL_SA_PASSWORD-no-.env>" -C -Q "SELECT name FROM sys.databases"
+```
 
 ---
 
@@ -296,16 +317,8 @@ O projeto possui testes para domínio, aplicação e API integrada.
 
 Para rodar todos os testes:
 
-```powershell
+```bash
 dotnet test
-```
-
-Para rodar por projeto:
-
-```powershell
-dotnet test tests\OficinaMecanica.Domain.UnitTests\OficinaMecanica.Domain.UnitTests.csproj
-dotnet test tests\OficinaMecanica.Application.UnitTests\OficinaMecanica.Application.UnitTests.csproj
-dotnet test tests\OficinaMecanica.API.IntegrationTests\OficinaMecanica.API.IntegrationTests.csproj
 ```
 
 Os testes integrados usam **Testcontainers** para subir um SQL Server temporário. Quando o Docker Desktop está em execução, eles rodam normalmente com `dotnet test`.
@@ -314,91 +327,35 @@ Se o Docker não estiver acessível no ambiente local, os testes integrados que 
 
 Para pular intencionalmente os testes que dependem de Docker em uma execução local:
 
+Windows PowerShell:
+
 ```powershell
 $env:OFICINA_SKIP_DOCKER_TESTS = "true"
 dotnet test
 Remove-Item Env:OFICINA_SKIP_DOCKER_TESTS
 ```
 
+Bash, macOS ou Linux:
+
+```bash
+export OFICINA_SKIP_DOCKER_TESTS=true
+dotnet test
+unset OFICINA_SKIP_DOCKER_TESTS
+```
+
 ---
 
-## Qualidade Com SonarQube
+## Qualidade e evidências
 
-O SonarQube roda separado da API. Ele serve para gerar as evidências de qualidade exigidas no Tech Challenge: Quality Gate, bugs, vulnerabilidades, security hotspots, code smells, cobertura e duplicação.
+Além dos testes automatizados, o projeto foi validado com evidências de cobertura, qualidade estática e análise dinâmica de segurança.
 
-### 1. Subir o SonarQube
+| Evidência | Ferramenta | Resultado validado |
+| --- | --- | --- |
+| Build e testes | `dotnet build`, `dotnet test` e Coverlet | Compilação sem erros e suíte automatizada aprovada |
+| Qualidade estática | SonarQube | Quality Gate aprovado, sem bugs, vulnerabilidades, security hotspots ou code smells abertos |
+| Segurança dinâmica | OWASP ZAP Baseline | Nenhuma falha crítica bloqueante; warnings residuais documentados como limitação do MVP |
 
-Se o container já existir:
-
-```powershell
-docker start oficina-sonarqube
-```
-
-Se ainda não existir:
-
-```powershell
-docker run -d --name oficina-sonarqube -p 9000:9000 sonarqube:community
-```
-
-Acesse:
-
-```text
-http://localhost:9000
-```
-
-No primeiro acesso, use `admin` / `admin`. O SonarQube pode pedir a troca da senha inicial. Depois disso, crie um token em **My Account > Security**.
-
-### 2. Rodar a análise
-
-No PowerShell, defina o token apenas em variável de ambiente:
-
-```powershell
-$env:SONAR_TOKEN = "cole-o-token-aqui"
-```
-
-Instale o scanner, se ainda não estiver instalado:
-
-```powershell
-dotnet tool install --global dotnet-sonarscanner
-```
-
-Execute a análise com cobertura:
-
-```powershell
-dotnet sonarscanner begin `
-  /k:"oficina-mecanica-api" `
-  /n:"Oficina Mecanica API" `
-  /d:sonar.host.url="http://localhost:9000" `
-  /d:sonar.token="$env:SONAR_TOKEN" `
-  /d:sonar.cs.opencover.reportsPaths="TestResults/SonarCoverage/**/coverage.opencover.xml" `
-  /d:sonar.exclusions="**/Migrations/**,**/bin/**,**/obj/**,docs/evidencias/**" `
-  /d:sonar.coverage.exclusions="**/Migrations/**"
-
-dotnet build --nologo
-
-dotnet test --nologo --no-build `
-  --settings tests\sonarqube.runsettings `
-  --collect:"XPlat Code Coverage" `
-  --results-directory TestResults\SonarCoverage
-
-dotnet sonarscanner end /d:sonar.token="$env:SONAR_TOKEN"
-```
-
-### 3. Acessar o dashboard e gerar PDF
-
-Depois da análise, acesse:
-
-```text
-http://localhost:9000/dashboard?id=oficina-mecanica-api
-```
-
-Use `Ctrl + P` no navegador e selecione **Salvar como PDF** para anexar a evidência na entrega.
-
-A pasta `docs/evidencias/**` fica fora da análise porque contém relatórios gerados para entrega, como HTML do OWASP ZAP e PDF do SonarQube. Esses arquivos são evidência, não código-fonte da API.
-
-A evidência local da última análise registrada está em `docs/evidencias/sonarqube_analise_2026-05-20.md`.
-
-Essa pasta é ignorada pelo Git para manter o repositório enxuto. Use os arquivos de `docs/evidencias/` apenas como anexos locais da entrega.
+Os relatórios gerados serão enviados junto ao PDF de entrega exigido no Tech Challenge.
 
 ---
 
