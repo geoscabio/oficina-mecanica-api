@@ -27,17 +27,21 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | DT-011 | Enums em `SCREAMING_CASE` | Pendente | Corrigido | `StatusOrdemServico` e `StatusServico` renomeados para PascalCase |
 | DT-013 | Padronizar formatacao global | Pendente | Corrigido | Quebras compactadas em `src` e `tests`; `.editorconfig` adicionado; `dotnet format` passou |
 | DT-040 | Consolidar backlog final de entrega | Nao existia | Corrigido | Itens P0/P1/P2 do consolidado final adicionados com IDs rastreaveis |
+| DT-014 | Evidencia SonarQube | Pendente | Em andamento | Analise publicada em SonarQube local; metricas registradas em `docs/evidencias/sonarqube_analise_2026-05-20.md`; falta exportar PDF do dashboard |
+| DT-025 | README com `.env` multiplataforma | Pendente | Corrigido | README mostra `Copy-Item .env.example .env` e `cp .env.example .env` |
+| DT-026 | README diferenciando Docker de .NET SDK local | Pendente | Corrigido | Pre-requisitos separados por fluxo Docker Compose e build/testes locais |
+| DT-029 | Arquivos locais/snapshot fora do versionamento | Pendente | Corrigido | `git ls-files .vs "*.csproj.user" "*snapshot*" "Contexto para IA.zip"` sem retorno |
 
 ## P0 - Obrigatorio Antes Da Entrega
 
 | ID | Origem | Item | Status | Evidencia atual | Proxima acao |
 | --- | --- | --- | --- | --- | --- |
-| DT-014 | Tech Challenge / Backlog | Gerar evidencia SonarQube com Quality Gate, bugs, vulnerabilities, security hotspots, code smells, coverage e duplications | Pendente | Sem evidencia SonarQube versionada/anexada | Subir SonarQube, rodar scanner .NET, acessar dashboard e gerar evidencias PDF |
-| DT-025 | Review final | README com criacao de `.env` multiplataforma | Pendente | README priorizou Windows PowerShell | Adicionar `Copy-Item .env.example .env` e `cp .env.example .env` |
-| DT-026 | Review final | README diferenciando Docker de .NET SDK local | Pendente | Pre-requisitos podem sugerir SDK obrigatorio para qualquer fluxo | Explicar que Docker basta para `docker compose up --build`; SDK e necessario para build/test/tools locais |
+| DT-014 | Tech Challenge / Backlog | Gerar evidencia SonarQube com Quality Gate, bugs, vulnerabilities, security hotspots, code smells, coverage e duplications | Em andamento | Dashboard local gerado; Quality Gate `OK`, bugs `0`, vulnerabilities `0`, hotspots `1`, code smells `17`, coverage `89.9%`, duplications `0.2%`; evidencia em `docs/evidencias/sonarqube_analise_2026-05-20.md` | Exportar o dashboard do SonarQube em PDF pelo navegador |
+| DT-025 | Review final | README com criacao de `.env` multiplataforma | Corrigido | README documenta PowerShell e Bash/Git Bash/macOS/Linux | Nenhuma |
+| DT-026 | Review final | README diferenciando Docker de .NET SDK local | Corrigido | README separa pre-requisitos de Docker Compose e build/testes locais | Nenhuma |
 | DT-027 | Review final | Revisar TODOs de entrega e documentacao | Pendente | Sem evidencia de revisao final dos TODOs visiveis | Buscar TODO/FIXME/Notion pendente e fechar/remover o que estiver obsoleto |
 | DT-028 | Review final | Evidencia final de execucao | Pendente | Ha historico de comandos no fluxo, mas falta evidencia consolidada de entrega | Registrar em `docs/evidencias` ou README: `dotnet test`, `docker compose up --build` e observacao sobre Docker nos integrados |
-| DT-029 | Auditoria final | Garantir que arquivos locais/snapshot nao estejam versionados | Pendente | `.gitignore` cobre `.vs/`, `.vscode/`, `*.user`, snapshots, mas falta evidencia final | Rodar `git ls-files` para `.vs`, `.csproj.user`, snapshots e registrar resultado |
+| DT-029 | Auditoria final | Garantir que arquivos locais/snapshot nao estejam versionados | Corrigido | `git ls-files .vs "*.csproj.user" "*snapshot*" "Contexto para IA.zip"` sem retorno; `.sonarqube/` tambem foi ignorado | Nenhuma |
 
 ## P1 - Correcoes Pequenas De Codigo Recomendadas
 
@@ -72,10 +76,10 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | Codigo | `DataInicio` nao-nullable | Pendente |
 | Codigo | `Endereco` com factory de Value Object | Pendente |
 | Codigo | `.AsSplitQuery()` em multiplos Includes de OS | Pendente |
-| Codigo | Nenhum `.vs/` ou `.csproj.user` versionado | Pendente |
+| Codigo | Nenhum `.vs/` ou `.csproj.user` versionado | Corrigido |
 | Codigo | ADR SQL Server alinhada com Docker/Testcontainers | Pendente |
-| Documentacao | README com `.env` para Windows e Mac/Linux | Pendente |
-| Documentacao | README explicando Docker vs .NET SDK local | Pendente |
+| Documentacao | README com `.env` para Windows e Mac/Linux | Corrigido |
+| Documentacao | README explicando Docker vs .NET SDK local | Corrigido |
 | Documentacao | README/evidencia com validacao final | Pendente |
 | Documentacao | Limitacoes MVP documentadas | Pendente |
 | Documentacao | Backlog tecnico atualizado | Corrigido |
@@ -83,7 +87,7 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | Validacao | `dotnet build --nologo` passou apos ajustes finais | Pendente |
 | Validacao | `dotnet test --nologo` passou apos ajustes finais | Pendente |
 | Validacao | `docker compose up --build` validado | Pendente |
-| Evidencias | SonarQube PDF para professor | Pendente |
+| Evidencias | SonarQube PDF para professor | Em andamento |
 | Evidencias | Auditoria NuGet | Corrigido |
 | Evidencias | Evidencia de testes/build/Docker | Pendente |
 
@@ -107,6 +111,9 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 - DT-022 `dotnet test` da solution nao falha sem Docker acessivel (corrigido)
 - DT-023 Metodos orfaos de `IEstoqueRepository` removidos (corrigido)
 - DT-024 Fluxo Git formalizado com branch por tarefa, commits convencionais e PR (corrigido)
+- DT-025 README com criacao de `.env` multiplataforma (corrigido)
+- DT-026 README diferenciando Docker Compose de .NET SDK local (corrigido)
+- DT-029 Arquivos locais e snapshots fora do versionamento (corrigido)
 - DC-003 `.env.example` criado e fluxo Docker documentado (corrigido)
 - DT-040 Backlog final de entrega consolidado com P0/P1/P2 rastreaveis (corrigido)
 

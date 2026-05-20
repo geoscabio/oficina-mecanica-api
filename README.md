@@ -138,20 +138,28 @@ O fluxo recomendado para avaliação é executar a API e o banco de dados com **
 
 ### Pré-requisitos
 
-| Item | Obrigatório? | Observação |
-| --- | --- | --- |
-| Docker Desktop | Sim | Necessário para subir API, SQL Server e testes integrados |
-| .NET SDK 10 | Sim | Necessário para executar os testes automatizados |
-| SQL Server Management Studio | Opcional | Usado apenas para visualizar o banco localmente |
-| Porta `5093` livre | Sim | Porta da API |
-| Porta `14333` livre | Sim | Porta local do SQL Server |
+| Item | Obrigatório para Docker Compose? | Obrigatório para build/testes locais? | Observação |
+| --- | --- | --- | --- |
+| Docker Desktop | Sim | Sim, para testes integrados | Necessário para subir API, SQL Server e containers de teste |
+| .NET SDK 10 | Não | Sim | Necessário para `dotnet build`, `dotnet test`, EF Core e SonarScanner |
+| SQL Server Management Studio | Opcional | Opcional | Usado apenas para visualizar o banco localmente |
+| Porta `5093` livre | Sim | Não | Porta da API |
+| Porta `14333` livre | Sim | Não | Porta local do SQL Server |
 
 ### 1. Subir API e banco
 
-Na raiz do repositório, execute o comando abaixo. Ele cria automaticamente o arquivo `.env` a partir do `.env.example`:
+Na raiz do repositório, execute um dos comandos abaixo. O comando cria o arquivo `.env` para você a partir do `.env.example`; não é necessário criar o arquivo manualmente.
+
+Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
+```
+
+Bash, Git Bash, macOS ou Linux:
+
+```bash
+cp .env.example .env
 ```
 
 O Docker Compose lê o arquivo `.env` automaticamente. Não é necessário criar o arquivo na mão. Se quiser trocar a senha do SQL Server ou o segredo JWT, edite os valores do `.env` antes de subir os containers.
@@ -311,6 +319,82 @@ $env:OFICINA_SKIP_DOCKER_TESTS = "true"
 dotnet test
 Remove-Item Env:OFICINA_SKIP_DOCKER_TESTS
 ```
+
+---
+
+## Qualidade Com SonarQube
+
+O SonarQube roda separado da API. Ele serve para gerar as evidências de qualidade exigidas no Tech Challenge: Quality Gate, bugs, vulnerabilidades, security hotspots, code smells, cobertura e duplicação.
+
+### 1. Subir o SonarQube
+
+Se o container já existir:
+
+```powershell
+docker start oficina-sonarqube
+```
+
+Se ainda não existir:
+
+```powershell
+docker run -d --name oficina-sonarqube -p 9000:9000 sonarqube:community
+```
+
+Acesse:
+
+```text
+http://localhost:9000
+```
+
+No primeiro acesso, use `admin` / `admin`. O SonarQube pode pedir a troca da senha inicial. Depois disso, crie um token em **My Account > Security**.
+
+### 2. Rodar a análise
+
+No PowerShell, defina o token apenas em variável de ambiente:
+
+```powershell
+$env:SONAR_TOKEN = "cole-o-token-aqui"
+```
+
+Instale o scanner, se ainda não estiver instalado:
+
+```powershell
+dotnet tool install --global dotnet-sonarscanner
+```
+
+Execute a análise com cobertura:
+
+```powershell
+dotnet sonarscanner begin `
+  /k:"oficina-mecanica-api" `
+  /n:"Oficina Mecanica API" `
+  /d:sonar.host.url="http://localhost:9000" `
+  /d:sonar.token="$env:SONAR_TOKEN" `
+  /d:sonar.cs.opencover.reportsPaths="TestResults/SonarCoverage/**/coverage.opencover.xml" `
+  /d:sonar.exclusions="**/Migrations/**,**/bin/**,**/obj/**" `
+  /d:sonar.coverage.exclusions="**/Migrations/**"
+
+dotnet build --nologo
+
+dotnet test --nologo --no-build `
+  --settings tests\sonarqube.runsettings `
+  --collect:"XPlat Code Coverage" `
+  --results-directory TestResults\SonarCoverage
+
+dotnet sonarscanner end /d:sonar.token="$env:SONAR_TOKEN"
+```
+
+### 3. Acessar o dashboard e gerar PDF
+
+Depois da análise, acesse:
+
+```text
+http://localhost:9000/dashboard?id=oficina-mecanica-api
+```
+
+Use `Ctrl + P` no navegador e selecione **Salvar como PDF** para anexar a evidência na entrega.
+
+A evidência local da última análise registrada está em `docs/evidencias/sonarqube_analise_2026-05-20.md`.
 
 ---
 
