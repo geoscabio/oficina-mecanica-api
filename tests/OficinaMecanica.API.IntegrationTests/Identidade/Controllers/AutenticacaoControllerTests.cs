@@ -1,8 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using FluentAssertions;
 using OficinaMecanica.API.IntegrationTests.Fixtures;
 using OficinaMecanica.API.IntegrationTests.Identidade.Builders;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Application.Identidade.ValidationMessages;
 
 namespace OficinaMecanica.API.IntegrationTests.Identidade.Controllers;
 
@@ -69,6 +72,10 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+
+        var erro = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+        ErroDeveSerNaoAutorizado(erro, IdentidadeValidationMessages.CredenciaisInvalidas);
     }
 
     [Fact]
@@ -82,6 +89,10 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+
+        var erro = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+        ErroDeveSerNaoAutorizado(erro, "Não autorizado.");
     }
 
     [Fact]
@@ -95,5 +106,15 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        var erro = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+        ErroDeveSerNaoAutorizado(erro, "Acesso proibido para o perfil informado.");
+    }
+
+    private static void ErroDeveSerNaoAutorizado(JsonElement erro, string mensagem)
+    {
+        erro.GetProperty("tipo").GetString().Should().Be(nameof(TipoErro.NaoAutorizado));
+        erro.GetProperty("mensagem").GetString().Should().Be(mensagem);
     }
 }

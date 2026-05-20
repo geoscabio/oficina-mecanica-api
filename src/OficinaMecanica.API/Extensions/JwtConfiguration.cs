@@ -1,8 +1,11 @@
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using OficinaMecanica.Application.Common;
 using OficinaMecanica.Infrastructure.Identidade.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -11,6 +14,12 @@ namespace OficinaMecanica.API.Extensions;
 public static class JwtConfiguration
 {
     private const string BearerScheme = "Bearer";
+    private const string MensagemNaoAutorizado = "Não autorizado.";
+    private const string MensagemAcessoProibido = "Acesso proibido para o perfil informado.";
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        Converters = { new JsonStringEnumConverter() }
+    };
 
     public static IServiceCollection AddJwtAuthentication(
         this IServiceCollection services,
@@ -44,6 +53,29 @@ public static class JwtConfiguration
                     IssuerSigningKey = signingKey,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromMinutes(2)
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+
+                        return context.Response.WriteAsJsonAsync(
+                            new ErrorResponse(MensagemNaoAutorizado, TipoErro.NaoAutorizado),
+                            JsonOptions);
+                    },
+                    OnForbidden = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        context.Response.ContentType = "application/json";
+
+                        return context.Response.WriteAsJsonAsync(
+                            new ErrorResponse(MensagemAcessoProibido, TipoErro.NaoAutorizado),
+                            JsonOptions);
+                    }
                 };
             });
 
@@ -88,7 +120,10 @@ public static class JwtConfiguration
             operation.Responses ??= [];
             operation.Responses.TryAdd(
                 StatusCodes.Status401Unauthorized.ToString(),
-                new OpenApiResponse { Description = "Nao autorizado" });
+                new OpenApiResponse { Description = MensagemNaoAutorizado });
+            operation.Responses.TryAdd(
+                StatusCodes.Status403Forbidden.ToString(),
+                new OpenApiResponse { Description = MensagemAcessoProibido });
 
             operation.Security ??= [];
             operation.Security.Add(
