@@ -37,7 +37,7 @@ public class FinalizarServicoUseCaseTests
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(ordemServico.Id);
-        ordemServico.Servicos.Single().Status.Should().Be(StatusServico.FINALIZADO);
+        ordemServico.Servicos.Single().Status.Should().Be(StatusServico.Finalizado);
 
         repository.Verify(
             repo => repo.ObterPorIdAsync(
@@ -50,7 +50,7 @@ public class FinalizarServicoUseCaseTests
                 It.Is<OrdemServico>(ordemServicoAtualizada =>
                     ordemServicoAtualizada.Id == ordemServico.Id
                     && ordemServicoAtualizada.Servicos.Single().Id == servicoId
-                    && ordemServicoAtualizada.Servicos.Single().Status == StatusServico.FINALIZADO),
+                    && ordemServicoAtualizada.Servicos.Single().Status == StatusServico.Finalizado),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

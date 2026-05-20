@@ -20,7 +20,7 @@ public sealed class OrdemServico
         Numero = numero;
         VeiculoId = veiculoId;
         MecanicoId = mecanicoId;
-        Status = StatusOrdemServico.RECEBIDA;
+        Status = StatusOrdemServico.Recebida;
         DataInicio = DateTime.UtcNow;
     }
 
@@ -58,14 +58,14 @@ public sealed class OrdemServico
 
     public void IniciarDiagnostico()
     {
-        ExigirStatus(StatusOrdemServico.RECEBIDA);
+        ExigirStatus(StatusOrdemServico.Recebida);
 
-        Status = StatusOrdemServico.EM_DIAGNOSTICO;
+        Status = StatusOrdemServico.EmDiagnostico;
     }
 
     public void DefinirServico(Guid servicoCatalogoId, decimal valor)
     {
-        ExigirStatus(StatusOrdemServico.EM_DIAGNOSTICO);
+        ExigirStatus(StatusOrdemServico.EmDiagnostico);
 
         _servicos.Add(Servico.Criar(servicoCatalogoId, valor));
         CalcularOrcamento();
@@ -73,7 +73,7 @@ public sealed class OrdemServico
 
     public void ReservarPecaInsumo(Guid pecaInsumoCatalogoId, int quantidade, decimal valorUnitario)
     {
-        ExigirStatus(StatusOrdemServico.EM_DIAGNOSTICO);
+        ExigirStatus(StatusOrdemServico.EmDiagnostico);
 
         _pecasInsumos.Add(PecaInsumo.Criar(pecaInsumoCatalogoId, quantidade, valorUnitario));
         CalcularOrcamento();
@@ -87,7 +87,7 @@ public sealed class OrdemServico
 
     public void AguardarAprovacao()
     {
-        ExigirStatus(StatusOrdemServico.EM_DIAGNOSTICO);
+        ExigirStatus(StatusOrdemServico.EmDiagnostico);
 
         if (_servicos.Count == 0)
         {
@@ -95,48 +95,48 @@ public sealed class OrdemServico
         }
 
         CalcularOrcamento();
-        Status = StatusOrdemServico.AGUARDANDO_APROVACAO;
+        Status = StatusOrdemServico.AguardandoAprovacao;
     }
 
     public void IniciarExecucao()
     {
-        ExigirStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
+        ExigirStatus(StatusOrdemServico.AguardandoAprovacao);
 
-        Status = StatusOrdemServico.EM_EXECUCAO;
+        Status = StatusOrdemServico.EmExecucao;
     }
 
     public void IniciarExecucaoServico(Guid servicoId)
     {
-        ExigirStatus(StatusOrdemServico.EM_EXECUCAO);
+        ExigirStatus(StatusOrdemServico.EmExecucao);
 
         ObterServico(servicoId).IniciarExecucao();
     }
 
     public void FinalizarServico(Guid servicoId)
     {
-        ExigirStatus(StatusOrdemServico.EM_EXECUCAO);
+        ExigirStatus(StatusOrdemServico.EmExecucao);
 
         ObterServico(servicoId).Finalizar();
     }
 
     public void Finalizar()
     {
-        ExigirStatus(StatusOrdemServico.EM_EXECUCAO);
+        ExigirStatus(StatusOrdemServico.EmExecucao);
 
-        if (_servicos.Count == 0 || _servicos.Any(servico => servico.Status != StatusServico.FINALIZADO))
+        if (_servicos.Count == 0 || _servicos.Any(servico => servico.Status != StatusServico.Finalizado))
         {
             throw new DomainException(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
         }
 
-        Status = StatusOrdemServico.FINALIZADA;
+        Status = StatusOrdemServico.Finalizada;
         DataFim = DateTime.UtcNow;
     }
 
     public void Entregar()
     {
-        ExigirStatus(StatusOrdemServico.FINALIZADA);
+        ExigirStatus(StatusOrdemServico.Finalizada);
 
-        Status = StatusOrdemServico.ENTREGUE;
+        Status = StatusOrdemServico.Entregue;
     }
 
     public void Cancelar(MotivoCancelamentoOrdemServico motivo)
@@ -146,12 +146,12 @@ public sealed class OrdemServico
             throw new DomainException(OrdemServicoErrorMessages.MotivoCancelamentoInvalido);
         }
 
-        if (Status is StatusOrdemServico.FINALIZADA or StatusOrdemServico.ENTREGUE or StatusOrdemServico.CANCELADA)
+        if (Status is StatusOrdemServico.Finalizada or StatusOrdemServico.Entregue or StatusOrdemServico.Cancelada)
         {
             throw new DomainException(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
         }
 
-        Status = StatusOrdemServico.CANCELADA;
+        Status = StatusOrdemServico.Cancelada;
         MotivoCancelamento = motivo;
         DataFim = DateTime.UtcNow;
     }
@@ -170,4 +170,5 @@ public sealed class OrdemServico
         }
     }
 }
+
 

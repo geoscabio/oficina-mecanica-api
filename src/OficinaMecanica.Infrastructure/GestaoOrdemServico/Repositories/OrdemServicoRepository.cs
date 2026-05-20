@@ -72,7 +72,7 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
     {
         return _dbContext.Set<Servico>()
             .Where(servico => servico.ServicoCatalogoId == servicoCatalogoId
-                && servico.Status == StatusServico.FINALIZADO
+                && servico.Status == StatusServico.Finalizado
                 && servico.DataInicio.HasValue
                 && servico.DataFim.HasValue)
             .Select(servico => (double?)EF.Functions.DateDiffMinute(
@@ -87,7 +87,7 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
     {
         return await _dbContext.Set<Servico>()
             .Where(servico => servicosCatalogoIds.Contains(servico.ServicoCatalogoId)
-                && servico.Status == StatusServico.FINALIZADO
+                && servico.Status == StatusServico.Finalizado
                 && servico.DataInicio.HasValue
                 && servico.DataFim.HasValue)
             .GroupBy(servico => servico.ServicoCatalogoId)
@@ -105,3 +105,4 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
                 cancellationToken);
     }
 }
+

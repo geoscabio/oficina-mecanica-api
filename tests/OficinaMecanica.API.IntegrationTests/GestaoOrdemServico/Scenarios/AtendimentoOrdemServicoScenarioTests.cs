@@ -107,12 +107,12 @@ public sealed class AtendimentoOrdemServicoScenarioTests : ApiIntegrationTestBas
         var ordensServico = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar");
 
         // Assert
-        ObterString(statusRecebida, "status").Should().Be("RECEBIDA");
-        ObterString(statusComServico, "status").Should().Be("EM_DIAGNOSTICO");
+        ObterString(statusRecebida, "status").Should().Be("Recebida");
+        ObterString(statusComServico, "status").Should().Be("EmDiagnostico");
         ordemComServicos.GetProperty("servicos").EnumerateArray().Should().ContainSingle();
         ordemComPecasInsumos.GetProperty("pecasInsumos").EnumerateArray().Should().ContainSingle();
-        ObterString(ordemFinalizada, "status").Should().Be("FINALIZADA");
-        ObterString(ordemEntregue, "status").Should().Be("ENTREGUE");
+        ObterString(ordemFinalizada, "status").Should().Be("Finalizada");
+        ObterString(ordemEntregue, "status").Should().Be("Entregue");
         tempoMedio.GetProperty("tempoMedioExecucaoEmMinutos").ValueKind.Should().NotBe(JsonValueKind.Null);
         ListagemDevePossuirItens(temposMedios);
         ListagemDevePossuirItens(ordensServico);
@@ -180,4 +180,5 @@ public sealed class AtendimentoOrdemServicoScenarioTests : ApiIntegrationTestBas
             HttpStatusCode.Created);
     }
 }
+
 

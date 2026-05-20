@@ -14,12 +14,12 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 | DT-015 | Auditoria de vulnerabilidade NuGet | Pendente | Corrigido | Evidencia registrada em `docs/evidencias/auditoria_nuget_vulnerabilidades.md` |
 | DT-024 | Evitar alteracoes diretas na `develop` | Pendente | Corrigido | Fluxo Git formalizado neste documento |
 | DT-012 | Retornar todos os erros de validacao | Pendente | Corrigido | `ErrorResponse` agora inclui `erros` e use cases retornam todas as mensagens do FluentValidation |
+| DT-011 | Enums em `SCREAMING_CASE` | Pendente | Corrigido | `StatusOrdemServico` e `StatusServico` renomeados para PascalCase |
 
 ## Status Atual Dos Itens Pendentes
 
 | ID | Prioridade | Tipo | Item | Status | Evidencia atual | Proxima acao |
 | --- | --- | --- | --- | --- | --- | --- |
-| DT-011 | P2 | Convencao C# | Enums em `SCREAMING_CASE` | Pendente | `StatusOrdemServico` e `StatusServico` ainda usam valores como `RECEBIDA` | Planejar ajuste com impacto em JSON/testes (breaking change controlado) |
 | DT-013 | P2 | DevEx | Padronizar formatacao global | Pendente | Estilos de codigo ainda heterogeneos entre modulos | Rodar formatacao automatica e revisar diff por camada |
 | DT-014 | P2 | Qualidade | Relatorio Sonar/cobertura | Pendente | Sem evidencia versionada de analise estatica/cobertura | Gerar relatorio e anexar evidencias |
 | DT-016 | P2 | Seguranca | Analise OWASP ZAP | Pendente | Sem relatorio de runtime | Rodar ZAP na API local e anexar saida |
@@ -40,6 +40,7 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 - DT-008 Construtor privado EF em `ServicoCatalogo` (corrigido)
 - DT-009 Desacoplamento de `EnderecoRequest` (corrigido)
 - DT-010 `PerfisAcesso` movido para Application (corrigido)
+- DT-011 Enums de status renomeados para PascalCase (corrigido)
 - DT-012 Erros de validacao retornam lista completa no campo `erros` (corrigido)
 - DT-015 Auditoria de vulnerabilidade NuGet sem pacotes vulneraveis encontrados (corrigido)
 - DT-024 Fluxo Git formalizado com branch por tarefa, commits convencionais e PR (corrigido)
@@ -58,3 +59,4 @@ Fonte de consolidacao: `code_review_v4_final.md` + `FIAP/Snapshots projeto/Code 
 - Testes de integracao dependem de Docker ativo.
 - Testes marcados com `RequiresDockerFactAttribute` sao ignorados quando Docker nao estiver acessivel.
 - Para forcar skip local dos cenarios que dependem de Docker, definir `OFICINA_SKIP_DOCKER_TESTS=true`.
+

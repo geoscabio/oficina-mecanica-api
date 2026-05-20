@@ -24,7 +24,7 @@ public class ServicoTests
         servico.Id.Should().NotBeEmpty();
         servico.ServicoCatalogoId.Should().Be(servicoCatalogoId);
         servico.Valor.Should().Be(OrdemServicoTestDataFactory.ValorServicoPadrao);
-        servico.Status.Should().Be(StatusServico.PENDENTE);
+        servico.Status.Should().Be(StatusServico.Pendente);
         servico.DataInicio.Should().BeNull();
         servico.DataFim.Should().BeNull();
     }
@@ -75,7 +75,7 @@ public class ServicoTests
         servico.IniciarExecucao();
 
         // Assert
-        servico.Status.Should().Be(StatusServico.EM_EXECUCAO);
+        servico.Status.Should().Be(StatusServico.EmExecucao);
         servico.DataInicio.Should().NotBeNull();
         servico.DataFim.Should().BeNull();
     }
@@ -120,7 +120,7 @@ public class ServicoTests
         servico.Finalizar();
 
         // Assert
-        servico.Status.Should().Be(StatusServico.FINALIZADO);
+        servico.Status.Should().Be(StatusServico.Finalizado);
         servico.DataInicio.Should().NotBeNull();
         servico.DataFim.Should().NotBeNull();
     }

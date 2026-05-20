@@ -24,14 +24,14 @@ internal static class OrdemServicoTestDataFactory
     public const decimal ValorPecaInsumoPadrao = 45m;
     public const int QuantidadePecaInsumoPadrao = 2;
 
-    public const string StatusRecebida = "RECEBIDA";
-    public const string StatusPendente = "PENDENTE";
-    public const string StatusEmDiagnostico = "EM_DIAGNOSTICO";
-    public const string StatusAguardandoAprovacao = "AGUARDANDO_APROVACAO";
-    public const string StatusEmExecucao = "EM_EXECUCAO";
-    public const string StatusFinalizada = "FINALIZADA";
-    public const string StatusEntregue = "ENTREGUE";
-    public const string StatusCancelada = "CANCELADA";
+    public const string StatusRecebida = "Recebida";
+    public const string StatusPendente = "Pendente";
+    public const string StatusEmDiagnostico = "EmDiagnostico";
+    public const string StatusAguardandoAprovacao = "AguardandoAprovacao";
+    public const string StatusEmExecucao = "EmExecucao";
+    public const string StatusFinalizada = "Finalizada";
+    public const string StatusEntregue = "Entregue";
+    public const string StatusCancelada = "Cancelada";
 
     public const int PaginaPadrao = 1;
     public const int TamanhoPaginaPadrao = 10;
@@ -303,3 +303,4 @@ internal static class OrdemServicoTestDataFactory
             tamanhoPagina);
     }
 }
+

@@ -37,7 +37,7 @@ public class IniciarExecucaoServicoUseCaseTests
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(ordemServico.Id);
-        ordemServico.Servicos.Single().Status.Should().Be(StatusServico.EM_EXECUCAO);
+        ordemServico.Servicos.Single().Status.Should().Be(StatusServico.EmExecucao);
 
         repository.Verify(
             repo => repo.ObterPorIdAsync(
@@ -50,7 +50,7 @@ public class IniciarExecucaoServicoUseCaseTests
                 It.Is<OrdemServico>(ordemServicoAtualizada =>
                     ordemServicoAtualizada.Id == ordemServico.Id
                     && ordemServicoAtualizada.Servicos.Single().Id == servicoId
-                    && ordemServicoAtualizada.Servicos.Single().Status == StatusServico.EM_EXECUCAO),
+                    && ordemServicoAtualizada.Servicos.Single().Status == StatusServico.EmExecucao),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

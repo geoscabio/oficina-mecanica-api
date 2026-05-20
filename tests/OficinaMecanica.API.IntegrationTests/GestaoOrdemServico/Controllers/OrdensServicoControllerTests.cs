@@ -53,9 +53,9 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
 
         // Assert
         ObterGuid(ordemConsultada, "id").Should().Be(ordemServicoId);
-        ObterString(status, "status").Should().Be("RECEBIDA");
+        ObterString(status, "status").Should().Be("Recebida");
         ListagemDevePossuirItens(ordens);
-        ObterString(ordemCancelada, "status").Should().Be("CANCELADA");
+        ObterString(ordemCancelada, "status").Should().Be("Cancelada");
     }
 
     private async Task<Guid> CadastrarVeiculoAsync()
@@ -91,4 +91,5 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         return ObterGuid(response, "id");
     }
 }
+
 
