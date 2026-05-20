@@ -24,10 +24,10 @@ internal sealed class AuthorizeOperationFilter : IOperationFilter
         operation.Responses ??= [];
         operation.Responses.TryAdd(
             StatusCodes.Status401Unauthorized.ToString(),
-            new OpenApiResponse { Description = JwtErrorMessages.NaoAutorizado });
+            OpenApiErrorResponseFactory.Create(context, JwtErrorMessages.NaoAutorizado));
         operation.Responses.TryAdd(
             StatusCodes.Status403Forbidden.ToString(),
-            new OpenApiResponse { Description = JwtErrorMessages.AcessoProibido });
+            OpenApiErrorResponseFactory.Create(context, JwtErrorMessages.AcessoProibido));
 
         operation.Security ??= [];
         operation.Security.Add(

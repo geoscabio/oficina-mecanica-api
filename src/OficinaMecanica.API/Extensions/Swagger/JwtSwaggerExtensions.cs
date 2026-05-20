@@ -21,6 +21,7 @@ public static class JwtSwaggerExtensions
                 Description = "Cole apenas o token JWT gerado no login."
             });
 
+        options.OperationFilter<ApiErrorResponsesOperationFilter>();
         options.OperationFilter<AuthorizeOperationFilter>();
     }
 }
