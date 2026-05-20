@@ -6,7 +6,8 @@ public enum TipoErro
     NaoEncontrado = 2,
     RegraNegocio = 3,
     NaoAutorizado = 4,
-    ErroInterno = 5
+    ErroInterno = 5,
+    AcessoProibido = 6
 }
 
 public sealed record ErrorResponse(string Mensagem, TipoErro Tipo);

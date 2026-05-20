@@ -43,7 +43,7 @@ public sealed class MecanicosControllerTests : ApiIntegrationTestBase
             $"/api/v1/administrativo/mecanicos/{mecanicoId}/atualizar",
             atualizacao);
 
-        await DeleteJsonAsync($"/api/v1/administrativo/mecanicos/{mecanicoId}/remover");
+        await DeleteAsync($"/api/v1/administrativo/mecanicos/{mecanicoId}/remover");
         var consultaAposRemocao = await Client.GetAsync($"/api/v1/administrativo/mecanicos/consultar/{mecanicoId}");
 
         // Assert

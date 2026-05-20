@@ -80,6 +80,6 @@ public sealed class ServicosCatalogoController : ControllerBase
             new RemoverServicoCatalogoRequest(servicoCatalogoId),
             cancellationToken);
 
-        return this.ToActionResult(result);
+        return this.ToNoContentResult(result);
     }
 }

@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.OpenApi;
 using OficinaMecanica.API.Extensions.Responses;
+using OficinaMecanica.API.Responses;
 using OficinaMecanica.Application.Common;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -10,11 +11,11 @@ internal sealed class ApiErrorResponsesOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        AddErrorResponse(operation, context, TipoErro.Validacao, "Requisição inválida.");
-        AddErrorResponse(operation, context, TipoErro.NaoAutorizado, "Não autorizado.");
-        AddErrorResponse(operation, context, TipoErro.NaoEncontrado, "Recurso não encontrado.");
-        AddErrorResponse(operation, context, TipoErro.RegraNegocio, "Regra de negócio violada.");
-        AddErrorResponse(operation, context, TipoErro.ErroInterno, "Erro interno inesperado.");
+        AddErrorResponse(operation, context, TipoErro.Validacao, ApiResponseMessages.RequisicaoInvalida);
+        AddErrorResponse(operation, context, TipoErro.NaoAutorizado, ApiResponseMessages.NaoAutorizado);
+        AddErrorResponse(operation, context, TipoErro.NaoEncontrado, ApiResponseMessages.RecursoNaoEncontrado);
+        AddErrorResponse(operation, context, TipoErro.RegraNegocio, ApiResponseMessages.RegraNegocioViolada);
+        AddErrorResponse(operation, context, TipoErro.ErroInterno, ApiResponseMessages.ErroInternoInesperado);
     }
 
     private static void AddErrorResponse(
@@ -31,6 +32,6 @@ internal sealed class ApiErrorResponsesOperationFilter : IOperationFilter
 
         operation.Responses.TryAdd(
             statusCode,
-            OpenApiErrorResponseFactory.Create(context, description));
+            OpenApiErrorResponseFactory.Create(context, description, tipoErro));
     }
 }

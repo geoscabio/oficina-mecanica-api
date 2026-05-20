@@ -2,6 +2,7 @@ using System.Text.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using OficinaMecanica.API.Middlewares;
+using OficinaMecanica.API.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Shared.Exceptions;
 
@@ -43,7 +44,7 @@ public sealed class GlobalExceptionMiddlewareTests
 
         var erro = await LerErroAsync(context);
         erro.GetProperty("tipo").GetString().Should().Be(nameof(TipoErro.ErroInterno));
-        erro.GetProperty("mensagem").GetString().Should().Be("Erro interno inesperado.");
+        erro.GetProperty("mensagem").GetString().Should().Be(ApiResponseMessages.ErroInternoInesperado);
     }
 
     private static DefaultHttpContext CriarHttpContext()

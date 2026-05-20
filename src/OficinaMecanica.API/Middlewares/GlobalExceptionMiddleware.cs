@@ -1,4 +1,5 @@
 using OficinaMecanica.API.Extensions.Responses;
+using OficinaMecanica.API.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Shared.Exceptions;
 
@@ -41,7 +42,7 @@ public sealed class GlobalExceptionMiddleware
             await WriteErrorAsync(
                 context,
                 TipoErro.ErroInterno.ToHttpStatusCode(),
-                new ErrorResponse("Erro interno inesperado.", TipoErro.ErroInterno));
+                new ErrorResponse(ApiResponseMessages.ErroInternoInesperado, TipoErro.ErroInterno));
         }
     }
 

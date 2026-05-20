@@ -74,6 +74,6 @@ public sealed class MecanicosController : ControllerBase
     {
         var result = await useCase.ExecuteAsync(new RemoverMecanicoRequest(mecanicoId), cancellationToken);
 
-        return this.ToActionResult(result);
+        return this.ToNoContentResult(result);
     }
 }

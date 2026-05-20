@@ -4,6 +4,7 @@ using System.Text.Json;
 using FluentAssertions;
 using OficinaMecanica.API.IntegrationTests.Fixtures;
 using OficinaMecanica.API.IntegrationTests.Identidade.Builders;
+using OficinaMecanica.API.Responses;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.Identidade.ValidationMessages;
 
@@ -92,7 +93,7 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
 
         var erro = await response.Content.ReadFromJsonAsync<JsonElement>();
 
-        ErroDeveSerNaoAutorizado(erro, "Não autorizado.");
+        ErroDeveSer(erro, ApiResponseMessages.NaoAutorizado, TipoErro.NaoAutorizado);
     }
 
     [Fact]
@@ -109,12 +110,17 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
 
         var erro = await response.Content.ReadFromJsonAsync<JsonElement>();
 
-        ErroDeveSerNaoAutorizado(erro, "Acesso proibido para o perfil informado.");
+        ErroDeveSer(erro, ApiResponseMessages.AcessoProibido, TipoErro.AcessoProibido);
     }
 
     private static void ErroDeveSerNaoAutorizado(JsonElement erro, string mensagem)
     {
-        erro.GetProperty("tipo").GetString().Should().Be(nameof(TipoErro.NaoAutorizado));
+        ErroDeveSer(erro, mensagem, TipoErro.NaoAutorizado);
+    }
+
+    private static void ErroDeveSer(JsonElement erro, string mensagem, TipoErro tipoErro)
+    {
+        erro.GetProperty("tipo").GetString().Should().Be(tipoErro.ToString());
         erro.GetProperty("mensagem").GetString().Should().Be(mensagem);
     }
 }

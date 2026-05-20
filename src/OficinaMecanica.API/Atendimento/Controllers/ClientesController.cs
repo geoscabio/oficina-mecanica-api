@@ -88,6 +88,6 @@ public sealed class ClientesController : ControllerBase
     {
         var result = await useCase.ExecuteAsync(new RemoverClienteRequest(clienteId), cancellationToken);
 
-        return this.ToActionResult(result);
+        return this.ToNoContentResult(result);
     }
 }

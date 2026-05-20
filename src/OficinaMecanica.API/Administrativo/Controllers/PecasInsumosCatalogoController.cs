@@ -80,6 +80,6 @@ public sealed class PecasInsumosCatalogoController : ControllerBase
             new RemoverPecaInsumoCatalogoRequest(pecaInsumoCatalogoId),
             cancellationToken);
 
-        return this.ToActionResult(result);
+        return this.ToNoContentResult(result);
     }
 }

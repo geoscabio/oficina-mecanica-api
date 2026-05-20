@@ -18,9 +18,10 @@ public static class JwtSwaggerExtensions
                 Scheme = "bearer",
                 BearerFormat = "JWT",
                 In = ParameterLocation.Header,
-                Description = "Cole apenas o token JWT gerado no login."
+                Description = SwaggerDocumentationMessages.TokenJwt
             });
 
+        options.OperationFilter<ApiSuccessResponsesOperationFilter>();
         options.OperationFilter<ApiErrorResponsesOperationFilter>();
         options.OperationFilter<AuthorizeOperationFilter>();
     }
