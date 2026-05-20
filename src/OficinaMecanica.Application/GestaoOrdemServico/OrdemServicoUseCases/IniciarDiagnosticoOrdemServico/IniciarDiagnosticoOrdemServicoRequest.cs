@@ -1,0 +1,3 @@
+namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
+
+public sealed record IniciarDiagnosticoOrdemServicoRequest(Guid OrdemServicoId);

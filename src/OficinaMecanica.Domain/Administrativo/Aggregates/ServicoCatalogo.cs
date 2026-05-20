@@ -1,9 +1,15 @@
-using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
+using OficinaMecanica.Domain.Administrativo.Messages;
 
 namespace OficinaMecanica.Domain.Administrativo.Aggregates;
 
 public sealed class ServicoCatalogo
 {
+    private ServicoCatalogo()
+    {
+        Descricao = string.Empty;
+    }
+
     private ServicoCatalogo(Guid id, string descricao, decimal valor)
     {
         Id = id;
@@ -19,14 +25,31 @@ public sealed class ServicoCatalogo
     {
         if (string.IsNullOrWhiteSpace(descricao))
         {
-            throw new ServicoCatalogoInvalidoException("Descricao do servico e obrigatoria.");
+            throw new DomainException(ServicoCatalogoErrorMessages.DescricaoObrigatoria);
         }
 
         if (valor <= 0)
         {
-            throw new ServicoCatalogoInvalidoException("Valor do servico deve ser maior que zero.");
+            throw new DomainException(ServicoCatalogoErrorMessages.ValorMaiorQueZero);
         }
 
         return new ServicoCatalogo(Guid.NewGuid(), descricao.Trim(), valor);
     }
+
+    public void Atualizar(string descricao, decimal valor)
+    {
+        if (string.IsNullOrWhiteSpace(descricao))
+        {
+            throw new DomainException(ServicoCatalogoErrorMessages.DescricaoObrigatoria);
+        }
+
+        if (valor <= 0)
+        {
+            throw new DomainException(ServicoCatalogoErrorMessages.ValorMaiorQueZero);
+        }
+
+        Descricao = descricao.Trim();
+        Valor = valor;
+    }
 }
+

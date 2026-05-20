@@ -1,3 +1,7 @@
+using AutoMapper;
+using FluentValidation;
+using OficinaMecanica.Application.Atendimento.ClienteUseCases.Responses;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -8,41 +12,46 @@ namespace OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarClien
 public sealed class CadastrarClienteUseCase
 {
     private readonly IClienteRepository _clienteRepository;
-    private readonly CadastrarClienteValidator _validator;
+    private readonly IValidator<CadastrarClienteRequest> _validator;
+    private readonly IMapper _mapper;
 
-    public CadastrarClienteUseCase(IClienteRepository clienteRepository, CadastrarClienteValidator validator)
+    public CadastrarClienteUseCase(IClienteRepository clienteRepository, IValidator<CadastrarClienteRequest> validator, IMapper mapper)
     {
         _clienteRepository = clienteRepository;
         _validator = validator;
+        _mapper = mapper;
     }
 
-    public async Task<Result<CadastrarClienteResponse>> ExecuteAsync(
-        CadastrarClienteRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<ClienteResponse>> ExecuteAsync(CadastrarClienteRequest request, CancellationToken cancellationToken = default)
     {
-        _validator.Validate(request);
+        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return Result<ClienteResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
+        }
 
         var documento = CpfCnpj.Criar(request.Documento);
         var clienteExistente = await _clienteRepository.ObterPorDocumentoAsync(documento.Numero, cancellationToken);
 
         if (clienteExistente is not null)
         {
-            return Result<CadastrarClienteResponse>.Falha("Cliente ja cadastrado para o documento informado.");
+            return Result<ClienteResponse>.Falha(ClienteErrorMessages.ClienteDuplicado, TipoErro.RegraNegocio);
         }
 
         var cliente = Cliente.Criar(
             documento,
             request.Nome,
-            new Endereco(request.Logradouro, request.Numero, request.Bairro, request.Cidade, request.CEP),
+            Endereco.Criar(request.Endereco.Logradouro, request.Endereco.Numero, request.Endereco.Bairro, request.Endereco.Cidade, request.Endereco.CEP),
             Telefone.Criar(request.Telefone),
             Email.Criar(request.Email));
 
         await _clienteRepository.AdicionarAsync(cliente, cancellationToken);
 
-        return Result<CadastrarClienteResponse>.Ok(new CadastrarClienteResponse(
-            cliente.Id,
-            cliente.Documento.Numero,
-            cliente.Nome,
-            cliente.Email.Endereco));
+        return Result<ClienteResponse>.Ok(_mapper.Map<ClienteResponse>(cliente));
     }
 }
+
+
+
+

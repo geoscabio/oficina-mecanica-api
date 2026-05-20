@@ -1,10 +1,18 @@
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
 
 namespace OficinaMecanica.Domain.Atendimento.Aggregates;
 
 public sealed class Veiculo
 {
+    private Veiculo()
+    {
+        Placa = null!;
+        Marca = string.Empty;
+        Modelo = string.Empty;
+    }
+
     private Veiculo(Guid id, Guid clienteId, Placa placa, string marca, string modelo, int ano)
     {
         Id = id;
@@ -26,29 +34,58 @@ public sealed class Veiculo
     {
         if (clienteId == Guid.Empty)
         {
-            throw new VeiculoInvalidoException("Cliente do veiculo e obrigatorio.");
+            throw new DomainException(VeiculoErrorMessages.ClienteObrigatorio);
         }
 
         if (placa is null)
         {
-            throw new VeiculoInvalidoException("Placa do veiculo e obrigatoria.");
+            throw new DomainException(VeiculoErrorMessages.PlacaObrigatoria);
         }
 
         if (string.IsNullOrWhiteSpace(marca))
         {
-            throw new VeiculoInvalidoException("Marca do veiculo e obrigatoria.");
+            throw new DomainException(VeiculoErrorMessages.MarcaObrigatoria);
         }
 
         if (string.IsNullOrWhiteSpace(modelo))
         {
-            throw new VeiculoInvalidoException("Modelo do veiculo e obrigatorio.");
+            throw new DomainException(VeiculoErrorMessages.ModeloObrigatorio);
         }
 
         if (ano <= 0)
         {
-            throw new VeiculoInvalidoException("Ano do veiculo e invalido.");
+            throw new DomainException(VeiculoErrorMessages.AnoInvalido);
         }
 
         return new Veiculo(Guid.NewGuid(), clienteId, placa, marca.Trim(), modelo.Trim(), ano);
     }
+
+    public void Atualizar(Placa placa, string marca, string modelo, int ano)
+    {
+        if (placa is null)
+        {
+            throw new DomainException(VeiculoErrorMessages.PlacaObrigatoria);
+        }
+
+        if (string.IsNullOrWhiteSpace(marca))
+        {
+            throw new DomainException(VeiculoErrorMessages.MarcaObrigatoria);
+        }
+
+        if (string.IsNullOrWhiteSpace(modelo))
+        {
+            throw new DomainException(VeiculoErrorMessages.ModeloObrigatorio);
+        }
+
+        if (ano <= 0)
+        {
+            throw new DomainException(VeiculoErrorMessages.AnoInvalido);
+        }
+
+        Placa = placa;
+        Marca = marca.Trim();
+        Modelo = modelo.Trim();
+        Ano = ano;
+    }
 }
+

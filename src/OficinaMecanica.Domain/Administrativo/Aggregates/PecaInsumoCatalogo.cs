@@ -1,10 +1,16 @@
 using OficinaMecanica.Domain.Administrativo.Enums;
-using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
+using OficinaMecanica.Domain.Administrativo.Messages;
 
 namespace OficinaMecanica.Domain.Administrativo.Aggregates;
 
 public sealed class PecaInsumoCatalogo
 {
+    private PecaInsumoCatalogo()
+    {
+        Descricao = string.Empty;
+    }
+
     private PecaInsumoCatalogo(Guid id, string descricao, TipoPecaInsumo tipo, decimal valor)
     {
         Id = id;
@@ -22,19 +28,42 @@ public sealed class PecaInsumoCatalogo
     {
         if (string.IsNullOrWhiteSpace(descricao))
         {
-            throw new PecaInsumoCatalogoInvalidaException("Descricao da peca ou insumo e obrigatoria.");
+            throw new DomainException(PecaInsumoCatalogoErrorMessages.DescricaoObrigatoria);
         }
 
         if (!Enum.IsDefined(tipo))
         {
-            throw new PecaInsumoCatalogoInvalidaException("Tipo da peca ou insumo e invalido.");
+            throw new DomainException(PecaInsumoCatalogoErrorMessages.TipoInvalido);
         }
 
         if (valor <= 0)
         {
-            throw new PecaInsumoCatalogoInvalidaException("Valor da peca ou insumo deve ser maior que zero.");
+            throw new DomainException(PecaInsumoCatalogoErrorMessages.ValorMaiorQueZero);
         }
 
         return new PecaInsumoCatalogo(Guid.NewGuid(), descricao.Trim(), tipo, valor);
     }
+
+    public void Atualizar(string descricao, TipoPecaInsumo tipo, decimal valor)
+    {
+        if (string.IsNullOrWhiteSpace(descricao))
+        {
+            throw new DomainException(PecaInsumoCatalogoErrorMessages.DescricaoObrigatoria);
+        }
+
+        if (!Enum.IsDefined(tipo))
+        {
+            throw new DomainException(PecaInsumoCatalogoErrorMessages.TipoInvalido);
+        }
+
+        if (valor <= 0)
+        {
+            throw new DomainException(PecaInsumoCatalogoErrorMessages.ValorMaiorQueZero);
+        }
+
+        Descricao = descricao.Trim();
+        Tipo = tipo;
+        Valor = valor;
+    }
 }
+

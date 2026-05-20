@@ -1,36 +1,24 @@
-using OficinaMecanica.Application.Common.Exceptions;
+using FluentValidation;
+using OficinaMecanica.Application.Atendimento.ValidationMessages;
 
 namespace OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
 
-public sealed class CadastrarVeiculoValidator
+public sealed class CadastrarVeiculoValidator : AbstractValidator<CadastrarVeiculoRequest>
 {
-    public void Validate(CadastrarVeiculoRequest request)
+    public CadastrarVeiculoValidator()
     {
-        if (request is null)
-        {
-            throw new ValidationException("Request de cadastro de veiculo e obrigatorio.");
-        }
+        RuleFor(request => request)
+            .NotNull()
+            .WithMessage(VeiculoValidationMessages.RequestCadastroVeiculoObrigatorio);
 
-        if (request.ClienteId == Guid.Empty)
+        When(request => request is not null, () =>
         {
-            throw new ValidationException("ClienteId e obrigatorio.");
-        }
-
-        ValidarObrigatorio(request.Placa, "Placa");
-        ValidarObrigatorio(request.Marca, "Marca");
-        ValidarObrigatorio(request.Modelo, "Modelo");
-
-        if (request.Ano <= 0)
-        {
-            throw new ValidationException("Ano deve ser maior que zero.");
-        }
-    }
-
-    private static void ValidarObrigatorio(string valor, string campo)
-    {
-        if (string.IsNullOrWhiteSpace(valor))
-        {
-            throw new ValidationException($"{campo} e obrigatorio.");
-        }
+            RuleFor(request => request.ClienteId).NotEmpty().WithMessage(VeiculoValidationMessages.ClienteIdObrigatorio);
+            RuleFor(request => request.Placa).NotEmpty().WithMessage(VeiculoValidationMessages.PlacaObrigatoria);
+            RuleFor(request => request.Marca).NotEmpty().WithMessage(VeiculoValidationMessages.MarcaObrigatoria);
+            RuleFor(request => request.Modelo).NotEmpty().WithMessage(VeiculoValidationMessages.ModeloObrigatorio);
+            RuleFor(request => request.Ano).GreaterThan(0).WithMessage(VeiculoValidationMessages.AnoMaiorQueZero);
+        });
     }
 }
+

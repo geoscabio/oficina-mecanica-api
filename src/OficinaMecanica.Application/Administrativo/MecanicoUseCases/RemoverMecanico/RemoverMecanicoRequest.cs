@@ -1,0 +1,3 @@
+﻿namespace OficinaMecanica.Application.Administrativo.MecanicoUseCases.RemoverMecanico;
+
+public sealed record RemoverMecanicoRequest(Guid MecanicoId);

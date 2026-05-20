@@ -1,0 +1,3 @@
+﻿namespace OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.ConsultarPecaInsumoCatalogo;
+
+public sealed record ConsultarPecaInsumoCatalogoRequest(Guid PecaInsumoCatalogoId);

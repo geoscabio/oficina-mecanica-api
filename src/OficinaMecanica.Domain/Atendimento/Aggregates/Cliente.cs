@@ -1,10 +1,20 @@
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
 
 namespace OficinaMecanica.Domain.Atendimento.Aggregates;
 
 public sealed class Cliente
 {
+    private Cliente()
+    {
+        Documento = null!;
+        Nome = string.Empty;
+        Endereco = null!;
+        Telefone = null!;
+        Email = null!;
+    }
+
     private Cliente(Guid id, CpfCnpj documento, string nome, Endereco endereco, Telefone telefone, Email email)
     {
         Id = id;
@@ -26,20 +36,34 @@ public sealed class Cliente
     {
         if (documento is null)
         {
-            throw new ClienteInvalidoException("Documento do cliente e obrigatorio.");
+            throw new DomainException(ClienteErrorMessages.DocumentoObrigatorio);
         }
 
         if (string.IsNullOrWhiteSpace(nome))
         {
-            throw new ClienteInvalidoException("Nome do cliente e obrigatorio.");
+            throw new DomainException(ClienteErrorMessages.NomeObrigatorio);
         }
 
         return new Cliente(
             Guid.NewGuid(),
             documento,
             nome.Trim(),
-            endereco ?? throw new ClienteInvalidoException("Endereco do cliente e obrigatorio."),
-            telefone ?? throw new ClienteInvalidoException("Telefone do cliente e obrigatorio."),
-            email ?? throw new ClienteInvalidoException("E-mail do cliente e obrigatorio."));
+            endereco ?? throw new DomainException(ClienteErrorMessages.EnderecoObrigatorio),
+            telefone ?? throw new DomainException(ClienteErrorMessages.TelefoneObrigatorio),
+            email ?? throw new DomainException(ClienteErrorMessages.EmailObrigatorio));
+    }
+
+    public void Atualizar(string nome, Endereco endereco, Telefone telefone, Email email)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+        {
+            throw new DomainException(ClienteErrorMessages.NomeObrigatorio);
+        }
+
+        Nome = nome.Trim();
+        Endereco = endereco ?? throw new DomainException(ClienteErrorMessages.EnderecoObrigatorio);
+        Telefone = telefone ?? throw new DomainException(ClienteErrorMessages.TelefoneObrigatorio);
+        Email = email ?? throw new DomainException(ClienteErrorMessages.EmailObrigatorio);
     }
 }
+

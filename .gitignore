@@ -2,10 +2,15 @@ bin/
 obj/
 .vs/
 .vscode/
+.sonarqube/
 TestResults/
+docs/
 *.user
 *.suo
 *.nupkg
+.env
+.env.local
+*.env.local
 
 Contexto para IA.zip
 _contexto_para_ia_extracted/

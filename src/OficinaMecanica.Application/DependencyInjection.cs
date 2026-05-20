@@ -1,6 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
-using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
-using OficinaMecanica.Application.Atendimento.VeiculoUseCases.CadastrarVeiculo;
+using OficinaMecanica.Application.Administrativo;
+using OficinaMecanica.Application.Atendimento;
+using OficinaMecanica.Application.GestaoEstoque;
+using OficinaMecanica.Application.GestaoOrdemServico;
+using OficinaMecanica.Application.Identidade;
 
 namespace OficinaMecanica.Application;
 
@@ -8,10 +11,13 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<CadastrarClienteValidator>();
-        services.AddScoped<CadastrarClienteUseCase>();
-        services.AddScoped<CadastrarVeiculoValidator>();
-        services.AddScoped<CadastrarVeiculoUseCase>();
+        services.AddAutoMapper(_ => { }, typeof(DependencyInjection).Assembly);
+
+        services.AddAdministrativoApplication();
+        services.AddAtendimentoApplication();
+        services.AddGestaoOrdemServicoApplication();
+        services.AddGestaoEstoqueApplication();
+        services.AddIdentidadeApplication();
 
         return services;
     }

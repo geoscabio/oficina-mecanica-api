@@ -1,9 +1,16 @@
-using OficinaMecanica.Domain.Administrativo.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
+using OficinaMecanica.Domain.Administrativo.Messages;
 
 namespace OficinaMecanica.Domain.Administrativo.Aggregates;
 
 public sealed class Mecanico
 {
+    private Mecanico()
+    {
+        Nome = string.Empty;
+        Funcional = string.Empty;
+    }
+
     private Mecanico(Guid id, string nome, string funcional)
     {
         Id = id;
@@ -19,14 +26,31 @@ public sealed class Mecanico
     {
         if (string.IsNullOrWhiteSpace(nome))
         {
-            throw new MecanicoInvalidoException("Nome do mecanico e obrigatorio.");
+            throw new DomainException(MecanicoErrorMessages.NomeObrigatorio);
         }
 
         if (string.IsNullOrWhiteSpace(funcional))
         {
-            throw new MecanicoInvalidoException("Funcional do mecanico e obrigatorio.");
+            throw new DomainException(MecanicoErrorMessages.FuncionalObrigatorio);
         }
 
         return new Mecanico(Guid.NewGuid(), nome.Trim(), funcional.Trim());
     }
+
+    public void Atualizar(string nome, string funcional)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+        {
+            throw new DomainException(MecanicoErrorMessages.NomeObrigatorio);
+        }
+
+        if (string.IsNullOrWhiteSpace(funcional))
+        {
+            throw new DomainException(MecanicoErrorMessages.FuncionalObrigatorio);
+        }
+
+        Nome = nome.Trim();
+        Funcional = funcional.Trim();
+    }
 }
+

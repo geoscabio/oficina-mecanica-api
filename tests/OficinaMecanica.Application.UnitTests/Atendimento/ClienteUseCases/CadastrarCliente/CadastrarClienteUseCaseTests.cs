@@ -1,8 +1,13 @@
 using FluentAssertions;
+using Moq;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.CadastrarCliente;
-using OficinaMecanica.Application.Common.Exceptions;
+using OficinaMecanica.Application.Atendimento.ValidationMessages;
+using OficinaMecanica.Application.Common;
+using OficinaMecanica.Application.UnitTests.Atendimento.Factories;
+using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
+using OficinaMecanica.Domain.Atendimento.Messages;
 
 namespace OficinaMecanica.Application.UnitTests.Atendimento.ClienteUseCases.CadastrarCliente;
 
@@ -11,83 +16,113 @@ public class CadastrarClienteUseCaseTests
     [Fact]
     public async Task Dado_RequestValido_Quando_CadastrarCliente_Entao_DevePersistirClienteERetornarSucesso()
     {
-        var repository = new ClienteRepositoryFake();
-        var useCase = new CadastrarClienteUseCase(repository, new CadastrarClienteValidator());
-        var request = CriarRequestValido();
+        // Arrange
+        var repository = CriarRepository(null);
 
+        var useCase = CriarUseCase(repository);
+
+        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido();
+
+        // Act
         var resultado = await useCase.ExecuteAsync(request);
 
+        // Assert
         resultado.Sucesso.Should().BeTrue();
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().NotBeEmpty();
-        resultado.Valor.Documento.Should().Be("52998224725");
-        resultado.Valor.Nome.Should().Be("Maria Silva");
-        repository.Clientes.Should().ContainSingle();
+        resultado.Valor.Documento.Should().Be(ClienteTestDataFactory.DocumentoNormalizadoPadrao);
+        resultado.Valor.Nome.Should().Be(ClienteTestDataFactory.NomePadrao);
+
+        repository.Verify(
+            repo => repo.AdicionarAsync(It.Is<Cliente>(cliente => cliente.Documento.Numero == ClienteTestDataFactory.DocumentoNormalizadoPadrao && cliente.Nome == ClienteTestDataFactory.NomePadrao), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
     public async Task Dado_DocumentoJaCadastrado_Quando_CadastrarCliente_Entao_DeveRetornarFalha()
     {
-        var repository = new ClienteRepositoryFake();
-        var useCase = new CadastrarClienteUseCase(repository, new CadastrarClienteValidator());
-        var request = CriarRequestValido();
-        await useCase.ExecuteAsync(request);
+        // Arrange
+        var clienteExistente = ClienteTestDataFactory.CriarClientePadrao();
 
+        var repository = CriarRepository(clienteExistente);
+
+        var useCase = CriarUseCase(repository);
+
+        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido();
+
+        // Act
         var resultado = await useCase.ExecuteAsync(request);
 
+        // Assert
         resultado.Sucesso.Should().BeFalse();
-        resultado.Erro.Should().Be("Cliente ja cadastrado para o documento informado.");
-        repository.Clientes.Should().ContainSingle();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().Be(ClienteErrorMessages.ClienteDuplicado);
+        resultado.Erro.Tipo.Should().Be(TipoErro.RegraNegocio);
+
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public async Task Dado_NomeInvalido_Quando_CadastrarCliente_Entao_DeveLancarValidationException(string nome)
+    public async Task Dado_NomeInvalido_Quando_CadastrarCliente_Entao_DeveRetornarFalhaDeValidacao(string nome)
     {
-        var repository = new ClienteRepositoryFake();
-        var useCase = new CadastrarClienteUseCase(repository, new CadastrarClienteValidator());
-        var request = CriarRequestValido() with { Nome = nome };
+        // Arrange
+        var repository = new Mock<IClienteRepository>();
 
-        var acao = () => useCase.ExecuteAsync(request);
+        var useCase = CriarUseCase(repository);
 
-        await acao.Should().ThrowAsync<ValidationException>();
+        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido(nome: nome);
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
+        resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
+
+        repository.Verify(repo => repo.ObterPorDocumentoAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static CadastrarClienteRequest CriarRequestValido()
+    [Fact]
+    public async Task Dado_MultiplosCamposInvalidos_Quando_CadastrarCliente_Entao_DeveRetornarTodosErrosDeValidacao()
     {
-        return new CadastrarClienteRequest(
-            Documento: "529.982.247-25",
-            Nome: "Maria Silva",
-            Logradouro: "Rua A",
-            Numero: "100",
-            Bairro: "Centro",
-            Cidade: "Sao Paulo",
-            CEP: "01001-000",
-            Telefone: "(11) 99999-9999",
-            Email: "maria@email.com");
+        // Arrange
+        var repository = new Mock<IClienteRepository>();
+
+        var useCase = CriarUseCase(repository);
+
+        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido(documento: string.Empty, nome: string.Empty, telefone: string.Empty, email: string.Empty);
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
+        resultado.Erro.Erros.Should().BeEquivalentTo(ClienteValidationMessages.DocumentoObrigatorio, ClienteValidationMessages.NomeObrigatorio, ClienteValidationMessages.TelefoneObrigatorio, ClienteValidationMessages.EmailObrigatorio);
+
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private sealed class ClienteRepositoryFake : IClienteRepository
+    private static Mock<IClienteRepository> CriarRepository(Cliente? cliente)
     {
-        private readonly List<Cliente> _clientes = new();
+        var repository = new Mock<IClienteRepository>();
 
-        public IReadOnlyCollection<Cliente> Clientes => _clientes.AsReadOnly();
+        repository
+            .Setup(repo => repo.ObterPorDocumentoAsync(ClienteTestDataFactory.DocumentoNormalizadoPadrao, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cliente);
 
-        public Task AdicionarAsync(Cliente cliente, CancellationToken cancellationToken = default)
-        {
-            _clientes.Add(cliente);
-            return Task.CompletedTask;
-        }
+        return repository;
+    }
 
-        public Task<Cliente?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(_clientes.SingleOrDefault(cliente => cliente.Id == id));
-        }
-
-        public Task<Cliente?> ObterPorDocumentoAsync(string documento, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(_clientes.SingleOrDefault(cliente => cliente.Documento.Numero == documento));
-        }
+    private static CadastrarClienteUseCase CriarUseCase(Mock<IClienteRepository> repository)
+    {
+        return new CadastrarClienteUseCase(repository.Object, new CadastrarClienteValidator(), MapperFactory.Criar());
     }
 }

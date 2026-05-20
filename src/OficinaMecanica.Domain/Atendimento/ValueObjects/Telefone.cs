@@ -1,4 +1,5 @@
-using OficinaMecanica.Domain.Atendimento.Exceptions;
+using OficinaMecanica.Domain.Shared.Exceptions;
+using OficinaMecanica.Domain.Atendimento.Messages;
 
 namespace OficinaMecanica.Domain.Atendimento.ValueObjects;
 
@@ -19,9 +20,10 @@ public sealed record Telefone
 
         if (numeroNormalizado.Length is < 10 or > 11)
         {
-            throw new ClienteInvalidoException("Telefone invalido.");
+            throw new DomainException(ClienteErrorMessages.TelefoneInvalido);
         }
 
         return new Telefone(numeroNormalizado);
     }
 }
+

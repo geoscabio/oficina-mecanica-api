@@ -1,0 +1,3 @@
+namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ConsultarStatusOrdemServico;
+
+public sealed record ConsultarStatusOrdemServicoRequest(Guid OrdemServicoId);

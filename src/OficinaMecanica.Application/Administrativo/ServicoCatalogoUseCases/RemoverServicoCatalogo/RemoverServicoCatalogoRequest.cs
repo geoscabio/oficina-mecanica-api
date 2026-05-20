@@ -1,0 +1,3 @@
+namespace OficinaMecanica.Application.Administrativo.ServicoCatalogoUseCases.RemoverServicoCatalogo;
+
+public sealed record RemoverServicoCatalogoRequest(Guid ServicoCatalogoId);

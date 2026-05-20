@@ -1,3 +1,7 @@
+using AutoMapper;
+using FluentValidation;
+using OficinaMecanica.Application.Atendimento.VeiculoUseCases.Responses;
+using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
 using OficinaMecanica.Domain.Atendimento.Interfaces;
@@ -9,29 +13,31 @@ public sealed class CadastrarVeiculoUseCase
 {
     private readonly IVeiculoRepository _veiculoRepository;
     private readonly IClienteRepository _clienteRepository;
-    private readonly CadastrarVeiculoValidator _validator;
+    private readonly IValidator<CadastrarVeiculoRequest> _validator;
+    private readonly IMapper _mapper;
 
-    public CadastrarVeiculoUseCase(
-        IVeiculoRepository veiculoRepository,
-        IClienteRepository clienteRepository,
-        CadastrarVeiculoValidator validator)
+    public CadastrarVeiculoUseCase(IVeiculoRepository veiculoRepository, IClienteRepository clienteRepository, IValidator<CadastrarVeiculoRequest> validator, IMapper mapper)
     {
         _veiculoRepository = veiculoRepository;
         _clienteRepository = clienteRepository;
         _validator = validator;
+        _mapper = mapper;
     }
 
-    public async Task<Result<CadastrarVeiculoResponse>> ExecuteAsync(
-        CadastrarVeiculoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<VeiculoResponse>> ExecuteAsync(CadastrarVeiculoRequest request, CancellationToken cancellationToken = default)
     {
-        _validator.Validate(request);
+        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return Result<VeiculoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
+        }
 
         var cliente = await _clienteRepository.ObterPorIdAsync(request.ClienteId, cancellationToken);
 
         if (cliente is null)
         {
-            return Result<CadastrarVeiculoResponse>.Falha("Cliente nao encontrado.");
+            return Result<VeiculoResponse>.Falha(ClienteErrorMessages.ClienteNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         var placa = Placa.Criar(request.Placa);
@@ -39,19 +45,18 @@ public sealed class CadastrarVeiculoUseCase
 
         if (veiculoExistente is not null)
         {
-            return Result<CadastrarVeiculoResponse>.Falha("Veiculo ja cadastrado para a placa informada.");
+            return Result<VeiculoResponse>.Falha(VeiculoErrorMessages.VeiculoDuplicado, TipoErro.RegraNegocio);
         }
 
         var veiculo = Veiculo.Criar(request.ClienteId, placa, request.Marca, request.Modelo, request.Ano);
 
         await _veiculoRepository.AdicionarAsync(veiculo, cancellationToken);
 
-        return Result<CadastrarVeiculoResponse>.Ok(new CadastrarVeiculoResponse(
-            veiculo.Id,
-            veiculo.ClienteId,
-            veiculo.Placa.NumeroPlaca,
-            veiculo.Marca,
-            veiculo.Modelo,
-            veiculo.Ano));
+        return Result<VeiculoResponse>.Ok(_mapper.Map<VeiculoResponse>(veiculo));
     }
 }
+
+
+
+
+
