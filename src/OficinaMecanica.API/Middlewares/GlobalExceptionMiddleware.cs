@@ -1,3 +1,4 @@
+using OficinaMecanica.API.Extensions;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.Shared.Exceptions;
 
@@ -50,8 +51,7 @@ public sealed class GlobalExceptionMiddleware
         ErrorResponse error)
     {
         context.Response.StatusCode = statusCode;
-        context.Response.ContentType = "application/json";
 
-        await context.Response.WriteAsJsonAsync(error);
+        await context.Response.WriteErrorResponseAsJsonAsync(error);
     }
 }
