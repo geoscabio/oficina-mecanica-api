@@ -19,7 +19,7 @@ public sealed class ServicosCatalogoControllerTests : ApiIntegrationTestBase
         await AutenticarComoAdministradorAsync();
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_ServicoCatalogoValido_Quando_ExecutarCrud_Entao_DevePersistirAlterarListarERemover()
     {
         // Arrange
@@ -55,3 +55,4 @@ public sealed class ServicosCatalogoControllerTests : ApiIntegrationTestBase
         consultaAposRemocao.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
+

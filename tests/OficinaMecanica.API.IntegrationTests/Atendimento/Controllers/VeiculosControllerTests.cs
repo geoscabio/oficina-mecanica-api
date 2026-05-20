@@ -19,7 +19,7 @@ public sealed class VeiculosControllerTests : ApiIntegrationTestBase
         await AutenticarComoAdministradorAsync();
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_VeiculoValido_Quando_ExecutarCrud_Entao_DevePersistirAlterarListarERemover()
     {
         // Arrange
@@ -69,3 +69,4 @@ public sealed class VeiculosControllerTests : ApiIntegrationTestBase
         return ObterGuid(response, "id");
     }
 }
+

@@ -20,7 +20,7 @@ public sealed class EstoqueControllerTests : ApiIntegrationTestBase
         await AutenticarComoAdministradorAsync();
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_EntradaEstoqueValida_Quando_ConsultarListarEAtualizar_Entao_DevePersistirEstoque()
     {
         // Arrange
@@ -64,3 +64,4 @@ public sealed class EstoqueControllerTests : ApiIntegrationTestBase
         return ObterGuid(response, "id");
     }
 }
+

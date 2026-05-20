@@ -19,7 +19,7 @@ public sealed class ClientesControllerTests : ApiIntegrationTestBase
         await AutenticarComoAdministradorAsync();
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_ClienteValido_Quando_ExecutarCrud_Entao_DevePersistirAlterarListarERemover()
     {
         // Arrange
@@ -57,3 +57,4 @@ public sealed class ClientesControllerTests : ApiIntegrationTestBase
         consultaAposRemocao.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
+

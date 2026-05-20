@@ -23,7 +23,7 @@ public sealed class AtendimentoOrdemServicoScenarioTests : ApiIntegrationTestBas
         await AutenticarComoAdministradorAsync();
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_DadosValidos_Quando_ExecutarAtendimentoCompleto_Entao_DeveEntregarOrdemServicoECalcularTempoMedio()
     {
         // Arrange
@@ -180,3 +180,4 @@ public sealed class AtendimentoOrdemServicoScenarioTests : ApiIntegrationTestBas
             HttpStatusCode.Created);
     }
 }
+

@@ -18,7 +18,7 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
     {
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_CredenciaisValidas_Quando_Autenticar_Entao_DeveRetornarJwt()
     {
         // Arrange
@@ -37,7 +37,7 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
         token!.Split('.').Should().HaveCount(3);
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_MesmoUsuarioDemo_Quando_AutenticarDuasVezes_Entao_DeveRetornarMesmoUsuarioId()
     {
         // Arrange
@@ -60,7 +60,7 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
             .Be(ObterString(segundaAutenticacao, "usuarioId"));
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_CredenciaisInvalidas_Quando_Autenticar_Entao_DeveRetornarNaoAutorizado()
     {
         // Arrange
@@ -79,7 +79,7 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
         ErroDeveSerNaoAutorizado(erro, IdentidadeValidationMessages.CredenciaisInvalidas);
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_EndpointProtegido_Quando_AcessarSemToken_Entao_DeveRetornarNaoAutorizado()
     {
         // Arrange
@@ -96,7 +96,7 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
         ErroDeveSer(erro, ApiResponseMessages.NaoAutorizado, TipoErro.NaoAutorizado);
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_PerfilSemPermissao_Quando_AcessarEndpointRestrito_Entao_DeveRetornarProibido()
     {
         // Arrange
@@ -124,3 +124,4 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
         erro.GetProperty("mensagem").GetString().Should().Be(mensagem);
     }
 }
+

@@ -20,7 +20,7 @@ public sealed class PecasInsumosCatalogoControllerTests : ApiIntegrationTestBase
         await AutenticarComoAdministradorAsync();
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_PecaInsumoCatalogoValido_Quando_ExecutarCrud_Entao_DevePersistirAlterarListarERemover()
     {
         // Arrange
@@ -57,3 +57,4 @@ public sealed class PecasInsumosCatalogoControllerTests : ApiIntegrationTestBase
         consultaAposRemocao.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
+

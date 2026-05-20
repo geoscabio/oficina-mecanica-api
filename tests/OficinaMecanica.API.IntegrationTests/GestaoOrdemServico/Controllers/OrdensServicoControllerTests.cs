@@ -21,7 +21,7 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         await AutenticarComoAdministradorAsync();
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_DadosValidos_Quando_AbrirConsultarListarECancelar_Entao_DevePersistirOrdemServico()
     {
         // Arrange
@@ -91,3 +91,4 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         return ObterGuid(response, "id");
     }
 }
+

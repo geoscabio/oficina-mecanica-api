@@ -14,7 +14,7 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
     {
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_EndpointProtegido_Quando_GerarSwagger_Entao_DeveDocumentarRespostasDeErroPadronizadas()
     {
         // Arrange
@@ -43,7 +43,7 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
             TipoErro.AcessoProibido);
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_EndpointCadastro_Quando_GerarSwagger_Entao_DeveDocumentarCreatedComSchema()
     {
         // Arrange
@@ -71,7 +71,7 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
             .NotBe(JsonValueKind.Undefined);
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_EndpointRemocao_Quando_GerarSwagger_Entao_DeveDocumentarNoContentSemBody()
     {
         // Arrange
@@ -124,3 +124,4 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
         example.GetProperty("tipo").GetString().Should().Be(tipoErro.ToString());
     }
 }
+

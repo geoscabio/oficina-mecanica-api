@@ -19,7 +19,7 @@ public sealed class MecanicosControllerTests : ApiIntegrationTestBase
         await AutenticarComoAdministradorAsync();
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_MecanicoValido_Quando_ExecutarCrud_Entao_DevePersistirAlterarListarERemover()
     {
         // Arrange
@@ -53,3 +53,4 @@ public sealed class MecanicosControllerTests : ApiIntegrationTestBase
         consultaAposRemocao.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
+
