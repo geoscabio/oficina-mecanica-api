@@ -6,7 +6,6 @@ using OficinaMecanica.Application.GestaoEstoque.ValidationMessages;
 using OficinaMecanica.Application.UnitTests.Common;
 using OficinaMecanica.Application.UnitTests.GestaoEstoque.Factories;
 using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
-using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
 
 namespace OficinaMecanica.Application.UnitTests.GestaoEstoque.EstoqueUseCases.AtualizarEstoque;
@@ -44,12 +43,6 @@ public class AtualizarEstoqueUseCaseTests
         repository.Verify(
             repo => repo.AtualizarAsync(estoque, It.IsAny<CancellationToken>()),
             Times.Once);
-
-        repository.Verify(
-            repo => repo.AtualizarItemAsync(
-                It.IsAny<ItemEstoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
     }
 
     [Fact]
@@ -80,12 +73,6 @@ public class AtualizarEstoqueUseCaseTests
                 It.IsAny<Estoque>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
-
-        repository.Verify(
-            repo => repo.AtualizarItemAsync(
-                It.IsAny<ItemEstoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
     }
 
     [Fact]
@@ -114,12 +101,6 @@ public class AtualizarEstoqueUseCaseTests
         repository.Verify(
             repo => repo.AtualizarAsync(
                 It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
-
-        repository.Verify(
-            repo => repo.AtualizarItemAsync(
-                It.IsAny<ItemEstoque>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
     }

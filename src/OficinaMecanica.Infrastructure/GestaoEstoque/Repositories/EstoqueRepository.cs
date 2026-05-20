@@ -64,20 +64,4 @@ public sealed class EstoqueRepository : IEstoqueRepository
         return _dbContext.Set<ItemEstoque>()
             .SingleOrDefaultAsync(item => item.Id == itemEstoqueId, cancellationToken);
     }
-
-    public Task<ItemEstoque?> ObterItemPorPecaInsumoCatalogoIdAsync(
-        Guid pecaInsumoCatalogoId,
-        CancellationToken cancellationToken = default)
-    {
-        return _dbContext.Set<ItemEstoque>()
-            .SingleOrDefaultAsync(
-                item => item.PecaInsumoCatalogoId == pecaInsumoCatalogoId,
-                cancellationToken);
-    }
-
-    public async Task AtualizarItemAsync(ItemEstoque itemEstoque, CancellationToken cancellationToken = default)
-    {
-        _dbContext.Set<ItemEstoque>().Update(itemEstoque);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
 }
