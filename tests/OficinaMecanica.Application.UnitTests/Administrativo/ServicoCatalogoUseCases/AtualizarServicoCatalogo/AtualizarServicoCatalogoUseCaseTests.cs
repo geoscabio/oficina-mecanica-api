@@ -22,8 +22,7 @@ public class AtualizarServicoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(
-            servicoCatalogo.Id);
+        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(servicoCatalogo.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -35,19 +34,10 @@ public class AtualizarServicoCatalogoUseCaseTests
         resultado.Valor.Descricao.Should().Be(request.Descricao);
         resultado.Valor.Valor.Should().Be(request.Valor);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.ServicoCatalogoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.ServicoCatalogoId, It.IsAny<CancellationToken>()), Times.Once);
 
         repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.Is<ServicoCatalogo>(servico =>
-                    servico.Id == servicoCatalogo.Id
-                    && servico.Descricao == request.Descricao
-                    && servico.Valor == request.Valor),
-                It.IsAny<CancellationToken>()),
+            repo => repo.AtualizarAsync(It.Is<ServicoCatalogo>(servico => servico.Id == servicoCatalogo.Id && servico.Descricao == request.Descricao && servico.Valor == request.Valor), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -70,17 +60,9 @@ public class AtualizarServicoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.ServicoCatalogoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.ServicoCatalogoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<ServicoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<ServicoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -91,8 +73,7 @@ public class AtualizarServicoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(
-            Guid.Empty);
+        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -103,32 +84,22 @@ public class AtualizarServicoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<ServicoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<ServicoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public async Task Dado_DescricaoInvalida_Quando_AtualizarServicoCatalogo_Entao_DeveRetornarFalhaDeValidacao(
-        string descricao)
+    public async Task Dado_DescricaoInvalida_Quando_AtualizarServicoCatalogo_Entao_DeveRetornarFalhaDeValidacao(string descricao)
     {
         // Arrange
         var repository = new Mock<IServicoCatalogoRepository>();
 
         var useCase = CriarUseCase(repository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(
-            descricao: descricao);
+        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(descricao: descricao);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -139,17 +110,9 @@ public class AtualizarServicoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<ServicoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<ServicoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -160,8 +123,7 @@ public class AtualizarServicoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(
-            valor: 0m);
+        var request = ServicoCatalogoTestDataFactory.CriarAtualizarServicoCatalogoRequestValido(valor: 0m);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -172,39 +134,24 @@ public class AtualizarServicoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<ServicoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<ServicoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static Mock<IServicoCatalogoRepository> CriarRepository(
-        ServicoCatalogo? servicoCatalogo)
+    private static Mock<IServicoCatalogoRepository> CriarRepository(ServicoCatalogo? servicoCatalogo)
     {
         var repository = new Mock<IServicoCatalogoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(servicoCatalogo);
 
         return repository;
     }
 
-    private static AtualizarServicoCatalogoUseCase CriarUseCase(
-        Mock<IServicoCatalogoRepository> repository)
+    private static AtualizarServicoCatalogoUseCase CriarUseCase(Mock<IServicoCatalogoRepository> repository)
     {
-        return new AtualizarServicoCatalogoUseCase(
-            repository.Object,
-            new AtualizarServicoCatalogoValidator(),
-            MapperFactory.Criar());
+        return new AtualizarServicoCatalogoUseCase(repository.Object, new AtualizarServicoCatalogoValidator(), MapperFactory.Criar());
     }
 }

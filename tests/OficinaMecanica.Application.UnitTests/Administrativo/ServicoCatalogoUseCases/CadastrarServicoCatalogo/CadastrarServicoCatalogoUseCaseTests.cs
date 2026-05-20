@@ -32,27 +32,21 @@ public class CadastrarServicoCatalogoUseCaseTests
         resultado.Valor.Valor.Should().Be(ServicoCatalogoTestDataFactory.ValorPadrao);
 
         repository.Verify(
-            repo => repo.AdicionarAsync(
-                It.Is<ServicoCatalogo>(servico =>
-                    servico.Descricao == ServicoCatalogoTestDataFactory.DescricaoPadrao
-                    && servico.Valor == ServicoCatalogoTestDataFactory.ValorPadrao),
-                It.IsAny<CancellationToken>()),
+            repo => repo.AdicionarAsync(It.Is<ServicoCatalogo>(servico => servico.Descricao == ServicoCatalogoTestDataFactory.DescricaoPadrao && servico.Valor == ServicoCatalogoTestDataFactory.ValorPadrao), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public async Task Dado_DescricaoInvalida_Quando_CadastrarServicoCatalogo_Entao_DeveRetornarFalhaDeValidacao(
-        string descricao)
+    public async Task Dado_DescricaoInvalida_Quando_CadastrarServicoCatalogo_Entao_DeveRetornarFalhaDeValidacao(string descricao)
     {
         // Arrange
         var repository = CriarRepository();
 
         var useCase = CriarUseCase(repository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarCadastrarServicoCatalogoRequestValido(
-            descricao: descricao);
+        var request = ServicoCatalogoTestDataFactory.CriarCadastrarServicoCatalogoRequestValido(descricao: descricao);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -63,11 +57,7 @@ public class CadastrarServicoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<ServicoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<ServicoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -78,8 +68,7 @@ public class CadastrarServicoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarCadastrarServicoCatalogoRequestValido(
-            valor: 0m);
+        var request = ServicoCatalogoTestDataFactory.CriarCadastrarServicoCatalogoRequestValido(valor: 0m);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -90,11 +79,7 @@ public class CadastrarServicoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<ServicoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<ServicoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IServicoCatalogoRepository> CriarRepository()
@@ -102,12 +87,8 @@ public class CadastrarServicoCatalogoUseCaseTests
         return new Mock<IServicoCatalogoRepository>();
     }
 
-    private static CadastrarServicoCatalogoUseCase CriarUseCase(
-        Mock<IServicoCatalogoRepository> repository)
+    private static CadastrarServicoCatalogoUseCase CriarUseCase(Mock<IServicoCatalogoRepository> repository)
     {
-        return new CadastrarServicoCatalogoUseCase(
-            repository.Object,
-            new CadastrarServicoCatalogoValidator(),
-            MapperFactory.Criar());
+        return new CadastrarServicoCatalogoUseCase(repository.Object, new CadastrarServicoCatalogoValidator(), MapperFactory.Criar());
     }
 }

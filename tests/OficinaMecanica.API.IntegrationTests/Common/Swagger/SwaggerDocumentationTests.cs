@@ -37,11 +37,7 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
         RespostaDeErroDevePossuirSchema(responses, "422");
         RespostaDeErroDevePossuirSchema(responses, "500");
         RespostaDeErroValidacaoDevePossuirListaErros(responses);
-        RespostaDeErroDevePossuirExemplo(
-            responses,
-            "403",
-            ApiResponseMessages.AcessoProibido,
-            TipoErro.AcessoProibido);
+        RespostaDeErroDevePossuirExemplo(responses, "403", ApiResponseMessages.AcessoProibido, TipoErro.AcessoProibido);
     }
 
     [RequiresDockerFact]
@@ -109,11 +105,7 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
             .NotBe(JsonValueKind.Undefined);
     }
 
-    private static void RespostaDeErroDevePossuirExemplo(
-        JsonElement responses,
-        string statusCode,
-        string mensagem,
-        TipoErro tipoErro)
+    private static void RespostaDeErroDevePossuirExemplo(JsonElement responses, string statusCode, string mensagem, TipoErro tipoErro)
     {
         var example = responses
             .GetProperty(statusCode)

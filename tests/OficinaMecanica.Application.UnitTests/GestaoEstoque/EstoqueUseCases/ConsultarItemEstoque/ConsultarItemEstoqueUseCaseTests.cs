@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ConsultarItemEstoque;
@@ -67,8 +67,7 @@ public class ConsultarItemEstoqueUseCaseTests
         var useCase = CriarUseCase(repository);
 
         var request =
-            EstoqueTestDataFactory.CriarConsultarItemEstoqueRequestValido(
-                Guid.Empty);
+            EstoqueTestDataFactory.CriarConsultarItemEstoqueRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -80,11 +79,7 @@ public class ConsultarItemEstoqueUseCaseTests
 
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterItemPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterItemPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IEstoqueRepository> CriarRepository(ItemEstoque? itemEstoque)
@@ -92,20 +87,14 @@ public class ConsultarItemEstoqueUseCaseTests
         var repository = new Mock<IEstoqueRepository>();
 
         repository
-            .Setup(repo => repo.ObterItemPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterItemPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(itemEstoque);
 
         return repository;
     }
 
-    private static ConsultarItemEstoqueUseCase CriarUseCase(
-        Mock<IEstoqueRepository> repository)
+    private static ConsultarItemEstoqueUseCase CriarUseCase(Mock<IEstoqueRepository> repository)
     {
-        return new ConsultarItemEstoqueUseCase(
-            repository.Object,
-            new ConsultarItemEstoqueValidator(),
-            MapperFactory.Criar());
+        return new ConsultarItemEstoqueUseCase(repository.Object, new ConsultarItemEstoqueValidator(), MapperFactory.Criar());
     }
 }

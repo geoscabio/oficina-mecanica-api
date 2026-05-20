@@ -46,22 +46,12 @@ internal static class ClienteTestDataFactory
 
     public static Endereco CriarEnderecoPadrao()
     {
-        return new Endereco(
-            LogradouroPadrao,
-            NumeroPadrao,
-            BairroPadrao,
-            CidadePadrao,
-            CepPadrao);
+        return new Endereco(LogradouroPadrao, NumeroPadrao, BairroPadrao, CidadePadrao, CepPadrao);
     }
 
     public static Endereco CriarEnderecoAtualizado()
     {
-        return new Endereco(
-            LogradouroAtualizado,
-            NumeroAtualizado,
-            BairroAtualizado,
-            CidadeAtualizada,
-            CepAtualizado);
+        return new Endereco(LogradouroAtualizado, NumeroAtualizado, BairroAtualizado, CidadeAtualizada, CepAtualizado);
     }
 
     public static Telefone CriarTelefonePadrao()
@@ -86,11 +76,6 @@ internal static class ClienteTestDataFactory
 
     public static Cliente CriarClientePadrao()
     {
-        return Cliente.Criar(
-            CriarDocumentoPadrao(),
-            NomePadrao,
-            CriarEnderecoPadrao(),
-            CriarTelefonePadrao(),
-            CriarEmailPadrao());
+        return Cliente.Criar(CriarDocumentoPadrao(), NomePadrao, CriarEnderecoPadrao(), CriarTelefonePadrao(), CriarEmailPadrao());
     }
 }

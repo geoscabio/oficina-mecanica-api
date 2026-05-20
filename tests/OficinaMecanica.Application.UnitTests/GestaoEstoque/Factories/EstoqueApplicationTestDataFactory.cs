@@ -1,4 +1,4 @@
-﻿using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.AtualizarEstoque;
+using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.AtualizarEstoque;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ConsultarItemEstoque;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ListarItensEstoque;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.RegistrarEntradaEstoque;
@@ -15,18 +15,12 @@ internal static class EstoqueTestDataFactory
     public const int PaginaPadrao = 1;
     public const int TamanhoPaginaPadrao = 10;
 
-    public static ItemEstoque CriarItemEstoquePadrao(
-        Guid? pecaInsumoCatalogoId = null,
-        int quantidadeDisponivel = QuantidadeDisponivelPadrao)
+    public static ItemEstoque CriarItemEstoquePadrao(Guid? pecaInsumoCatalogoId = null, int quantidadeDisponivel = QuantidadeDisponivelPadrao)
     {
-        return ItemEstoque.Criar(
-            pecaInsumoCatalogoId ?? Guid.NewGuid(),
-            quantidadeDisponivel);
+        return ItemEstoque.Criar(pecaInsumoCatalogoId ?? Guid.NewGuid(), quantidadeDisponivel);
     }
 
-    public static Estoque CriarEstoquePadrao(
-        Guid? pecaInsumoCatalogoId = null,
-        int quantidadeDisponivel = QuantidadeDisponivelPadrao)
+    public static Estoque CriarEstoquePadrao(Guid? pecaInsumoCatalogoId = null, int quantidadeDisponivel = QuantidadeDisponivelPadrao)
     {
         return Estoque.Criar(new[]
         {
@@ -44,37 +38,23 @@ internal static class EstoqueTestDataFactory
         return Estoque.Criar(itens);
     }
 
-    public static AtualizarEstoqueRequest CriarAtualizarEstoqueRequestValido(
-        Guid? pecaInsumoCatalogoId = null,
-        int quantidadeDisponivel = QuantidadeAtualizadaPadrao)
+    public static AtualizarEstoqueRequest CriarAtualizarEstoqueRequestValido(Guid? pecaInsumoCatalogoId = null, int quantidadeDisponivel = QuantidadeAtualizadaPadrao)
     {
-        return new AtualizarEstoqueRequest(
-            pecaInsumoCatalogoId ?? Guid.NewGuid(),
-            quantidadeDisponivel);
+        return new AtualizarEstoqueRequest(pecaInsumoCatalogoId ?? Guid.NewGuid(), quantidadeDisponivel);
     }
 
-    public static ConsultarItemEstoqueRequest CriarConsultarItemEstoqueRequestValido(
-        Guid? itemEstoqueId = null)
+    public static ConsultarItemEstoqueRequest CriarConsultarItemEstoqueRequestValido(Guid? itemEstoqueId = null)
     {
-        return new ConsultarItemEstoqueRequest(
-            itemEstoqueId ?? Guid.NewGuid());
+        return new ConsultarItemEstoqueRequest(itemEstoqueId ?? Guid.NewGuid());
     }
 
-    public static ListarItensEstoqueRequest CriarListarItensEstoqueRequestValido(
-        int pagina = PaginaPadrao,
-        int tamanhoPagina = TamanhoPaginaPadrao)
+    public static ListarItensEstoqueRequest CriarListarItensEstoqueRequestValido(int pagina = PaginaPadrao, int tamanhoPagina = TamanhoPaginaPadrao)
     {
-        return new ListarItensEstoqueRequest(
-            pagina,
-            tamanhoPagina);
+        return new ListarItensEstoqueRequest(pagina, tamanhoPagina);
     }
 
-    public static RegistrarEntradaEstoqueRequest CriarRegistrarEntradaEstoqueRequestValido(
-        Guid? pecaInsumoCatalogoId = null,
-        int quantidade = QuantidadeEntradaPadrao)
+    public static RegistrarEntradaEstoqueRequest CriarRegistrarEntradaEstoqueRequestValido(Guid? pecaInsumoCatalogoId = null, int quantidade = QuantidadeEntradaPadrao)
     {
-        return new RegistrarEntradaEstoqueRequest(
-            pecaInsumoCatalogoId ?? Guid.NewGuid(),
-            quantidade);
+        return new RegistrarEntradaEstoqueRequest(pecaInsumoCatalogoId ?? Guid.NewGuid(), quantidade);
     }
 }

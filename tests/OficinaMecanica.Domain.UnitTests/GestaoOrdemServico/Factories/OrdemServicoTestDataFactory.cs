@@ -13,15 +13,9 @@ internal static class OrdemServicoTestDataFactory
     public const decimal ValorPecaInsumoPadrao = 45m;
     public const int QuantidadePecaInsumoPadrao = 2;
 
-    public static OrdemServico CriarOrdemServicoPadrao(
-        int numero = NumeroPadrao,
-        Guid? veiculoId = null,
-        Guid? mecanicoId = null)
+    public static OrdemServico CriarOrdemServicoPadrao(int numero = NumeroPadrao, Guid? veiculoId = null, Guid? mecanicoId = null)
     {
-        return OrdemServico.Abrir(
-            numero,
-            veiculoId ?? Guid.NewGuid(),
-            mecanicoId ?? Guid.NewGuid());
+        return OrdemServico.Abrir(numero, veiculoId ?? Guid.NewGuid(), mecanicoId ?? Guid.NewGuid());
     }
 
     public static OrdemServico CriarOrdemServicoEmDiagnostico()
@@ -37,9 +31,7 @@ internal static class OrdemServicoTestDataFactory
     {
         var ordemServico = CriarOrdemServicoEmDiagnostico();
 
-        ordemServico.DefinirServico(
-            Guid.NewGuid(),
-            ValorServicoPadrao);
+        ordemServico.DefinirServico(Guid.NewGuid(), ValorServicoPadrao);
 
         return ordemServico;
     }
@@ -48,10 +40,7 @@ internal static class OrdemServicoTestDataFactory
     {
         var ordemServico = CriarOrdemServicoEmDiagnosticoComServico();
 
-        ordemServico.ReservarPecaInsumo(
-            Guid.NewGuid(),
-            QuantidadePecaInsumoPadrao,
-            ValorPecaInsumoPadrao);
+        ordemServico.ReservarPecaInsumo(Guid.NewGuid(), QuantidadePecaInsumoPadrao, ValorPecaInsumoPadrao);
 
         return ordemServico;
     }
@@ -114,13 +103,9 @@ internal static class OrdemServicoTestDataFactory
         return ordemServico;
     }
 
-    public static Servico CriarServicoPadrao(
-        Guid? servicoCatalogoId = null,
-        decimal valor = ValorServicoPadrao)
+    public static Servico CriarServicoPadrao(Guid? servicoCatalogoId = null, decimal valor = ValorServicoPadrao)
     {
-        return Servico.Criar(
-            servicoCatalogoId ?? Guid.NewGuid(),
-            valor);
+        return Servico.Criar(servicoCatalogoId ?? Guid.NewGuid(), valor);
     }
 
     public static Servico CriarServicoEmExecucao()
@@ -141,14 +126,8 @@ internal static class OrdemServicoTestDataFactory
         return servico;
     }
 
-    public static PecaInsumo CriarPecaInsumoPadrao(
-        Guid? pecaInsumoCatalogoId = null,
-        int quantidade = QuantidadePecaInsumoPadrao,
-        decimal valorUnitario = ValorPecaInsumoPadrao)
+    public static PecaInsumo CriarPecaInsumoPadrao(Guid? pecaInsumoCatalogoId = null, int quantidade = QuantidadePecaInsumoPadrao, decimal valorUnitario = ValorPecaInsumoPadrao)
     {
-        return PecaInsumo.Criar(
-            pecaInsumoCatalogoId ?? Guid.NewGuid(),
-            quantidade,
-            valorUnitario);
+        return PecaInsumo.Criar(pecaInsumoCatalogoId ?? Guid.NewGuid(), quantidade, valorUnitario);
     }
 }

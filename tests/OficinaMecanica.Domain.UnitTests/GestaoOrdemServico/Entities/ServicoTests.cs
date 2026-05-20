@@ -16,9 +16,7 @@ public class ServicoTests
         var servicoCatalogoId = Guid.NewGuid();
 
         // Act
-        var servico = Servico.Criar(
-            servicoCatalogoId,
-            OrdemServicoTestDataFactory.ValorServicoPadrao);
+        var servico = Servico.Criar(servicoCatalogoId, OrdemServicoTestDataFactory.ValorServicoPadrao);
 
         // Assert
         servico.Id.Should().NotBeEmpty();
@@ -36,9 +34,7 @@ public class ServicoTests
         var servicoCatalogoId = Guid.Empty;
 
         // Act
-        var acao = () => Servico.Criar(
-            servicoCatalogoId,
-            OrdemServicoTestDataFactory.ValorServicoPadrao);
+        var acao = () => Servico.Criar(servicoCatalogoId, OrdemServicoTestDataFactory.ValorServicoPadrao);
 
         // Assert
         acao.Should()
@@ -55,9 +51,7 @@ public class ServicoTests
         var servicoCatalogoId = Guid.NewGuid();
 
         // Act
-        var acao = () => Servico.Criar(
-            servicoCatalogoId,
-            valor);
+        var acao = () => Servico.Criar(servicoCatalogoId, valor);
 
         // Assert
         acao.Should()

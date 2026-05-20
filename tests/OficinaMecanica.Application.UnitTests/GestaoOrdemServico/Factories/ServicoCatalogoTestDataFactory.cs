@@ -16,29 +16,19 @@ internal static class ServicoCatalogoTestDataFactory
     public const int PaginaPadrao = 1;
     public const int TamanhoPaginaPadrao = 10;
 
-    public static ServicoCatalogo CriarServicoCatalogoPadrao(
-        string descricao = DescricaoPadrao,
-        decimal valor = ValorPadrao)
+    public static ServicoCatalogo CriarServicoCatalogoPadrao(string descricao = DescricaoPadrao, decimal valor = ValorPadrao)
     {
-        return ServicoCatalogo.Criar(
-            descricao,
-            valor);
+        return ServicoCatalogo.Criar(descricao, valor);
     }
 
-    public static ConsultarTempoMedioExecucaoServicoRequest CriarConsultarTempoMedioExecucaoServicoRequestValido(
-        Guid? servicoCatalogoId = null)
+    public static ConsultarTempoMedioExecucaoServicoRequest CriarConsultarTempoMedioExecucaoServicoRequestValido(Guid? servicoCatalogoId = null)
     {
-        return new ConsultarTempoMedioExecucaoServicoRequest(
-            servicoCatalogoId ?? Guid.NewGuid());
+        return new ConsultarTempoMedioExecucaoServicoRequest(servicoCatalogoId ?? Guid.NewGuid());
     }
 
-    public static ListarTempoMedioExecucaoServicosRequest CriarListarTempoMedioExecucaoServicosRequestValido(
-        int pagina = PaginaPadrao,
-        int tamanhoPagina = TamanhoPaginaPadrao)
+    public static ListarTempoMedioExecucaoServicosRequest CriarListarTempoMedioExecucaoServicosRequestValido(int pagina = PaginaPadrao, int tamanhoPagina = TamanhoPaginaPadrao)
     {
-        return new ListarTempoMedioExecucaoServicosRequest(
-            pagina,
-            tamanhoPagina);
+        return new ListarTempoMedioExecucaoServicosRequest(pagina, tamanhoPagina);
     }
 }
 

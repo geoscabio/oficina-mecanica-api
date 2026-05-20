@@ -33,23 +33,15 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
             .BuildAbertura();
 
         // Act
-        var ordemCriada = await PostJsonAsync(
-            "/api/v1/gestao-ordem-servico/ordens-servico/cadastrar",
-            request,
-            HttpStatusCode.Created);
+        var ordemCriada = await PostJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/cadastrar", request, HttpStatusCode.Created);
         var ordemServicoId = ObterGuid(ordemCriada, "id");
 
-        var ordemConsultada = await GetJsonAsync(
-            $"/api/v1/gestao-ordem-servico/ordens-servico/consultar/{ordemServicoId}");
-        var status = await GetJsonAsync(
-            $"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/consultar-status");
+        var ordemConsultada = await GetJsonAsync($"/api/v1/gestao-ordem-servico/ordens-servico/consultar/{ordemServicoId}");
+        var status = await GetJsonAsync($"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/consultar-status");
         var ordens = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar");
 
         var cancelamento = OrdemServicoRequestBuilder.Novo().BuildCancelamento(ordemServicoId);
-        var ordemCancelada = await PostJsonAsync(
-            $"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/cancelar",
-            cancelamento,
-            HttpStatusCode.OK);
+        var ordemCancelada = await PostJsonAsync($"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/cancelar", cancelamento, HttpStatusCode.OK);
 
         // Assert
         ObterGuid(ordemConsultada, "id").Should().Be(ordemServicoId);
@@ -61,32 +53,21 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
     private async Task<Guid> CadastrarVeiculoAsync()
     {
         var clienteId = await CadastrarClienteAsync();
-        var response = await PostJsonAsync(
-            "/api/v1/atendimento/veiculos/cadastrar",
-            VeiculoRequestBuilder.Novo()
-                .ComClienteId(clienteId)
-                .BuildCadastro(),
-            HttpStatusCode.Created);
+        var response = await PostJsonAsync("/api/v1/atendimento/veiculos/cadastrar", VeiculoRequestBuilder.Novo().ComClienteId(clienteId).BuildCadastro(), HttpStatusCode.Created);
 
         return ObterGuid(response, "id");
     }
 
     private async Task<Guid> CadastrarClienteAsync()
     {
-        var response = await PostJsonAsync(
-            "/api/v1/atendimento/clientes/cadastrar",
-            ClienteRequestBuilder.Novo().BuildCadastro(),
-            HttpStatusCode.Created);
+        var response = await PostJsonAsync("/api/v1/atendimento/clientes/cadastrar", ClienteRequestBuilder.Novo().BuildCadastro(), HttpStatusCode.Created);
 
         return ObterGuid(response, "id");
     }
 
     private async Task<Guid> CadastrarMecanicoAsync()
     {
-        var response = await PostJsonAsync(
-            "/api/v1/administrativo/mecanicos/cadastrar",
-            MecanicoRequestBuilder.Novo().BuildCadastro(),
-            HttpStatusCode.Created);
+        var response = await PostJsonAsync("/api/v1/administrativo/mecanicos/cadastrar", MecanicoRequestBuilder.Novo().BuildCadastro(), HttpStatusCode.Created);
 
         return ObterGuid(response, "id");
     }

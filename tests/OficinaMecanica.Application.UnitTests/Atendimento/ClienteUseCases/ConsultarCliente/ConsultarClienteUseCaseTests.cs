@@ -52,11 +52,7 @@ public class ConsultarClienteUseCaseTests
 
         resultado.Valor.Email.Should().Be(ClienteTestDataFactory.EmailPadrao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.Id,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -81,11 +77,7 @@ public class ConsultarClienteUseCaseTests
 
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.Id,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -110,11 +102,7 @@ public class ConsultarClienteUseCaseTests
 
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IClienteRepository> CriarRepository(Cliente? cliente)
@@ -122,9 +110,7 @@ public class ConsultarClienteUseCaseTests
         var repository = new Mock<IClienteRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(cliente);
 
         return repository;
@@ -132,9 +118,6 @@ public class ConsultarClienteUseCaseTests
 
     private static ConsultarClienteUseCase CriarUseCase(Mock<IClienteRepository> repository)
     {
-        return new ConsultarClienteUseCase(
-            repository.Object,
-            new ConsultarClienteValidator(),
-            MapperFactory.Criar());
+        return new ConsultarClienteUseCase(repository.Object, new ConsultarClienteValidator(), MapperFactory.Criar());
     }
 }

@@ -21,9 +21,7 @@ public class ListarOrdensServicoUseCaseTests
             OrdemServicoTestDataFactory.CriarOrdemServicoFinalizada()
         };
 
-        var repository = CriarRepository(
-            ordensServico,
-            totalItens: ordensServico.Length);
+        var repository = CriarRepository(ordensServico, totalItens: ordensServico.Length);
 
         var useCase = CriarUseCase(repository);
 
@@ -39,28 +37,18 @@ public class ListarOrdensServicoUseCaseTests
         resultado.Valor.TamanhoPagina.Should().Be(OrdemServicoTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(ordensServico.Length);
         resultado.Valor.Itens.Should().HaveCount(ordensServico.Length);
-        resultado.Valor.Itens.Select(ordemServico => ordemServico.Id).Should().BeEquivalentTo(
-            ordensServico.Select(ordemServico => ordemServico.Id));
+        resultado.Valor.Itens.Select(ordemServico => ordemServico.Id).Should().BeEquivalentTo(ordensServico.Select(ordemServico => ordemServico.Id));
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                OrdemServicoTestDataFactory.PaginaPadrao,
-                OrdemServicoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ListarAsync(OrdemServicoTestDataFactory.PaginaPadrao, OrdemServicoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task Dado_NenhumaOrdemServico_Quando_ListarOrdensServico_Entao_DeveRetornarListaVazia()
     {
         // Arrange
-        var repository = CriarRepository(
-            Array.Empty<OrdemServico>(),
-            totalItens: 0);
+        var repository = CriarRepository(Array.Empty<OrdemServico>(), totalItens: 0);
 
         var useCase = CriarUseCase(repository);
 
@@ -77,31 +65,20 @@ public class ListarOrdensServicoUseCaseTests
         resultado.Valor.TamanhoPagina.Should().Be(OrdemServicoTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(0);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                OrdemServicoTestDataFactory.PaginaPadrao,
-                OrdemServicoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ListarAsync(OrdemServicoTestDataFactory.PaginaPadrao, OrdemServicoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task Dado_PaginaSemResultado_Quando_ListarOrdensServico_Entao_DeveRetornarListaVaziaComTotalItens()
     {
         // Arrange
-        var repository = CriarRepository(
-            Array.Empty<OrdemServico>(),
-            totalItens: 10,
-            pagina: OrdemServicoTestDataFactory.SegundaPagina);
+        var repository = CriarRepository(Array.Empty<OrdemServico>(), totalItens: 10, pagina: OrdemServicoTestDataFactory.SegundaPagina);
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarListarOrdensServicoRequestValido(
-            pagina: OrdemServicoTestDataFactory.SegundaPagina);
+        var request = OrdemServicoTestDataFactory.CriarListarOrdensServicoRequestValido(pagina: OrdemServicoTestDataFactory.SegundaPagina);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -114,16 +91,9 @@ public class ListarOrdensServicoUseCaseTests
         resultado.Valor.TamanhoPagina.Should().Be(OrdemServicoTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(10);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                OrdemServicoTestDataFactory.SegundaPagina,
-                OrdemServicoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ListarAsync(OrdemServicoTestDataFactory.SegundaPagina, OrdemServicoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -134,8 +104,7 @@ public class ListarOrdensServicoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarListarOrdensServicoRequestValido(
-            pagina: 0);
+        var request = OrdemServicoTestDataFactory.CriarListarOrdensServicoRequestValido(pagina: 0);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -146,16 +115,9 @@ public class ListarOrdensServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -166,8 +128,7 @@ public class ListarOrdensServicoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarListarOrdensServicoRequestValido(
-            tamanhoPagina: 101);
+        var request = OrdemServicoTestDataFactory.CriarListarOrdensServicoRequestValido(tamanhoPagina: 101);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -178,16 +139,9 @@ public class ListarOrdensServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IOrdemServicoRepository> CriarRepository(
@@ -199,10 +153,7 @@ public class ListarOrdensServicoUseCaseTests
         var repository = new Mock<IOrdemServicoRepository>();
 
         repository
-            .Setup(repo => repo.ListarAsync(
-                pagina,
-                tamanhoPagina,
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ListarAsync(pagina, tamanhoPagina, It.IsAny<CancellationToken>()))
             .ReturnsAsync(ordensServico);
 
         repository
@@ -212,12 +163,8 @@ public class ListarOrdensServicoUseCaseTests
         return repository;
     }
 
-    private static ListarOrdensServicoUseCase CriarUseCase(
-        Mock<IOrdemServicoRepository> repository)
+    private static ListarOrdensServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
     {
-        return new ListarOrdensServicoUseCase(
-            repository.Object,
-            new ListarOrdensServicoValidator(),
-            MapperFactory.Criar());
+        return new ListarOrdensServicoUseCase(repository.Object, new ListarOrdensServicoValidator(), MapperFactory.Criar());
     }
 }

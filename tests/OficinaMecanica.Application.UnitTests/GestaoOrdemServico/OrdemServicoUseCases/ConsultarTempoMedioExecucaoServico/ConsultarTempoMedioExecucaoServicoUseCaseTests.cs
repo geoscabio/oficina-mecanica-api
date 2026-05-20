@@ -21,13 +21,11 @@ public class ConsultarTempoMedioExecucaoServicoUseCaseTests
 
         var servicoCatalogoRepository = CriarServicoCatalogoRepository(servicoCatalogo);
 
-        var ordemServicoRepository = CriarOrdemServicoRepository(
-            ServicoCatalogoTestDataFactory.TempoMedioExecucaoPadrao);
+        var ordemServicoRepository = CriarOrdemServicoRepository(ServicoCatalogoTestDataFactory.TempoMedioExecucaoPadrao);
 
         var useCase = CriarUseCase(servicoCatalogoRepository, ordemServicoRepository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarConsultarTempoMedioExecucaoServicoRequestValido(
-            servicoCatalogo.Id);
+        var request = ServicoCatalogoTestDataFactory.CriarConsultarTempoMedioExecucaoServicoRequestValido(servicoCatalogo.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -38,20 +36,11 @@ public class ConsultarTempoMedioExecucaoServicoUseCaseTests
         resultado.Valor!.ServicoCatalogoId.Should().Be(servicoCatalogo.Id);
         resultado.Valor.Descricao.Should().Be(ServicoCatalogoTestDataFactory.DescricaoPadrao);
         resultado.Valor.Valor.Should().Be(ServicoCatalogoTestDataFactory.ValorPadrao);
-        resultado.Valor.TempoMedioExecucaoEmMinutos.Should().Be(
-            ServicoCatalogoTestDataFactory.TempoMedioExecucaoPadrao);
+        resultado.Valor.TempoMedioExecucaoEmMinutos.Should().Be(ServicoCatalogoTestDataFactory.TempoMedioExecucaoPadrao);
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.ServicoCatalogoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        servicoCatalogoRepository.Verify(repo => repo.ObterPorIdAsync(request.ServicoCatalogoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterTempoMedioExecucaoServicoAsync(
-                servicoCatalogo.Id,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        ordemServicoRepository.Verify(repo => repo.ObterTempoMedioExecucaoServicoAsync(servicoCatalogo.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -66,8 +55,7 @@ public class ConsultarTempoMedioExecucaoServicoUseCaseTests
 
         var useCase = CriarUseCase(servicoCatalogoRepository, ordemServicoRepository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarConsultarTempoMedioExecucaoServicoRequestValido(
-            servicoCatalogo.Id);
+        var request = ServicoCatalogoTestDataFactory.CriarConsultarTempoMedioExecucaoServicoRequestValido(servicoCatalogo.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -78,17 +66,9 @@ public class ConsultarTempoMedioExecucaoServicoUseCaseTests
         resultado.Valor!.ServicoCatalogoId.Should().Be(servicoCatalogo.Id);
         resultado.Valor.TempoMedioExecucaoEmMinutos.Should().BeNull();
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.ServicoCatalogoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        servicoCatalogoRepository.Verify(repo => repo.ObterPorIdAsync(request.ServicoCatalogoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterTempoMedioExecucaoServicoAsync(
-                servicoCatalogo.Id,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        ordemServicoRepository.Verify(repo => repo.ObterTempoMedioExecucaoServicoAsync(servicoCatalogo.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -112,17 +92,9 @@ public class ConsultarTempoMedioExecucaoServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.ServicoCatalogoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        servicoCatalogoRepository.Verify(repo => repo.ObterPorIdAsync(request.ServicoCatalogoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterTempoMedioExecucaoServicoAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ObterTempoMedioExecucaoServicoAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -135,8 +107,7 @@ public class ConsultarTempoMedioExecucaoServicoUseCaseTests
 
         var useCase = CriarUseCase(servicoCatalogoRepository, ordemServicoRepository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarConsultarTempoMedioExecucaoServicoRequestValido(
-            Guid.Empty);
+        var request = ServicoCatalogoTestDataFactory.CriarConsultarTempoMedioExecucaoServicoRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -147,28 +118,17 @@ public class ConsultarTempoMedioExecucaoServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        servicoCatalogoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterTempoMedioExecucaoServicoAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ObterTempoMedioExecucaoServicoAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static Mock<IServicoCatalogoRepository> CriarServicoCatalogoRepository(
-        ServicoCatalogo? servicoCatalogo)
+    private static Mock<IServicoCatalogoRepository> CriarServicoCatalogoRepository(ServicoCatalogo? servicoCatalogo)
     {
         var repository = new Mock<IServicoCatalogoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(servicoCatalogo);
 
         return repository;
@@ -179,22 +139,14 @@ public class ConsultarTempoMedioExecucaoServicoUseCaseTests
         var repository = new Mock<IOrdemServicoRepository>();
 
         repository
-            .Setup(repo => repo.ObterTempoMedioExecucaoServicoAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterTempoMedioExecucaoServicoAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(tempoMedio);
 
         return repository;
     }
 
-    private static ConsultarTempoMedioExecucaoServicoUseCase CriarUseCase(
-        Mock<IServicoCatalogoRepository> servicoCatalogoRepository,
-        Mock<IOrdemServicoRepository> ordemServicoRepository)
+    private static ConsultarTempoMedioExecucaoServicoUseCase CriarUseCase(Mock<IServicoCatalogoRepository> servicoCatalogoRepository, Mock<IOrdemServicoRepository> ordemServicoRepository)
     {
-        return new ConsultarTempoMedioExecucaoServicoUseCase(
-            servicoCatalogoRepository.Object,
-            ordemServicoRepository.Object,
-            new ConsultarTempoMedioExecucaoServicoValidator(),
-            MapperFactory.Criar());
+        return new ConsultarTempoMedioExecucaoServicoUseCase(servicoCatalogoRepository.Object, ordemServicoRepository.Object, new ConsultarTempoMedioExecucaoServicoValidator(), MapperFactory.Criar());
     }
 }

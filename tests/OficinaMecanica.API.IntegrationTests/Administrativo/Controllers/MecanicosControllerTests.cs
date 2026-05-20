@@ -26,10 +26,7 @@ public sealed class MecanicosControllerTests : ApiIntegrationTestBase
         var cadastro = MecanicoRequestBuilder.Novo().BuildCadastro();
 
         // Act
-        var mecanicoCriado = await PostJsonAsync(
-            "/api/v1/administrativo/mecanicos/cadastrar",
-            cadastro,
-            HttpStatusCode.Created);
+        var mecanicoCriado = await PostJsonAsync("/api/v1/administrativo/mecanicos/cadastrar", cadastro, HttpStatusCode.Created);
         var mecanicoId = ObterGuid(mecanicoCriado, "id");
 
         var mecanicoConsultado = await GetJsonAsync($"/api/v1/administrativo/mecanicos/consultar/{mecanicoId}");
@@ -39,9 +36,7 @@ public sealed class MecanicosControllerTests : ApiIntegrationTestBase
             .ComNome("Joao Mecanico Atualizado")
             .ComFuncional("MEC002")
             .BuildAtualizacao(mecanicoId);
-        var mecanicoAtualizado = await PutJsonAsync(
-            $"/api/v1/administrativo/mecanicos/{mecanicoId}/atualizar",
-            atualizacao);
+        var mecanicoAtualizado = await PutJsonAsync($"/api/v1/administrativo/mecanicos/{mecanicoId}/atualizar", atualizacao);
 
         await DeleteAsync($"/api/v1/administrativo/mecanicos/{mecanicoId}/remover");
         var consultaAposRemocao = await Client.GetAsync($"/api/v1/administrativo/mecanicos/consultar/{mecanicoId}");

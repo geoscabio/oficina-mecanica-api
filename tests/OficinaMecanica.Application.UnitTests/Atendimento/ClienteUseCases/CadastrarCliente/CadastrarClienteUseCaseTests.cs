@@ -34,11 +34,7 @@ public class CadastrarClienteUseCaseTests
         resultado.Valor.Nome.Should().Be(ClienteTestDataFactory.NomePadrao);
 
         repository.Verify(
-            repo => repo.AdicionarAsync(
-                It.Is<Cliente>(cliente =>
-                    cliente.Documento.Numero == ClienteTestDataFactory.DocumentoNormalizadoPadrao
-                    && cliente.Nome == ClienteTestDataFactory.NomePadrao),
-                It.IsAny<CancellationToken>()),
+            repo => repo.AdicionarAsync(It.Is<Cliente>(cliente => cliente.Documento.Numero == ClienteTestDataFactory.DocumentoNormalizadoPadrao && cliente.Nome == ClienteTestDataFactory.NomePadrao), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -63,11 +59,7 @@ public class CadastrarClienteUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(ClienteErrorMessages.ClienteDuplicado);
         resultado.Erro.Tipo.Should().Be(TipoErro.RegraNegocio);
 
-        repository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<Cliente>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Theory]
@@ -80,8 +72,7 @@ public class CadastrarClienteUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido(
-            nome: nome);
+        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido(nome: nome);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -92,17 +83,9 @@ public class CadastrarClienteUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorDocumentoAsync(
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorDocumentoAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<Cliente>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -113,11 +96,7 @@ public class CadastrarClienteUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido(
-            documento: string.Empty,
-            nome: string.Empty,
-            telefone: string.Empty,
-            email: string.Empty);
+        var request = ClienteTestDataFactory.CriarCadastrarClienteRequestValido(documento: string.Empty, nome: string.Empty, telefone: string.Empty, email: string.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -126,17 +105,9 @@ public class CadastrarClienteUseCaseTests
         resultado.Sucesso.Should().BeFalse();
         resultado.Erro.Should().NotBeNull();
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
-        resultado.Erro.Erros.Should().BeEquivalentTo(
-            ClienteValidationMessages.DocumentoObrigatorio,
-            ClienteValidationMessages.NomeObrigatorio,
-            ClienteValidationMessages.TelefoneObrigatorio,
-            ClienteValidationMessages.EmailObrigatorio);
+        resultado.Erro.Erros.Should().BeEquivalentTo(ClienteValidationMessages.DocumentoObrigatorio, ClienteValidationMessages.NomeObrigatorio, ClienteValidationMessages.TelefoneObrigatorio, ClienteValidationMessages.EmailObrigatorio);
 
-        repository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<Cliente>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IClienteRepository> CriarRepository(Cliente? cliente)
@@ -144,9 +115,7 @@ public class CadastrarClienteUseCaseTests
         var repository = new Mock<IClienteRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorDocumentoAsync(
-                ClienteTestDataFactory.DocumentoNormalizadoPadrao,
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorDocumentoAsync(ClienteTestDataFactory.DocumentoNormalizadoPadrao, It.IsAny<CancellationToken>()))
             .ReturnsAsync(cliente);
 
         return repository;
@@ -154,9 +123,6 @@ public class CadastrarClienteUseCaseTests
 
     private static CadastrarClienteUseCase CriarUseCase(Mock<IClienteRepository> repository)
     {
-        return new CadastrarClienteUseCase(
-            repository.Object,
-            new CadastrarClienteValidator(),
-            MapperFactory.Criar());
+        return new CadastrarClienteUseCase(repository.Object, new CadastrarClienteValidator(), MapperFactory.Criar());
     }
 }

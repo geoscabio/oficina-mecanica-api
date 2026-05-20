@@ -17,10 +17,7 @@ public class OrdemServicoTests
         var mecanicoId = Guid.NewGuid();
 
         // Act
-        var ordemServico = OrdemServico.Abrir(
-            OrdemServicoTestDataFactory.NumeroPadrao,
-            veiculoId,
-            mecanicoId);
+        var ordemServico = OrdemServico.Abrir(OrdemServicoTestDataFactory.NumeroPadrao, veiculoId, mecanicoId);
 
         // Assert
         ordemServico.Id.Should().NotBeEmpty();
@@ -46,10 +43,7 @@ public class OrdemServicoTests
         var mecanicoId = Guid.NewGuid();
 
         // Act
-        var acao = () => OrdemServico.Abrir(
-            numero,
-            veiculoId,
-            mecanicoId);
+        var acao = () => OrdemServico.Abrir(numero, veiculoId, mecanicoId);
 
         // Assert
         acao.Should()
@@ -64,10 +58,7 @@ public class OrdemServicoTests
         var mecanicoId = Guid.NewGuid();
 
         // Act
-        var acao = () => OrdemServico.Abrir(
-            OrdemServicoTestDataFactory.NumeroPadrao,
-            Guid.Empty,
-            mecanicoId);
+        var acao = () => OrdemServico.Abrir(OrdemServicoTestDataFactory.NumeroPadrao, Guid.Empty, mecanicoId);
 
         // Assert
         acao.Should()
@@ -82,10 +73,7 @@ public class OrdemServicoTests
         var veiculoId = Guid.NewGuid();
 
         // Act
-        var acao = () => OrdemServico.Abrir(
-            OrdemServicoTestDataFactory.NumeroPadrao,
-            veiculoId,
-            Guid.Empty);
+        var acao = () => OrdemServico.Abrir(OrdemServicoTestDataFactory.NumeroPadrao, veiculoId, Guid.Empty);
 
         // Assert
         acao.Should()
@@ -130,9 +118,7 @@ public class OrdemServicoTests
         var servicoCatalogoId = Guid.NewGuid();
 
         // Act
-        ordemServico.DefinirServico(
-            servicoCatalogoId,
-            OrdemServicoTestDataFactory.ValorServicoPadrao);
+        ordemServico.DefinirServico(servicoCatalogoId, OrdemServicoTestDataFactory.ValorServicoPadrao);
 
         // Assert
         ordemServico.Servicos.Should().ContainSingle();
@@ -149,9 +135,7 @@ public class OrdemServicoTests
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
 
         // Act
-        var acao = () => ordemServico.DefinirServico(
-            Guid.NewGuid(),
-            OrdemServicoTestDataFactory.ValorServicoPadrao);
+        var acao = () => ordemServico.DefinirServico(Guid.NewGuid(), OrdemServicoTestDataFactory.ValorServicoPadrao);
 
         // Assert
         acao.Should()
@@ -166,9 +150,7 @@ public class OrdemServicoTests
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
 
         // Act
-        var acao = () => ordemServico.DefinirServico(
-            Guid.Empty,
-            OrdemServicoTestDataFactory.ValorServicoPadrao);
+        var acao = () => ordemServico.DefinirServico(Guid.Empty, OrdemServicoTestDataFactory.ValorServicoPadrao);
 
         // Assert
         acao.Should()
@@ -183,9 +165,7 @@ public class OrdemServicoTests
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
 
         // Act
-        var acao = () => ordemServico.DefinirServico(
-            Guid.NewGuid(),
-            0m);
+        var acao = () => ordemServico.DefinirServico(Guid.NewGuid(), 0m);
 
         // Assert
         acao.Should()
@@ -201,10 +181,7 @@ public class OrdemServicoTests
         var pecaInsumoCatalogoId = Guid.NewGuid();
 
         // Act
-        ordemServico.ReservarPecaInsumo(
-            pecaInsumoCatalogoId,
-            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
-            OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
+        ordemServico.ReservarPecaInsumo(pecaInsumoCatalogoId, OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao, OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
 
         // Assert
         ordemServico.PecasInsumos.Should().ContainSingle();
@@ -222,10 +199,7 @@ public class OrdemServicoTests
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
 
         // Act
-        var acao = () => ordemServico.ReservarPecaInsumo(
-            Guid.NewGuid(),
-            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
-            OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
+        var acao = () => ordemServico.ReservarPecaInsumo(Guid.NewGuid(), OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao, OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
 
         // Assert
         acao.Should()

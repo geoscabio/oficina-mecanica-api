@@ -18,53 +18,33 @@ internal static class MecanicoTestDataFactory
     public const int PaginaPadrao = 1;
     public const int TamanhoPaginaPadrao = 10;
 
-    public static Mecanico CriarMecanicoPadrao(
-        string nome = NomePadrao,
-        string funcional = FuncionalPadrao)
+    public static Mecanico CriarMecanicoPadrao(string nome = NomePadrao, string funcional = FuncionalPadrao)
     {
         return Mecanico.Criar(nome, funcional);
     }
 
-    public static CadastrarMecanicoRequest CriarCadastrarMecanicoRequestValido(
-        string nome = NomePadrao,
-        string funcional = FuncionalPadrao)
+    public static CadastrarMecanicoRequest CriarCadastrarMecanicoRequestValido(string nome = NomePadrao, string funcional = FuncionalPadrao)
     {
-        return new CadastrarMecanicoRequest(
-            nome,
-            funcional);
+        return new CadastrarMecanicoRequest(nome, funcional);
     }
 
-    public static AtualizarMecanicoRequest CriarAtualizarMecanicoRequestValido(
-        Guid? mecanicoId = null,
-        string nome = NomeAtualizado,
-        string funcional = FuncionalAtualizado)
+    public static AtualizarMecanicoRequest CriarAtualizarMecanicoRequestValido(Guid? mecanicoId = null, string nome = NomeAtualizado, string funcional = FuncionalAtualizado)
     {
-        return new AtualizarMecanicoRequest(
-            mecanicoId ?? Guid.NewGuid(),
-            nome,
-            funcional);
+        return new AtualizarMecanicoRequest(mecanicoId ?? Guid.NewGuid(), nome, funcional);
     }
 
-    public static ConsultarMecanicoRequest CriarConsultarMecanicoRequestValido(
-        Guid? mecanicoId = null)
+    public static ConsultarMecanicoRequest CriarConsultarMecanicoRequestValido(Guid? mecanicoId = null)
     {
-        return new ConsultarMecanicoRequest(
-            mecanicoId ?? Guid.NewGuid());
+        return new ConsultarMecanicoRequest(mecanicoId ?? Guid.NewGuid());
     }
 
-    public static ListarMecanicosRequest CriarListarMecanicosRequestValido(
-        int pagina = PaginaPadrao,
-        int tamanhoPagina = TamanhoPaginaPadrao)
+    public static ListarMecanicosRequest CriarListarMecanicosRequestValido(int pagina = PaginaPadrao, int tamanhoPagina = TamanhoPaginaPadrao)
     {
-        return new ListarMecanicosRequest(
-            pagina,
-            tamanhoPagina);
+        return new ListarMecanicosRequest(pagina, tamanhoPagina);
     }
 
-    public static RemoverMecanicoRequest CriarRemoverMecanicoRequestValido(
-        Guid? mecanicoId = null)
+    public static RemoverMecanicoRequest CriarRemoverMecanicoRequestValido(Guid? mecanicoId = null)
     {
-        return new RemoverMecanicoRequest(
-            mecanicoId ?? Guid.NewGuid());
+        return new RemoverMecanicoRequest(mecanicoId ?? Guid.NewGuid());
     }
 }

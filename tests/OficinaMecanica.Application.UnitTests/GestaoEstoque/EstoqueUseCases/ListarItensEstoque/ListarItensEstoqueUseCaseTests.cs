@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.ListarItensEstoque;
@@ -19,9 +19,7 @@ public class ListarItensEstoqueUseCaseTests
 
         var itensEstoque = estoque.ItensEstoque.ToArray();
 
-        var repository = CriarRepository(
-            itensEstoque,
-            itensEstoque.Length);
+        var repository = CriarRepository(itensEstoque, itensEstoque.Length);
 
         var useCase = CriarUseCase(repository);
 
@@ -43,19 +41,11 @@ public class ListarItensEstoqueUseCaseTests
 
         resultado.Valor.Itens.Should().HaveCount(itensEstoque.Length);
 
-        resultado.Valor.Itens.Select(item => item.Id).Should().BeEquivalentTo(
-            itensEstoque.Select(item => item.Id));
+        resultado.Valor.Itens.Select(item => item.Id).Should().BeEquivalentTo(itensEstoque.Select(item => item.Id));
 
-        repository.Verify(
-            repo => repo.ListarItensAsync(
-                request.Pagina,
-                request.TamanhoPagina,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ListarItensAsync(request.Pagina, request.TamanhoPagina, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.ContarItensAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ContarItensAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -64,9 +54,7 @@ public class ListarItensEstoqueUseCaseTests
         // Arrange
         var itensEstoque = Array.Empty<ItemEstoque>();
 
-        var repository = CriarRepository(
-            itensEstoque,
-            totalItens: 0);
+        var repository = CriarRepository(itensEstoque, totalItens: 0);
 
         var useCase = CriarUseCase(repository);
 
@@ -97,8 +85,7 @@ public class ListarItensEstoqueUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = EstoqueTestDataFactory.CriarListarItensEstoqueRequestValido(
-            pagina: 0);
+        var request = EstoqueTestDataFactory.CriarListarItensEstoqueRequestValido(pagina: 0);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -110,16 +97,9 @@ public class ListarItensEstoqueUseCaseTests
 
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ListarItensAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ListarItensAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.ContarItensAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ContarItensAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -130,8 +110,7 @@ public class ListarItensEstoqueUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = EstoqueTestDataFactory.CriarListarItensEstoqueRequestValido(
-            tamanhoPagina: 101);
+        var request = EstoqueTestDataFactory.CriarListarItensEstoqueRequestValido(tamanhoPagina: 101);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -143,29 +122,17 @@ public class ListarItensEstoqueUseCaseTests
 
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ListarItensAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ListarItensAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.ContarItensAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ContarItensAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static Mock<IEstoqueRepository> CriarRepository(
-        IReadOnlyCollection<ItemEstoque> itensEstoque,
-        int totalItens)
+    private static Mock<IEstoqueRepository> CriarRepository(IReadOnlyCollection<ItemEstoque> itensEstoque, int totalItens)
     {
         var repository = new Mock<IEstoqueRepository>();
 
         repository
-            .Setup(repo => repo.ListarItensAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ListarItensAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(itensEstoque);
 
         repository
@@ -175,12 +142,8 @@ public class ListarItensEstoqueUseCaseTests
         return repository;
     }
 
-    private static ListarItensEstoqueUseCase CriarUseCase(
-        Mock<IEstoqueRepository> repository)
+    private static ListarItensEstoqueUseCase CriarUseCase(Mock<IEstoqueRepository> repository)
     {
-        return new ListarItensEstoqueUseCase(
-            repository.Object,
-            new ListarItensEstoqueValidator(),
-            MapperFactory.Criar());
+        return new ListarItensEstoqueUseCase(repository.Object, new ListarItensEstoqueValidator(), MapperFactory.Criar());
     }
 }

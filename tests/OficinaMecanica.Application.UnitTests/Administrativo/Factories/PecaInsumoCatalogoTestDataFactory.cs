@@ -1,4 +1,4 @@
-﻿using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.AtualizarPecaInsumoCatalogo;
+using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.AtualizarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.CadastrarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.ConsultarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.ListarPecasInsumosCatalogo;
@@ -21,26 +21,14 @@ internal static class PecaInsumoCatalogoTestDataFactory
     public const int PaginaPadrao = 1;
     public const int TamanhoPaginaPadrao = 10;
 
-    public static PecaInsumoCatalogo CriarPecaInsumoCatalogoPadrao(
-        string descricao = DescricaoPadrao,
-        TipoPecaInsumo tipo = TipoPadrao,
-        decimal valor = ValorPadrao)
+    public static PecaInsumoCatalogo CriarPecaInsumoCatalogoPadrao(string descricao = DescricaoPadrao, TipoPecaInsumo tipo = TipoPadrao, decimal valor = ValorPadrao)
     {
-        return PecaInsumoCatalogo.Criar(
-            descricao,
-            tipo,
-            valor);
+        return PecaInsumoCatalogo.Criar(descricao, tipo, valor);
     }
 
-    public static CadastrarPecaInsumoCatalogoRequest CriarCadastrarPecaInsumoCatalogoRequestValido(
-        string descricao = DescricaoPadrao,
-        TipoPecaInsumo tipo = TipoPadrao,
-        decimal valor = ValorPadrao)
+    public static CadastrarPecaInsumoCatalogoRequest CriarCadastrarPecaInsumoCatalogoRequestValido(string descricao = DescricaoPadrao, TipoPecaInsumo tipo = TipoPadrao, decimal valor = ValorPadrao)
     {
-        return new CadastrarPecaInsumoCatalogoRequest(
-            descricao,
-            tipo,
-            valor);
+        return new CadastrarPecaInsumoCatalogoRequest(descricao, tipo, valor);
     }
 
     public static AtualizarPecaInsumoCatalogoRequest CriarAtualizarPecaInsumoCatalogoRequestValido(
@@ -49,33 +37,21 @@ internal static class PecaInsumoCatalogoTestDataFactory
         TipoPecaInsumo tipo = TipoAtualizado,
         decimal valor = ValorAtualizado)
     {
-        return new AtualizarPecaInsumoCatalogoRequest(
-            pecaInsumoCatalogoId ?? Guid.NewGuid(),
-            descricao,
-            tipo,
-            valor);
+        return new AtualizarPecaInsumoCatalogoRequest(pecaInsumoCatalogoId ?? Guid.NewGuid(), descricao, tipo, valor);
     }
 
-    public static ConsultarPecaInsumoCatalogoRequest CriarConsultarPecaInsumoCatalogoRequestValido(
-        Guid? pecaInsumoCatalogoId = null)
+    public static ConsultarPecaInsumoCatalogoRequest CriarConsultarPecaInsumoCatalogoRequestValido(Guid? pecaInsumoCatalogoId = null)
     {
-        return new ConsultarPecaInsumoCatalogoRequest(
-            pecaInsumoCatalogoId ?? Guid.NewGuid());
+        return new ConsultarPecaInsumoCatalogoRequest(pecaInsumoCatalogoId ?? Guid.NewGuid());
     }
 
-    public static ListarPecasInsumosCatalogoRequest CriarListarPecasInsumosCatalogoRequestValido(
-        int pagina = PaginaPadrao,
-        int tamanhoPagina = TamanhoPaginaPadrao)
+    public static ListarPecasInsumosCatalogoRequest CriarListarPecasInsumosCatalogoRequestValido(int pagina = PaginaPadrao, int tamanhoPagina = TamanhoPaginaPadrao)
     {
-        return new ListarPecasInsumosCatalogoRequest(
-            pagina,
-            tamanhoPagina);
+        return new ListarPecasInsumosCatalogoRequest(pagina, tamanhoPagina);
     }
 
-    public static RemoverPecaInsumoCatalogoRequest CriarRemoverPecaInsumoCatalogoRequestValido(
-        Guid? pecaInsumoCatalogoId = null)
+    public static RemoverPecaInsumoCatalogoRequest CriarRemoverPecaInsumoCatalogoRequestValido(Guid? pecaInsumoCatalogoId = null)
     {
-        return new RemoverPecaInsumoCatalogoRequest(
-            pecaInsumoCatalogoId ?? Guid.NewGuid());
+        return new RemoverPecaInsumoCatalogoRequest(pecaInsumoCatalogoId ?? Guid.NewGuid());
     }
 }

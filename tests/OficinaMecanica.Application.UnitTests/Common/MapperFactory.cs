@@ -8,9 +8,7 @@ internal static class MapperFactory
 {
     public static IMapper Criar()
     {
-        var configuration = new MapperConfiguration(
-            config => config.AddMaps(typeof(DependencyInjection).Assembly),
-            NullLoggerFactory.Instance);
+        var configuration = new MapperConfiguration(config => config.AddMaps(typeof(DependencyInjection).Assembly), NullLoggerFactory.Instance);
 
         configuration.AssertConfigurationIsValid();
 

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.ListarPecasInsumosCatalogo;
 using OficinaMecanica.Application.Common;
@@ -18,10 +18,7 @@ public class ListarPecasInsumosCatalogoUseCaseTests
         var itens = new[]
         {
             PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao(),
-            PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao(
-                PecaInsumoCatalogoTestDataFactory.DescricaoAtualizada,
-                PecaInsumoCatalogoTestDataFactory.TipoAtualizado,
-                PecaInsumoCatalogoTestDataFactory.ValorAtualizado)
+            PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao(PecaInsumoCatalogoTestDataFactory.DescricaoAtualizada, PecaInsumoCatalogoTestDataFactory.TipoAtualizado, PecaInsumoCatalogoTestDataFactory.ValorAtualizado)
         };
 
         var repository = CriarRepository(itens, totalItens: itens.Length);
@@ -40,19 +37,11 @@ public class ListarPecasInsumosCatalogoUseCaseTests
         resultado.Valor.TamanhoPagina.Should().Be(PecaInsumoCatalogoTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(itens.Length);
         resultado.Valor.Itens.Should().HaveCount(itens.Length);
-        resultado.Valor.Itens.Select(item => item.Id).Should().BeEquivalentTo(
-            itens.Select(item => item.Id));
+        resultado.Valor.Itens.Select(item => item.Id).Should().BeEquivalentTo(itens.Select(item => item.Id));
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                PecaInsumoCatalogoTestDataFactory.PaginaPadrao,
-                PecaInsumoCatalogoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ListarAsync(PecaInsumoCatalogoTestDataFactory.PaginaPadrao, PecaInsumoCatalogoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -76,16 +65,9 @@ public class ListarPecasInsumosCatalogoUseCaseTests
         resultado.Valor.TamanhoPagina.Should().Be(PecaInsumoCatalogoTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(0);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                PecaInsumoCatalogoTestDataFactory.PaginaPadrao,
-                PecaInsumoCatalogoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ListarAsync(PecaInsumoCatalogoTestDataFactory.PaginaPadrao, PecaInsumoCatalogoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -96,8 +78,7 @@ public class ListarPecasInsumosCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = PecaInsumoCatalogoTestDataFactory.CriarListarPecasInsumosCatalogoRequestValido(
-            pagina: 0);
+        var request = PecaInsumoCatalogoTestDataFactory.CriarListarPecasInsumosCatalogoRequestValido(pagina: 0);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -108,16 +89,9 @@ public class ListarPecasInsumosCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -128,8 +102,7 @@ public class ListarPecasInsumosCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = PecaInsumoCatalogoTestDataFactory.CriarListarPecasInsumosCatalogoRequestValido(
-            tamanhoPagina: 101);
+        var request = PecaInsumoCatalogoTestDataFactory.CriarListarPecasInsumosCatalogoRequestValido(tamanhoPagina: 101);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -140,29 +113,17 @@ public class ListarPecasInsumosCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static Mock<IPecaInsumoCatalogoRepository> CriarRepository(
-        IReadOnlyCollection<PecaInsumoCatalogo> itens,
-        int totalItens)
+    private static Mock<IPecaInsumoCatalogoRepository> CriarRepository(IReadOnlyCollection<PecaInsumoCatalogo> itens, int totalItens)
     {
         var repository = new Mock<IPecaInsumoCatalogoRepository>();
 
         repository
-            .Setup(repo => repo.ListarAsync(
-                PecaInsumoCatalogoTestDataFactory.PaginaPadrao,
-                PecaInsumoCatalogoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ListarAsync(PecaInsumoCatalogoTestDataFactory.PaginaPadrao, PecaInsumoCatalogoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()))
             .ReturnsAsync(itens);
 
         repository
@@ -172,12 +133,8 @@ public class ListarPecasInsumosCatalogoUseCaseTests
         return repository;
     }
 
-    private static ListarPecasInsumosCatalogoUseCase CriarUseCase(
-        Mock<IPecaInsumoCatalogoRepository> repository)
+    private static ListarPecasInsumosCatalogoUseCase CriarUseCase(Mock<IPecaInsumoCatalogoRepository> repository)
     {
-        return new ListarPecasInsumosCatalogoUseCase(
-            repository.Object,
-            new ListarPecasInsumosCatalogoValidator(),
-            MapperFactory.Criar());
+        return new ListarPecasInsumosCatalogoUseCase(repository.Object, new ListarPecasInsumosCatalogoValidator(), MapperFactory.Criar());
     }
 }

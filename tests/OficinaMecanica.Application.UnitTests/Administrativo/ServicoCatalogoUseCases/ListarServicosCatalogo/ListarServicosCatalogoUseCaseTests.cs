@@ -18,9 +18,7 @@ public class ListarServicosCatalogoUseCaseTests
         var servicosCatalogo = new[]
         {
             ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao(),
-            ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao(
-                ServicoCatalogoTestDataFactory.DescricaoAtualizada,
-                ServicoCatalogoTestDataFactory.ValorAtualizado)
+            ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao(ServicoCatalogoTestDataFactory.DescricaoAtualizada, ServicoCatalogoTestDataFactory.ValorAtualizado)
         };
 
         var repository = CriarRepository(servicosCatalogo, totalItens: servicosCatalogo.Length);
@@ -39,19 +37,11 @@ public class ListarServicosCatalogoUseCaseTests
         resultado.Valor.TamanhoPagina.Should().Be(ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(servicosCatalogo.Length);
         resultado.Valor.Itens.Should().HaveCount(servicosCatalogo.Length);
-        resultado.Valor.Itens.Select(servicoCatalogo => servicoCatalogo.Id).Should().BeEquivalentTo(
-            servicosCatalogo.Select(servicoCatalogo => servicoCatalogo.Id));
+        resultado.Valor.Itens.Select(servicoCatalogo => servicoCatalogo.Id).Should().BeEquivalentTo(servicosCatalogo.Select(servicoCatalogo => servicoCatalogo.Id));
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                ServicoCatalogoTestDataFactory.PaginaPadrao,
-                ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ListarAsync(ServicoCatalogoTestDataFactory.PaginaPadrao, ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -75,16 +65,9 @@ public class ListarServicosCatalogoUseCaseTests
         resultado.Valor.TamanhoPagina.Should().Be(ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(0);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                ServicoCatalogoTestDataFactory.PaginaPadrao,
-                ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ListarAsync(ServicoCatalogoTestDataFactory.PaginaPadrao, ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -95,8 +78,7 @@ public class ListarServicosCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarListarServicosCatalogoRequestValido(
-            pagina: 0);
+        var request = ServicoCatalogoTestDataFactory.CriarListarServicosCatalogoRequestValido(pagina: 0);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -107,16 +89,9 @@ public class ListarServicosCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -127,8 +102,7 @@ public class ListarServicosCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarListarServicosCatalogoRequestValido(
-            tamanhoPagina: 101);
+        var request = ServicoCatalogoTestDataFactory.CriarListarServicosCatalogoRequestValido(tamanhoPagina: 101);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -139,29 +113,17 @@ public class ListarServicosCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static Mock<IServicoCatalogoRepository> CriarRepository(
-        IReadOnlyCollection<ServicoCatalogo> servicosCatalogo,
-        int totalItens)
+    private static Mock<IServicoCatalogoRepository> CriarRepository(IReadOnlyCollection<ServicoCatalogo> servicosCatalogo, int totalItens)
     {
         var repository = new Mock<IServicoCatalogoRepository>();
 
         repository
-            .Setup(repo => repo.ListarAsync(
-                ServicoCatalogoTestDataFactory.PaginaPadrao,
-                ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ListarAsync(ServicoCatalogoTestDataFactory.PaginaPadrao, ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()))
             .ReturnsAsync(servicosCatalogo);
 
         repository
@@ -171,12 +133,8 @@ public class ListarServicosCatalogoUseCaseTests
         return repository;
     }
 
-    private static ListarServicosCatalogoUseCase CriarUseCase(
-        Mock<IServicoCatalogoRepository> repository)
+    private static ListarServicosCatalogoUseCase CriarUseCase(Mock<IServicoCatalogoRepository> repository)
     {
-        return new ListarServicosCatalogoUseCase(
-            repository.Object,
-            new ListarServicosCatalogoValidator(),
-            MapperFactory.Criar());
+        return new ListarServicosCatalogoUseCase(repository.Object, new ListarServicosCatalogoValidator(), MapperFactory.Criar());
     }
 }

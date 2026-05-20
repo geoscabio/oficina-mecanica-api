@@ -37,11 +37,7 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
         resultado.Valor.Modelo.Should().Be(VeiculoTestDataFactory.ModeloPadrao);
         resultado.Valor.Ano.Should().Be(VeiculoTestDataFactory.AnoPadrao);
 
-        repository.Verify(
-            repo => repo.ObterPorPlacaAsync(
-                VeiculoTestDataFactory.PlacaNormalizadaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorPlacaAsync(VeiculoTestDataFactory.PlacaNormalizadaPadrao, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -63,11 +59,7 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(VeiculoErrorMessages.VeiculoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorPlacaAsync(
-                VeiculoTestDataFactory.PlacaNormalizadaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorPlacaAsync(VeiculoTestDataFactory.PlacaNormalizadaPadrao, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Theory]
@@ -80,8 +72,7 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = VeiculoTestDataFactory.CriarConsultarVeiculoPorPlacaRequestValido(
-            placa);
+        var request = VeiculoTestDataFactory.CriarConsultarVeiculoPorPlacaRequestValido(placa);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -92,11 +83,7 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorPlacaAsync(
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorPlacaAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IVeiculoRepository> CriarRepository(Veiculo? veiculo)
@@ -104,9 +91,7 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
         var repository = new Mock<IVeiculoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorPlacaAsync(
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorPlacaAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(veiculo);
 
         return repository;
@@ -114,9 +99,6 @@ public class ConsultarVeiculoPorPlacaUseCaseTests
 
     private static ConsultarVeiculoPorPlacaUseCase CriarUseCase(Mock<IVeiculoRepository> repository)
     {
-        return new ConsultarVeiculoPorPlacaUseCase(
-            repository.Object,
-            new ConsultarVeiculoPorPlacaValidator(),
-            MapperFactory.Criar());
+        return new ConsultarVeiculoPorPlacaUseCase(repository.Object, new ConsultarVeiculoPorPlacaValidator(), MapperFactory.Criar());
     }
 }

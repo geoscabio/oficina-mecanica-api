@@ -15,10 +15,7 @@ public class PecaInsumoTests
         var pecaInsumoCatalogoId = Guid.NewGuid();
 
         // Act
-        var pecaInsumo = PecaInsumo.Criar(
-            pecaInsumoCatalogoId,
-            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
-            OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
+        var pecaInsumo = PecaInsumo.Criar(pecaInsumoCatalogoId, OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao, OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
 
         // Assert
         pecaInsumo.Id.Should().NotBeEmpty();
@@ -35,10 +32,7 @@ public class PecaInsumoTests
         var pecaInsumoCatalogoId = Guid.Empty;
 
         // Act
-        var acao = () => PecaInsumo.Criar(
-            pecaInsumoCatalogoId,
-            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
-            OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
+        var acao = () => PecaInsumo.Criar(pecaInsumoCatalogoId, OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao, OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
 
         // Assert
         acao.Should()
@@ -49,17 +43,13 @@ public class PecaInsumoTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Dado_QuantidadeInvalida_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException(
-        int quantidade)
+    public void Dado_QuantidadeInvalida_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException(int quantidade)
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
 
         // Act
-        var acao = () => PecaInsumo.Criar(
-            pecaInsumoCatalogoId,
-            quantidade,
-            OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
+        var acao = () => PecaInsumo.Criar(pecaInsumoCatalogoId, quantidade, OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
 
         // Assert
         acao.Should()
@@ -70,17 +60,13 @@ public class PecaInsumoTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Dado_ValorUnitarioInvalido_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException(
-        decimal valorUnitario)
+    public void Dado_ValorUnitarioInvalido_Quando_CriarPecaInsumo_Entao_DeveLancarDomainException(decimal valorUnitario)
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
 
         // Act
-        var acao = () => PecaInsumo.Criar(
-            pecaInsumoCatalogoId,
-            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
-            valorUnitario);
+        var acao = () => PecaInsumo.Criar(pecaInsumoCatalogoId, OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao, valorUnitario);
 
         // Assert
         acao.Should()

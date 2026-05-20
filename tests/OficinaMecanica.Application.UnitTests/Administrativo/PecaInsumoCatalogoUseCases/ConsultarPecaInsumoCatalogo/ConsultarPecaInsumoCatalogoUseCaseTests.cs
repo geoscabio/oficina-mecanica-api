@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.ConsultarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Common;
@@ -22,8 +22,7 @@ public class ConsultarPecaInsumoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = PecaInsumoCatalogoTestDataFactory.CriarConsultarPecaInsumoCatalogoRequestValido(
-            item.Id);
+        var request = PecaInsumoCatalogoTestDataFactory.CriarConsultarPecaInsumoCatalogoRequestValido(item.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -36,11 +35,7 @@ public class ConsultarPecaInsumoCatalogoUseCaseTests
         resultado.Valor.Tipo.Should().Be(PecaInsumoCatalogoTestDataFactory.TipoPadrao);
         resultado.Valor.Valor.Should().Be(PecaInsumoCatalogoTestDataFactory.ValorPadrao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.PecaInsumoCatalogoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.PecaInsumoCatalogoId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -62,11 +57,7 @@ public class ConsultarPecaInsumoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(PecaInsumoCatalogoErrorMessages.PecaInsumoCatalogoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.PecaInsumoCatalogoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.PecaInsumoCatalogoId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -77,8 +68,7 @@ public class ConsultarPecaInsumoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = PecaInsumoCatalogoTestDataFactory.CriarConsultarPecaInsumoCatalogoRequestValido(
-            Guid.Empty);
+        var request = PecaInsumoCatalogoTestDataFactory.CriarConsultarPecaInsumoCatalogoRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -89,33 +79,22 @@ public class ConsultarPecaInsumoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static Mock<IPecaInsumoCatalogoRepository> CriarRepository(
-        PecaInsumoCatalogo? item)
+    private static Mock<IPecaInsumoCatalogoRepository> CriarRepository(PecaInsumoCatalogo? item)
     {
         var repository = new Mock<IPecaInsumoCatalogoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(item);
 
         return repository;
     }
 
-    private static ConsultarPecaInsumoCatalogoUseCase CriarUseCase(
-        Mock<IPecaInsumoCatalogoRepository> repository)
+    private static ConsultarPecaInsumoCatalogoUseCase CriarUseCase(Mock<IPecaInsumoCatalogoRepository> repository)
     {
-        return new ConsultarPecaInsumoCatalogoUseCase(
-            repository.Object,
-            new ConsultarPecaInsumoCatalogoValidator(),
-            MapperFactory.Criar());
+        return new ConsultarPecaInsumoCatalogoUseCase(repository.Object, new ConsultarPecaInsumoCatalogoValidator(), MapperFactory.Criar());
     }
 }

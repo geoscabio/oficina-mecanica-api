@@ -33,11 +33,7 @@ public sealed class RequiresDockerFactAttribute : FactAttribute
     {
         try
         {
-            using var client = new NamedPipeClientStream(
-                ".",
-                pipeName,
-                PipeDirection.InOut,
-                PipeOptions.None);
+            using var client = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.None);
 
             client.Connect(250);
             return client.IsConnected;

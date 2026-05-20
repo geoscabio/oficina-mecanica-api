@@ -28,70 +28,36 @@ internal static class VeiculoTestDataFactory
 
     public static Veiculo CriarVeiculoPadrao(Guid? clienteId = null)
     {
-        return Veiculo.Criar(
-            clienteId ?? Guid.NewGuid(),
-            Placa.Criar(PlacaPadrao),
-            MarcaPadrao,
-            ModeloPadrao,
-            AnoPadrao);
+        return Veiculo.Criar(clienteId ?? Guid.NewGuid(), Placa.Criar(PlacaPadrao), MarcaPadrao, ModeloPadrao, AnoPadrao);
     }
 
-    public static CadastrarVeiculoRequest CriarCadastrarVeiculoRequestValido(
-        Guid? clienteId = null,
-        string placa = PlacaPadrao,
-        string marca = MarcaPadrao,
-        string modelo = ModeloPadrao,
-        int ano = AnoPadrao)
+    public static CadastrarVeiculoRequest CriarCadastrarVeiculoRequestValido(Guid? clienteId = null, string placa = PlacaPadrao, string marca = MarcaPadrao, string modelo = ModeloPadrao, int ano = AnoPadrao)
     {
-        return new CadastrarVeiculoRequest(
-            clienteId ?? Guid.NewGuid(),
-            placa,
-            marca,
-            modelo,
-            ano);
+        return new CadastrarVeiculoRequest(clienteId ?? Guid.NewGuid(), placa, marca, modelo, ano);
     }
 
-    public static AtualizarVeiculoRequest CriarAtualizarVeiculoRequestValido(
-        Guid? veiculoId = null,
-        string placa = PlacaAtualizada,
-        string marca = MarcaAtualizada,
-        string modelo = ModeloAtualizado,
-        int ano = AnoAtualizado)
+    public static AtualizarVeiculoRequest CriarAtualizarVeiculoRequestValido(Guid? veiculoId = null, string placa = PlacaAtualizada, string marca = MarcaAtualizada, string modelo = ModeloAtualizado, int ano = AnoAtualizado)
     {
-        return new AtualizarVeiculoRequest(
-            veiculoId ?? Guid.NewGuid(),
-            placa,
-            marca,
-            modelo,
-            ano);
+        return new AtualizarVeiculoRequest(veiculoId ?? Guid.NewGuid(), placa, marca, modelo, ano);
     }
 
-    public static ConsultarVeiculoRequest CriarConsultarVeiculoRequestValido(
-        Guid? veiculoId = null)
+    public static ConsultarVeiculoRequest CriarConsultarVeiculoRequestValido(Guid? veiculoId = null)
     {
-        return new ConsultarVeiculoRequest(
-            veiculoId ?? Guid.NewGuid());
+        return new ConsultarVeiculoRequest(veiculoId ?? Guid.NewGuid());
     }
 
-    public static ConsultarVeiculoPorPlacaRequest CriarConsultarVeiculoPorPlacaRequestValido(
-        string placa = PlacaPadrao)
+    public static ConsultarVeiculoPorPlacaRequest CriarConsultarVeiculoPorPlacaRequestValido(string placa = PlacaPadrao)
     {
         return new ConsultarVeiculoPorPlacaRequest(placa);
     }
 
-    public static ListarVeiculosRequest CriarListarVeiculosRequestValido(
-        int pagina = PaginaPadrao,
-        int tamanhoPagina = TamanhoPaginaPadrao)
+    public static ListarVeiculosRequest CriarListarVeiculosRequestValido(int pagina = PaginaPadrao, int tamanhoPagina = TamanhoPaginaPadrao)
     {
-        return new ListarVeiculosRequest(
-            pagina,
-            tamanhoPagina);
+        return new ListarVeiculosRequest(pagina, tamanhoPagina);
     }
 
-    public static RemoverVeiculoRequest CriarRemoverVeiculoRequestValido(
-        Guid? veiculoId = null)
+    public static RemoverVeiculoRequest CriarRemoverVeiculoRequestValido(Guid? veiculoId = null)
     {
-        return new RemoverVeiculoRequest(
-            veiculoId ?? Guid.NewGuid());
+        return new RemoverVeiculoRequest(veiculoId ?? Guid.NewGuid());
     }
 }

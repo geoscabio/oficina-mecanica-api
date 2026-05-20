@@ -28,15 +28,11 @@ public sealed class ClientesControllerTests : ApiIntegrationTestBase
         var cadastro = ClienteRequestBuilder.Novo().BuildCadastro();
 
         // Act
-        var clienteCriado = await PostJsonAsync(
-            "/api/v1/atendimento/clientes/cadastrar",
-            cadastro,
-            HttpStatusCode.Created);
+        var clienteCriado = await PostJsonAsync("/api/v1/atendimento/clientes/cadastrar", cadastro, HttpStatusCode.Created);
         var clienteId = ObterGuid(clienteCriado, "id");
 
         var clienteConsultado = await GetJsonAsync($"/api/v1/atendimento/clientes/consultar/{clienteId}");
-        var clientePorDocumento = await GetJsonAsync(
-            $"/api/v1/atendimento/clientes/consultar-por-documento/{cadastro.Documento}");
+        var clientePorDocumento = await GetJsonAsync($"/api/v1/atendimento/clientes/consultar-por-documento/{cadastro.Documento}");
         var clientes = await GetJsonAsync("/api/v1/atendimento/clientes/listar");
 
         var atualizacao = ClienteRequestBuilder.Novo()
@@ -44,9 +40,7 @@ public sealed class ClientesControllerTests : ApiIntegrationTestBase
             .ComTelefone("(11) 98888-7777")
             .ComEmail("maria.atualizada@email.com")
             .BuildAtualizacao(clienteId);
-        var clienteAtualizado = await PutJsonAsync(
-            $"/api/v1/atendimento/clientes/{clienteId}/atualizar",
-            atualizacao);
+        var clienteAtualizado = await PutJsonAsync($"/api/v1/atendimento/clientes/{clienteId}/atualizar", atualizacao);
 
         await DeleteAsync($"/api/v1/atendimento/clientes/{clienteId}/remover");
         var consultaAposRemocao = await Client.GetAsync($"/api/v1/atendimento/clientes/consultar/{clienteId}");
@@ -71,21 +65,14 @@ public sealed class ClientesControllerTests : ApiIntegrationTestBase
             .BuildCadastro();
 
         // Act
-        var response = await PostJsonAsync(
-            "/api/v1/atendimento/clientes/cadastrar",
-            cadastro,
-            HttpStatusCode.BadRequest);
+        var response = await PostJsonAsync("/api/v1/atendimento/clientes/cadastrar", cadastro, HttpStatusCode.BadRequest);
 
         // Assert
         response.GetProperty("tipo").GetString().Should().Be(TipoErro.Validacao.ToString());
         response.GetProperty("erros").EnumerateArray()
             .Select(erro => erro.GetString())
             .Should()
-            .BeEquivalentTo(
-                ClienteValidationMessages.DocumentoObrigatorio,
-                ClienteValidationMessages.NomeObrigatorio,
-                ClienteValidationMessages.TelefoneObrigatorio,
-                ClienteValidationMessages.EmailObrigatorio);
+            .BeEquivalentTo(ClienteValidationMessages.DocumentoObrigatorio, ClienteValidationMessages.NomeObrigatorio, ClienteValidationMessages.TelefoneObrigatorio, ClienteValidationMessages.EmailObrigatorio);
     }
 }
 

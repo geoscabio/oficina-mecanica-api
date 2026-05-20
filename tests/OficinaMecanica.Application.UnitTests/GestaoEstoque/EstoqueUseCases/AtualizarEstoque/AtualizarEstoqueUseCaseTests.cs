@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.AtualizarEstoque;
@@ -36,13 +36,9 @@ public class AtualizarEstoqueUseCaseTests
         resultado.Valor.QuantidadeDisponivel.Should().Be(request.QuantidadeDisponivel);
         estoque.ObterItem(pecaInsumoCatalogoId).QuantidadeDisponivel.Should().Be(request.QuantidadeDisponivel);
 
-        repository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(estoque, It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.AtualizarAsync(estoque, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -64,15 +60,9 @@ public class AtualizarEstoqueUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(EstoqueValidationMessages.ItemEstoqueNaoEncontrado);
         resultado.Erro!.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -94,15 +84,9 @@ public class AtualizarEstoqueUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(EstoqueValidationMessages.ItemEstoqueNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -113,8 +97,7 @@ public class AtualizarEstoqueUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = EstoqueTestDataFactory.CriarAtualizarEstoqueRequestValido(
-            Guid.Empty);
+        var request = EstoqueTestDataFactory.CriarAtualizarEstoqueRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -125,15 +108,9 @@ public class AtualizarEstoqueUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(EstoqueValidationMessages.PecaInsumoCatalogoObrigatorio);
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -144,8 +121,7 @@ public class AtualizarEstoqueUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = EstoqueTestDataFactory.CriarAtualizarEstoqueRequestValido(
-            quantidadeDisponivel: -1);
+        var request = EstoqueTestDataFactory.CriarAtualizarEstoqueRequestValido(quantidadeDisponivel: -1);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -156,15 +132,9 @@ public class AtualizarEstoqueUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(EstoqueValidationMessages.QuantidadeDisponivelNaoNegativa);
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IEstoqueRepository> CriarRepository(Estoque? estoque)
@@ -180,9 +150,6 @@ public class AtualizarEstoqueUseCaseTests
 
     private static AtualizarEstoqueUseCase CriarUseCase(Mock<IEstoqueRepository> repository)
     {
-        return new AtualizarEstoqueUseCase(
-            repository.Object,
-            new AtualizarEstoqueValidator(),
-            MapperFactory.Criar());
+        return new AtualizarEstoqueUseCase(repository.Object, new AtualizarEstoqueValidator(), MapperFactory.Criar());
     }
 }

@@ -11,9 +11,7 @@ public class PlacaTests
     [Theory]
     [InlineData("ABC-1234", VeiculoTestDataFactory.PlacaNormalizadaPadrao)]
     [InlineData("abc1d23", "ABC1D23")]
-    public void Dado_PlacaValida_Quando_Criar_Entao_DeveNormalizarNumeroDaPlaca(
-        string numero,
-        string esperado)
+    public void Dado_PlacaValida_Quando_Criar_Entao_DeveNormalizarNumeroDaPlaca(string numero, string esperado)
     {
         // Arrange
         var numeroInformado = numero;

@@ -24,8 +24,7 @@ public class ConsultarStatusOrdemServicoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarConsultarStatusOrdemServicoRequestValido(
-            ordemServico.Id);
+        var request = OrdemServicoTestDataFactory.CriarConsultarStatusOrdemServicoRequestValido(ordemServico.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -41,11 +40,7 @@ public class ConsultarStatusOrdemServicoUseCaseTests
         resultado.Valor.Servicos.Single().ServicoCatalogoId.Should().Be(servico.ServicoCatalogoId);
         resultado.Valor.Servicos.Single().Status.Should().Be(OrdemServicoTestDataFactory.StatusEmExecucao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -58,8 +53,7 @@ public class ConsultarStatusOrdemServicoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarConsultarStatusOrdemServicoRequestValido(
-            ordemServico.Id);
+        var request = OrdemServicoTestDataFactory.CriarConsultarStatusOrdemServicoRequestValido(ordemServico.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -72,11 +66,7 @@ public class ConsultarStatusOrdemServicoUseCaseTests
         resultado.Valor.Status.Should().Be(OrdemServicoTestDataFactory.StatusRecebida);
         resultado.Valor.Servicos.Should().BeEmpty();
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -98,11 +88,7 @@ public class ConsultarStatusOrdemServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -113,8 +99,7 @@ public class ConsultarStatusOrdemServicoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarConsultarStatusOrdemServicoRequestValido(
-            Guid.Empty);
+        var request = OrdemServicoTestDataFactory.CriarConsultarStatusOrdemServicoRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -125,11 +110,7 @@ public class ConsultarStatusOrdemServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IOrdemServicoRepository> CriarRepository(OrdemServico? ordemServico)
@@ -137,20 +118,14 @@ public class ConsultarStatusOrdemServicoUseCaseTests
         var repository = new Mock<IOrdemServicoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(ordemServico);
 
         return repository;
     }
 
-    private static ConsultarStatusOrdemServicoUseCase CriarUseCase(
-        Mock<IOrdemServicoRepository> repository)
+    private static ConsultarStatusOrdemServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
     {
-        return new ConsultarStatusOrdemServicoUseCase(
-            repository.Object,
-            new ConsultarStatusOrdemServicoValidator(),
-            MapperFactory.Criar());
+        return new ConsultarStatusOrdemServicoUseCase(repository.Object, new ConsultarStatusOrdemServicoValidator(), MapperFactory.Criar());
     }
 }

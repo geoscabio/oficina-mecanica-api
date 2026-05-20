@@ -42,92 +42,46 @@ internal static class ClienteTestDataFactory
 
     public static Cliente CriarClientePadrao()
     {
-        return Cliente.Criar(
-            CpfCnpj.Criar(DocumentoPadrao),
-            NomePadrao,
-            new Endereco(
-                LogradouroPadrao,
-                NumeroPadrao,
-                BairroPadrao,
-                CidadePadrao,
-                CepPadrao),
-            Telefone.Criar(TelefonePadrao),
-            Email.Criar(EmailPadrao));
+        return Cliente.Criar(CpfCnpj.Criar(DocumentoPadrao), NomePadrao, new Endereco(LogradouroPadrao, NumeroPadrao, BairroPadrao, CidadePadrao, CepPadrao), Telefone.Criar(TelefonePadrao), Email.Criar(EmailPadrao));
     }
 
-    public static CadastrarClienteRequest CriarCadastrarClienteRequestValido(
-        string documento = DocumentoPadrao,
-        string nome = NomePadrao,
-        string telefone = TelefonePadrao,
-        string email = EmailPadrao)
+    public static CadastrarClienteRequest CriarCadastrarClienteRequestValido(string documento = DocumentoPadrao, string nome = NomePadrao, string telefone = TelefonePadrao, string email = EmailPadrao)
     {
-        return new CadastrarClienteRequest(
-            documento,
-            nome,
-            CriarEnderecoRequestValido(),
-            telefone,
-            email);
+        return new CadastrarClienteRequest(documento, nome, CriarEnderecoRequestValido(), telefone, email);
     }
 
-    public static AtualizarClienteRequest CriarAtualizarClienteRequestValido(
-        Guid? clienteId = null,
-        string nome = NomeAtualizado,
-        string telefone = TelefoneAtualizado,
-        string email = EmailAtualizado)
+    public static AtualizarClienteRequest CriarAtualizarClienteRequestValido(Guid? clienteId = null, string nome = NomeAtualizado, string telefone = TelefoneAtualizado, string email = EmailAtualizado)
     {
-        return new AtualizarClienteRequest(
-            clienteId ?? Guid.NewGuid(),
-            nome,
-            CriarEnderecoAtualizadoRequestValido(),
-            telefone,
-            email);
+        return new AtualizarClienteRequest(clienteId ?? Guid.NewGuid(), nome, CriarEnderecoAtualizadoRequestValido(), telefone, email);
     }
 
     public static ConsultarClienteRequest CriarConsultarClienteRequestValido(Guid? clienteId = null)
     {
-        return new ConsultarClienteRequest(
-            clienteId ?? Guid.NewGuid());
+        return new ConsultarClienteRequest(clienteId ?? Guid.NewGuid());
     }
 
-    public static ConsultarClientePorDocumentoRequest CriarConsultarClientePorDocumentoRequestValido(
-        string documento = DocumentoPadrao)
+    public static ConsultarClientePorDocumentoRequest CriarConsultarClientePorDocumentoRequestValido(string documento = DocumentoPadrao)
     {
         return new ConsultarClientePorDocumentoRequest(documento);
     }
 
-    public static ListarClientesRequest CriarListarClientesRequestValido(
-        int pagina = PaginaPadrao,
-        int tamanhoPagina = TamanhoPaginaPadrao)
+    public static ListarClientesRequest CriarListarClientesRequestValido(int pagina = PaginaPadrao, int tamanhoPagina = TamanhoPaginaPadrao)
     {
-        return new ListarClientesRequest(
-            pagina,
-            tamanhoPagina);
+        return new ListarClientesRequest(pagina, tamanhoPagina);
     }
 
-    public static RemoverClienteRequest CriarRemoverClienteRequestValido(
-        Guid? clienteId = null)
+    public static RemoverClienteRequest CriarRemoverClienteRequestValido(Guid? clienteId = null)
     {
-        return new RemoverClienteRequest(
-            clienteId ?? Guid.NewGuid());
+        return new RemoverClienteRequest(clienteId ?? Guid.NewGuid());
     }
 
     private static EnderecoRequest CriarEnderecoRequestValido()
     {
-        return new EnderecoRequest(
-            LogradouroPadrao,
-            NumeroPadrao,
-            BairroPadrao,
-            CidadePadrao,
-            CepPadrao);
+        return new EnderecoRequest(LogradouroPadrao, NumeroPadrao, BairroPadrao, CidadePadrao, CepPadrao);
     }
 
     private static EnderecoRequest CriarEnderecoAtualizadoRequestValido()
     {
-        return new EnderecoRequest(
-            LogradouroAtualizado,
-            NumeroAtualizado,
-            BairroAtualizado,
-            CidadeAtualizada,
-            CepAtualizado);
+        return new EnderecoRequest(LogradouroAtualizado, NumeroAtualizado, BairroAtualizado, CidadeAtualizada, CepAtualizado);
     }
 }

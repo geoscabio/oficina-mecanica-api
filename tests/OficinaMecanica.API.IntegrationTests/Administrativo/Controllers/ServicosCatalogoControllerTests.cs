@@ -26,27 +26,20 @@ public sealed class ServicosCatalogoControllerTests : ApiIntegrationTestBase
         var cadastro = ServicoCatalogoRequestBuilder.Novo().BuildCadastro();
 
         // Act
-        var servicoCriado = await PostJsonAsync(
-            "/api/v1/administrativo/servicos-catalogo/cadastrar",
-            cadastro,
-            HttpStatusCode.Created);
+        var servicoCriado = await PostJsonAsync("/api/v1/administrativo/servicos-catalogo/cadastrar", cadastro, HttpStatusCode.Created);
         var servicoCatalogoId = ObterGuid(servicoCriado, "id");
 
-        var servicoConsultado = await GetJsonAsync(
-            $"/api/v1/administrativo/servicos-catalogo/consultar/{servicoCatalogoId}");
+        var servicoConsultado = await GetJsonAsync($"/api/v1/administrativo/servicos-catalogo/consultar/{servicoCatalogoId}");
         var servicos = await GetJsonAsync("/api/v1/administrativo/servicos-catalogo/listar");
 
         var atualizacao = ServicoCatalogoRequestBuilder.Novo()
             .ComDescricao("Alinhamento")
             .ComValor(220m)
             .BuildAtualizacao(servicoCatalogoId);
-        var servicoAtualizado = await PutJsonAsync(
-            $"/api/v1/administrativo/servicos-catalogo/{servicoCatalogoId}/atualizar",
-            atualizacao);
+        var servicoAtualizado = await PutJsonAsync($"/api/v1/administrativo/servicos-catalogo/{servicoCatalogoId}/atualizar", atualizacao);
 
         await DeleteAsync($"/api/v1/administrativo/servicos-catalogo/{servicoCatalogoId}/remover");
-        var consultaAposRemocao = await Client.GetAsync(
-            $"/api/v1/administrativo/servicos-catalogo/consultar/{servicoCatalogoId}");
+        var consultaAposRemocao = await Client.GetAsync($"/api/v1/administrativo/servicos-catalogo/consultar/{servicoCatalogoId}");
 
         // Assert
         ObterString(servicoConsultado, "descricao").Should().Be(cadastro.Descricao);

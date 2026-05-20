@@ -16,9 +16,7 @@ public class ItemEstoqueTests
         const int quantidadeDisponivel = EstoqueTestDataFactory.QuantidadeDisponivelPadrao;
 
         // Act
-        var item = ItemEstoque.Criar(
-            pecaInsumoCatalogoId,
-            quantidadeDisponivel);
+        var item = ItemEstoque.Criar(pecaInsumoCatalogoId, quantidadeDisponivel);
 
         // Assert
         item.Id.Should().NotBeEmpty();
@@ -35,9 +33,7 @@ public class ItemEstoqueTests
         const int quantidadeDisponivel = EstoqueTestDataFactory.QuantidadeDisponivelPadrao;
 
         // Act
-        var acao = () => ItemEstoque.Criar(
-            pecaInsumoCatalogoId,
-            quantidadeDisponivel);
+        var acao = () => ItemEstoque.Criar(pecaInsumoCatalogoId, quantidadeDisponivel);
 
         // Assert
         acao.Should()
@@ -53,9 +49,7 @@ public class ItemEstoqueTests
         const int quantidadeDisponivel = -1;
 
         // Act
-        var acao = () => ItemEstoque.Criar(
-            pecaInsumoCatalogoId,
-            quantidadeDisponivel);
+        var acao = () => ItemEstoque.Criar(pecaInsumoCatalogoId, quantidadeDisponivel);
 
         // Assert
         acao.Should()
@@ -70,8 +64,7 @@ public class ItemEstoqueTests
         var item = EstoqueTestDataFactory.CriarItemEstoquePadrao();
 
         // Act
-        var possuiDisponibilidade = item.PossuiDisponibilidade(
-            EstoqueTestDataFactory.QuantidadeReservadaPadrao);
+        var possuiDisponibilidade = item.PossuiDisponibilidade(EstoqueTestDataFactory.QuantidadeReservadaPadrao);
 
         // Assert
         possuiDisponibilidade.Should().BeTrue();
@@ -81,12 +74,10 @@ public class ItemEstoqueTests
     public void Dado_ItemSemQuantidadeDisponivelSuficiente_Quando_PossuiDisponibilidade_Entao_DeveRetornarFalso()
     {
         // Arrange
-        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao(
-            quantidadeDisponivel: 3);
+        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao(quantidadeDisponivel: 3);
 
         // Act
-        var possuiDisponibilidade = item.PossuiDisponibilidade(
-            EstoqueTestDataFactory.QuantidadeReservadaPadrao);
+        var possuiDisponibilidade = item.PossuiDisponibilidade(EstoqueTestDataFactory.QuantidadeReservadaPadrao);
 
         // Assert
         possuiDisponibilidade.Should().BeFalse();
@@ -125,8 +116,7 @@ public class ItemEstoqueTests
     public void Dado_ItemSemQuantidadeDisponivelSuficiente_Quando_Reservar_Entao_DeveLancarDomainException()
     {
         // Arrange
-        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao(
-            quantidadeDisponivel: 3);
+        var item = EstoqueTestDataFactory.CriarItemEstoquePadrao(quantidadeDisponivel: 3);
 
         // Act
         var acao = () => item.Reservar(EstoqueTestDataFactory.QuantidadeReservadaPadrao);
@@ -170,8 +160,7 @@ public class ItemEstoqueTests
     public void Dado_ItemSemQuantidadeReservadaSuficiente_Quando_Estornar_Entao_DeveLancarDomainException()
     {
         // Arrange
-        var item = EstoqueTestDataFactory.CriarItemEstoqueComReserva(
-            quantidadeReservada: 2);
+        var item = EstoqueTestDataFactory.CriarItemEstoqueComReserva(quantidadeReservada: 2);
 
         // Act
         var acao = () => item.Estornar(EstoqueTestDataFactory.QuantidadeReservadaPadrao);
@@ -215,8 +204,7 @@ public class ItemEstoqueTests
     public void Dado_ItemSemQuantidadeReservadaSuficiente_Quando_Baixar_Entao_DeveLancarDomainException()
     {
         // Arrange
-        var item = EstoqueTestDataFactory.CriarItemEstoqueComReserva(
-            quantidadeReservada: 2);
+        var item = EstoqueTestDataFactory.CriarItemEstoqueComReserva(quantidadeReservada: 2);
 
         // Act
         var acao = () => item.Baixar(EstoqueTestDataFactory.QuantidadeReservadaPadrao);
@@ -278,8 +266,7 @@ public class ItemEstoqueTests
         var item = EstoqueTestDataFactory.CriarItemEstoquePadrao();
 
         // Act
-        item.AtualizarQuantidadeDisponivel(
-            EstoqueTestDataFactory.QuantidadeAtualizadaPadrao);
+        item.AtualizarQuantidadeDisponivel(EstoqueTestDataFactory.QuantidadeAtualizadaPadrao);
 
         // Assert
         item.QuantidadeDisponivel.Should().Be(EstoqueTestDataFactory.QuantidadeAtualizadaPadrao);

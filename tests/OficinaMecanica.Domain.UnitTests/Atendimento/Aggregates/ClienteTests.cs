@@ -19,12 +19,7 @@ public class ClienteTests
         var email = ClienteTestDataFactory.CriarEmailPadrao();
 
         // Act
-        var cliente = Cliente.Criar(
-            documento,
-            ClienteTestDataFactory.NomePadrao,
-            endereco,
-            telefone,
-            email);
+        var cliente = Cliente.Criar(documento, ClienteTestDataFactory.NomePadrao, endereco, telefone, email);
 
         // Assert
         cliente.Id.Should().NotBeEmpty();
@@ -49,12 +44,7 @@ public class ClienteTests
         var email = ClienteTestDataFactory.CriarEmailPadrao();
 
         // Act
-        var acao = () => Cliente.Criar(
-            documento,
-            nome,
-            endereco,
-            telefone,
-            email);
+        var acao = () => Cliente.Criar(documento, nome, endereco, telefone, email);
 
         // Assert
         acao.Should()
@@ -72,11 +62,7 @@ public class ClienteTests
         var novoEmail = ClienteTestDataFactory.CriarEmailAtualizado();
 
         // Act
-        cliente.Atualizar(
-            ClienteTestDataFactory.NomeAtualizado,
-            novoEndereco,
-            novoTelefone,
-            novoEmail);
+        cliente.Atualizar(ClienteTestDataFactory.NomeAtualizado, novoEndereco, novoTelefone, novoEmail);
 
         // Assert
         cliente.Nome.Should().Be(ClienteTestDataFactory.NomeAtualizado);
@@ -96,11 +82,7 @@ public class ClienteTests
         var cliente = ClienteTestDataFactory.CriarClientePadrao();
 
         // Act
-        var acao = () => cliente.Atualizar(
-            nome,
-            ClienteTestDataFactory.CriarEnderecoPadrao(),
-            ClienteTestDataFactory.CriarTelefonePadrao(),
-            ClienteTestDataFactory.CriarEmailPadrao());
+        var acao = () => cliente.Atualizar(nome, ClienteTestDataFactory.CriarEnderecoPadrao(), ClienteTestDataFactory.CriarTelefonePadrao(), ClienteTestDataFactory.CriarEmailPadrao());
 
         // Assert
         acao.Should()

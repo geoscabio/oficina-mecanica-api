@@ -31,10 +31,7 @@ public sealed class EstoqueControllerTests : ApiIntegrationTestBase
             .BuildRegistroEntrada();
 
         // Act
-        var itemCriado = await PostJsonAsync(
-            "/api/v1/gestao-estoque/estoque/registrar-entrada",
-            registroEntrada,
-            HttpStatusCode.Created);
+        var itemCriado = await PostJsonAsync("/api/v1/gestao-estoque/estoque/registrar-entrada", registroEntrada, HttpStatusCode.Created);
         var itemEstoqueId = ObterGuid(itemCriado, "id");
 
         var itemConsultado = await GetJsonAsync($"/api/v1/gestao-estoque/estoque/consultar-item/{itemEstoqueId}");
@@ -44,9 +41,7 @@ public sealed class EstoqueControllerTests : ApiIntegrationTestBase
             .ComPecaInsumoCatalogoId(pecaInsumoCatalogoId)
             .ComQuantidade(10)
             .BuildAtualizacao();
-        var itemAtualizado = await PutJsonAsync(
-            $"/api/v1/gestao-estoque/estoque/{pecaInsumoCatalogoId}/atualizar-quantidade-disponivel",
-            atualizacao);
+        var itemAtualizado = await PutJsonAsync($"/api/v1/gestao-estoque/estoque/{pecaInsumoCatalogoId}/atualizar-quantidade-disponivel", atualizacao);
 
         // Assert
         ObterGuid(itemConsultado, "id").Should().Be(itemEstoqueId);
@@ -56,10 +51,7 @@ public sealed class EstoqueControllerTests : ApiIntegrationTestBase
 
     private async Task<Guid> CadastrarPecaInsumoCatalogoAsync()
     {
-        var response = await PostJsonAsync(
-            "/api/v1/administrativo/pecas-insumos-catalogo/cadastrar",
-            PecaInsumoCatalogoRequestBuilder.Novo().BuildCadastro(),
-            HttpStatusCode.Created);
+        var response = await PostJsonAsync("/api/v1/administrativo/pecas-insumos-catalogo/cadastrar", PecaInsumoCatalogoRequestBuilder.Novo().BuildCadastro(), HttpStatusCode.Created);
 
         return ObterGuid(response, "id");
     }

@@ -52,11 +52,7 @@ public class ConsultarClientePorDocumentoUseCaseTests
 
         resultado.Valor.Email.Should().Be(ClienteTestDataFactory.EmailPadrao);
 
-        repository.Verify(
-            repo => repo.ObterPorDocumentoAsync(
-                ClienteTestDataFactory.DocumentoNormalizadoPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorDocumentoAsync(ClienteTestDataFactory.DocumentoNormalizadoPadrao, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -81,26 +77,20 @@ public class ConsultarClientePorDocumentoUseCaseTests
 
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorDocumentoAsync(
-                ClienteTestDataFactory.DocumentoNormalizadoPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorDocumentoAsync(ClienteTestDataFactory.DocumentoNormalizadoPadrao, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public async Task Dado_DocumentoVazio_Quando_ConsultarClientePorDocumento_Entao_DeveRetornarFalhaDeValidacao(
-        string documento)
+    public async Task Dado_DocumentoVazio_Quando_ConsultarClientePorDocumento_Entao_DeveRetornarFalhaDeValidacao(string documento)
     {
         // Arrange
         var repository = new Mock<IClienteRepository>();
 
         var useCase = CriarUseCase(repository);
 
-        var request = ClienteTestDataFactory.CriarConsultarClientePorDocumentoRequestValido(
-            documento);
+        var request = ClienteTestDataFactory.CriarConsultarClientePorDocumentoRequestValido(documento);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -114,11 +104,7 @@ public class ConsultarClientePorDocumentoUseCaseTests
 
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorDocumentoAsync(
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorDocumentoAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IClienteRepository> CriarRepository(Cliente? cliente)
@@ -126,20 +112,14 @@ public class ConsultarClientePorDocumentoUseCaseTests
         var repository = new Mock<IClienteRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorDocumentoAsync(
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorDocumentoAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(cliente);
 
         return repository;
     }
 
-    private static ConsultarClientePorDocumentoUseCase CriarUseCase(
-        Mock<IClienteRepository> repository)
+    private static ConsultarClientePorDocumentoUseCase CriarUseCase(Mock<IClienteRepository> repository)
     {
-        return new ConsultarClientePorDocumentoUseCase(
-            repository.Object,
-            new ConsultarClientePorDocumentoValidator(),
-            MapperFactory.Criar());
+        return new ConsultarClientePorDocumentoUseCase(repository.Object, new ConsultarClientePorDocumentoValidator(), MapperFactory.Criar());
     }
 }

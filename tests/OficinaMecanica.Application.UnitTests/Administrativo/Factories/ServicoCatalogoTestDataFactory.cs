@@ -18,55 +18,33 @@ internal static class ServicoCatalogoTestDataFactory
     public const int PaginaPadrao = 1;
     public const int TamanhoPaginaPadrao = 10;
 
-    public static ServicoCatalogo CriarServicoCatalogoPadrao(
-        string descricao = DescricaoPadrao,
-        decimal valor = ValorPadrao)
+    public static ServicoCatalogo CriarServicoCatalogoPadrao(string descricao = DescricaoPadrao, decimal valor = ValorPadrao)
     {
-        return ServicoCatalogo.Criar(
-            descricao,
-            valor);
+        return ServicoCatalogo.Criar(descricao, valor);
     }
 
-    public static CadastrarServicoCatalogoRequest CriarCadastrarServicoCatalogoRequestValido(
-        string descricao = DescricaoPadrao,
-        decimal valor = ValorPadrao)
+    public static CadastrarServicoCatalogoRequest CriarCadastrarServicoCatalogoRequestValido(string descricao = DescricaoPadrao, decimal valor = ValorPadrao)
     {
-        return new CadastrarServicoCatalogoRequest(
-            descricao,
-            valor);
+        return new CadastrarServicoCatalogoRequest(descricao, valor);
     }
 
-    public static AtualizarServicoCatalogoRequest CriarAtualizarServicoCatalogoRequestValido(
-        Guid? servicoCatalogoId = null,
-        string descricao = DescricaoAtualizada,
-        decimal valor = ValorAtualizado)
+    public static AtualizarServicoCatalogoRequest CriarAtualizarServicoCatalogoRequestValido(Guid? servicoCatalogoId = null, string descricao = DescricaoAtualizada, decimal valor = ValorAtualizado)
     {
-        return new AtualizarServicoCatalogoRequest(
-            servicoCatalogoId ?? Guid.NewGuid(),
-            descricao,
-            valor);
+        return new AtualizarServicoCatalogoRequest(servicoCatalogoId ?? Guid.NewGuid(), descricao, valor);
     }
 
-    public static ConsultarServicoCatalogoRequest CriarConsultarServicoCatalogoRequestValido(
-        Guid? servicoCatalogoId = null)
+    public static ConsultarServicoCatalogoRequest CriarConsultarServicoCatalogoRequestValido(Guid? servicoCatalogoId = null)
     {
-        return new ConsultarServicoCatalogoRequest(
-            servicoCatalogoId ?? Guid.NewGuid());
+        return new ConsultarServicoCatalogoRequest(servicoCatalogoId ?? Guid.NewGuid());
     }
 
-    public static ListarServicosCatalogoRequest CriarListarServicosCatalogoRequestValido(
-        int pagina = PaginaPadrao,
-        int tamanhoPagina = TamanhoPaginaPadrao)
+    public static ListarServicosCatalogoRequest CriarListarServicosCatalogoRequestValido(int pagina = PaginaPadrao, int tamanhoPagina = TamanhoPaginaPadrao)
     {
-        return new ListarServicosCatalogoRequest(
-            pagina,
-            tamanhoPagina);
+        return new ListarServicosCatalogoRequest(pagina, tamanhoPagina);
     }
 
-    public static RemoverServicoCatalogoRequest CriarRemoverServicoCatalogoRequestValido(
-        Guid? servicoCatalogoId = null)
+    public static RemoverServicoCatalogoRequest CriarRemoverServicoCatalogoRequestValido(Guid? servicoCatalogoId = null)
     {
-        return new RemoverServicoCatalogoRequest(
-            servicoCatalogoId ?? Guid.NewGuid());
+        return new RemoverServicoCatalogoRequest(servicoCatalogoId ?? Guid.NewGuid());
     }
 }

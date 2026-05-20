@@ -36,16 +36,9 @@ public class ReservarPecaInsumoUseCaseTests
 
         var unitOfWork = CriarUnitOfWork();
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            pecaInsumoCatalogoRepository,
-            estoqueRepository,
-            unitOfWork);
+        var useCase = CriarUseCase(ordemServicoRepository, pecaInsumoCatalogoRepository, estoqueRepository, unitOfWork);
 
-        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(
-            ordemServico.Id,
-            pecaInsumoCatalogo.Id,
-            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao);
+        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(ordemServico.Id, pecaInsumoCatalogo.Id, OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -65,29 +58,13 @@ public class ReservarPecaInsumoUseCaseTests
         estoque.ObterItem(pecaInsumoCatalogo.Id).QuantidadeDisponivel.Should().Be(8);
         estoque.ObterItem(pecaInsumoCatalogo.Id).QuantidadeReservada.Should().Be(2);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        ordemServicoRepository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        estoqueRepository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdsAsync(
-                It.Is<IReadOnlyCollection<Guid>>(ids =>
-                    ids.Contains(pecaInsumoCatalogo.Id)
-                    && ids.Count == 1),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdsAsync(It.Is<IReadOnlyCollection<Guid>>(ids => ids.Contains(pecaInsumoCatalogo.Id) && ids.Count == 1), It.IsAny<CancellationToken>()), Times.Once);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
         ordemServicoRepository.Verify(
             repo => repo.AtualizarAsync(
@@ -98,17 +75,9 @@ public class ReservarPecaInsumoUseCaseTests
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
-        estoqueRepository.Verify(
-            repo => repo.AtualizarAsync(
-                estoque,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        estoqueRepository.Verify(repo => repo.AtualizarAsync(estoque, It.IsAny<CancellationToken>()), Times.Once);
 
-        unitOfWork.Verify(
-            uow => uow.ExecutarEmTransacaoAsync(
-                It.IsAny<Func<CancellationToken, Task>>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        unitOfWork.Verify(uow => uow.ExecutarEmTransacaoAsync(It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -123,14 +92,9 @@ public class ReservarPecaInsumoUseCaseTests
 
         var estoqueRepository = new Mock<IEstoqueRepository>();
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            pecaInsumoCatalogoRepository,
-            estoqueRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, pecaInsumoCatalogoRepository, estoqueRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(
-            pecaInsumoCatalogoId: pecaInsumoCatalogo.Id,
-            quantidade: 1);
+        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(pecaInsumoCatalogoId: pecaInsumoCatalogo.Id, quantidade: 1);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -141,33 +105,15 @@ public class ReservarPecaInsumoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        ordemServicoRepository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        estoqueRepository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdsAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdsAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        estoqueRepository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -184,14 +130,9 @@ public class ReservarPecaInsumoUseCaseTests
 
         var estoqueRepository = CriarEstoqueRepository(null);
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            pecaInsumoCatalogoRepository,
-            estoqueRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, pecaInsumoCatalogoRepository, estoqueRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(
-            ordemServico.Id,
-            pecaInsumoCatalogo.Id);
+        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(ordemServico.Id, pecaInsumoCatalogo.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -204,33 +145,15 @@ public class ReservarPecaInsumoUseCaseTests
 
         ordemServico.PecasInsumos.Should().BeEmpty();
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        ordemServicoRepository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        estoqueRepository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdsAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdsAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        estoqueRepository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -249,15 +172,9 @@ public class ReservarPecaInsumoUseCaseTests
 
         var estoqueRepository = CriarEstoqueRepository(estoque);
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            pecaInsumoCatalogoRepository,
-            estoqueRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, pecaInsumoCatalogoRepository, estoqueRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(
-            ordemServico.Id,
-            pecaInsumoCatalogoId,
-            quantidade: 1);
+        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(ordemServico.Id, pecaInsumoCatalogoId, quantidade: 1);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -270,41 +187,17 @@ public class ReservarPecaInsumoUseCaseTests
 
         ordemServico.PecasInsumos.Should().BeEmpty();
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        ordemServicoRepository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        estoqueRepository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdsAsync(
-                It.Is<IReadOnlyCollection<Guid>>(ids =>
-                    ids.Contains(pecaInsumoCatalogoId)
-                    && ids.Count == 1),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdsAsync(It.Is<IReadOnlyCollection<Guid>>(ids => ids.Contains(pecaInsumoCatalogoId) && ids.Count == 1), It.IsAny<CancellationToken>()), Times.Once);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        estoqueRepository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -315,9 +208,7 @@ public class ReservarPecaInsumoUseCaseTests
 
         var pecaInsumoCatalogo = PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao();
 
-        var estoque = EstoqueTestDataFactory.CriarEstoqueComItem(
-            pecaInsumoCatalogo.Id,
-            quantidadeDisponivel: 1);
+        var estoque = EstoqueTestDataFactory.CriarEstoqueComItem(pecaInsumoCatalogo.Id, quantidadeDisponivel: 1);
 
         var ordemServicoRepository = CriarOrdemServicoRepository(ordemServico);
 
@@ -325,15 +216,9 @@ public class ReservarPecaInsumoUseCaseTests
 
         var estoqueRepository = CriarEstoqueRepository(estoque);
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            pecaInsumoCatalogoRepository,
-            estoqueRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, pecaInsumoCatalogoRepository, estoqueRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(
-            ordemServico.Id,
-            pecaInsumoCatalogo.Id,
-            quantidade: 2);
+        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(ordemServico.Id, pecaInsumoCatalogo.Id, quantidade: 2);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -346,41 +231,17 @@ public class ReservarPecaInsumoUseCaseTests
 
         ordemServico.PecasInsumos.Should().BeEmpty();
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        ordemServicoRepository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        estoqueRepository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdsAsync(
-                It.Is<IReadOnlyCollection<Guid>>(ids =>
-                    ids.Contains(pecaInsumoCatalogo.Id)
-                    && ids.Count == 1),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdsAsync(It.Is<IReadOnlyCollection<Guid>>(ids => ids.Contains(pecaInsumoCatalogo.Id) && ids.Count == 1), It.IsAny<CancellationToken>()), Times.Once);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        estoqueRepository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -393,13 +254,9 @@ public class ReservarPecaInsumoUseCaseTests
 
         var estoqueRepository = new Mock<IEstoqueRepository>();
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            pecaInsumoCatalogoRepository,
-            estoqueRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, pecaInsumoCatalogoRepository, estoqueRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(
-            ordemServicoId: Guid.Empty);
+        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(ordemServicoId: Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -410,33 +267,15 @@ public class ReservarPecaInsumoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        estoqueRepository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdsAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdsAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        estoqueRepository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -449,14 +288,9 @@ public class ReservarPecaInsumoUseCaseTests
 
         var estoqueRepository = new Mock<IEstoqueRepository>();
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            pecaInsumoCatalogoRepository,
-            estoqueRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, pecaInsumoCatalogoRepository, estoqueRepository);
 
-        var request = new ReservarPecaInsumoRequest(
-            Guid.NewGuid(),
-            Array.Empty<PecaInsumoRequest>());
+        var request = new ReservarPecaInsumoRequest(Guid.NewGuid(), Array.Empty<PecaInsumoRequest>());
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -467,21 +301,11 @@ public class ReservarPecaInsumoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        estoqueRepository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdsAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdsAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -494,13 +318,9 @@ public class ReservarPecaInsumoUseCaseTests
 
         var estoqueRepository = new Mock<IEstoqueRepository>();
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            pecaInsumoCatalogoRepository,
-            estoqueRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, pecaInsumoCatalogoRepository, estoqueRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(
-            pecaInsumoCatalogoId: Guid.Empty);
+        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(pecaInsumoCatalogoId: Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -511,21 +331,11 @@ public class ReservarPecaInsumoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        estoqueRepository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdsAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdsAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -538,13 +348,9 @@ public class ReservarPecaInsumoUseCaseTests
 
         var estoqueRepository = new Mock<IEstoqueRepository>();
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            pecaInsumoCatalogoRepository,
-            estoqueRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, pecaInsumoCatalogoRepository, estoqueRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(
-            quantidade: 0);
+        var request = OrdemServicoTestDataFactory.CriarReservarPecaInsumoRequestValido(quantidade: 0);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -555,21 +361,11 @@ public class ReservarPecaInsumoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        estoqueRepository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdsAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdsAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -584,10 +380,7 @@ public class ReservarPecaInsumoUseCaseTests
 
         var estoqueRepository = new Mock<IEstoqueRepository>();
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            pecaInsumoCatalogoRepository,
-            estoqueRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, pecaInsumoCatalogoRepository, estoqueRepository);
 
         var request = new ReservarPecaInsumoRequest(
             Guid.NewGuid(),
@@ -606,51 +399,31 @@ public class ReservarPecaInsumoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        estoqueRepository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        estoqueRepository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        pecaInsumoCatalogoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        pecaInsumoCatalogoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static Mock<IOrdemServicoRepository> CriarOrdemServicoRepository(
-        OrdemServico? ordemServico)
+    private static Mock<IOrdemServicoRepository> CriarOrdemServicoRepository(OrdemServico? ordemServico)
     {
         var repository = new Mock<IOrdemServicoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(ordemServico);
 
         return repository;
     }
 
-    private static Mock<IPecaInsumoCatalogoRepository> CriarPecaInsumoCatalogoRepository(
-        params PecaInsumoCatalogo[] pecasInsumosCatalogo)
+    private static Mock<IPecaInsumoCatalogoRepository> CriarPecaInsumoCatalogoRepository(params PecaInsumoCatalogo[] pecasInsumosCatalogo)
     {
         var repository = new Mock<IPecaInsumoCatalogoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdsAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                (IReadOnlyCollection<Guid> ids, CancellationToken _) =>
-                    pecasInsumosCatalogo
-                        .Where(pecaInsumoCatalogo => ids.Contains(pecaInsumoCatalogo.Id))
-                        .ToArray());
+            .Setup(repo => repo.ObterPorIdsAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IReadOnlyCollection<Guid> ids, CancellationToken _) => pecasInsumosCatalogo.Where(pecaInsumoCatalogo => ids.Contains(pecaInsumoCatalogo.Id)).ToArray());
 
         return repository;
     }
@@ -671,11 +444,8 @@ public class ReservarPecaInsumoUseCaseTests
         var unitOfWork = new Mock<IUnitOfWork>();
 
         unitOfWork
-            .Setup(uow => uow.ExecutarEmTransacaoAsync(
-                It.IsAny<Func<CancellationToken, Task>>(),
-                It.IsAny<CancellationToken>()))
-            .Returns<Func<CancellationToken, Task>, CancellationToken>(
-                (operacao, cancellationToken) => operacao(cancellationToken));
+            .Setup(uow => uow.ExecutarEmTransacaoAsync(It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()))
+            .Returns<Func<CancellationToken, Task>, CancellationToken>((operacao, cancellationToken) => operacao(cancellationToken));
 
         return unitOfWork;
     }
@@ -688,12 +458,6 @@ public class ReservarPecaInsumoUseCaseTests
     {
         unitOfWork ??= CriarUnitOfWork();
 
-        return new ReservarPecaInsumoUseCase(
-            ordemServicoRepository.Object,
-            pecaInsumoCatalogoRepository.Object,
-            estoqueRepository.Object,
-            unitOfWork.Object,
-            new ReservarPecaInsumoValidator(),
-            MapperFactory.Criar());
+        return new ReservarPecaInsumoUseCase(ordemServicoRepository.Object, pecaInsumoCatalogoRepository.Object, estoqueRepository.Object, unitOfWork.Object, new ReservarPecaInsumoValidator(), MapperFactory.Criar());
     }
 }

@@ -1,4 +1,4 @@
-﻿using OficinaMecanica.Application.Identidade.UsuarioUseCases.AutenticarUsuario;
+using OficinaMecanica.Application.Identidade.UsuarioUseCases.AutenticarUsuario;
 
 namespace OficinaMecanica.Application.UnitTests.Identidade.Factories;
 
@@ -10,23 +10,13 @@ internal static class IdentidadeTestDataFactory
     public const string NomePadrao = "Administrador";
     public const string PerfilPadrao = "Administrador";
 
-    public static AutenticarUsuarioRequest CriarAutenticarUsuarioRequestValido(
-        string login = LoginPadrao,
-        string senha = SenhaPadrao)
+    public static AutenticarUsuarioRequest CriarAutenticarUsuarioRequestValido(string login = LoginPadrao, string senha = SenhaPadrao)
     {
-        return new AutenticarUsuarioRequest(
-            login,
-            senha);
+        return new AutenticarUsuarioRequest(login, senha);
     }
 
-    public static AutenticarUsuarioResponse CriarAutenticarUsuarioResponseValido(
-        string token = "")
+    public static AutenticarUsuarioResponse CriarAutenticarUsuarioResponseValido(string token = "")
     {
-        return new AutenticarUsuarioResponse(
-            token,
-            Guid.NewGuid(),
-            NomePadrao,
-            LoginPadrao,
-            PerfilPadrao);
+        return new AutenticarUsuarioResponse(token, Guid.NewGuid(), NomePadrao, LoginPadrao, PerfilPadrao);
     }
 }

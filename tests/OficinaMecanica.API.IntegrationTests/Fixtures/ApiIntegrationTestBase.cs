@@ -53,10 +53,7 @@ public abstract class ApiIntegrationTestBase : IAsyncLifetime
         return await LerJsonAsync(response);
     }
 
-    protected async Task<JsonElement> PostJsonAsync(
-        string endpoint,
-        object? request,
-        HttpStatusCode expectedStatusCode = HttpStatusCode.OK)
+    protected async Task<JsonElement> PostJsonAsync(string endpoint, object? request, HttpStatusCode expectedStatusCode = HttpStatusCode.OK)
     {
         var response = request is null
             ? await Client.PostAsync(endpoint, content: null)
@@ -67,10 +64,7 @@ public abstract class ApiIntegrationTestBase : IAsyncLifetime
         return await LerJsonAsync(response);
     }
 
-    protected async Task<JsonElement> PutJsonAsync(
-        string endpoint,
-        object request,
-        HttpStatusCode expectedStatusCode = HttpStatusCode.OK)
+    protected async Task<JsonElement> PutJsonAsync(string endpoint, object request, HttpStatusCode expectedStatusCode = HttpStatusCode.OK)
     {
         var response = await Client.PutAsJsonAsync(endpoint, request);
 
@@ -79,9 +73,7 @@ public abstract class ApiIntegrationTestBase : IAsyncLifetime
         return await LerJsonAsync(response);
     }
 
-    protected async Task DeleteAsync(
-        string endpoint,
-        HttpStatusCode expectedStatusCode = HttpStatusCode.NoContent)
+    protected async Task DeleteAsync(string endpoint, HttpStatusCode expectedStatusCode = HttpStatusCode.NoContent)
     {
         var response = await Client.DeleteAsync(endpoint);
 
@@ -119,13 +111,7 @@ public abstract class ApiIntegrationTestBase : IAsyncLifetime
 
     private async Task<string> AutenticarAsync(string login, string senha)
     {
-        var response = await PostJsonAsync(
-            "/api/v1/identidade/autenticacao/login",
-            AutenticacaoRequestBuilder.Novo()
-                .ComLogin(login)
-                .ComSenha(senha)
-                .Build(),
-            HttpStatusCode.OK);
+        var response = await PostJsonAsync("/api/v1/identidade/autenticacao/login", AutenticacaoRequestBuilder.Novo().ComLogin(login).ComSenha(senha).Build(), HttpStatusCode.OK);
 
         return response.GetProperty("token").GetString()!;
     }

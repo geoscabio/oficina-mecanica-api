@@ -16,9 +16,7 @@ public class MecanicoTests
         const string funcional = MecanicoTestDataFactory.FuncionalPadrao;
 
         // Act
-        var mecanico = Mecanico.Criar(
-            nome,
-            funcional);
+        var mecanico = Mecanico.Criar(nome, funcional);
 
         // Assert
         mecanico.Id.Should().NotBeEmpty();
@@ -35,9 +33,7 @@ public class MecanicoTests
         const string funcional = MecanicoTestDataFactory.FuncionalPadrao;
 
         // Act
-        var acao = () => Mecanico.Criar(
-            nome,
-            funcional);
+        var acao = () => Mecanico.Criar(nome, funcional);
 
         // Assert
         acao.Should()
@@ -48,16 +44,13 @@ public class MecanicoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_FuncionalInvalido_Quando_CriarMecanico_Entao_DeveLancarDomainException(
-        string funcional)
+    public void Dado_FuncionalInvalido_Quando_CriarMecanico_Entao_DeveLancarDomainException(string funcional)
     {
         // Arrange
         const string nome = MecanicoTestDataFactory.NomePadrao;
 
         // Act
-        var acao = () => Mecanico.Criar(
-            nome,
-            funcional);
+        var acao = () => Mecanico.Criar(nome, funcional);
 
         // Assert
         acao.Should()
@@ -72,9 +65,7 @@ public class MecanicoTests
         var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
 
         // Act
-        mecanico.Atualizar(
-            MecanicoTestDataFactory.NomeAtualizado,
-            MecanicoTestDataFactory.FuncionalAtualizado);
+        mecanico.Atualizar(MecanicoTestDataFactory.NomeAtualizado, MecanicoTestDataFactory.FuncionalAtualizado);
 
         // Assert
         mecanico.Nome.Should().Be(MecanicoTestDataFactory.NomeAtualizado);
@@ -84,16 +75,13 @@ public class MecanicoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_NomeInvalido_Quando_AtualizarMecanico_Entao_DeveLancarDomainException(
-        string nome)
+    public void Dado_NomeInvalido_Quando_AtualizarMecanico_Entao_DeveLancarDomainException(string nome)
     {
         // Arrange
         var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
 
         // Act
-        var acao = () => mecanico.Atualizar(
-            nome,
-            MecanicoTestDataFactory.FuncionalAtualizado);
+        var acao = () => mecanico.Atualizar(nome, MecanicoTestDataFactory.FuncionalAtualizado);
 
         // Assert
         acao.Should()
@@ -104,16 +92,13 @@ public class MecanicoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_FuncionalInvalido_Quando_AtualizarMecanico_Entao_DeveLancarDomainException(
-        string funcional)
+    public void Dado_FuncionalInvalido_Quando_AtualizarMecanico_Entao_DeveLancarDomainException(string funcional)
     {
         // Arrange
         var mecanico = MecanicoTestDataFactory.CriarMecanicoPadrao();
 
         // Act
-        var acao = () => mecanico.Atualizar(
-            MecanicoTestDataFactory.NomeAtualizado,
-            funcional);
+        var acao = () => mecanico.Atualizar(MecanicoTestDataFactory.NomeAtualizado, funcional);
 
         // Assert
         acao.Should()

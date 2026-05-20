@@ -25,10 +25,7 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
         var request = AutenticacaoRequestBuilder.Novo().Build();
 
         // Act
-        var response = await PostJsonAsync(
-            "/api/v1/identidade/autenticacao/login",
-            request,
-            HttpStatusCode.OK);
+        var response = await PostJsonAsync("/api/v1/identidade/autenticacao/login", request, HttpStatusCode.OK);
 
         // Assert
         var token = ObterString(response, "token");
@@ -44,15 +41,9 @@ public sealed class AutenticacaoControllerTests : ApiIntegrationTestBase
         var request = AutenticacaoRequestBuilder.Novo().Build();
 
         // Act
-        var primeiraAutenticacao = await PostJsonAsync(
-            "/api/v1/identidade/autenticacao/login",
-            request,
-            HttpStatusCode.OK);
+        var primeiraAutenticacao = await PostJsonAsync("/api/v1/identidade/autenticacao/login", request, HttpStatusCode.OK);
 
-        var segundaAutenticacao = await PostJsonAsync(
-            "/api/v1/identidade/autenticacao/login",
-            request,
-            HttpStatusCode.OK);
+        var segundaAutenticacao = await PostJsonAsync("/api/v1/identidade/autenticacao/login", request, HttpStatusCode.OK);
 
         // Assert
         ObterString(primeiraAutenticacao, "usuarioId")
