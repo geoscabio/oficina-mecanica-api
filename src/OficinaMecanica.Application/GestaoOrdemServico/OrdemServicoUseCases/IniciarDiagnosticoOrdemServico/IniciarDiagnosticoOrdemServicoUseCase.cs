@@ -41,7 +41,12 @@ public sealed class IniciarDiagnosticoOrdemServicoUseCase
             return Result<OrdemServicoResponse>.Falha(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada, TipoErro.NaoEncontrado);
         }
 
-        ordemServico.IniciarDiagnostico();
+        var resultadoDominio = ordemServico.IniciarDiagnostico();
+
+        if (!resultadoDominio.Sucesso)
+        {
+            return resultadoDominio.ParaFalhaDeRegraNegocio<OrdemServicoResponse>();
+        }
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
 

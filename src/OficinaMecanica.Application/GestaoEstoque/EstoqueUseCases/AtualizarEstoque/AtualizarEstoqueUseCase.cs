@@ -44,12 +44,17 @@ public sealed class AtualizarEstoqueUseCase
             return Result<ItemEstoqueResponse>.Falha(EstoqueValidationMessages.ItemEstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
-        var itemEstoque = estoque.AtualizarQuantidadeDisponivel(
+        var resultadoDominio = estoque.AtualizarQuantidadeDisponivel(
             request.PecaInsumoCatalogoId,
             request.QuantidadeDisponivel);
 
+        if (!resultadoDominio.Sucesso)
+        {
+            return Result<ItemEstoqueResponse>.Falha(resultadoDominio.Mensagem!, TipoErro.RegraNegocio);
+        }
+
         await _estoqueRepository.AtualizarAsync(estoque, cancellationToken);
 
-        return Result<ItemEstoqueResponse>.Ok(_mapper.Map<ItemEstoqueResponse>(itemEstoque));
+        return Result<ItemEstoqueResponse>.Ok(_mapper.Map<ItemEstoqueResponse>(resultadoDominio.Valor));
     }
 }

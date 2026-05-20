@@ -11,7 +11,6 @@ using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
-using OficinaMecanica.Domain.Shared.Exceptions;
 
 namespace OficinaMecanica.Application.UnitTests.GestaoOrdemServico.OrdemServicoUseCases.CancelarOrdemServico;
 
@@ -260,7 +259,7 @@ public class CancelarOrdemServicoUseCaseTests
     }
 
     [Fact]
-    public async Task Dado_OrdemServicoFinalizada_Quando_Cancelar_Entao_DeveLancarDomainException()
+    public async Task Dado_OrdemServicoFinalizada_Quando_Cancelar_Entao_DeveRetornarFalhaDeRegraNegocio()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoFinalizada();
@@ -278,12 +277,13 @@ public class CancelarOrdemServicoUseCaseTests
             MotivoCancelamentoOrdemServico.EstoqueInsuficiente);
 
         // Act
-        var acao = () => useCase.ExecuteAsync(request);
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
-        await acao.Should()
-            .ThrowAsync<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
+        resultado.Erro.Tipo.Should().Be(TipoErro.RegraNegocio);
 
         ordemServicoRepository.Verify(
             repo => repo.ObterPorIdAsync(

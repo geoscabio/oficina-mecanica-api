@@ -59,13 +59,25 @@ public sealed class CancelarOrdemServicoUseCase
             return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
-        ordemServico.Cancelar(request.Motivo);
+        var resultadoCancelamento = ordemServico.Cancelar(request.Motivo);
+
+        if (!resultadoCancelamento.Sucesso)
+        {
+            return resultadoCancelamento.ParaFalhaDeRegraNegocio<OrdemServicoResponse>();
+        }
 
         if (deveEstornarEstoque)
         {
             foreach (var pecaInsumo in ordemServico.PecasInsumos)
             {
-                estoque!.EstornarItens(pecaInsumo.PecaInsumoCatalogoId, pecaInsumo.Quantidade);
+                var resultadoEstornoEstoque = estoque!.EstornarItens(
+                    pecaInsumo.PecaInsumoCatalogoId,
+                    pecaInsumo.Quantidade);
+
+                if (!resultadoEstornoEstoque.Sucesso)
+                {
+                    return resultadoEstornoEstoque.ParaFalhaDeRegraNegocio<OrdemServicoResponse>();
+                }
             }
         }
 

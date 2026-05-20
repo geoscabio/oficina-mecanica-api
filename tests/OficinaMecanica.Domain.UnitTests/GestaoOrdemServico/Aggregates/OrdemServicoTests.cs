@@ -108,18 +108,17 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoEmDiagnostico_Quando_IniciarDiagnostico_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoEmDiagnostico_Quando_IniciarDiagnostico_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
 
         // Act
-        var acao = () => ordemServico.IniciarDiagnostico();
+        var resultado = ordemServico.IniciarDiagnostico();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]
@@ -143,20 +142,19 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoRecebida_Quando_DefinirServico_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoRecebida_Quando_DefinirServico_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
 
         // Act
-        var acao = () => ordemServico.DefinirServico(
+        var resultado = ordemServico.DefinirServico(
             Guid.NewGuid(),
             OrdemServicoTestDataFactory.ValorServicoPadrao);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]
@@ -216,21 +214,20 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoRecebida_Quando_ReservarPecaInsumo_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoRecebida_Quando_ReservarPecaInsumo_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
 
         // Act
-        var acao = () => ordemServico.ReservarPecaInsumo(
+        var resultado = ordemServico.ReservarPecaInsumo(
             Guid.NewGuid(),
             OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
             OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]
@@ -262,33 +259,31 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoEmDiagnosticoSemServico_Quando_AguardarAprovacao_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoEmDiagnosticoSemServico_Quando_AguardarAprovacao_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
 
         // Act
-        var acao = () => ordemServico.AguardarAprovacao();
+        var resultado = ordemServico.AguardarAprovacao();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicoObrigatorioParaAguardarAprovacao);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicoObrigatorioParaAguardarAprovacao);
     }
 
     [Fact]
-    public void Dado_OrdemServicoRecebida_Quando_AguardarAprovacao_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoRecebida_Quando_AguardarAprovacao_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
 
         // Act
-        var acao = () => ordemServico.AguardarAprovacao();
+        var resultado = ordemServico.AguardarAprovacao();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]
@@ -305,18 +300,17 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoRecebida_Quando_IniciarExecucao_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoRecebida_Quando_IniciarExecucao_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
 
         // Act
-        var acao = () => ordemServico.IniciarExecucao();
+        var resultado = ordemServico.IniciarExecucao();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]
@@ -336,34 +330,32 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoAguardandoAprovacao_Quando_IniciarExecucaoServico_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoAguardandoAprovacao_Quando_IniciarExecucaoServico_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacao();
         var servicoId = ordemServico.Servicos.Single().Id;
 
         // Act
-        var acao = () => ordemServico.IniciarExecucaoServico(servicoId);
+        var resultado = ordemServico.IniciarExecucaoServico(servicoId);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]
-    public void Dado_ServicoInexistente_Quando_IniciarExecucaoServico_Entao_DeveLancarDomainException()
+    public void Dado_ServicoInexistente_Quando_IniciarExecucaoServico_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmExecucao();
 
         // Act
-        var acao = () => ordemServico.IniciarExecucaoServico(Guid.NewGuid());
+        var resultado = ordemServico.IniciarExecucaoServico(Guid.NewGuid());
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicoNaoEncontrado);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicoNaoEncontrado);
     }
 
     [Fact]
@@ -383,34 +375,32 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoAguardandoAprovacao_Quando_FinalizarServico_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoAguardandoAprovacao_Quando_FinalizarServico_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacao();
         var servicoId = ordemServico.Servicos.Single().Id;
 
         // Act
-        var acao = () => ordemServico.FinalizarServico(servicoId);
+        var resultado = ordemServico.FinalizarServico(servicoId);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]
-    public void Dado_ServicoInexistente_Quando_FinalizarServico_Entao_DeveLancarDomainException()
+    public void Dado_ServicoInexistente_Quando_FinalizarServico_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmExecucao();
 
         // Act
-        var acao = () => ordemServico.FinalizarServico(Guid.NewGuid());
+        var resultado = ordemServico.FinalizarServico(Guid.NewGuid());
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicoNaoEncontrado);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicoNaoEncontrado);
     }
 
     [Fact]
@@ -428,22 +418,21 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoEmExecucaoComServicoPendente_Quando_Finalizar_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoEmExecucaoComServicoPendente_Quando_Finalizar_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmExecucao();
 
         // Act
-        var acao = () => ordemServico.Finalizar();
+        var resultado = ordemServico.Finalizar();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
     }
 
     [Fact]
-    public void Dado_OrdemServicoEmExecucaoSemServicos_Quando_Finalizar_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoEmExecucaoSemServicos_Quando_Finalizar_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacao();
@@ -451,27 +440,25 @@ public class OrdemServicoTests
         ordemServico.IniciarExecucao();
 
         // Act
-        var acao = () => ordemServico.Finalizar();
+        var resultado = ordemServico.Finalizar();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
     }
 
     [Fact]
-    public void Dado_OrdemServicoAguardandoAprovacao_Quando_Finalizar_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoAguardandoAprovacao_Quando_Finalizar_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacao();
 
         // Act
-        var acao = () => ordemServico.Finalizar();
+        var resultado = ordemServico.Finalizar();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]
@@ -488,18 +475,17 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_OrdemServicoEmExecucao_Quando_Entregar_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoEmExecucao_Quando_Entregar_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmExecucaoComServicoFinalizado();
 
         // Act
-        var acao = () => ordemServico.Entregar();
+        var resultado = ordemServico.Entregar();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]
@@ -533,52 +519,49 @@ public class OrdemServicoTests
     }
 
     [Fact]
-    public void Dado_MotivoInvalido_Quando_Cancelar_Entao_DeveLancarDomainException()
+    public void Dado_MotivoInvalido_Quando_Cancelar_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacao();
 
         // Act
-        var acao = () => ordemServico.Cancelar((MotivoCancelamentoOrdemServico)99);
+        var resultado = ordemServico.Cancelar((MotivoCancelamentoOrdemServico)99);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.MotivoCancelamentoInvalido);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.MotivoCancelamentoInvalido);
     }
 
     [Fact]
-    public void Dado_OrdemServicoFinalizada_Quando_Cancelar_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoFinalizada_Quando_Cancelar_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoFinalizada();
 
         // Act
-        var acao = () => ordemServico.Cancelar(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
+        var resultado = ordemServico.Cancelar(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
     }
 
     [Fact]
-    public void Dado_OrdemServicoEntregue_Quando_Cancelar_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoEntregue_Quando_Cancelar_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEntregue();
 
         // Act
-        var acao = () => ordemServico.Cancelar(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
+        var resultado = ordemServico.Cancelar(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
     }
 
     [Fact]
-    public void Dado_OrdemServicoCancelada_Quando_CancelarNovamente_Entao_DeveLancarDomainException()
+    public void Dado_OrdemServicoCancelada_Quando_CancelarNovamente_Entao_DeveRetornarFalha()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacao();
@@ -586,11 +569,10 @@ public class OrdemServicoTests
         ordemServico.Cancelar(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
 
         // Act
-        var acao = () => ordemServico.Cancelar(MotivoCancelamentoOrdemServico.EstoqueInsuficiente);
+        var resultado = ordemServico.Cancelar(MotivoCancelamentoOrdemServico.EstoqueInsuficiente);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
     }
 }

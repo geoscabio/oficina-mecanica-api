@@ -146,25 +146,24 @@ public class EstoqueTests
     }
 
     [Fact]
-    public void Dado_ItemInexistente_Quando_ReservarItens_Entao_DeveLancarDomainException()
+    public void Dado_ItemInexistente_Quando_ReservarItens_Entao_DeveRetornarFalha()
     {
         // Arrange
         var estoque = EstoqueTestDataFactory.CriarEstoquePadrao();
         var pecaInsumoCatalogoIdInexistente = Guid.NewGuid();
 
         // Act
-        var acao = () => estoque.ReservarItens(
+        var resultado = estoque.ReservarItens(
             pecaInsumoCatalogoIdInexistente,
             1);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(EstoqueErrorMessages.ItemNaoEncontrado);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(EstoqueErrorMessages.ItemNaoEncontrado);
     }
 
     [Fact]
-    public void Dado_QuantidadeInvalida_Quando_ReservarItens_Entao_DeveLancarDomainException()
+    public void Dado_QuantidadeInvalida_Quando_ReservarItens_Entao_DeveRetornarFalha()
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
@@ -173,14 +172,13 @@ public class EstoqueTests
             pecaInsumoCatalogoId);
 
         // Act
-        var acao = () => estoque.ReservarItens(
+        var resultado = estoque.ReservarItens(
             pecaInsumoCatalogoId,
             0);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(EstoqueErrorMessages.QuantidadeMaiorQueZero);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(EstoqueErrorMessages.QuantidadeMaiorQueZero);
     }
 
     [Fact]
@@ -204,7 +202,7 @@ public class EstoqueTests
     }
 
     [Fact]
-    public void Dado_ItemExistenteSemReservaSuficiente_Quando_EstornarItens_Entao_DeveLancarDomainException()
+    public void Dado_ItemExistenteSemReservaSuficiente_Quando_EstornarItens_Entao_DeveRetornarFalha()
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
@@ -214,14 +212,13 @@ public class EstoqueTests
             quantidadeReservada: 2);
 
         // Act
-        var acao = () => estoque.EstornarItens(
+        var resultado = estoque.EstornarItens(
             pecaInsumoCatalogoId,
             EstoqueTestDataFactory.QuantidadeReservadaPadrao);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(EstoqueErrorMessages.QuantidadeReservadaInsuficiente);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(EstoqueErrorMessages.QuantidadeReservadaInsuficiente);
     }
 
     [Fact]
@@ -245,7 +242,7 @@ public class EstoqueTests
     }
 
     [Fact]
-    public void Dado_ItemExistenteSemReservaSuficiente_Quando_BaixarItens_Entao_DeveLancarDomainException()
+    public void Dado_ItemExistenteSemReservaSuficiente_Quando_BaixarItens_Entao_DeveRetornarFalha()
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
@@ -255,14 +252,13 @@ public class EstoqueTests
             quantidadeReservada: 2);
 
         // Act
-        var acao = () => estoque.BaixarItens(
+        var resultado = estoque.BaixarItens(
             pecaInsumoCatalogoId,
             EstoqueTestDataFactory.QuantidadeReservadaPadrao);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(EstoqueErrorMessages.QuantidadeReservadaInsuficiente);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(EstoqueErrorMessages.QuantidadeReservadaInsuficiente);
     }
 
     [Fact]
@@ -275,11 +271,15 @@ public class EstoqueTests
             pecaInsumoCatalogoId);
 
         // Act
-        var item = estoque.RegistrarEntrada(
+        var resultado = estoque.RegistrarEntrada(
             pecaInsumoCatalogoId,
             EstoqueTestDataFactory.QuantidadeEntradaPadrao);
 
         // Assert
+        resultado.Sucesso.Should().BeTrue();
+
+        var item = resultado.Valor!;
+
         item.QuantidadeDisponivel.Should().Be(15);
         item.QuantidadeReservada.Should().Be(0);
     }
@@ -292,11 +292,15 @@ public class EstoqueTests
         var pecaInsumoCatalogoId = Guid.NewGuid();
 
         // Act
-        var item = estoque.RegistrarEntrada(
+        var resultado = estoque.RegistrarEntrada(
             pecaInsumoCatalogoId,
             EstoqueTestDataFactory.QuantidadeEntradaPadrao);
 
         // Assert
+        resultado.Sucesso.Should().BeTrue();
+
+        var item = resultado.Valor!;
+
         item.PecaInsumoCatalogoId.Should().Be(pecaInsumoCatalogoId);
         item.QuantidadeDisponivel.Should().Be(EstoqueTestDataFactory.QuantidadeEntradaPadrao);
         item.QuantidadeReservada.Should().Be(0);
@@ -304,7 +308,7 @@ public class EstoqueTests
     }
 
     [Fact]
-    public void Dado_QuantidadeInvalida_Quando_RegistrarEntrada_Entao_DeveLancarDomainException()
+    public void Dado_QuantidadeInvalida_Quando_RegistrarEntrada_Entao_DeveRetornarFalha()
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
@@ -313,14 +317,13 @@ public class EstoqueTests
             pecaInsumoCatalogoId);
 
         // Act
-        var acao = () => estoque.RegistrarEntrada(
+        var resultado = estoque.RegistrarEntrada(
             pecaInsumoCatalogoId,
             0);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(EstoqueErrorMessages.QuantidadeMaiorQueZero);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(EstoqueErrorMessages.QuantidadeMaiorQueZero);
     }
 
     [Fact]
@@ -333,30 +336,33 @@ public class EstoqueTests
             pecaInsumoCatalogoId);
 
         // Act
-        var item = estoque.AtualizarQuantidadeDisponivel(
+        var resultado = estoque.AtualizarQuantidadeDisponivel(
             pecaInsumoCatalogoId,
             EstoqueTestDataFactory.QuantidadeAtualizadaPadrao);
 
         // Assert
+        resultado.Sucesso.Should().BeTrue();
+
+        var item = resultado.Valor!;
+
         item.QuantidadeDisponivel.Should().Be(EstoqueTestDataFactory.QuantidadeAtualizadaPadrao);
         item.QuantidadeReservada.Should().Be(0);
     }
 
     [Fact]
-    public void Dado_ItemInexistente_Quando_AtualizarQuantidadeDisponivel_Entao_DeveLancarDomainException()
+    public void Dado_ItemInexistente_Quando_AtualizarQuantidadeDisponivel_Entao_DeveRetornarFalha()
     {
         // Arrange
         var estoque = EstoqueTestDataFactory.CriarEstoquePadrao();
 
         // Act
-        var acao = () => estoque.AtualizarQuantidadeDisponivel(
+        var resultado = estoque.AtualizarQuantidadeDisponivel(
             Guid.NewGuid(),
             EstoqueTestDataFactory.QuantidadeAtualizadaPadrao);
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(EstoqueErrorMessages.ItemNaoEncontrado);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(EstoqueErrorMessages.ItemNaoEncontrado);
     }
 
     [Fact]

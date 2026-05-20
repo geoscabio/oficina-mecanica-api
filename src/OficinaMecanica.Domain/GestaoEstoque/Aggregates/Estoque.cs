@@ -1,6 +1,7 @@
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
 using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.GestaoEstoque.Messages;
+using OficinaMecanica.Domain.Shared.Results;
 
 namespace OficinaMecanica.Domain.GestaoEstoque.Aggregates;
 
@@ -41,23 +42,45 @@ public sealed class Estoque
         return item is not null && item.PossuiDisponibilidade(quantidade);
     }
 
-    public void ReservarItens(Guid pecaInsumoCatalogoId, int quantidade)
+    public ResultadoDominio ReservarItens(Guid pecaInsumoCatalogoId, int quantidade)
     {
-        ObterItem(pecaInsumoCatalogoId).Reservar(quantidade);
+        var resultadoItem = ObterItemParaOperacao(pecaInsumoCatalogoId);
+
+        return resultadoItem.Sucesso
+            ? resultadoItem.Valor!.Reservar(quantidade)
+            : ResultadoDominio.Falha(resultadoItem.Mensagem!);
     }
 
-    public void EstornarItens(Guid pecaInsumoCatalogoId, int quantidade)
+    public ResultadoDominio EstornarItens(Guid pecaInsumoCatalogoId, int quantidade)
     {
-        ObterItem(pecaInsumoCatalogoId).Estornar(quantidade);
+        var resultadoItem = ObterItemParaOperacao(pecaInsumoCatalogoId);
+
+        return resultadoItem.Sucesso
+            ? resultadoItem.Valor!.Estornar(quantidade)
+            : ResultadoDominio.Falha(resultadoItem.Mensagem!);
     }
 
-    public void BaixarItens(Guid pecaInsumoCatalogoId, int quantidade)
+    public ResultadoDominio BaixarItens(Guid pecaInsumoCatalogoId, int quantidade)
     {
-        ObterItem(pecaInsumoCatalogoId).Baixar(quantidade);
+        var resultadoItem = ObterItemParaOperacao(pecaInsumoCatalogoId);
+
+        return resultadoItem.Sucesso
+            ? resultadoItem.Valor!.Baixar(quantidade)
+            : ResultadoDominio.Falha(resultadoItem.Mensagem!);
     }
 
-    public ItemEstoque RegistrarEntrada(Guid pecaInsumoCatalogoId, int quantidade)
+    public ResultadoDominio<ItemEstoque> RegistrarEntrada(Guid pecaInsumoCatalogoId, int quantidade)
     {
+        if (pecaInsumoCatalogoId == Guid.Empty)
+        {
+            return ResultadoDominio<ItemEstoque>.Falha(EstoqueErrorMessages.PecaInsumoCatalogoObrigatorio);
+        }
+
+        if (quantidade <= 0)
+        {
+            return ResultadoDominio<ItemEstoque>.Falha(EstoqueErrorMessages.QuantidadeMaiorQueZero);
+        }
+
         var item = EncontrarItem(pecaInsumoCatalogoId);
 
         if (item is null)
@@ -65,27 +88,53 @@ public sealed class Estoque
             item = ItemEstoque.Criar(pecaInsumoCatalogoId, quantidade);
             _itensEstoque.Add(item);
 
-            return item;
+            return ResultadoDominio<ItemEstoque>.Ok(item);
         }
 
-        item.RegistrarEntrada(quantidade);
+        var resultadoEntrada = item.RegistrarEntrada(quantidade);
 
-        return item;
+        return resultadoEntrada.Sucesso
+            ? ResultadoDominio<ItemEstoque>.Ok(item)
+            : ResultadoDominio<ItemEstoque>.Falha(resultadoEntrada.Mensagem!);
     }
 
-    public ItemEstoque AtualizarQuantidadeDisponivel(Guid pecaInsumoCatalogoId, int quantidadeDisponivel)
+    public ResultadoDominio<ItemEstoque> AtualizarQuantidadeDisponivel(
+        Guid pecaInsumoCatalogoId,
+        int quantidadeDisponivel)
     {
-        var item = ObterItem(pecaInsumoCatalogoId);
+        var resultadoItem = ObterItemParaOperacao(pecaInsumoCatalogoId);
+        if (!resultadoItem.Sucesso)
+        {
+            return ResultadoDominio<ItemEstoque>.Falha(resultadoItem.Mensagem!);
+        }
 
-        item.AtualizarQuantidadeDisponivel(quantidadeDisponivel);
+        var item = resultadoItem.Valor!;
 
-        return item;
+        var resultadoAtualizacao = item.AtualizarQuantidadeDisponivel(quantidadeDisponivel);
+
+        return resultadoAtualizacao.Sucesso
+            ? ResultadoDominio<ItemEstoque>.Ok(item)
+            : ResultadoDominio<ItemEstoque>.Falha(resultadoAtualizacao.Mensagem!);
     }
 
     public ItemEstoque ObterItem(Guid pecaInsumoCatalogoId)
     {
         return EncontrarItem(pecaInsumoCatalogoId)
             ?? throw new DomainException(EstoqueErrorMessages.ItemNaoEncontrado);
+    }
+
+    private ResultadoDominio<ItemEstoque> ObterItemParaOperacao(Guid pecaInsumoCatalogoId)
+    {
+        if (pecaInsumoCatalogoId == Guid.Empty)
+        {
+            return ResultadoDominio<ItemEstoque>.Falha(EstoqueErrorMessages.PecaInsumoCatalogoObrigatorio);
+        }
+
+        var item = EncontrarItem(pecaInsumoCatalogoId);
+
+        return item is null
+            ? ResultadoDominio<ItemEstoque>.Falha(EstoqueErrorMessages.ItemNaoEncontrado)
+            : ResultadoDominio<ItemEstoque>.Ok(item);
     }
 
     private ItemEstoque? EncontrarItem(Guid pecaInsumoCatalogoId)

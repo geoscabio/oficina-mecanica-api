@@ -41,7 +41,12 @@ public sealed class AguardarAprovacaoOrcamentoUseCase
             return Result<OrdemServicoResponse>.Falha(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada, TipoErro.NaoEncontrado);
         }
 
-        ordemServico.AguardarAprovacao();
+        var resultadoDominio = ordemServico.AguardarAprovacao();
+
+        if (!resultadoDominio.Sucesso)
+        {
+            return resultadoDominio.ParaFalhaDeRegraNegocio<OrdemServicoResponse>();
+        }
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
 

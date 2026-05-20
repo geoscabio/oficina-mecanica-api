@@ -41,7 +41,12 @@ public sealed class FinalizarServicoUseCase
             return Result<OrdemServicoResponse>.Falha(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada, TipoErro.NaoEncontrado);
         }
 
-        ordemServico.FinalizarServico(request.ServicoId);
+        var resultadoDominio = ordemServico.FinalizarServico(request.ServicoId);
+
+        if (!resultadoDominio.Sucesso)
+        {
+            return resultadoDominio.ParaFalhaDeRegraNegocio<OrdemServicoResponse>();
+        }
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
 

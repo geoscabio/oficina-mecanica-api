@@ -7,7 +7,6 @@ using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Factories;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
-using OficinaMecanica.Domain.Shared.Exceptions;
 
 namespace OficinaMecanica.Application.UnitTests.GestaoOrdemServico.OrdemServicoUseCases.AguardarAprovacaoOrcamento;
 
@@ -84,7 +83,7 @@ public class AguardarAprovacaoOrcamentoUseCaseTests
     }
 
     [Fact]
-    public async Task Dado_OrdemServicoEmDiagnosticoSemServico_Quando_AguardarAprovacaoOrcamento_Entao_DeveLancarDomainException()
+    public async Task Dado_OrdemServicoEmDiagnosticoSemServico_Quando_AguardarAprovacaoOrcamento_Entao_DeveRetornarFalhaDeRegraNegocio()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
@@ -97,12 +96,13 @@ public class AguardarAprovacaoOrcamentoUseCaseTests
             ordemServico.Id);
 
         // Act
-        var acao = () => useCase.ExecuteAsync(request);
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
-        await acao.Should()
-            .ThrowAsync<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicoObrigatorioParaAguardarAprovacao);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicoObrigatorioParaAguardarAprovacao);
+        resultado.Erro.Tipo.Should().Be(TipoErro.RegraNegocio);
 
         repository.Verify(
             repo => repo.ObterPorIdAsync(

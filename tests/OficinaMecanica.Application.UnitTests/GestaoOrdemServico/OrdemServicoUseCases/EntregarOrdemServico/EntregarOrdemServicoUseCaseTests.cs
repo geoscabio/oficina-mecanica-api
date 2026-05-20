@@ -7,7 +7,6 @@ using OficinaMecanica.Application.UnitTests.GestaoOrdemServico.Factories;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
-using OficinaMecanica.Domain.Shared.Exceptions;
 
 namespace OficinaMecanica.Application.UnitTests.GestaoOrdemServico.OrdemServicoUseCases.EntregarOrdemServico;
 
@@ -83,7 +82,7 @@ public class EntregarOrdemServicoUseCaseTests
     }
 
     [Fact]
-    public async Task Dado_OrdemServicoEmExecucao_Quando_EntregarOrdemServico_Entao_DeveLancarDomainException()
+    public async Task Dado_OrdemServicoEmExecucao_Quando_EntregarOrdemServico_Entao_DeveRetornarFalhaDeRegraNegocio()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmExecucaoComServicoFinalizado();
@@ -96,12 +95,13 @@ public class EntregarOrdemServicoUseCaseTests
             ordemServico.Id);
 
         // Act
-        var acao = () => useCase.ExecuteAsync(request);
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
-        await acao.Should()
-            .ThrowAsync<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+        resultado.Erro.Tipo.Should().Be(TipoErro.RegraNegocio);
 
         repository.Verify(
             repo => repo.ObterPorIdAsync(

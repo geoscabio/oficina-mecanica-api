@@ -81,33 +81,31 @@ public class ServicoTests
     }
 
     [Fact]
-    public void Dado_ServicoEmExecucao_Quando_IniciarExecucao_Entao_DeveLancarDomainException()
+    public void Dado_ServicoEmExecucao_Quando_IniciarExecucao_Entao_DeveRetornarFalha()
     {
         // Arrange
         var servico = OrdemServicoTestDataFactory.CriarServicoEmExecucao();
 
         // Act
-        var acao = servico.IniciarExecucao;
+        var resultado = servico.IniciarExecucao();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicoPendenteParaIniciarExecucao);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicoPendenteParaIniciarExecucao);
     }
 
     [Fact]
-    public void Dado_ServicoFinalizado_Quando_IniciarExecucao_Entao_DeveLancarDomainException()
+    public void Dado_ServicoFinalizado_Quando_IniciarExecucao_Entao_DeveRetornarFalha()
     {
         // Arrange
         var servico = OrdemServicoTestDataFactory.CriarServicoFinalizado();
 
         // Act
-        var acao = servico.IniciarExecucao;
+        var resultado = servico.IniciarExecucao();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicoPendenteParaIniciarExecucao);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicoPendenteParaIniciarExecucao);
     }
 
     [Fact]
@@ -126,32 +124,30 @@ public class ServicoTests
     }
 
     [Fact]
-    public void Dado_ServicoPendente_Quando_Finalizar_Entao_DeveLancarDomainException()
+    public void Dado_ServicoPendente_Quando_Finalizar_Entao_DeveRetornarFalha()
     {
         // Arrange
         var servico = OrdemServicoTestDataFactory.CriarServicoPadrao();
 
         // Act
-        var acao = servico.Finalizar;
+        var resultado = servico.Finalizar();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
     }
 
     [Fact]
-    public void Dado_ServicoFinalizado_Quando_Finalizar_Entao_DeveLancarDomainException()
+    public void Dado_ServicoFinalizado_Quando_Finalizar_Entao_DeveRetornarFalha()
     {
         // Arrange
         var servico = OrdemServicoTestDataFactory.CriarServicoFinalizado();
 
         // Act
-        var acao = servico.Finalizar;
+        var resultado = servico.Finalizar();
 
         // Assert
-        acao.Should()
-            .Throw<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
     }
 }

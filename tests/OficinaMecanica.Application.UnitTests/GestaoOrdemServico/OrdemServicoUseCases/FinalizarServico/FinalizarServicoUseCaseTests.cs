@@ -8,7 +8,6 @@ using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
-using OficinaMecanica.Domain.Shared.Exceptions;
 
 namespace OficinaMecanica.Application.UnitTests.GestaoOrdemServico.OrdemServicoUseCases.FinalizarServico;
 
@@ -88,7 +87,7 @@ public class FinalizarServicoUseCaseTests
     }
 
     [Fact]
-    public async Task Dado_ServicoPendente_Quando_FinalizarServico_Entao_DeveLancarDomainException()
+    public async Task Dado_ServicoPendente_Quando_FinalizarServico_Entao_DeveRetornarFalhaDeRegraNegocio()
     {
         // Arrange
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmExecucaoComServicoPendente();
@@ -104,12 +103,13 @@ public class FinalizarServicoUseCaseTests
             servicoId);
 
         // Act
-        var acao = () => useCase.ExecuteAsync(request);
+        var resultado = await useCase.ExecuteAsync(request);
 
         // Assert
-        await acao.Should()
-            .ThrowAsync<DomainException>()
-            .WithMessage(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Erro.Should().NotBeNull();
+        resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
+        resultado.Erro.Tipo.Should().Be(TipoErro.RegraNegocio);
 
         repository.Verify(
             repo => repo.ObterPorIdAsync(

@@ -41,7 +41,12 @@ public sealed class IniciarExecucaoOrdemServicoUseCase
             return Result<OrdemServicoResponse>.Falha(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada, TipoErro.NaoEncontrado);
         }
 
-        ordemServico.IniciarExecucao();
+        var resultadoDominio = ordemServico.IniciarExecucao();
+
+        if (!resultadoDominio.Sucesso)
+        {
+            return resultadoDominio.ParaFalhaDeRegraNegocio<OrdemServicoResponse>();
+        }
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
 

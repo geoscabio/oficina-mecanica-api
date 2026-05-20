@@ -41,7 +41,12 @@ public sealed class EntregarOrdemServicoUseCase
             return Result<OrdemServicoResponse>.Falha(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada, TipoErro.NaoEncontrado);
         }
 
-        ordemServico.Entregar();
+        var resultadoDominio = ordemServico.Entregar();
+
+        if (!resultadoDominio.Sucesso)
+        {
+            return resultadoDominio.ParaFalhaDeRegraNegocio<OrdemServicoResponse>();
+        }
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
 

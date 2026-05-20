@@ -44,10 +44,15 @@ public sealed class RegistrarEntradaEstoqueUseCase
             estoque = Estoque.Criar(Array.Empty<ItemEstoque>());
         }
 
-        var itemEstoque = estoque.RegistrarEntrada(request.PecaInsumoCatalogoId, request.Quantidade);
+        var resultadoDominio = estoque.RegistrarEntrada(request.PecaInsumoCatalogoId, request.Quantidade);
+
+        if (!resultadoDominio.Sucesso)
+        {
+            return resultadoDominio.ParaFalhaDeRegraNegocio<ItemEstoque, ItemEstoqueResponse>();
+        }
 
         await _estoqueRepository.AtualizarAsync(estoque, cancellationToken);
 
-        return Result<ItemEstoqueResponse>.Ok(_mapper.Map<ItemEstoqueResponse>(itemEstoque));
+        return Result<ItemEstoqueResponse>.Ok(_mapper.Map<ItemEstoqueResponse>(resultadoDominio.Valor));
     }
 }

@@ -58,7 +58,12 @@ public sealed class DefinirServicosUseCase
         {
             var servicoCatalogo = servicosCatalogo[servicoCatalogoId];
 
-            ordemServico.DefinirServico(servicoCatalogo.Id, servicoCatalogo.Valor);
+            var resultadoDominio = ordemServico.DefinirServico(servicoCatalogo.Id, servicoCatalogo.Valor);
+
+            if (!resultadoDominio.Sucesso)
+            {
+                return resultadoDominio.ParaFalhaDeRegraNegocio<OrdemServicoResponse>();
+            }
         }
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);

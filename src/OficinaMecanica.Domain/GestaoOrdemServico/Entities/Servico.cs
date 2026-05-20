@@ -1,6 +1,7 @@
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
+using OficinaMecanica.Domain.Shared.Results;
 
 namespace OficinaMecanica.Domain.GestaoOrdemServico.Entities;
 
@@ -36,26 +37,30 @@ public sealed class Servico
         return new Servico(Guid.NewGuid(), servicoCatalogoId, valor);
     }
 
-    public void IniciarExecucao()
+    public ResultadoDominio IniciarExecucao()
     {
         if (Status != StatusServico.PENDENTE)
         {
-            throw new DomainException(OrdemServicoErrorMessages.ServicoPendenteParaIniciarExecucao);
+            return ResultadoDominio.Falha(OrdemServicoErrorMessages.ServicoPendenteParaIniciarExecucao);
         }
 
         Status = StatusServico.EM_EXECUCAO;
         DataInicio = DateTime.UtcNow;
+
+        return ResultadoDominio.Ok();
     }
 
-    public void Finalizar()
+    public ResultadoDominio Finalizar()
     {
         if (Status != StatusServico.EM_EXECUCAO)
         {
-            throw new DomainException(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
+            return ResultadoDominio.Falha(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
         }
 
         Status = StatusServico.FINALIZADO;
         DataFim = DateTime.UtcNow;
+
+        return ResultadoDominio.Ok();
     }
 }
 

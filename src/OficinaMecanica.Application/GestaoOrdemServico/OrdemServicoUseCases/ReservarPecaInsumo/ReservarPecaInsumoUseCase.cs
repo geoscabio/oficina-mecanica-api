@@ -79,12 +79,22 @@ public sealed class ReservarPecaInsumoUseCase
         {
             var pecaInsumoCatalogo = pecasInsumosCatalogo[pecaInsumo.PecaInsumoCatalogoId];
 
-            ordemServico.ReservarPecaInsumo(
+            var resultadoReservaOrdemServico = ordemServico.ReservarPecaInsumo(
                 pecaInsumoCatalogo.Id,
                 pecaInsumo.Quantidade,
                 pecaInsumoCatalogo.Valor);
 
-            estoque.ReservarItens(pecaInsumoCatalogo.Id, pecaInsumo.Quantidade);
+            if (!resultadoReservaOrdemServico.Sucesso)
+            {
+                return resultadoReservaOrdemServico.ParaFalhaDeRegraNegocio<OrdemServicoResponse>();
+            }
+
+            var resultadoReservaEstoque = estoque.ReservarItens(pecaInsumoCatalogo.Id, pecaInsumo.Quantidade);
+
+            if (!resultadoReservaEstoque.Sucesso)
+            {
+                return resultadoReservaEstoque.ParaFalhaDeRegraNegocio<OrdemServicoResponse>();
+            }
         }
 
         await _unitOfWork.ExecutarEmTransacaoAsync(

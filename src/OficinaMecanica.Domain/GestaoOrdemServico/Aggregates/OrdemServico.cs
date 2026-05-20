@@ -2,6 +2,7 @@ using OficinaMecanica.Domain.GestaoOrdemServico.Entities;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
+using OficinaMecanica.Domain.Shared.Results;
 
 namespace OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
 
@@ -56,27 +57,45 @@ public sealed class OrdemServico
         return new OrdemServico(Guid.NewGuid(), numero, veiculoId, mecanicoId);
     }
 
-    public void IniciarDiagnostico()
+    public ResultadoDominio IniciarDiagnostico()
     {
-        ExigirStatus(StatusOrdemServico.RECEBIDA);
+        var resultadoStatus = ValidarStatus(StatusOrdemServico.RECEBIDA);
+        if (!resultadoStatus.Sucesso)
+        {
+            return resultadoStatus;
+        }
 
         Status = StatusOrdemServico.EM_DIAGNOSTICO;
+
+        return ResultadoDominio.Ok();
     }
 
-    public void DefinirServico(Guid servicoCatalogoId, decimal valor)
+    public ResultadoDominio DefinirServico(Guid servicoCatalogoId, decimal valor)
     {
-        ExigirStatus(StatusOrdemServico.EM_DIAGNOSTICO);
+        var resultadoStatus = ValidarStatus(StatusOrdemServico.EM_DIAGNOSTICO);
+        if (!resultadoStatus.Sucesso)
+        {
+            return resultadoStatus;
+        }
 
         _servicos.Add(Servico.Criar(servicoCatalogoId, valor));
         CalcularOrcamento();
+
+        return ResultadoDominio.Ok();
     }
 
-    public void ReservarPecaInsumo(Guid pecaInsumoCatalogoId, int quantidade, decimal valorUnitario)
+    public ResultadoDominio ReservarPecaInsumo(Guid pecaInsumoCatalogoId, int quantidade, decimal valorUnitario)
     {
-        ExigirStatus(StatusOrdemServico.EM_DIAGNOSTICO);
+        var resultadoStatus = ValidarStatus(StatusOrdemServico.EM_DIAGNOSTICO);
+        if (!resultadoStatus.Sucesso)
+        {
+            return resultadoStatus;
+        }
 
         _pecasInsumos.Add(PecaInsumo.Criar(pecaInsumoCatalogoId, quantidade, valorUnitario));
         CalcularOrcamento();
+
+        return ResultadoDominio.Ok();
     }
 
     public void CalcularOrcamento()
@@ -85,89 +104,140 @@ public sealed class OrdemServico
             + _pecasInsumos.Sum(pecaInsumo => pecaInsumo.ValorTotal);
     }
 
-    public void AguardarAprovacao()
+    public ResultadoDominio AguardarAprovacao()
     {
-        ExigirStatus(StatusOrdemServico.EM_DIAGNOSTICO);
+        var resultadoStatus = ValidarStatus(StatusOrdemServico.EM_DIAGNOSTICO);
+        if (!resultadoStatus.Sucesso)
+        {
+            return resultadoStatus;
+        }
 
         if (_servicos.Count == 0)
         {
-            throw new DomainException(OrdemServicoErrorMessages.ServicoObrigatorioParaAguardarAprovacao);
+            return ResultadoDominio.Falha(OrdemServicoErrorMessages.ServicoObrigatorioParaAguardarAprovacao);
         }
 
         CalcularOrcamento();
         Status = StatusOrdemServico.AGUARDANDO_APROVACAO;
+
+        return ResultadoDominio.Ok();
     }
 
-    public void IniciarExecucao()
+    public ResultadoDominio IniciarExecucao()
     {
-        ExigirStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
+        var resultadoStatus = ValidarStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
+        if (!resultadoStatus.Sucesso)
+        {
+            return resultadoStatus;
+        }
 
         Status = StatusOrdemServico.EM_EXECUCAO;
+
+        return ResultadoDominio.Ok();
     }
 
-    public void IniciarExecucaoServico(Guid servicoId)
+    public ResultadoDominio IniciarExecucaoServico(Guid servicoId)
     {
-        ExigirStatus(StatusOrdemServico.EM_EXECUCAO);
+        var resultadoStatus = ValidarStatus(StatusOrdemServico.EM_EXECUCAO);
+        if (!resultadoStatus.Sucesso)
+        {
+            return resultadoStatus;
+        }
 
-        ObterServico(servicoId).IniciarExecucao();
+        var resultadoServico = ObterServico(servicoId);
+        if (!resultadoServico.Sucesso)
+        {
+            return ResultadoDominio.Falha(resultadoServico.Mensagem!);
+        }
+
+        return resultadoServico.Valor!.IniciarExecucao();
     }
 
-    public void FinalizarServico(Guid servicoId)
+    public ResultadoDominio FinalizarServico(Guid servicoId)
     {
-        ExigirStatus(StatusOrdemServico.EM_EXECUCAO);
+        var resultadoStatus = ValidarStatus(StatusOrdemServico.EM_EXECUCAO);
+        if (!resultadoStatus.Sucesso)
+        {
+            return resultadoStatus;
+        }
 
-        ObterServico(servicoId).Finalizar();
+        var resultadoServico = ObterServico(servicoId);
+        if (!resultadoServico.Sucesso)
+        {
+            return ResultadoDominio.Falha(resultadoServico.Mensagem!);
+        }
+
+        return resultadoServico.Valor!.Finalizar();
     }
 
-    public void Finalizar()
+    public ResultadoDominio Finalizar()
     {
-        ExigirStatus(StatusOrdemServico.EM_EXECUCAO);
+        var resultadoStatus = ValidarStatus(StatusOrdemServico.EM_EXECUCAO);
+        if (!resultadoStatus.Sucesso)
+        {
+            return resultadoStatus;
+        }
 
         if (_servicos.Count == 0 || _servicos.Any(servico => servico.Status != StatusServico.FINALIZADO))
         {
-            throw new DomainException(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
+            return ResultadoDominio.Falha(OrdemServicoErrorMessages.ServicosFinalizadosObrigatorios);
         }
 
         Status = StatusOrdemServico.FINALIZADA;
         DataFim = DateTime.UtcNow;
+
+        return ResultadoDominio.Ok();
     }
 
-    public void Entregar()
+    public ResultadoDominio Entregar()
     {
-        ExigirStatus(StatusOrdemServico.FINALIZADA);
+        var resultadoStatus = ValidarStatus(StatusOrdemServico.FINALIZADA);
+        if (!resultadoStatus.Sucesso)
+        {
+            return resultadoStatus;
+        }
 
         Status = StatusOrdemServico.ENTREGUE;
+
+        return ResultadoDominio.Ok();
     }
 
-    public void Cancelar(MotivoCancelamentoOrdemServico motivo)
+    public ResultadoDominio Cancelar(MotivoCancelamentoOrdemServico motivo)
     {
         if (!Enum.IsDefined(typeof(MotivoCancelamentoOrdemServico), motivo))
         {
-            throw new DomainException(OrdemServicoErrorMessages.MotivoCancelamentoInvalido);
+            return ResultadoDominio.Falha(OrdemServicoErrorMessages.MotivoCancelamentoInvalido);
         }
 
         if (Status is StatusOrdemServico.FINALIZADA or StatusOrdemServico.ENTREGUE or StatusOrdemServico.CANCELADA)
         {
-            throw new DomainException(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
+            return ResultadoDominio.Falha(OrdemServicoErrorMessages.CancelamentoStatusInvalido);
         }
 
         Status = StatusOrdemServico.CANCELADA;
         MotivoCancelamento = motivo;
         DataFim = DateTime.UtcNow;
+
+        return ResultadoDominio.Ok();
     }
 
-    private Servico ObterServico(Guid servicoId)
+    private ResultadoDominio<Servico> ObterServico(Guid servicoId)
     {
-        return _servicos.SingleOrDefault(servico => servico.Id == servicoId)
-            ?? throw new DomainException(OrdemServicoErrorMessages.ServicoNaoEncontrado);
+        var servico = _servicos.SingleOrDefault(servico => servico.Id == servicoId);
+
+        return servico is null
+            ? ResultadoDominio<Servico>.Falha(OrdemServicoErrorMessages.ServicoNaoEncontrado)
+            : ResultadoDominio<Servico>.Ok(servico);
     }
 
-    private void ExigirStatus(StatusOrdemServico statusEsperado)
+    private ResultadoDominio ValidarStatus(StatusOrdemServico statusEsperado)
     {
         if (Status != statusEsperado)
         {
-            throw new DomainException(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+            return ResultadoDominio.Falha(OrdemServicoErrorMessages.TransicaoStatusInvalida);
         }
+
+        return ResultadoDominio.Ok();
     }
 }
 

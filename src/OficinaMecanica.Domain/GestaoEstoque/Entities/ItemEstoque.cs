@@ -1,5 +1,6 @@
 using OficinaMecanica.Domain.Shared.Exceptions;
 using OficinaMecanica.Domain.GestaoEstoque.Messages;
+using OficinaMecanica.Domain.Shared.Results;
 
 namespace OficinaMecanica.Domain.GestaoEstoque.Entities;
 
@@ -35,72 +36,116 @@ public sealed class ItemEstoque
 
     public bool PossuiDisponibilidade(int quantidade)
     {
-        ValidarQuantidadePositiva(quantidade);
+        var resultadoQuantidade = ValidarQuantidadePositiva(quantidade);
+        if (!resultadoQuantidade.Sucesso)
+        {
+            return false;
+        }
 
         return QuantidadeDisponivel >= quantidade;
     }
 
-    public void Reservar(int quantidade)
+    public ResultadoDominio Reservar(int quantidade)
     {
-        ValidarQuantidadePositiva(quantidade);
-
-        if (!PossuiDisponibilidade(quantidade))
+        var resultadoQuantidade = ValidarQuantidadePositiva(quantidade);
+        if (!resultadoQuantidade.Sucesso)
         {
-            throw new DomainException(EstoqueErrorMessages.EstoqueInsuficiente);
+            return resultadoQuantidade;
+        }
+
+        if (QuantidadeDisponivel < quantidade)
+        {
+            return ResultadoDominio.Falha(EstoqueErrorMessages.EstoqueInsuficiente);
         }
 
         QuantidadeDisponivel -= quantidade;
         QuantidadeReservada += quantidade;
+
+        return ResultadoDominio.Ok();
     }
 
-    public void Estornar(int quantidade)
+    public ResultadoDominio Estornar(int quantidade)
     {
-        ValidarQuantidadePositiva(quantidade);
-        ValidarQuantidadeReservadaSuficiente(quantidade);
+        var resultadoQuantidade = ValidarQuantidadePositiva(quantidade);
+        if (!resultadoQuantidade.Sucesso)
+        {
+            return resultadoQuantidade;
+        }
+
+        var resultadoReserva = ValidarQuantidadeReservadaSuficiente(quantidade);
+        if (!resultadoReserva.Sucesso)
+        {
+            return resultadoReserva;
+        }
 
         QuantidadeReservada -= quantidade;
         QuantidadeDisponivel += quantidade;
+
+        return ResultadoDominio.Ok();
     }
 
-    public void Baixar(int quantidade)
+    public ResultadoDominio Baixar(int quantidade)
     {
-        ValidarQuantidadePositiva(quantidade);
-        ValidarQuantidadeReservadaSuficiente(quantidade);
+        var resultadoQuantidade = ValidarQuantidadePositiva(quantidade);
+        if (!resultadoQuantidade.Sucesso)
+        {
+            return resultadoQuantidade;
+        }
+
+        var resultadoReserva = ValidarQuantidadeReservadaSuficiente(quantidade);
+        if (!resultadoReserva.Sucesso)
+        {
+            return resultadoReserva;
+        }
 
         QuantidadeReservada -= quantidade;
+
+        return ResultadoDominio.Ok();
     }
 
-    public void RegistrarEntrada(int quantidade)
+    public ResultadoDominio RegistrarEntrada(int quantidade)
     {
-        ValidarQuantidadePositiva(quantidade);
+        var resultadoQuantidade = ValidarQuantidadePositiva(quantidade);
+        if (!resultadoQuantidade.Sucesso)
+        {
+            return resultadoQuantidade;
+        }
 
         QuantidadeDisponivel += quantidade;
+
+        return ResultadoDominio.Ok();
     }
 
-    public void AtualizarQuantidadeDisponivel(int quantidadeDisponivel)
+    public ResultadoDominio AtualizarQuantidadeDisponivel(int quantidadeDisponivel)
     {
         if (quantidadeDisponivel < 0)
         {
-            throw new DomainException(EstoqueErrorMessages.QuantidadeDisponivelNaoNegativa);
+            return ResultadoDominio.Falha(EstoqueErrorMessages.QuantidadeDisponivelNaoNegativa);
         }
 
         QuantidadeDisponivel = quantidadeDisponivel;
+
+        return ResultadoDominio.Ok();
     }
 
-    private static void ValidarQuantidadePositiva(int quantidade)
+    private static ResultadoDominio ValidarQuantidadePositiva(int quantidade)
     {
         if (quantidade <= 0)
         {
-            throw new DomainException(EstoqueErrorMessages.QuantidadeMaiorQueZero);
+            return ResultadoDominio.Falha(EstoqueErrorMessages.QuantidadeMaiorQueZero);
         }
+
+        return ResultadoDominio.Ok();
     }
 
-    private void ValidarQuantidadeReservadaSuficiente(int quantidade)
+    private ResultadoDominio ValidarQuantidadeReservadaSuficiente(int quantidade)
     {
         if (QuantidadeReservada < quantidade)
         {
-            throw new DomainException(EstoqueErrorMessages.QuantidadeReservadaInsuficiente);
+            return ResultadoDominio.Falha(EstoqueErrorMessages.QuantidadeReservadaInsuficiente);
         }
+
+        return ResultadoDominio.Ok();
     }
 }
 
