@@ -1,5 +1,3 @@
-﻿namespace OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.AtualizarEstoque;
+namespace OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.AtualizarEstoque;
 
-public sealed record AtualizarEstoqueRequest(
-    Guid PecaInsumoCatalogoId,
-    int QuantidadeDisponivel);
+public sealed record AtualizarEstoqueRequest(Guid PecaInsumoCatalogoId, int QuantidadeDisponivel);

@@ -17,11 +17,7 @@ public sealed class DefinirServicosUseCase
     private readonly IValidator<DefinirServicosRequest> _validator;
     private readonly IMapper _mapper;
 
-    public DefinirServicosUseCase(
-        IOrdemServicoRepository ordemServicoRepository,
-        IServicoCatalogoRepository servicoCatalogoRepository,
-        IValidator<DefinirServicosRequest> validator,
-        IMapper mapper)
+    public DefinirServicosUseCase(IOrdemServicoRepository ordemServicoRepository, IServicoCatalogoRepository servicoCatalogoRepository, IValidator<DefinirServicosRequest> validator, IMapper mapper)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _servicoCatalogoRepository = servicoCatalogoRepository;
@@ -29,15 +25,13 @@ public sealed class DefinirServicosUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(
-        DefinirServicosRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(DefinirServicosRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<OrdemServicoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<OrdemServicoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var ordemServico = await _ordemServicoRepository.ObterPorIdAsync(request.OrdemServicoId, cancellationToken);
@@ -66,9 +60,7 @@ public sealed class DefinirServicosUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 
-    private async Task<Dictionary<Guid, ServicoCatalogo>> ObterServicosCatalogoAsync(
-        IEnumerable<Guid> servicosCatalogoIds,
-        CancellationToken cancellationToken)
+    private async Task<Dictionary<Guid, ServicoCatalogo>> ObterServicosCatalogoAsync(IEnumerable<Guid> servicosCatalogoIds, CancellationToken cancellationToken)
     {
         var ids = servicosCatalogoIds
             .Distinct()
@@ -79,6 +71,7 @@ public sealed class DefinirServicosUseCase
         return servicosCatalogo.ToDictionary(servicoCatalogo => servicoCatalogo.Id);
     }
 }
+
 
 
 

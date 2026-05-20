@@ -17,17 +17,14 @@ public class OrdemServicoTests
         var mecanicoId = Guid.NewGuid();
 
         // Act
-        var ordemServico = OrdemServico.Abrir(
-            OrdemServicoTestDataFactory.NumeroPadrao,
-            veiculoId,
-            mecanicoId);
+        var ordemServico = OrdemServico.Abrir(OrdemServicoTestDataFactory.NumeroPadrao, veiculoId, mecanicoId);
 
         // Assert
         ordemServico.Id.Should().NotBeEmpty();
         ordemServico.Numero.Should().Be(OrdemServicoTestDataFactory.NumeroPadrao);
         ordemServico.VeiculoId.Should().Be(veiculoId);
         ordemServico.MecanicoId.Should().Be(mecanicoId);
-        ordemServico.Status.Should().Be(StatusOrdemServico.RECEBIDA);
+        ordemServico.Status.Should().Be(StatusOrdemServico.Recebida);
         ordemServico.DataInicio.Should().NotBeNull();
         ordemServico.DataFim.Should().BeNull();
         ordemServico.MotivoCancelamento.Should().BeNull();
@@ -46,10 +43,7 @@ public class OrdemServicoTests
         var mecanicoId = Guid.NewGuid();
 
         // Act
-        var acao = () => OrdemServico.Abrir(
-            numero,
-            veiculoId,
-            mecanicoId);
+        var acao = () => OrdemServico.Abrir(numero, veiculoId, mecanicoId);
 
         // Assert
         acao.Should()
@@ -64,10 +58,7 @@ public class OrdemServicoTests
         var mecanicoId = Guid.NewGuid();
 
         // Act
-        var acao = () => OrdemServico.Abrir(
-            OrdemServicoTestDataFactory.NumeroPadrao,
-            Guid.Empty,
-            mecanicoId);
+        var acao = () => OrdemServico.Abrir(OrdemServicoTestDataFactory.NumeroPadrao, Guid.Empty, mecanicoId);
 
         // Assert
         acao.Should()
@@ -82,10 +73,7 @@ public class OrdemServicoTests
         var veiculoId = Guid.NewGuid();
 
         // Act
-        var acao = () => OrdemServico.Abrir(
-            OrdemServicoTestDataFactory.NumeroPadrao,
-            veiculoId,
-            Guid.Empty);
+        var acao = () => OrdemServico.Abrir(OrdemServicoTestDataFactory.NumeroPadrao, veiculoId, Guid.Empty);
 
         // Assert
         acao.Should()
@@ -103,7 +91,7 @@ public class OrdemServicoTests
         ordemServico.IniciarDiagnostico();
 
         // Assert
-        ordemServico.Status.Should().Be(StatusOrdemServico.EM_DIAGNOSTICO);
+        ordemServico.Status.Should().Be(StatusOrdemServico.EmDiagnostico);
         ordemServico.DataFim.Should().BeNull();
     }
 
@@ -130,15 +118,13 @@ public class OrdemServicoTests
         var servicoCatalogoId = Guid.NewGuid();
 
         // Act
-        ordemServico.DefinirServico(
-            servicoCatalogoId,
-            OrdemServicoTestDataFactory.ValorServicoPadrao);
+        ordemServico.DefinirServico(servicoCatalogoId, OrdemServicoTestDataFactory.ValorServicoPadrao);
 
         // Assert
         ordemServico.Servicos.Should().ContainSingle();
         ordemServico.Servicos.Single().ServicoCatalogoId.Should().Be(servicoCatalogoId);
         ordemServico.Servicos.Single().Valor.Should().Be(OrdemServicoTestDataFactory.ValorServicoPadrao);
-        ordemServico.Servicos.Single().Status.Should().Be(StatusServico.PENDENTE);
+        ordemServico.Servicos.Single().Status.Should().Be(StatusServico.Pendente);
         ordemServico.ValorTotal.Should().Be(OrdemServicoTestDataFactory.ValorServicoPadrao);
     }
 
@@ -149,9 +135,7 @@ public class OrdemServicoTests
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
 
         // Act
-        var acao = () => ordemServico.DefinirServico(
-            Guid.NewGuid(),
-            OrdemServicoTestDataFactory.ValorServicoPadrao);
+        var acao = () => ordemServico.DefinirServico(Guid.NewGuid(), OrdemServicoTestDataFactory.ValorServicoPadrao);
 
         // Assert
         acao.Should()
@@ -166,9 +150,7 @@ public class OrdemServicoTests
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
 
         // Act
-        var acao = () => ordemServico.DefinirServico(
-            Guid.Empty,
-            OrdemServicoTestDataFactory.ValorServicoPadrao);
+        var acao = () => ordemServico.DefinirServico(Guid.Empty, OrdemServicoTestDataFactory.ValorServicoPadrao);
 
         // Assert
         acao.Should()
@@ -183,9 +165,7 @@ public class OrdemServicoTests
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico();
 
         // Act
-        var acao = () => ordemServico.DefinirServico(
-            Guid.NewGuid(),
-            0m);
+        var acao = () => ordemServico.DefinirServico(Guid.NewGuid(), 0m);
 
         // Assert
         acao.Should()
@@ -201,10 +181,7 @@ public class OrdemServicoTests
         var pecaInsumoCatalogoId = Guid.NewGuid();
 
         // Act
-        ordemServico.ReservarPecaInsumo(
-            pecaInsumoCatalogoId,
-            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
-            OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
+        ordemServico.ReservarPecaInsumo(pecaInsumoCatalogoId, OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao, OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
 
         // Assert
         ordemServico.PecasInsumos.Should().ContainSingle();
@@ -222,10 +199,7 @@ public class OrdemServicoTests
         var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
 
         // Act
-        var acao = () => ordemServico.ReservarPecaInsumo(
-            Guid.NewGuid(),
-            OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao,
-            OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
+        var acao = () => ordemServico.ReservarPecaInsumo(Guid.NewGuid(), OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao, OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
 
         // Assert
         acao.Should()
@@ -256,7 +230,7 @@ public class OrdemServicoTests
         ordemServico.AguardarAprovacao();
 
         // Assert
-        ordemServico.Status.Should().Be(StatusOrdemServico.AGUARDANDO_APROVACAO);
+        ordemServico.Status.Should().Be(StatusOrdemServico.AguardandoAprovacao);
         ordemServico.ValorTotal.Should().Be(OrdemServicoTestDataFactory.ValorServicoPadrao);
         ordemServico.DataFim.Should().BeNull();
     }
@@ -301,7 +275,7 @@ public class OrdemServicoTests
         ordemServico.IniciarExecucao();
 
         // Assert
-        ordemServico.Status.Should().Be(StatusOrdemServico.EM_EXECUCAO);
+        ordemServico.Status.Should().Be(StatusOrdemServico.EmExecucao);
     }
 
     [Fact]
@@ -330,7 +304,7 @@ public class OrdemServicoTests
         ordemServico.IniciarExecucaoServico(servicoId);
 
         // Assert
-        ordemServico.Servicos.Single().Status.Should().Be(StatusServico.EM_EXECUCAO);
+        ordemServico.Servicos.Single().Status.Should().Be(StatusServico.EmExecucao);
         ordemServico.Servicos.Single().DataInicio.Should().NotBeNull();
         ordemServico.Servicos.Single().DataFim.Should().BeNull();
     }
@@ -377,7 +351,7 @@ public class OrdemServicoTests
         ordemServico.FinalizarServico(servicoId);
 
         // Assert
-        ordemServico.Servicos.Single().Status.Should().Be(StatusServico.FINALIZADO);
+        ordemServico.Servicos.Single().Status.Should().Be(StatusServico.Finalizado);
         ordemServico.Servicos.Single().DataInicio.Should().NotBeNull();
         ordemServico.Servicos.Single().DataFim.Should().NotBeNull();
     }
@@ -423,7 +397,7 @@ public class OrdemServicoTests
         ordemServico.Finalizar();
 
         // Assert
-        ordemServico.Status.Should().Be(StatusOrdemServico.FINALIZADA);
+        ordemServico.Status.Should().Be(StatusOrdemServico.Finalizada);
         ordemServico.DataFim.Should().NotBeNull();
     }
 
@@ -484,7 +458,7 @@ public class OrdemServicoTests
         ordemServico.Entregar();
 
         // Assert
-        ordemServico.Status.Should().Be(StatusOrdemServico.ENTREGUE);
+        ordemServico.Status.Should().Be(StatusOrdemServico.Entregue);
     }
 
     [Fact]
@@ -512,7 +486,7 @@ public class OrdemServicoTests
         ordemServico.Cancelar(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
 
         // Assert
-        ordemServico.Status.Should().Be(StatusOrdemServico.CANCELADA);
+        ordemServico.Status.Should().Be(StatusOrdemServico.Cancelada);
         ordemServico.MotivoCancelamento.Should().Be(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
         ordemServico.DataFim.Should().NotBeNull();
     }
@@ -527,7 +501,7 @@ public class OrdemServicoTests
         ordemServico.Cancelar(MotivoCancelamentoOrdemServico.EstoqueInsuficiente);
 
         // Assert
-        ordemServico.Status.Should().Be(StatusOrdemServico.CANCELADA);
+        ordemServico.Status.Should().Be(StatusOrdemServico.Cancelada);
         ordemServico.MotivoCancelamento.Should().Be(MotivoCancelamentoOrdemServico.EstoqueInsuficiente);
         ordemServico.DataFim.Should().NotBeNull();
     }

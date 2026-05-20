@@ -24,14 +24,14 @@ internal static class OrdemServicoTestDataFactory
     public const decimal ValorPecaInsumoPadrao = 45m;
     public const int QuantidadePecaInsumoPadrao = 2;
 
-    public const string StatusRecebida = "RECEBIDA";
-    public const string StatusPendente = "PENDENTE";
-    public const string StatusEmDiagnostico = "EM_DIAGNOSTICO";
-    public const string StatusAguardandoAprovacao = "AGUARDANDO_APROVACAO";
-    public const string StatusEmExecucao = "EM_EXECUCAO";
-    public const string StatusFinalizada = "FINALIZADA";
-    public const string StatusEntregue = "ENTREGUE";
-    public const string StatusCancelada = "CANCELADA";
+    public const string StatusRecebida = "Recebida";
+    public const string StatusPendente = "Pendente";
+    public const string StatusEmDiagnostico = "EmDiagnostico";
+    public const string StatusAguardandoAprovacao = "AguardandoAprovacao";
+    public const string StatusEmExecucao = "EmExecucao";
+    public const string StatusFinalizada = "Finalizada";
+    public const string StatusEntregue = "Entregue";
+    public const string StatusCancelada = "Cancelada";
 
     public const int PaginaPadrao = 1;
     public const int TamanhoPaginaPadrao = 10;
@@ -42,10 +42,7 @@ internal static class OrdemServicoTestDataFactory
 
     public static OrdemServico CriarOrdemServicoRecebida()
     {
-        return OrdemServico.Abrir(
-            NumeroPadrao,
-            Guid.NewGuid(),
-            Guid.NewGuid());
+        return OrdemServico.Abrir(NumeroPadrao, Guid.NewGuid(), Guid.NewGuid());
     }
 
     public static OrdemServico CriarOrdemServicoEmDiagnostico()
@@ -61,9 +58,7 @@ internal static class OrdemServicoTestDataFactory
     {
         var ordemServico = CriarOrdemServicoEmDiagnostico();
 
-        ordemServico.DefinirServico(
-            Guid.NewGuid(),
-            ValorServicoPadrao);
+        ordemServico.DefinirServico(Guid.NewGuid(), ValorServicoPadrao);
 
         return ordemServico;
     }
@@ -72,10 +67,7 @@ internal static class OrdemServicoTestDataFactory
     {
         var ordemServico = CriarOrdemServicoEmDiagnosticoComServico();
 
-        ordemServico.ReservarPecaInsumo(
-            Guid.NewGuid(),
-            QuantidadePecaInsumoPadrao,
-            ValorPecaInsumoPadrao);
+        ordemServico.ReservarPecaInsumo(Guid.NewGuid(), QuantidadePecaInsumoPadrao, ValorPecaInsumoPadrao);
 
         return ordemServico;
     }
@@ -147,16 +139,11 @@ internal static class OrdemServicoTestDataFactory
         return ordemServico;
     }
 
-    public static OrdemServico CriarOrdemServicoEmExecucaoComServicoFinalizadoEPecaInsumoReservado(
-        Guid pecaInsumoCatalogoId,
-        int quantidade = QuantidadePecaInsumoPadrao)
+    public static OrdemServico CriarOrdemServicoEmExecucaoComServicoFinalizadoEPecaInsumoReservado(Guid pecaInsumoCatalogoId, int quantidade = QuantidadePecaInsumoPadrao)
     {
         var ordemServico = CriarOrdemServicoEmDiagnosticoComServico();
 
-        ordemServico.ReservarPecaInsumo(
-            pecaInsumoCatalogoId,
-            quantidade,
-            ValorPecaInsumoPadrao);
+        ordemServico.ReservarPecaInsumo(pecaInsumoCatalogoId, quantidade, ValorPecaInsumoPadrao);
 
         ordemServico.AguardarAprovacao();
         ordemServico.IniciarExecucao();
@@ -169,137 +156,90 @@ internal static class OrdemServicoTestDataFactory
         return ordemServico;
     }
 
-    public static OrdemServico CriarOrdemServicoAguardandoAprovacaoComPecaInsumoReservado(
-        Guid pecaInsumoCatalogoId,
-        int quantidade = QuantidadePecaInsumoPadrao)
+    public static OrdemServico CriarOrdemServicoAguardandoAprovacaoComPecaInsumoReservado(Guid pecaInsumoCatalogoId, int quantidade = QuantidadePecaInsumoPadrao)
     {
         var ordemServico = CriarOrdemServicoEmDiagnosticoComServico();
 
-        ordemServico.ReservarPecaInsumo(
-            pecaInsumoCatalogoId,
-            quantidade,
-            ValorPecaInsumoPadrao);
+        ordemServico.ReservarPecaInsumo(pecaInsumoCatalogoId, quantidade, ValorPecaInsumoPadrao);
 
         ordemServico.AguardarAprovacao();
 
         return ordemServico;
     }
 
-    public static AbrirOrdemServicoRequest CriarAbrirOrdemServicoRequestValido(
-        Guid? veiculoId = null,
-        Guid? mecanicoId = null)
+    public static AbrirOrdemServicoRequest CriarAbrirOrdemServicoRequestValido(Guid? veiculoId = null, Guid? mecanicoId = null)
     {
-        return new AbrirOrdemServicoRequest(
-            veiculoId ?? Guid.NewGuid(),
-            mecanicoId ?? Guid.NewGuid());
+        return new AbrirOrdemServicoRequest(veiculoId ?? Guid.NewGuid(), mecanicoId ?? Guid.NewGuid());
     }
 
-    public static IniciarDiagnosticoOrdemServicoRequest CriarIniciarDiagnosticoOrdemServicoRequestValido(
-        Guid? ordemServicoId = null)
+    public static IniciarDiagnosticoOrdemServicoRequest CriarIniciarDiagnosticoOrdemServicoRequestValido(Guid? ordemServicoId = null)
     {
-        return new IniciarDiagnosticoOrdemServicoRequest(
-            ordemServicoId ?? Guid.NewGuid());
+        return new IniciarDiagnosticoOrdemServicoRequest(ordemServicoId ?? Guid.NewGuid());
     }
 
-    public static DefinirServicosRequest CriarDefinirServicosRequestValido(
-        Guid? ordemServicoId = null,
-        IReadOnlyCollection<Guid>? servicosCatalogoIds = null)
+    public static DefinirServicosRequest CriarDefinirServicosRequestValido(Guid? ordemServicoId = null, IReadOnlyCollection<Guid>? servicosCatalogoIds = null)
     {
-        return new DefinirServicosRequest(
-            ordemServicoId ?? Guid.NewGuid(),
-            servicosCatalogoIds ?? new[] { Guid.NewGuid() });
+        return new DefinirServicosRequest(ordemServicoId ?? Guid.NewGuid(), servicosCatalogoIds ?? new[] { Guid.NewGuid() });
     }
 
-    public static ReservarPecaInsumoRequest CriarReservarPecaInsumoRequestValido(
-        Guid? ordemServicoId = null,
-        Guid? pecaInsumoCatalogoId = null,
-        int quantidade = QuantidadePecaInsumoPadrao)
+    public static ReservarPecaInsumoRequest CriarReservarPecaInsumoRequestValido(Guid? ordemServicoId = null, Guid? pecaInsumoCatalogoId = null, int quantidade = QuantidadePecaInsumoPadrao)
     {
         return new ReservarPecaInsumoRequest(
             ordemServicoId ?? Guid.NewGuid(),
             new[]
             {
-                new PecaInsumoRequest(
-                    pecaInsumoCatalogoId ?? Guid.NewGuid(),
-                    quantidade)
+                new PecaInsumoRequest(pecaInsumoCatalogoId ?? Guid.NewGuid(), quantidade)
             });
     }
 
-    public static AguardarAprovacaoOrcamentoRequest CriarAguardarAprovacaoOrcamentoRequestValido(
-        Guid? ordemServicoId = null)
+    public static AguardarAprovacaoOrcamentoRequest CriarAguardarAprovacaoOrcamentoRequestValido(Guid? ordemServicoId = null)
     {
-        return new AguardarAprovacaoOrcamentoRequest(
-            ordemServicoId ?? Guid.NewGuid());
+        return new AguardarAprovacaoOrcamentoRequest(ordemServicoId ?? Guid.NewGuid());
     }
 
-    public static IniciarExecucaoOrdemServicoRequest CriarIniciarExecucaoOrdemServicoRequestValido(
-        Guid? ordemServicoId = null)
+    public static IniciarExecucaoOrdemServicoRequest CriarIniciarExecucaoOrdemServicoRequestValido(Guid? ordemServicoId = null)
     {
-        return new IniciarExecucaoOrdemServicoRequest(
-            ordemServicoId ?? Guid.NewGuid());
+        return new IniciarExecucaoOrdemServicoRequest(ordemServicoId ?? Guid.NewGuid());
     }
 
-    public static IniciarExecucaoServicoRequest CriarIniciarExecucaoServicoRequestValido(
-        Guid? ordemServicoId = null,
-        Guid? servicoId = null)
+    public static IniciarExecucaoServicoRequest CriarIniciarExecucaoServicoRequestValido(Guid? ordemServicoId = null, Guid? servicoId = null)
     {
-        return new IniciarExecucaoServicoRequest(
-            ordemServicoId ?? Guid.NewGuid(),
-            servicoId ?? Guid.NewGuid());
+        return new IniciarExecucaoServicoRequest(ordemServicoId ?? Guid.NewGuid(), servicoId ?? Guid.NewGuid());
     }
 
-    public static FinalizarServicoRequest CriarFinalizarServicoRequestValido(
-        Guid? ordemServicoId = null,
-        Guid? servicoId = null)
+    public static FinalizarServicoRequest CriarFinalizarServicoRequestValido(Guid? ordemServicoId = null, Guid? servicoId = null)
     {
-        return new FinalizarServicoRequest(
-            ordemServicoId ?? Guid.NewGuid(),
-            servicoId ?? Guid.NewGuid());
+        return new FinalizarServicoRequest(ordemServicoId ?? Guid.NewGuid(), servicoId ?? Guid.NewGuid());
     }
 
-    public static FinalizarOrdemServicoRequest CriarFinalizarOrdemServicoRequestValido(
-        Guid? ordemServicoId = null)
+    public static FinalizarOrdemServicoRequest CriarFinalizarOrdemServicoRequestValido(Guid? ordemServicoId = null)
     {
-        return new FinalizarOrdemServicoRequest(
-            ordemServicoId ?? Guid.NewGuid());
+        return new FinalizarOrdemServicoRequest(ordemServicoId ?? Guid.NewGuid());
     }
 
-    public static EntregarOrdemServicoRequest CriarEntregarOrdemServicoRequestValido(
-        Guid? ordemServicoId = null)
+    public static EntregarOrdemServicoRequest CriarEntregarOrdemServicoRequestValido(Guid? ordemServicoId = null)
     {
-        return new EntregarOrdemServicoRequest(
-            ordemServicoId ?? Guid.NewGuid());
+        return new EntregarOrdemServicoRequest(ordemServicoId ?? Guid.NewGuid());
     }
 
-    public static CancelarOrdemServicoRequest CriarCancelarOrdemServicoRequestValido(
-        Guid? ordemServicoId = null,
-        MotivoCancelamentoOrdemServico motivo = MotivoCancelamentoPadrao)
+    public static CancelarOrdemServicoRequest CriarCancelarOrdemServicoRequestValido(Guid? ordemServicoId = null, MotivoCancelamentoOrdemServico motivo = MotivoCancelamentoPadrao)
     {
-        return new CancelarOrdemServicoRequest(
-            ordemServicoId ?? Guid.NewGuid(),
-            motivo);
+        return new CancelarOrdemServicoRequest(ordemServicoId ?? Guid.NewGuid(), motivo);
     }
 
-    public static ConsultarStatusOrdemServicoRequest CriarConsultarStatusOrdemServicoRequestValido(
-        Guid? ordemServicoId = null)
+    public static ConsultarStatusOrdemServicoRequest CriarConsultarStatusOrdemServicoRequestValido(Guid? ordemServicoId = null)
     {
-        return new ConsultarStatusOrdemServicoRequest(
-            ordemServicoId ?? Guid.NewGuid());
+        return new ConsultarStatusOrdemServicoRequest(ordemServicoId ?? Guid.NewGuid());
     }
 
-    public static DetalharOrdemServicoRequest CriarDetalharOrdemServicoRequestValido(
-        Guid? ordemServicoId = null)
+    public static DetalharOrdemServicoRequest CriarDetalharOrdemServicoRequestValido(Guid? ordemServicoId = null)
     {
-        return new DetalharOrdemServicoRequest(
-            ordemServicoId ?? Guid.NewGuid());
+        return new DetalharOrdemServicoRequest(ordemServicoId ?? Guid.NewGuid());
     }
 
-    public static ListarOrdensServicoRequest CriarListarOrdensServicoRequestValido(
-        int pagina = PaginaPadrao,
-        int tamanhoPagina = TamanhoPaginaPadrao)
+    public static ListarOrdensServicoRequest CriarListarOrdensServicoRequestValido(int pagina = PaginaPadrao, int tamanhoPagina = TamanhoPaginaPadrao)
     {
-        return new ListarOrdensServicoRequest(
-            pagina,
-            tamanhoPagina);
+        return new ListarOrdensServicoRequest(pagina, tamanhoPagina);
     }
 }
+

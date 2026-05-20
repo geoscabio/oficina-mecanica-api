@@ -7,10 +7,7 @@ namespace OficinaMecanica.Infrastructure.Persistence;
 
 public static class DatabaseInitializer
 {
-    public static async Task InitializeDatabaseAsync(
-        this IServiceProvider serviceProvider,
-        IConfiguration configuration,
-        CancellationToken cancellationToken = default)
+    public static async Task InitializeDatabaseAsync(this IServiceProvider serviceProvider, IConfiguration configuration, CancellationToken cancellationToken = default)
     {
         using var scope = serviceProvider.CreateScope();
 

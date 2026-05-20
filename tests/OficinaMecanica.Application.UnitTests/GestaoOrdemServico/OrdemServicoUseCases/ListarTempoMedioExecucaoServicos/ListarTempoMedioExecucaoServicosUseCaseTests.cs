@@ -19,9 +19,7 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
         var servicosCatalogo = new[]
         {
             ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao(),
-            ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao(
-                ServicoCatalogoTestDataFactory.DescricaoAtualizada,
-                ServicoCatalogoTestDataFactory.ValorAtualizado)
+            ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao(ServicoCatalogoTestDataFactory.DescricaoAtualizada, ServicoCatalogoTestDataFactory.ValorAtualizado)
         };
 
         var temposMedios = new Dictionary<Guid, double>
@@ -29,9 +27,7 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
             { servicosCatalogo[0].Id, ServicoCatalogoTestDataFactory.TempoMedioExecucaoPadrao }
         };
 
-        var servicoCatalogoRepository = CriarServicoCatalogoRepository(
-            servicosCatalogo,
-            totalItens: servicosCatalogo.Length);
+        var servicoCatalogoRepository = CriarServicoCatalogoRepository(servicosCatalogo, totalItens: servicosCatalogo.Length);
 
         var ordemServicoRepository = CriarOrdemServicoRepository(temposMedios);
 
@@ -50,8 +46,7 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
         resultado.Valor.TotalItens.Should().Be(servicosCatalogo.Length);
         resultado.Valor.Itens.Should().HaveCount(servicosCatalogo.Length);
 
-        resultado.Valor.Itens.Select(servico => servico.ServicoCatalogoId).Should().BeEquivalentTo(
-            servicosCatalogo.Select(servico => servico.Id));
+        resultado.Valor.Itens.Select(servico => servico.ServicoCatalogoId).Should().BeEquivalentTo(servicosCatalogo.Select(servico => servico.Id));
 
         resultado.Valor.Itens
             .Single(servico => servico.ServicoCatalogoId == servicosCatalogo[0].Id)
@@ -65,23 +60,12 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
             .Should()
             .BeNull();
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ListarAsync(
-                ServicoCatalogoTestDataFactory.PaginaPadrao,
-                ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        servicoCatalogoRepository.Verify(repo => repo.ListarAsync(ServicoCatalogoTestDataFactory.PaginaPadrao, ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        servicoCatalogoRepository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
 
         ordemServicoRepository.Verify(
-            repo => repo.ListarTemposMediosExecucaoServicosAsync(
-                It.Is<IReadOnlyCollection<Guid>>(ids =>
-                    ids.Count == servicosCatalogo.Length
-                    && servicosCatalogo.All(servico => ids.Contains(servico.Id))),
-                It.IsAny<CancellationToken>()),
+            repo => repo.ListarTemposMediosExecucaoServicosAsync(It.Is<IReadOnlyCollection<Guid>>(ids => ids.Count == servicosCatalogo.Length && servicosCatalogo.All(servico => ids.Contains(servico.Id))), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -89,9 +73,7 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
     public async Task Dado_NenhumServicoCatalogo_Quando_ListarTempoMedioExecucaoServicos_Entao_DeveRetornarListaVazia()
     {
         // Arrange
-        var servicoCatalogoRepository = CriarServicoCatalogoRepository(
-            Array.Empty<ServicoCatalogo>(),
-            totalItens: 0);
+        var servicoCatalogoRepository = CriarServicoCatalogoRepository(Array.Empty<ServicoCatalogo>(), totalItens: 0);
 
         var ordemServicoRepository = new Mock<IOrdemServicoRepository>();
 
@@ -110,22 +92,11 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
         resultado.Valor.TamanhoPagina.Should().Be(ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao);
         resultado.Valor.TotalItens.Should().Be(0);
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ListarAsync(
-                ServicoCatalogoTestDataFactory.PaginaPadrao,
-                ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        servicoCatalogoRepository.Verify(repo => repo.ListarAsync(ServicoCatalogoTestDataFactory.PaginaPadrao, ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        servicoCatalogoRepository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ListarTemposMediosExecucaoServicosAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ListarTemposMediosExecucaoServicosAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -138,8 +109,7 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
 
         var useCase = CriarUseCase(servicoCatalogoRepository, ordemServicoRepository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarListarTempoMedioExecucaoServicosRequestValido(
-            pagina: 0);
+        var request = ServicoCatalogoTestDataFactory.CriarListarTempoMedioExecucaoServicosRequestValido(pagina: 0);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -150,22 +120,11 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ListarAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        servicoCatalogoRepository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        servicoCatalogoRepository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ListarTemposMediosExecucaoServicosAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ListarTemposMediosExecucaoServicosAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -178,8 +137,7 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
 
         var useCase = CriarUseCase(servicoCatalogoRepository, ordemServicoRepository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarListarTempoMedioExecucaoServicosRequestValido(
-            tamanhoPagina: 101);
+        var request = ServicoCatalogoTestDataFactory.CriarListarTempoMedioExecucaoServicosRequestValido(tamanhoPagina: 101);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -190,35 +148,19 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ListarAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        servicoCatalogoRepository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        servicoCatalogoRepository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        servicoCatalogoRepository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ListarTemposMediosExecucaoServicosAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ListarTemposMediosExecucaoServicosAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static Mock<IServicoCatalogoRepository> CriarServicoCatalogoRepository(
-        IReadOnlyCollection<ServicoCatalogo> servicosCatalogo,
-        int totalItens)
+    private static Mock<IServicoCatalogoRepository> CriarServicoCatalogoRepository(IReadOnlyCollection<ServicoCatalogo> servicosCatalogo, int totalItens)
     {
         var repository = new Mock<IServicoCatalogoRepository>();
 
         repository
-            .Setup(repo => repo.ListarAsync(
-                ServicoCatalogoTestDataFactory.PaginaPadrao,
-                ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ListarAsync(ServicoCatalogoTestDataFactory.PaginaPadrao, ServicoCatalogoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()))
             .ReturnsAsync(servicosCatalogo);
 
         repository
@@ -228,28 +170,19 @@ public class ListarTempoMedioExecucaoServicosUseCaseTests
         return repository;
     }
 
-    private static Mock<IOrdemServicoRepository> CriarOrdemServicoRepository(
-        IReadOnlyDictionary<Guid, double> temposMedios)
+    private static Mock<IOrdemServicoRepository> CriarOrdemServicoRepository(IReadOnlyDictionary<Guid, double> temposMedios)
     {
         var repository = new Mock<IOrdemServicoRepository>();
 
         repository
-            .Setup(repo => repo.ListarTemposMediosExecucaoServicosAsync(
-                It.IsAny<IReadOnlyCollection<Guid>>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ListarTemposMediosExecucaoServicosAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(temposMedios);
 
         return repository;
     }
 
-    private static ListarTempoMedioExecucaoServicosUseCase CriarUseCase(
-        Mock<IServicoCatalogoRepository> servicoCatalogoRepository,
-        Mock<IOrdemServicoRepository> ordemServicoRepository)
+    private static ListarTempoMedioExecucaoServicosUseCase CriarUseCase(Mock<IServicoCatalogoRepository> servicoCatalogoRepository, Mock<IOrdemServicoRepository> ordemServicoRepository)
     {
-        return new ListarTempoMedioExecucaoServicosUseCase(
-            servicoCatalogoRepository.Object,
-            ordemServicoRepository.Object,
-            new ListarTempoMedioExecucaoServicosValidator(),
-            MapperFactory.Criar());
+        return new ListarTempoMedioExecucaoServicosUseCase(servicoCatalogoRepository.Object, ordemServicoRepository.Object, new ListarTempoMedioExecucaoServicosValidator(), MapperFactory.Criar());
     }
 }

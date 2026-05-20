@@ -16,11 +16,7 @@ public sealed class CadastrarVeiculoUseCase
     private readonly IValidator<CadastrarVeiculoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public CadastrarVeiculoUseCase(
-        IVeiculoRepository veiculoRepository,
-        IClienteRepository clienteRepository,
-        IValidator<CadastrarVeiculoRequest> validator,
-        IMapper mapper)
+    public CadastrarVeiculoUseCase(IVeiculoRepository veiculoRepository, IClienteRepository clienteRepository, IValidator<CadastrarVeiculoRequest> validator, IMapper mapper)
     {
         _veiculoRepository = veiculoRepository;
         _clienteRepository = clienteRepository;
@@ -28,15 +24,13 @@ public sealed class CadastrarVeiculoUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<VeiculoResponse>> ExecuteAsync(
-        CadastrarVeiculoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<VeiculoResponse>> ExecuteAsync(CadastrarVeiculoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<VeiculoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<VeiculoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var cliente = await _clienteRepository.ObterPorIdAsync(request.ClienteId, cancellationToken);
@@ -61,6 +55,7 @@ public sealed class CadastrarVeiculoUseCase
         return Result<VeiculoResponse>.Ok(_mapper.Map<VeiculoResponse>(veiculo));
     }
 }
+
 
 
 

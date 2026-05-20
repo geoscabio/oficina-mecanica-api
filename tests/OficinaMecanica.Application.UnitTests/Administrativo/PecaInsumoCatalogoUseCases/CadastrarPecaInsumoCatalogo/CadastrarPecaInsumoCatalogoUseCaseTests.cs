@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Administrativo.PecaInsumoCatalogoUseCases.CadastrarPecaInsumoCatalogo;
 using OficinaMecanica.Application.Common;
@@ -46,16 +46,14 @@ public class CadastrarPecaInsumoCatalogoUseCaseTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public async Task Dado_DescricaoInvalida_Quando_CadastrarPecaInsumoCatalogo_Entao_DeveRetornarFalhaDeValidacao(
-        string descricao)
+    public async Task Dado_DescricaoInvalida_Quando_CadastrarPecaInsumoCatalogo_Entao_DeveRetornarFalhaDeValidacao(string descricao)
     {
         // Arrange
         var repository = CriarRepository();
 
         var useCase = CriarUseCase(repository);
 
-        var request = PecaInsumoCatalogoTestDataFactory.CriarCadastrarPecaInsumoCatalogoRequestValido(
-            descricao: descricao);
+        var request = PecaInsumoCatalogoTestDataFactory.CriarCadastrarPecaInsumoCatalogoRequestValido(descricao: descricao);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -66,11 +64,7 @@ public class CadastrarPecaInsumoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<PecaInsumoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<PecaInsumoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -81,8 +75,7 @@ public class CadastrarPecaInsumoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = PecaInsumoCatalogoTestDataFactory.CriarCadastrarPecaInsumoCatalogoRequestValido(
-            tipo: (TipoPecaInsumo)99);
+        var request = PecaInsumoCatalogoTestDataFactory.CriarCadastrarPecaInsumoCatalogoRequestValido(tipo: (TipoPecaInsumo)99);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -93,11 +86,7 @@ public class CadastrarPecaInsumoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<PecaInsumoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<PecaInsumoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -108,8 +97,7 @@ public class CadastrarPecaInsumoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = PecaInsumoCatalogoTestDataFactory.CriarCadastrarPecaInsumoCatalogoRequestValido(
-            valor: 0m);
+        var request = PecaInsumoCatalogoTestDataFactory.CriarCadastrarPecaInsumoCatalogoRequestValido(valor: 0m);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -120,11 +108,7 @@ public class CadastrarPecaInsumoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<PecaInsumoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AdicionarAsync(It.IsAny<PecaInsumoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IPecaInsumoCatalogoRepository> CriarRepository()
@@ -132,12 +116,8 @@ public class CadastrarPecaInsumoCatalogoUseCaseTests
         return new Mock<IPecaInsumoCatalogoRepository>();
     }
 
-    private static CadastrarPecaInsumoCatalogoUseCase CriarUseCase(
-        Mock<IPecaInsumoCatalogoRepository> repository)
+    private static CadastrarPecaInsumoCatalogoUseCase CriarUseCase(Mock<IPecaInsumoCatalogoRepository> repository)
     {
-        return new CadastrarPecaInsumoCatalogoUseCase(
-            repository.Object,
-            new CadastrarPecaInsumoCatalogoValidator(),
-            MapperFactory.Criar());
+        return new CadastrarPecaInsumoCatalogoUseCase(repository.Object, new CadastrarPecaInsumoCatalogoValidator(), MapperFactory.Criar());
     }
 }

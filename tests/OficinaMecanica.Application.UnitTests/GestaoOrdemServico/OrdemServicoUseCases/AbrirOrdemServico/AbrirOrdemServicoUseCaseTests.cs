@@ -39,14 +39,9 @@ public class AbrirOrdemServicoUseCaseTests
 
         var mecanicoRepository = CriarMecanicoRepository(mecanico);
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            veiculoRepository,
-            mecanicoRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, veiculoRepository, mecanicoRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarAbrirOrdemServicoRequestValido(
-            veiculo.Id,
-            mecanico.Id);
+        var request = OrdemServicoTestDataFactory.CriarAbrirOrdemServicoRequestValido(veiculo.Id, mecanico.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -65,29 +60,14 @@ public class AbrirOrdemServicoUseCaseTests
         resultado.Valor.Servicos.Should().BeEmpty();
         resultado.Valor.PecasInsumos.Should().BeEmpty();
 
-        veiculoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.VeiculoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        veiculoRepository.Verify(repo => repo.ObterPorIdAsync(request.VeiculoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        mecanicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.MecanicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        mecanicoRepository.Verify(repo => repo.ObterPorIdAsync(request.MecanicoId, It.IsAny<CancellationToken>()), Times.Once);
+
+        ordemServicoRepository.Verify(repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()), Times.Once);
 
         ordemServicoRepository.Verify(
-            repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
-
-        ordemServicoRepository.Verify(
-            repo => repo.AdicionarAsync(
-                It.Is<OrdemServico>(ordemServico =>
-                    ordemServico.VeiculoId == veiculo.Id
-                    && ordemServico.MecanicoId == mecanico.Id
-                    && ordemServico.Numero == ProximoNumeroOrdemServico),
-                It.IsAny<CancellationToken>()),
+            repo => repo.AdicionarAsync(It.Is<OrdemServico>(ordemServico => ordemServico.VeiculoId == veiculo.Id && ordemServico.MecanicoId == mecanico.Id && ordemServico.Numero == ProximoNumeroOrdemServico), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -103,13 +83,9 @@ public class AbrirOrdemServicoUseCaseTests
 
         var mecanicoRepository = CriarMecanicoRepository(mecanico);
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            veiculoRepository,
-            mecanicoRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, veiculoRepository, mecanicoRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarAbrirOrdemServicoRequestValido(
-            mecanicoId: mecanico.Id);
+        var request = OrdemServicoTestDataFactory.CriarAbrirOrdemServicoRequestValido(mecanicoId: mecanico.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -120,27 +96,13 @@ public class AbrirOrdemServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(VeiculoErrorMessages.VeiculoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        veiculoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.VeiculoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        veiculoRepository.Verify(repo => repo.ObterPorIdAsync(request.VeiculoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        mecanicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        mecanicoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -155,13 +117,9 @@ public class AbrirOrdemServicoUseCaseTests
 
         var mecanicoRepository = CriarMecanicoRepository(null);
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            veiculoRepository,
-            mecanicoRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, veiculoRepository, mecanicoRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarAbrirOrdemServicoRequestValido(
-            veiculo.Id);
+        var request = OrdemServicoTestDataFactory.CriarAbrirOrdemServicoRequestValido(veiculo.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -172,27 +130,13 @@ public class AbrirOrdemServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(MecanicoErrorMessages.MecanicoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        veiculoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.VeiculoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        veiculoRepository.Verify(repo => repo.ObterPorIdAsync(request.VeiculoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        mecanicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.MecanicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        mecanicoRepository.Verify(repo => repo.ObterPorIdAsync(request.MecanicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -205,13 +149,9 @@ public class AbrirOrdemServicoUseCaseTests
 
         var mecanicoRepository = new Mock<IMecanicoRepository>();
 
-        var useCase = CriarUseCase(
-            ordemServicoRepository,
-            veiculoRepository,
-            mecanicoRepository);
+        var useCase = CriarUseCase(ordemServicoRepository, veiculoRepository, mecanicoRepository);
 
-        var request = OrdemServicoTestDataFactory.CriarAbrirOrdemServicoRequestValido(
-            veiculoId: Guid.Empty);
+        var request = OrdemServicoTestDataFactory.CriarAbrirOrdemServicoRequestValido(veiculoId: Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -222,27 +162,13 @@ public class AbrirOrdemServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        veiculoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        veiculoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        mecanicoRepository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        mecanicoRepository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.ObterProximoNumeroAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        ordemServicoRepository.Verify(
-            repo => repo.AdicionarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        ordemServicoRepository.Verify(repo => repo.AdicionarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IVeiculoRepository> CriarVeiculoRepository(Veiculo? veiculo)
@@ -250,9 +176,7 @@ public class AbrirOrdemServicoUseCaseTests
         var repository = new Mock<IVeiculoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(veiculo);
 
         return repository;
@@ -263,24 +187,14 @@ public class AbrirOrdemServicoUseCaseTests
         var repository = new Mock<IMecanicoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mecanico);
 
         return repository;
     }
 
-    private static AbrirOrdemServicoUseCase CriarUseCase(
-        Mock<IOrdemServicoRepository> ordemServicoRepository,
-        Mock<IVeiculoRepository> veiculoRepository,
-        Mock<IMecanicoRepository> mecanicoRepository)
+    private static AbrirOrdemServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> ordemServicoRepository, Mock<IVeiculoRepository> veiculoRepository, Mock<IMecanicoRepository> mecanicoRepository)
     {
-        return new AbrirOrdemServicoUseCase(
-            ordemServicoRepository.Object,
-            veiculoRepository.Object,
-            mecanicoRepository.Object,
-            new AbrirOrdemServicoValidator(),
-            MapperFactory.Criar());
+        return new AbrirOrdemServicoUseCase(ordemServicoRepository.Object, veiculoRepository.Object, mecanicoRepository.Object, new AbrirOrdemServicoValidator(), MapperFactory.Criar());
     }
 }

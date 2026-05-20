@@ -18,11 +18,7 @@ internal sealed class ApiErrorResponsesOperationFilter : IOperationFilter
         AddErrorResponse(operation, context, TipoErro.ErroInterno, ApiResponseMessages.ErroInternoInesperado);
     }
 
-    private static void AddErrorResponse(
-        OpenApiOperation operation,
-        OperationFilterContext context,
-        TipoErro tipoErro,
-        string description)
+    private static void AddErrorResponse(OpenApiOperation operation, OperationFilterContext context, TipoErro tipoErro, string description)
     {
         operation.Responses ??= [];
 
@@ -30,8 +26,6 @@ internal sealed class ApiErrorResponsesOperationFilter : IOperationFilter
             .ToHttpStatusCode()
             .ToString(CultureInfo.InvariantCulture);
 
-        operation.Responses.TryAdd(
-            statusCode,
-            OpenApiErrorResponseFactory.Create(context, description, tipoErro));
+        operation.Responses.TryAdd(statusCode, OpenApiErrorResponseFactory.Create(context, description, tipoErro));
     }
 }

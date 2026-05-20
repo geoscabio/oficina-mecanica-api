@@ -16,11 +16,7 @@ public sealed class ConsultarTempoMedioExecucaoServicoUseCase
     private readonly IValidator<ConsultarTempoMedioExecucaoServicoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public ConsultarTempoMedioExecucaoServicoUseCase(
-        IServicoCatalogoRepository servicoCatalogoRepository,
-        IOrdemServicoRepository ordemServicoRepository,
-        IValidator<ConsultarTempoMedioExecucaoServicoRequest> validator,
-        IMapper mapper)
+    public ConsultarTempoMedioExecucaoServicoUseCase(IServicoCatalogoRepository servicoCatalogoRepository, IOrdemServicoRepository ordemServicoRepository, IValidator<ConsultarTempoMedioExecucaoServicoRequest> validator, IMapper mapper)
     {
         _servicoCatalogoRepository = servicoCatalogoRepository;
         _ordemServicoRepository = ordemServicoRepository;
@@ -28,37 +24,26 @@ public sealed class ConsultarTempoMedioExecucaoServicoUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<TempoMedioExecucaoServicoResponse>> ExecuteAsync(
-        ConsultarTempoMedioExecucaoServicoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<TempoMedioExecucaoServicoResponse>> ExecuteAsync(ConsultarTempoMedioExecucaoServicoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<TempoMedioExecucaoServicoResponse>.Falha(
-                validationResult.Errors.First().ErrorMessage,
-                TipoErro.Validacao);
+            return Result<TempoMedioExecucaoServicoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
-        var servicoCatalogo = await _servicoCatalogoRepository.ObterPorIdAsync(
-            request.ServicoCatalogoId,
-            cancellationToken);
+        var servicoCatalogo = await _servicoCatalogoRepository.ObterPorIdAsync(request.ServicoCatalogoId, cancellationToken);
 
         if (servicoCatalogo is null)
         {
-            return Result<TempoMedioExecucaoServicoResponse>.Falha(
-                ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado,
-                TipoErro.NaoEncontrado);
+            return Result<TempoMedioExecucaoServicoResponse>.Falha(ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
-        var tempoMedio = await _ordemServicoRepository.ObterTempoMedioExecucaoServicoAsync(
-            servicoCatalogo.Id,
-            cancellationToken);
-        var response = _mapper.Map<TempoMedioExecucaoServicoResponse>(
-            servicoCatalogo,
-            opcao => opcao.Items[OrdemServicoMappingProfile.TempoMedioExecucaoEmMinutosKey] = tempoMedio);
+        var tempoMedio = await _ordemServicoRepository.ObterTempoMedioExecucaoServicoAsync(servicoCatalogo.Id, cancellationToken);
+        var response = _mapper.Map<TempoMedioExecucaoServicoResponse>(servicoCatalogo, opcao => opcao.Items[OrdemServicoMappingProfile.TempoMedioExecucaoEmMinutosKey] = tempoMedio);
 
         return Result<TempoMedioExecucaoServicoResponse>.Ok(response);
     }
 }
+

@@ -17,24 +17,15 @@ namespace OficinaMecanica.API.Atendimento.Controllers;
 public sealed class ClientesController : ControllerBase
 {
     [HttpPost("cadastrar")]
-    public async Task<IActionResult> Cadastrar(
-        [FromServices] CadastrarClienteUseCase useCase,
-        [FromBody] CadastrarClienteRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Cadastrar([FromServices] CadastrarClienteUseCase useCase, [FromBody] CadastrarClienteRequest request, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
-        return this.ToCreatedAtActionResult(
-            result,
-            nameof(Consultar),
-            cliente => new { clienteId = cliente.Id });
+        return this.ToCreatedAtActionResult(result, nameof(Consultar), cliente => new { clienteId = cliente.Id });
     }
 
     [HttpGet("consultar/{clienteId:guid}")]
-    public async Task<IActionResult> Consultar(
-        [FromServices] ConsultarClienteUseCase useCase,
-        Guid clienteId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Consultar([FromServices] ConsultarClienteUseCase useCase, Guid clienteId, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(new ConsultarClienteRequest(clienteId), cancellationToken);
 
@@ -42,24 +33,15 @@ public sealed class ClientesController : ControllerBase
     }
 
     [HttpGet("consultar-por-documento/{documento}")]
-    public async Task<IActionResult> ConsultarPorDocumento(
-        [FromServices] ConsultarClientePorDocumentoUseCase useCase,
-        string documento,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ConsultarPorDocumento([FromServices] ConsultarClientePorDocumentoUseCase useCase, string documento, CancellationToken cancellationToken)
     {
-        var result = await useCase.ExecuteAsync(
-            new ConsultarClientePorDocumentoRequest(documento),
-            cancellationToken);
+        var result = await useCase.ExecuteAsync(new ConsultarClientePorDocumentoRequest(documento), cancellationToken);
 
         return this.ToActionResult(result);
     }
 
     [HttpGet("listar")]
-    public async Task<IActionResult> Listar(
-        [FromServices] ListarClientesUseCase useCase,
-        [FromQuery] int pagina = 1,
-        [FromQuery] int tamanhoPagina = 10,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Listar([FromServices] ListarClientesUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
     {
         var result = await useCase.ExecuteAsync(new ListarClientesRequest(pagina, tamanhoPagina), cancellationToken);
 
@@ -67,24 +49,15 @@ public sealed class ClientesController : ControllerBase
     }
 
     [HttpPut("{clienteId:guid}/atualizar")]
-    public async Task<IActionResult> Atualizar(
-        [FromServices] AtualizarClienteUseCase useCase,
-        Guid clienteId,
-        [FromBody] AtualizarClienteRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Atualizar([FromServices] AtualizarClienteUseCase useCase, Guid clienteId, [FromBody] AtualizarClienteRequest request, CancellationToken cancellationToken)
     {
-        var result = await useCase.ExecuteAsync(
-            request with { ClienteId = clienteId },
-            cancellationToken);
+        var result = await useCase.ExecuteAsync(request with { ClienteId = clienteId }, cancellationToken);
 
         return this.ToActionResult(result);
     }
 
     [HttpDelete("{clienteId:guid}/remover")]
-    public async Task<IActionResult> Remover(
-        [FromServices] RemoverClienteUseCase useCase,
-        Guid clienteId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Remover([FromServices] RemoverClienteUseCase useCase, Guid clienteId, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(new RemoverClienteRequest(clienteId), cancellationToken);
 

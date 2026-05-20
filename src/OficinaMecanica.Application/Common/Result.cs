@@ -22,4 +22,17 @@ public sealed class Result<T>
     {
         return new Result<T>(false, default!, new ErrorResponse(mensagem, tipo));
     }
+
+    public static Result<T> Falha(IReadOnlyCollection<string> mensagens, TipoErro tipo)
+    {
+        var mensagensNormalizadas = mensagens
+            .Where(mensagem => !string.IsNullOrWhiteSpace(mensagem))
+            .Distinct()
+            .ToArray();
+
+        var mensagemPrincipal = mensagensNormalizadas.FirstOrDefault()
+            ?? ValidationErrorMessages.RequestInvalido;
+
+        return new Result<T>(false, default!, new ErrorResponse(mensagemPrincipal, tipo, mensagensNormalizadas));
+    }
 }

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.ListarVeiculos;
 using OficinaMecanica.Application.Common;
@@ -43,19 +43,11 @@ public class ListarVeiculosUseCaseTests
 
         resultado.Valor.Itens.Should().HaveCount(2);
 
-        resultado.Valor.Itens.Select(veiculo => veiculo.Id).Should().BeEquivalentTo(
-            veiculos.Select(veiculo => veiculo.Id));
+        resultado.Valor.Itens.Select(veiculo => veiculo.Id).Should().BeEquivalentTo(veiculos.Select(veiculo => veiculo.Id));
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                VeiculoTestDataFactory.PaginaPadrao,
-                VeiculoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ListarAsync(VeiculoTestDataFactory.PaginaPadrao, VeiculoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -84,16 +76,9 @@ public class ListarVeiculosUseCaseTests
 
         resultado.Valor.TotalItens.Should().Be(0);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                VeiculoTestDataFactory.PaginaPadrao,
-                VeiculoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ListarAsync(VeiculoTestDataFactory.PaginaPadrao, VeiculoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -104,8 +89,7 @@ public class ListarVeiculosUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = VeiculoTestDataFactory.CriarListarVeiculosRequestValido(
-            pagina: 0);
+        var request = VeiculoTestDataFactory.CriarListarVeiculosRequestValido(pagina: 0);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -117,16 +101,9 @@ public class ListarVeiculosUseCaseTests
 
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -137,8 +114,7 @@ public class ListarVeiculosUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = VeiculoTestDataFactory.CriarListarVeiculosRequestValido(
-            tamanhoPagina: 101);
+        var request = VeiculoTestDataFactory.CriarListarVeiculosRequestValido(tamanhoPagina: 101);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -150,29 +126,17 @@ public class ListarVeiculosUseCaseTests
 
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ListarAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.ContarAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static Mock<IVeiculoRepository> CriarRepository(
-        IReadOnlyCollection<Veiculo> veiculos,
-        int totalItens)
+    private static Mock<IVeiculoRepository> CriarRepository(IReadOnlyCollection<Veiculo> veiculos, int totalItens)
     {
         var repository = new Mock<IVeiculoRepository>();
 
         repository
-            .Setup(repo => repo.ListarAsync(
-                VeiculoTestDataFactory.PaginaPadrao,
-                VeiculoTestDataFactory.TamanhoPaginaPadrao,
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ListarAsync(VeiculoTestDataFactory.PaginaPadrao, VeiculoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()))
             .ReturnsAsync(veiculos);
 
         repository
@@ -184,9 +148,6 @@ public class ListarVeiculosUseCaseTests
 
     private static ListarVeiculosUseCase CriarUseCase(Mock<IVeiculoRepository> repository)
     {
-        return new ListarVeiculosUseCase(
-            repository.Object,
-            new ListarVeiculosValidator(),
-            MapperFactory.Criar());
+        return new ListarVeiculosUseCase(repository.Object, new ListarVeiculosValidator(), MapperFactory.Criar());
     }
 }

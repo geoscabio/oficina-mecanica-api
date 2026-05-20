@@ -22,8 +22,7 @@ public class RemoverServicoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarRemoverServicoCatalogoRequestValido(
-            servicoCatalogo.Id);
+        var request = ServicoCatalogoTestDataFactory.CriarRemoverServicoCatalogoRequestValido(servicoCatalogo.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -33,17 +32,9 @@ public class RemoverServicoCatalogoUseCaseTests
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(servicoCatalogo.Id);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.ServicoCatalogoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.ServicoCatalogoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.RemoverAsync(
-                It.Is<ServicoCatalogo>(servico => servico.Id == servicoCatalogo.Id),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.RemoverAsync(It.Is<ServicoCatalogo>(servico => servico.Id == servicoCatalogo.Id), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -65,17 +56,9 @@ public class RemoverServicoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(ServicoCatalogoErrorMessages.ServicoCatalogoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.ServicoCatalogoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.ServicoCatalogoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.RemoverAsync(
-                It.IsAny<ServicoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.RemoverAsync(It.IsAny<ServicoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -86,8 +69,7 @@ public class RemoverServicoCatalogoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ServicoCatalogoTestDataFactory.CriarRemoverServicoCatalogoRequestValido(
-            Guid.Empty);
+        var request = ServicoCatalogoTestDataFactory.CriarRemoverServicoCatalogoRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -98,39 +80,24 @@ public class RemoverServicoCatalogoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.RemoverAsync(
-                It.IsAny<ServicoCatalogo>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.RemoverAsync(It.IsAny<ServicoCatalogo>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static Mock<IServicoCatalogoRepository> CriarRepository(
-        ServicoCatalogo? servicoCatalogo)
+    private static Mock<IServicoCatalogoRepository> CriarRepository(ServicoCatalogo? servicoCatalogo)
     {
         var repository = new Mock<IServicoCatalogoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(servicoCatalogo);
 
         return repository;
     }
 
-    private static RemoverServicoCatalogoUseCase CriarUseCase(
-        Mock<IServicoCatalogoRepository> repository)
+    private static RemoverServicoCatalogoUseCase CriarUseCase(Mock<IServicoCatalogoRepository> repository)
     {
-        return new RemoverServicoCatalogoUseCase(
-            repository.Object,
-            new RemoverServicoCatalogoValidator(),
-            MapperFactory.Criar());
+        return new RemoverServicoCatalogoUseCase(repository.Object, new RemoverServicoCatalogoValidator(), MapperFactory.Criar());
     }
 }

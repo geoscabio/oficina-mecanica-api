@@ -31,11 +31,6 @@ internal static class VeiculoTestDataFactory
 
     public static Veiculo CriarVeiculoPadrao(Guid? clienteId = null)
     {
-        return Veiculo.Criar(
-            clienteId ?? Guid.NewGuid(),
-            CriarPlacaPadrao(),
-            MarcaPadrao,
-            ModeloPadrao,
-            AnoPadrao);
+        return Veiculo.Criar(clienteId ?? Guid.NewGuid(), CriarPlacaPadrao(), MarcaPadrao, ModeloPadrao, AnoPadrao);
     }
 }

@@ -14,8 +14,4 @@ public interface IEstoqueRepository
     Task<int> ContarItensAsync(CancellationToken cancellationToken = default);
 
     Task<ItemEstoque?> ObterItemPorIdAsync(Guid itemEstoqueId, CancellationToken cancellationToken = default);
-
-    Task<ItemEstoque?> ObterItemPorPecaInsumoCatalogoIdAsync(Guid pecaInsumoCatalogoId, CancellationToken cancellationToken = default);
-
-    Task AtualizarItemAsync(ItemEstoque itemEstoque, CancellationToken cancellationToken = default);
 }

@@ -16,10 +16,7 @@ public sealed class UsuarioDemoAutenticadoService : IUsuarioAutenticadoService
         _options = options.Value;
     }
 
-    public Task<AutenticarUsuarioResponse?> AutenticarAsync(
-        string login,
-        string senha,
-        CancellationToken cancellationToken = default)
+    public Task<AutenticarUsuarioResponse?> AutenticarAsync(string login, string senha, CancellationToken cancellationToken = default)
     {
         var usuarioDemo = ObterUsuariosDemo()
             .FirstOrDefault(usuario =>
@@ -31,13 +28,7 @@ public sealed class UsuarioDemoAutenticadoService : IUsuarioAutenticadoService
             return Task.FromResult<AutenticarUsuarioResponse?>(null);
         }
 
-        return Task.FromResult<AutenticarUsuarioResponse?>(
-            new AutenticarUsuarioResponse(
-                Token: string.Empty,
-                UsuarioId: usuarioDemo.UsuarioId,
-                Nome: usuarioDemo.Nome,
-                Login: usuarioDemo.Login,
-                Perfil: usuarioDemo.Perfil));
+        return Task.FromResult<AutenticarUsuarioResponse?>(new AutenticarUsuarioResponse(Token: string.Empty, UsuarioId: usuarioDemo.UsuarioId, Nome: usuarioDemo.Nome, Login: usuarioDemo.Login, Perfil: usuarioDemo.Perfil));
     }
 
     private IEnumerable<UsuarioDemo> ObterUsuariosDemo()
@@ -55,12 +46,7 @@ public sealed class UsuarioDemoAutenticadoService : IUsuarioAutenticadoService
             return null;
         }
 
-        return new UsuarioDemo(
-            GerarUsuarioId(usuario.Login),
-            usuario.Nome,
-            usuario.Login,
-            usuario.Senha,
-            usuario.Perfil);
+        return new UsuarioDemo(GerarUsuarioId(usuario.Login), usuario.Nome, usuario.Login, usuario.Senha, usuario.Perfil);
     }
 
     private static Guid GerarUsuarioId(string login)
@@ -70,10 +56,5 @@ public sealed class UsuarioDemoAutenticadoService : IUsuarioAutenticadoService
         return new Guid(hash.AsSpan(0, 16));
     }
 
-    private sealed record UsuarioDemo(
-        Guid UsuarioId,
-        string Nome,
-        string Login,
-        string Senha,
-        string Perfil);
+    private sealed record UsuarioDemo(Guid UsuarioId, string Nome, string Login, string Senha, string Perfil);
 }

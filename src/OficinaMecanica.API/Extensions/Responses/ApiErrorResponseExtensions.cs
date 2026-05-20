@@ -12,9 +12,7 @@ public static class ApiErrorResponseExtensions
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public static Task WriteApiErrorResponseAsJsonAsync(
-        this HttpResponse response,
-        ErrorResponse error)
+    public static Task WriteApiErrorResponseAsJsonAsync(this HttpResponse response, ErrorResponse error)
     {
         response.ContentType = ApiResponseContentTypes.Json;
 

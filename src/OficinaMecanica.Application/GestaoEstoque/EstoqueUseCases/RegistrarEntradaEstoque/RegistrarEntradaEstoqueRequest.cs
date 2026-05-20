@@ -1,5 +1,3 @@
-﻿namespace OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.RegistrarEntradaEstoque;
+namespace OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.RegistrarEntradaEstoque;
 
-public sealed record RegistrarEntradaEstoqueRequest(
-    Guid PecaInsumoCatalogoId,
-    int Quantidade);
+public sealed record RegistrarEntradaEstoqueRequest(Guid PecaInsumoCatalogoId, int Quantidade);

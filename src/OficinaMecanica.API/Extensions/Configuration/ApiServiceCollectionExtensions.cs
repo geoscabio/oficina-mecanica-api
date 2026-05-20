@@ -8,9 +8,7 @@ namespace OficinaMecanica.API.Extensions.Configuration;
 
 public static class ApiServiceCollectionExtensions
 {
-    public static IServiceCollection AddApi(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddApi(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddControllers()
@@ -25,10 +23,18 @@ public static class ApiServiceCollectionExtensions
 
         services.Configure<ApiBehaviorOptions>(options =>
         {
-            options.InvalidModelStateResponseFactory = _ =>
-                new BadRequestObjectResult(new ErrorResponse(
-                    ValidationErrorMessages.RequestInvalido,
-                    TipoErro.Validacao));
+            options.InvalidModelStateResponseFactory = context =>
+            {
+                var erros = context.ModelState
+                    .SelectMany(item => item.Value?.Errors ?? [])
+                    .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage)
+                        ? ValidationErrorMessages.RequestInvalido
+                        : error.ErrorMessage)
+                    .Distinct()
+                    .ToArray();
+
+                return new BadRequestObjectResult(new ErrorResponse(ValidationErrorMessages.RequestInvalido, TipoErro.Validacao, erros));
+            };
         });
 
         return services;

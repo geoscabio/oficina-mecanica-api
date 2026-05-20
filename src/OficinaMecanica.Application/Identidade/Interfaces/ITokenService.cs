@@ -1,10 +1,6 @@
-﻿namespace OficinaMecanica.Application.Identidade.Interfaces;
+namespace OficinaMecanica.Application.Identidade.Interfaces;
 
 public interface ITokenService
 {
-    string GerarToken(
-        Guid usuarioId,
-        string nome,
-        string login,
-        string perfil);
+    string GerarToken(Guid usuarioId, string nome, string login, string perfil);
 }

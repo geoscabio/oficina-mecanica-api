@@ -9,24 +9,17 @@ internal static class MecanicoSeedData
     private static readonly MecanicoSeed MecanicoPrincipal = new("Joao Silva", "MEC001");
     private static readonly MecanicoSeed MecanicoDiagnostico = new("Mariana Costa", "MEC002");
 
-    public static Task<Mecanico> ObterOuCriarPrincipalAsync(
-        OficinaMecanicaDbContext dbContext,
-        CancellationToken cancellationToken)
+    public static Task<Mecanico> ObterOuCriarPrincipalAsync(OficinaMecanicaDbContext dbContext, CancellationToken cancellationToken)
     {
         return ObterOuCriarAsync(dbContext, MecanicoPrincipal, cancellationToken);
     }
 
-    public static Task<Mecanico> ObterOuCriarDiagnosticoAsync(
-        OficinaMecanicaDbContext dbContext,
-        CancellationToken cancellationToken)
+    public static Task<Mecanico> ObterOuCriarDiagnosticoAsync(OficinaMecanicaDbContext dbContext, CancellationToken cancellationToken)
     {
         return ObterOuCriarAsync(dbContext, MecanicoDiagnostico, cancellationToken);
     }
 
-    private static async Task<Mecanico> ObterOuCriarAsync(
-        OficinaMecanicaDbContext dbContext,
-        MecanicoSeed seed,
-        CancellationToken cancellationToken)
+    private static async Task<Mecanico> ObterOuCriarAsync(OficinaMecanicaDbContext dbContext, MecanicoSeed seed, CancellationToken cancellationToken)
     {
         var mecanicoExistente = await dbContext.Mecanicos
             .SingleOrDefaultAsync(mecanico => mecanico.Funcional == seed.Funcional, cancellationToken);

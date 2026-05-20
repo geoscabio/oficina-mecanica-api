@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.Responses;
 using OficinaMecanica.Application.Common;
@@ -14,25 +14,20 @@ public sealed class AtualizarClienteUseCase
     private readonly IValidator<AtualizarClienteRequest> _validator;
     private readonly IMapper _mapper;
 
-    public AtualizarClienteUseCase(
-        IClienteRepository clienteRepository,
-        IValidator<AtualizarClienteRequest> validator,
-        IMapper mapper)
+    public AtualizarClienteUseCase(IClienteRepository clienteRepository, IValidator<AtualizarClienteRequest> validator, IMapper mapper)
     {
         _clienteRepository = clienteRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<ClienteResponse>> ExecuteAsync(
-        AtualizarClienteRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<ClienteResponse>> ExecuteAsync(AtualizarClienteRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<ClienteResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<ClienteResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var cliente = await _clienteRepository.ObterPorIdAsync(request.ClienteId, cancellationToken);
@@ -44,12 +39,7 @@ public sealed class AtualizarClienteUseCase
 
         cliente.Atualizar(
             request.Nome,
-            new Endereco(
-                request.Endereco.Logradouro,
-                request.Endereco.Numero,
-                request.Endereco.Bairro,
-                request.Endereco.Cidade,
-                request.Endereco.CEP),
+            new Endereco(request.Endereco.Logradouro, request.Endereco.Numero, request.Endereco.Bairro, request.Endereco.Cidade, request.Endereco.CEP),
             Telefone.Criar(request.Telefone),
             Email.Criar(request.Email));
 

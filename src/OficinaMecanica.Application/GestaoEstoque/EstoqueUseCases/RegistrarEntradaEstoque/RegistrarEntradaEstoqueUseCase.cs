@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.Responses;
@@ -14,27 +14,20 @@ public sealed class RegistrarEntradaEstoqueUseCase
     private readonly IValidator<RegistrarEntradaEstoqueRequest> _validator;
     private readonly IMapper _mapper;
 
-    public RegistrarEntradaEstoqueUseCase(
-        IEstoqueRepository estoqueRepository,
-        IValidator<RegistrarEntradaEstoqueRequest> validator,
-        IMapper mapper)
+    public RegistrarEntradaEstoqueUseCase(IEstoqueRepository estoqueRepository, IValidator<RegistrarEntradaEstoqueRequest> validator, IMapper mapper)
     {
         _estoqueRepository = estoqueRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<ItemEstoqueResponse>> ExecuteAsync(
-        RegistrarEntradaEstoqueRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<ItemEstoqueResponse>> ExecuteAsync(RegistrarEntradaEstoqueRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<ItemEstoqueResponse>.Falha(
-                validationResult.Errors.First().ErrorMessage,
-                TipoErro.Validacao);
+            return Result<ItemEstoqueResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var estoque = await _estoqueRepository.ObterAsync(cancellationToken);
@@ -51,3 +44,4 @@ public sealed class RegistrarEntradaEstoqueUseCase
         return Result<ItemEstoqueResponse>.Ok(_mapper.Map<ItemEstoqueResponse>(itemEstoque));
     }
 }
+

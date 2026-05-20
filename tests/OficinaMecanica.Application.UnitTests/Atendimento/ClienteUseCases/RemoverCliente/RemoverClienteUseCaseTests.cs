@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.RemoverCliente;
 using OficinaMecanica.Application.Common;
@@ -32,17 +32,9 @@ public class RemoverClienteUseCaseTests
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(cliente.Id);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.ClienteId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.ClienteId, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.RemoverAsync(
-                It.Is<Cliente>(clienteRemovido => clienteRemovido.Id == cliente.Id),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.RemoverAsync(It.Is<Cliente>(clienteRemovido => clienteRemovido.Id == cliente.Id), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -64,17 +56,9 @@ public class RemoverClienteUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(ClienteErrorMessages.ClienteNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.ClienteId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.ClienteId, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.RemoverAsync(
-                It.IsAny<Cliente>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.RemoverAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -96,17 +80,9 @@ public class RemoverClienteUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.RemoverAsync(
-                It.IsAny<Cliente>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.RemoverAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IClienteRepository> CriarRepository(Cliente? cliente)
@@ -114,9 +90,7 @@ public class RemoverClienteUseCaseTests
         var repository = new Mock<IClienteRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(cliente);
 
         return repository;
@@ -124,9 +98,6 @@ public class RemoverClienteUseCaseTests
 
     private static RemoverClienteUseCase CriarUseCase(Mock<IClienteRepository> repository)
     {
-        return new RemoverClienteUseCase(
-            repository.Object,
-            new RemoverClienteValidator(),
-            MapperFactory.Criar());
+        return new RemoverClienteUseCase(repository.Object, new RemoverClienteValidator(), MapperFactory.Criar());
     }
 }

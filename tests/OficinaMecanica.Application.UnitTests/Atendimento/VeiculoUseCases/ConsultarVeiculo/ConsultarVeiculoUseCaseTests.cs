@@ -37,11 +37,7 @@ public class ConsultarVeiculoUseCaseTests
         resultado.Valor.Modelo.Should().Be(VeiculoTestDataFactory.ModeloPadrao);
         resultado.Valor.Ano.Should().Be(VeiculoTestDataFactory.AnoPadrao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.Id,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -63,11 +59,7 @@ public class ConsultarVeiculoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(VeiculoErrorMessages.VeiculoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.Id,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -89,11 +81,7 @@ public class ConsultarVeiculoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IVeiculoRepository> CriarRepository(Veiculo? veiculo)
@@ -101,9 +89,7 @@ public class ConsultarVeiculoUseCaseTests
         var repository = new Mock<IVeiculoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(veiculo);
 
         return repository;
@@ -111,9 +97,6 @@ public class ConsultarVeiculoUseCaseTests
 
     private static ConsultarVeiculoUseCase CriarUseCase(Mock<IVeiculoRepository> repository)
     {
-        return new ConsultarVeiculoUseCase(
-            repository.Object,
-            new ConsultarVeiculoValidator(),
-            MapperFactory.Criar());
+        return new ConsultarVeiculoUseCase(repository.Object, new ConsultarVeiculoValidator(), MapperFactory.Criar());
     }
 }

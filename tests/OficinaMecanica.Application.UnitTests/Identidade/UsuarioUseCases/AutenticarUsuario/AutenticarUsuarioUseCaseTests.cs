@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.Identidade.Interfaces;
@@ -42,13 +42,7 @@ public class AutenticarUsuarioUseCaseTests
 
         resultado.Valor.Perfil.Should().Be(usuario.Perfil);
 
-        tokenService.Verify(
-            service => service.GerarToken(
-                usuario.UsuarioId,
-                usuario.Nome,
-                usuario.Login,
-                usuario.Perfil),
-            Times.Once);
+        tokenService.Verify(service => service.GerarToken(usuario.UsuarioId, usuario.Nome, usuario.Login, usuario.Perfil), Times.Once);
     }
 
     [Fact]
@@ -71,18 +65,11 @@ public class AutenticarUsuarioUseCaseTests
 
         resultado.Erro.Should().NotBeNull();
 
-        resultado.Erro!.Mensagem.Should().Be(
-            IdentidadeValidationMessages.CredenciaisInvalidas);
+        resultado.Erro!.Mensagem.Should().Be(IdentidadeValidationMessages.CredenciaisInvalidas);
 
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoAutorizado);
 
-        tokenService.Verify(
-            service => service.GerarToken(
-                It.IsAny<Guid>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>()),
-            Times.Never);
+        tokenService.Verify(service => service.GerarToken(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -95,8 +82,7 @@ public class AutenticarUsuarioUseCaseTests
 
         var useCase = CriarUseCase(usuarioService, tokenService);
 
-        var request = IdentidadeTestDataFactory.CriarAutenticarUsuarioRequestValido(
-            login: string.Empty);
+        var request = IdentidadeTestDataFactory.CriarAutenticarUsuarioRequestValido(login: string.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -108,12 +94,7 @@ public class AutenticarUsuarioUseCaseTests
 
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        usuarioService.Verify(
-            service => service.AutenticarAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        usuarioService.Verify(service => service.AutenticarAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -126,8 +107,7 @@ public class AutenticarUsuarioUseCaseTests
 
         var useCase = CriarUseCase(usuarioService, tokenService);
 
-        var request = IdentidadeTestDataFactory.CriarAutenticarUsuarioRequestValido(
-            senha: string.Empty);
+        var request = IdentidadeTestDataFactory.CriarAutenticarUsuarioRequestValido(senha: string.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -139,34 +119,20 @@ public class AutenticarUsuarioUseCaseTests
 
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        usuarioService.Verify(
-            service => service.AutenticarAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        usuarioService.Verify(service => service.AutenticarAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static AutenticarUsuarioUseCase CriarUseCase(
-        Mock<IUsuarioAutenticadoService> usuarioService,
-        Mock<ITokenService> tokenService)
+    private static AutenticarUsuarioUseCase CriarUseCase(Mock<IUsuarioAutenticadoService> usuarioService, Mock<ITokenService> tokenService)
     {
-        return new AutenticarUsuarioUseCase(
-            usuarioService.Object,
-            tokenService.Object,
-            new AutenticarUsuarioValidator());
+        return new AutenticarUsuarioUseCase(usuarioService.Object, tokenService.Object, new AutenticarUsuarioValidator());
     }
 
-    private static Mock<IUsuarioAutenticadoService> CriarUsuarioService(
-        AutenticarUsuarioResponse? usuario)
+    private static Mock<IUsuarioAutenticadoService> CriarUsuarioService(AutenticarUsuarioResponse? usuario)
     {
         var service = new Mock<IUsuarioAutenticadoService>();
 
         service
-            .Setup(service => service.AutenticarAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(service => service.AutenticarAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(usuario);
 
         return service;
@@ -177,11 +143,7 @@ public class AutenticarUsuarioUseCaseTests
         var service = new Mock<ITokenService>();
 
         service
-            .Setup(service => service.GerarToken(
-                It.IsAny<Guid>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>()))
+            .Setup(service => service.GerarToken(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .Returns(token);
 
         return service;

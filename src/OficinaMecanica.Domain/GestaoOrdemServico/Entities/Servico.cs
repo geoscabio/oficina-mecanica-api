@@ -11,7 +11,7 @@ public sealed class Servico
         Id = id;
         ServicoCatalogoId = servicoCatalogoId;
         Valor = valor;
-        Status = StatusServico.PENDENTE;
+        Status = StatusServico.Pendente;
     }
 
     public Guid Id { get; private set; }
@@ -38,24 +38,25 @@ public sealed class Servico
 
     public void IniciarExecucao()
     {
-        if (Status != StatusServico.PENDENTE)
+        if (Status != StatusServico.Pendente)
         {
             throw new DomainException(OrdemServicoErrorMessages.ServicoPendenteParaIniciarExecucao);
         }
 
-        Status = StatusServico.EM_EXECUCAO;
+        Status = StatusServico.EmExecucao;
         DataInicio = DateTime.UtcNow;
     }
 
     public void Finalizar()
     {
-        if (Status != StatusServico.EM_EXECUCAO)
+        if (Status != StatusServico.EmExecucao)
         {
             throw new DomainException(OrdemServicoErrorMessages.ServicoEmExecucaoParaFinalizar);
         }
 
-        Status = StatusServico.FINALIZADO;
+        Status = StatusServico.Finalizado;
         DataFim = DateTime.UtcNow;
     }
 }
+
 

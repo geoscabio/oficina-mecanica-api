@@ -10,12 +10,8 @@ internal static class ServicoCatalogoTestDataFactory
     public const string DescricaoAtualizada = "Alinhamento";
     public const decimal ValorAtualizado = 90m;
 
-    public static ServicoCatalogo CriarServicoCatalogoPadrao(
-        string descricao = DescricaoPadrao,
-        decimal valor = ValorPadrao)
+    public static ServicoCatalogo CriarServicoCatalogoPadrao(string descricao = DescricaoPadrao, decimal valor = ValorPadrao)
     {
-        return ServicoCatalogo.Criar(
-            descricao,
-            valor);
+        return ServicoCatalogo.Criar(descricao, valor);
     }
 }

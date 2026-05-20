@@ -23,8 +23,7 @@ public class IniciarExecucaoOrdemServicoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarIniciarExecucaoOrdemServicoRequestValido(
-            ordemServico.Id);
+        var request = OrdemServicoTestDataFactory.CriarIniciarExecucaoOrdemServicoRequestValido(ordemServico.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -35,11 +34,7 @@ public class IniciarExecucaoOrdemServicoUseCaseTests
         resultado.Valor!.Id.Should().Be(ordemServico.Id);
         resultado.Valor.Status.Should().Be(OrdemServicoTestDataFactory.StatusEmExecucao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
 
         repository.Verify(
             repo => repo.AtualizarAsync(
@@ -69,17 +64,9 @@ public class IniciarExecucaoOrdemServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -92,8 +79,7 @@ public class IniciarExecucaoOrdemServicoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarIniciarExecucaoOrdemServicoRequestValido(
-            ordemServico.Id);
+        var request = OrdemServicoTestDataFactory.CriarIniciarExecucaoOrdemServicoRequestValido(ordemServico.Id);
 
         // Act
         var acao = () => useCase.ExecuteAsync(request);
@@ -103,17 +89,9 @@ public class IniciarExecucaoOrdemServicoUseCaseTests
             .ThrowAsync<DomainException>()
             .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -124,8 +102,7 @@ public class IniciarExecucaoOrdemServicoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarIniciarExecucaoOrdemServicoRequestValido(
-            Guid.Empty);
+        var request = OrdemServicoTestDataFactory.CriarIniciarExecucaoOrdemServicoRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -136,17 +113,9 @@ public class IniciarExecucaoOrdemServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<OrdemServico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<OrdemServico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IOrdemServicoRepository> CriarRepository(OrdemServico? ordemServico)
@@ -154,20 +123,14 @@ public class IniciarExecucaoOrdemServicoUseCaseTests
         var repository = new Mock<IOrdemServicoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(ordemServico);
 
         return repository;
     }
 
-    private static IniciarExecucaoOrdemServicoUseCase CriarUseCase(
-        Mock<IOrdemServicoRepository> repository)
+    private static IniciarExecucaoOrdemServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
     {
-        return new IniciarExecucaoOrdemServicoUseCase(
-            repository.Object,
-            new IniciarExecucaoOrdemServicoValidator(),
-            MapperFactory.Criar());
+        return new IniciarExecucaoOrdemServicoUseCase(repository.Object, new IniciarExecucaoOrdemServicoValidator(), MapperFactory.Criar());
     }
 }

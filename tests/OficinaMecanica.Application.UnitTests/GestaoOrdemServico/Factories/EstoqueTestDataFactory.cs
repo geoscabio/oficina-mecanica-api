@@ -10,10 +10,7 @@ internal static class EstoqueTestDataFactory
         return Estoque.Criar(new[] { ItemEstoque.Criar(pecaInsumoCatalogoId, quantidadeDisponivel) });
     }
 
-    public static Estoque CriarEstoqueComItemReservado(
-        Guid pecaInsumoCatalogoId,
-        int quantidadeDisponivel = 10,
-        int quantidadeReservada = 2)
+    public static Estoque CriarEstoqueComItemReservado(Guid pecaInsumoCatalogoId, int quantidadeDisponivel = 10, int quantidadeReservada = 2)
     {
         var estoque = CriarEstoqueComItem(pecaInsumoCatalogoId, quantidadeDisponivel);
 

@@ -1,4 +1,4 @@
-﻿using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
+using OficinaMecanica.Domain.GestaoEstoque.Aggregates;
 using OficinaMecanica.Domain.GestaoEstoque.Entities;
 
 namespace OficinaMecanica.Domain.UnitTests.GestaoEstoque.Factories;
@@ -11,32 +11,21 @@ internal static class EstoqueTestDataFactory
     public const int QuantidadeAtualizadaPadrao = 3;
     public const int QuantidadeIndisponivelPadrao = 15;
 
-    public static ItemEstoque CriarItemEstoquePadrao(
-        Guid? pecaInsumoCatalogoId = null,
-        int quantidadeDisponivel = QuantidadeDisponivelPadrao)
+    public static ItemEstoque CriarItemEstoquePadrao(Guid? pecaInsumoCatalogoId = null, int quantidadeDisponivel = QuantidadeDisponivelPadrao)
     {
-        return ItemEstoque.Criar(
-            pecaInsumoCatalogoId ?? Guid.NewGuid(),
-            quantidadeDisponivel);
+        return ItemEstoque.Criar(pecaInsumoCatalogoId ?? Guid.NewGuid(), quantidadeDisponivel);
     }
 
-    public static ItemEstoque CriarItemEstoqueComReserva(
-        Guid? pecaInsumoCatalogoId = null,
-        int quantidadeDisponivel = QuantidadeDisponivelPadrao,
-        int quantidadeReservada = QuantidadeReservadaPadrao)
+    public static ItemEstoque CriarItemEstoqueComReserva(Guid? pecaInsumoCatalogoId = null, int quantidadeDisponivel = QuantidadeDisponivelPadrao, int quantidadeReservada = QuantidadeReservadaPadrao)
     {
-        var item = CriarItemEstoquePadrao(
-            pecaInsumoCatalogoId,
-            quantidadeDisponivel);
+        var item = CriarItemEstoquePadrao(pecaInsumoCatalogoId, quantidadeDisponivel);
 
         item.Reservar(quantidadeReservada);
 
         return item;
     }
 
-    public static Estoque CriarEstoquePadrao(
-        Guid? pecaInsumoCatalogoId = null,
-        int quantidadeDisponivel = QuantidadeDisponivelPadrao)
+    public static Estoque CriarEstoquePadrao(Guid? pecaInsumoCatalogoId = null, int quantidadeDisponivel = QuantidadeDisponivelPadrao)
     {
         return Estoque.Criar(new[]
         {
@@ -44,17 +33,11 @@ internal static class EstoqueTestDataFactory
         });
     }
 
-    public static Estoque CriarEstoqueComItemReservado(
-        Guid? pecaInsumoCatalogoId = null,
-        int quantidadeDisponivel = QuantidadeDisponivelPadrao,
-        int quantidadeReservada = QuantidadeReservadaPadrao)
+    public static Estoque CriarEstoqueComItemReservado(Guid? pecaInsumoCatalogoId = null, int quantidadeDisponivel = QuantidadeDisponivelPadrao, int quantidadeReservada = QuantidadeReservadaPadrao)
     {
         return Estoque.Criar(new[]
         {
-            CriarItemEstoqueComReserva(
-                pecaInsumoCatalogoId,
-                quantidadeDisponivel,
-                quantidadeReservada)
+            CriarItemEstoqueComReserva(pecaInsumoCatalogoId, quantidadeDisponivel, quantidadeReservada)
         });
     }
 }

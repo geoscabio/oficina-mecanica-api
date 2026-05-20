@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoEstoque.EstoqueUseCases.RegistrarEntradaEstoque;
@@ -17,18 +17,14 @@ public class RegistrarEntradaEstoqueUseCaseTests
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
 
-        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(
-            pecaInsumoCatalogoId,
-            quantidadeDisponivel: 10);
+        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(pecaInsumoCatalogoId, quantidadeDisponivel: 10);
 
         var repository = CriarRepository(estoque);
 
         var useCase = CriarUseCase(repository);
 
         var request =
-            EstoqueTestDataFactory.CriarRegistrarEntradaEstoqueRequestValido(
-                pecaInsumoCatalogoId,
-                quantidade: 5);
+            EstoqueTestDataFactory.CriarRegistrarEntradaEstoqueRequestValido(pecaInsumoCatalogoId, quantidade: 5);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -40,11 +36,7 @@ public class RegistrarEntradaEstoqueUseCaseTests
 
         resultado.Valor!.QuantidadeDisponivel.Should().Be(15);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                estoque,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.AtualizarAsync(estoque, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -55,16 +47,14 @@ public class RegistrarEntradaEstoqueUseCaseTests
 
         var pecaInsumoNovaId = Guid.NewGuid();
 
-        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(
-            pecaInsumoJaExistenteId);
+        var estoque = EstoqueTestDataFactory.CriarEstoquePadrao(pecaInsumoJaExistenteId);
 
         var repository = CriarRepository(estoque);
 
         var useCase = CriarUseCase(repository);
 
         var request =
-            EstoqueTestDataFactory.CriarRegistrarEntradaEstoqueRequestValido(
-                pecaInsumoNovaId);
+            EstoqueTestDataFactory.CriarRegistrarEntradaEstoqueRequestValido(pecaInsumoNovaId);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -78,14 +68,9 @@ public class RegistrarEntradaEstoqueUseCaseTests
 
         resultado.Valor.QuantidadeDisponivel.Should().Be(request.Quantidade);
 
-        estoque.ItensEstoque.Should().Contain(
-            item => item.PecaInsumoCatalogoId == pecaInsumoNovaId);
+        estoque.ItensEstoque.Should().Contain(item => item.PecaInsumoCatalogoId == pecaInsumoNovaId);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                estoque,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.AtualizarAsync(estoque, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -115,13 +100,7 @@ public class RegistrarEntradaEstoqueUseCaseTests
 
         resultado.Valor.QuantidadeDisponivel.Should().Be(request.Quantidade);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.Is<Estoque>(estoque =>
-                    estoque.ItensEstoque.Any(item =>
-                        item.PecaInsumoCatalogoId == request.PecaInsumoCatalogoId)),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.AtualizarAsync(It.Is<Estoque>(estoque => estoque.ItensEstoque.Any(item => item.PecaInsumoCatalogoId == request.PecaInsumoCatalogoId)), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -133,8 +112,7 @@ public class RegistrarEntradaEstoqueUseCaseTests
         var useCase = CriarUseCase(repository);
 
         var request =
-            EstoqueTestDataFactory.CriarRegistrarEntradaEstoqueRequestValido(
-                Guid.Empty);
+            EstoqueTestDataFactory.CriarRegistrarEntradaEstoqueRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -146,15 +124,9 @@ public class RegistrarEntradaEstoqueUseCaseTests
 
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -166,8 +138,7 @@ public class RegistrarEntradaEstoqueUseCaseTests
         var useCase = CriarUseCase(repository);
 
         var request =
-            EstoqueTestDataFactory.CriarRegistrarEntradaEstoqueRequestValido(
-                quantidade: 0);
+            EstoqueTestDataFactory.CriarRegistrarEntradaEstoqueRequestValido(quantidade: 0);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -179,15 +150,9 @@ public class RegistrarEntradaEstoqueUseCaseTests
 
         resultado.Erro!.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterAsync(It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Estoque>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Estoque>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IEstoqueRepository> CriarRepository(Estoque estoque)
@@ -201,12 +166,8 @@ public class RegistrarEntradaEstoqueUseCaseTests
         return repository;
     }
 
-    private static RegistrarEntradaEstoqueUseCase CriarUseCase(
-        Mock<IEstoqueRepository> repository)
+    private static RegistrarEntradaEstoqueUseCase CriarUseCase(Mock<IEstoqueRepository> repository)
     {
-        return new RegistrarEntradaEstoqueUseCase(
-            repository.Object,
-            new RegistrarEntradaEstoqueValidator(),
-            MapperFactory.Criar());
+        return new RegistrarEntradaEstoqueUseCase(repository.Object, new RegistrarEntradaEstoqueValidator(), MapperFactory.Criar());
     }
 }

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.AtualizarMecanico;
 using OficinaMecanica.Application.Common;
@@ -34,11 +34,7 @@ public class AtualizarMecanicoUseCaseTests
         resultado.Valor.Nome.Should().Be(request.Nome);
         resultado.Valor.Funcional.Should().Be(request.Funcional);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.MecanicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.MecanicoId, It.IsAny<CancellationToken>()), Times.Once);
 
         repository.Verify(
             repo => repo.AtualizarAsync(
@@ -69,17 +65,9 @@ public class AtualizarMecanicoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(MecanicoErrorMessages.MecanicoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.MecanicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.MecanicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Mecanico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Mecanico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -101,32 +89,22 @@ public class AtualizarMecanicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Mecanico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Mecanico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public async Task Dado_NomeInvalido_Quando_AtualizarMecanico_Entao_DeveRetornarFalhaDeValidacao(
-        string nome)
+    public async Task Dado_NomeInvalido_Quando_AtualizarMecanico_Entao_DeveRetornarFalhaDeValidacao(string nome)
     {
         // Arrange
         var repository = new Mock<IMecanicoRepository>();
 
         var useCase = CriarUseCase(repository);
 
-        var request = MecanicoTestDataFactory.CriarAtualizarMecanicoRequestValido(
-            nome: nome);
+        var request = MecanicoTestDataFactory.CriarAtualizarMecanicoRequestValido(nome: nome);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -137,32 +115,22 @@ public class AtualizarMecanicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Mecanico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Mecanico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public async Task Dado_FuncionalInvalida_Quando_AtualizarMecanico_Entao_DeveRetornarFalhaDeValidacao(
-        string funcional)
+    public async Task Dado_FuncionalInvalida_Quando_AtualizarMecanico_Entao_DeveRetornarFalhaDeValidacao(string funcional)
     {
         // Arrange
         var repository = new Mock<IMecanicoRepository>();
 
         var useCase = CriarUseCase(repository);
 
-        var request = MecanicoTestDataFactory.CriarAtualizarMecanicoRequestValido(
-            funcional: funcional);
+        var request = MecanicoTestDataFactory.CriarAtualizarMecanicoRequestValido(funcional: funcional);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -173,17 +141,9 @@ public class AtualizarMecanicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Mecanico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Mecanico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IMecanicoRepository> CriarRepository(Mecanico? mecanico)
@@ -191,9 +151,7 @@ public class AtualizarMecanicoUseCaseTests
         var repository = new Mock<IMecanicoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mecanico);
 
         return repository;
@@ -201,9 +159,6 @@ public class AtualizarMecanicoUseCaseTests
 
     private static AtualizarMecanicoUseCase CriarUseCase(Mock<IMecanicoRepository> repository)
     {
-        return new AtualizarMecanicoUseCase(
-            repository.Object,
-            new AtualizarMecanicoValidator(),
-            MapperFactory.Criar());
+        return new AtualizarMecanicoUseCase(repository.Object, new AtualizarMecanicoValidator(), MapperFactory.Criar());
     }
 }

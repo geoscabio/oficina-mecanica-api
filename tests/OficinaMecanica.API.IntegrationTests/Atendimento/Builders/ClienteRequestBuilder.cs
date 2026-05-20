@@ -10,12 +10,7 @@ public sealed class ClienteRequestBuilder
     private string _nome = "Maria Cliente";
     private string _telefone = "(11) 99999-9999";
     private string _email = "maria.cliente@email.com";
-    private EnderecoRequest _endereco = new(
-        "Rua das Oficinas",
-        "100",
-        "Centro",
-        "Sao Paulo",
-        "01001-000");
+    private EnderecoRequest _endereco = new("Rua das Oficinas", "100", "Centro", "Sao Paulo", "01001-000");
 
     public static ClienteRequestBuilder Novo()
     {

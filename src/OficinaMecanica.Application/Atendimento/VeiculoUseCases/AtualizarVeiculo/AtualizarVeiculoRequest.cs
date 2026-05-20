@@ -1,8 +1,3 @@
-﻿namespace OficinaMecanica.Application.Atendimento.VeiculoUseCases.AtualizarVeiculo;
+namespace OficinaMecanica.Application.Atendimento.VeiculoUseCases.AtualizarVeiculo;
 
-public sealed record AtualizarVeiculoRequest(
-    Guid VeiculoId,
-    string Placa,
-    string Marca,
-    string Modelo,
-    int Ano);
+public sealed record AtualizarVeiculoRequest(Guid VeiculoId, string Placa, string Marca, string Modelo, int Ano);

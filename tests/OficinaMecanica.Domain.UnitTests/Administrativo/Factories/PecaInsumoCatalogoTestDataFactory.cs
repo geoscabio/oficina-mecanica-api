@@ -13,14 +13,8 @@ internal static class PecaInsumoCatalogoTestDataFactory
     public const TipoPecaInsumo TipoAtualizado = TipoPecaInsumo.INSUMO;
     public const decimal ValorAtualizado = 38m;
 
-    public static PecaInsumoCatalogo CriarPecaInsumoCatalogoPadrao(
-        string descricao = DescricaoPadrao,
-        TipoPecaInsumo tipo = TipoPadrao,
-        decimal valor = ValorPadrao)
+    public static PecaInsumoCatalogo CriarPecaInsumoCatalogoPadrao(string descricao = DescricaoPadrao, TipoPecaInsumo tipo = TipoPadrao, decimal valor = ValorPadrao)
     {
-        return PecaInsumoCatalogo.Criar(
-            descricao,
-            tipo,
-            valor);
+        return PecaInsumoCatalogo.Criar(descricao, tipo, valor);
     }
 }

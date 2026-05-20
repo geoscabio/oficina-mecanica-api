@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.RemoverMecanico;
 using OficinaMecanica.Application.Common;
@@ -32,17 +32,9 @@ public class RemoverMecanicoUseCaseTests
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Id.Should().Be(mecanico.Id);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.MecanicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.MecanicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.RemoverAsync(
-                It.Is<Mecanico>(mecanicoRemovido => mecanicoRemovido.Id == mecanico.Id),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.RemoverAsync(It.Is<Mecanico>(mecanicoRemovido => mecanicoRemovido.Id == mecanico.Id), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -64,17 +56,9 @@ public class RemoverMecanicoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(MecanicoErrorMessages.MecanicoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.MecanicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.MecanicoId, It.IsAny<CancellationToken>()), Times.Once);
 
-        repository.Verify(
-            repo => repo.RemoverAsync(
-                It.IsAny<Mecanico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.RemoverAsync(It.IsAny<Mecanico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -96,17 +80,9 @@ public class RemoverMecanicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.RemoverAsync(
-                It.IsAny<Mecanico>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.RemoverAsync(It.IsAny<Mecanico>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IMecanicoRepository> CriarRepository(Mecanico? mecanico)
@@ -114,9 +90,7 @@ public class RemoverMecanicoUseCaseTests
         var repository = new Mock<IMecanicoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mecanico);
 
         return repository;
@@ -124,9 +98,6 @@ public class RemoverMecanicoUseCaseTests
 
     private static RemoverMecanicoUseCase CriarUseCase(Mock<IMecanicoRepository> repository)
     {
-        return new RemoverMecanicoUseCase(
-            repository.Object,
-            new RemoverMecanicoValidator(),
-            MapperFactory.Criar());
+        return new RemoverMecanicoUseCase(repository.Object, new RemoverMecanicoValidator(), MapperFactory.Criar());
     }
 }

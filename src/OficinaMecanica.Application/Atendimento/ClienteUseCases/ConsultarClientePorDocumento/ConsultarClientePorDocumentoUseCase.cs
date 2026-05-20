@@ -14,25 +14,20 @@ public sealed class ConsultarClientePorDocumentoUseCase
     private readonly IValidator<ConsultarClientePorDocumentoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public ConsultarClientePorDocumentoUseCase(
-        IClienteRepository clienteRepository,
-        IValidator<ConsultarClientePorDocumentoRequest> validator,
-        IMapper mapper)
+    public ConsultarClientePorDocumentoUseCase(IClienteRepository clienteRepository, IValidator<ConsultarClientePorDocumentoRequest> validator, IMapper mapper)
     {
         _clienteRepository = clienteRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<ClienteResponse>> ExecuteAsync(
-        ConsultarClientePorDocumentoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<ClienteResponse>> ExecuteAsync(ConsultarClientePorDocumentoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<ClienteResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<ClienteResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var documento = CpfCnpj.Criar(request.Documento);
@@ -46,6 +41,7 @@ public sealed class ConsultarClientePorDocumentoUseCase
         return Result<ClienteResponse>.Ok(_mapper.Map<ClienteResponse>(cliente));
     }
 }
+
 
 
 

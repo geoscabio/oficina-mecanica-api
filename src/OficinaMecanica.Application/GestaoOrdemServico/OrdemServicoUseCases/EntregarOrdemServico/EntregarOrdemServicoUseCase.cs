@@ -13,25 +13,20 @@ public sealed class EntregarOrdemServicoUseCase
     private readonly IValidator<EntregarOrdemServicoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public EntregarOrdemServicoUseCase(
-        IOrdemServicoRepository ordemServicoRepository,
-        IValidator<EntregarOrdemServicoRequest> validator,
-        IMapper mapper)
+    public EntregarOrdemServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IValidator<EntregarOrdemServicoRequest> validator, IMapper mapper)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(
-        EntregarOrdemServicoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<OrdemServicoResponse>> ExecuteAsync(EntregarOrdemServicoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<OrdemServicoResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<OrdemServicoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var ordemServico = await _ordemServicoRepository.ObterPorIdAsync(request.OrdemServicoId, cancellationToken);
@@ -48,3 +43,4 @@ public sealed class EntregarOrdemServicoUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }
+

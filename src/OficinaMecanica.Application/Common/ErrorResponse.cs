@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace OficinaMecanica.Application.Common;
 
 public enum TipoErro
@@ -10,4 +12,4 @@ public enum TipoErro
     AcessoProibido = 6
 }
 
-public sealed record ErrorResponse(string Mensagem, TipoErro Tipo);
+public sealed record ErrorResponse(string Mensagem, TipoErro Tipo, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyCollection<string>? Erros = null);

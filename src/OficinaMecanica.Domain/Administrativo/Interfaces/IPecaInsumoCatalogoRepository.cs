@@ -8,9 +8,7 @@ public interface IPecaInsumoCatalogoRepository
 
     Task<PecaInsumoCatalogo?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyCollection<PecaInsumoCatalogo>> ObterPorIdsAsync(
-        IReadOnlyCollection<Guid> ids,
-        CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<PecaInsumoCatalogo>> ObterPorIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<PecaInsumoCatalogo>> ListarAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default);
 

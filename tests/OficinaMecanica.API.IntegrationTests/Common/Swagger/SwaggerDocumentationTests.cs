@@ -14,7 +14,7 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
     {
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_EndpointProtegido_Quando_GerarSwagger_Entao_DeveDocumentarRespostasDeErroPadronizadas()
     {
         // Arrange
@@ -36,14 +36,11 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
         RespostaDeErroDevePossuirSchema(responses, "404");
         RespostaDeErroDevePossuirSchema(responses, "422");
         RespostaDeErroDevePossuirSchema(responses, "500");
-        RespostaDeErroDevePossuirExemplo(
-            responses,
-            "403",
-            ApiResponseMessages.AcessoProibido,
-            TipoErro.AcessoProibido);
+        RespostaDeErroValidacaoDevePossuirListaErros(responses);
+        RespostaDeErroDevePossuirExemplo(responses, "403", ApiResponseMessages.AcessoProibido, TipoErro.AcessoProibido);
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_EndpointCadastro_Quando_GerarSwagger_Entao_DeveDocumentarCreatedComSchema()
     {
         // Arrange
@@ -71,7 +68,7 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
             .NotBe(JsonValueKind.Undefined);
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_EndpointRemocao_Quando_GerarSwagger_Entao_DeveDocumentarNoContentSemBody()
     {
         // Arrange
@@ -108,11 +105,7 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
             .NotBe(JsonValueKind.Undefined);
     }
 
-    private static void RespostaDeErroDevePossuirExemplo(
-        JsonElement responses,
-        string statusCode,
-        string mensagem,
-        TipoErro tipoErro)
+    private static void RespostaDeErroDevePossuirExemplo(JsonElement responses, string statusCode, string mensagem, TipoErro tipoErro)
     {
         var example = responses
             .GetProperty(statusCode)
@@ -123,4 +116,18 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
         example.GetProperty("mensagem").GetString().Should().Be(mensagem);
         example.GetProperty("tipo").GetString().Should().Be(tipoErro.ToString());
     }
+
+    private static void RespostaDeErroValidacaoDevePossuirListaErros(JsonElement responses)
+    {
+        var example = responses
+            .GetProperty("400")
+            .GetProperty("content")
+            .GetProperty(ApiResponseContentTypes.Json)
+            .GetProperty("example");
+
+        example.GetProperty("erros").EnumerateArray()
+            .Should()
+            .NotBeEmpty();
+    }
 }
+

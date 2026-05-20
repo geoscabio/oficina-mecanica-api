@@ -39,10 +39,7 @@ public sealed class EstoqueRepository : IEstoqueRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<ItemEstoque>> ListarItensAsync(
-        int pagina,
-        int tamanhoPagina,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<ItemEstoque>> ListarItensAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Set<ItemEstoque>()
             .AsNoTracking()
@@ -57,27 +54,9 @@ public sealed class EstoqueRepository : IEstoqueRepository
         return _dbContext.Set<ItemEstoque>().CountAsync(cancellationToken);
     }
 
-    public Task<ItemEstoque?> ObterItemPorIdAsync(
-        Guid itemEstoqueId,
-        CancellationToken cancellationToken = default)
+    public Task<ItemEstoque?> ObterItemPorIdAsync(Guid itemEstoqueId, CancellationToken cancellationToken = default)
     {
         return _dbContext.Set<ItemEstoque>()
             .SingleOrDefaultAsync(item => item.Id == itemEstoqueId, cancellationToken);
-    }
-
-    public Task<ItemEstoque?> ObterItemPorPecaInsumoCatalogoIdAsync(
-        Guid pecaInsumoCatalogoId,
-        CancellationToken cancellationToken = default)
-    {
-        return _dbContext.Set<ItemEstoque>()
-            .SingleOrDefaultAsync(
-                item => item.PecaInsumoCatalogoId == pecaInsumoCatalogoId,
-                cancellationToken);
-    }
-
-    public async Task AtualizarItemAsync(ItemEstoque itemEstoque, CancellationToken cancellationToken = default)
-    {
-        _dbContext.Set<ItemEstoque>().Update(itemEstoque);
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

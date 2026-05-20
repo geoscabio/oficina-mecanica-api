@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using OficinaMecanica.Application.Atendimento.VeiculoUseCases.Responses;
 using OficinaMecanica.Application.Common;
@@ -13,38 +13,27 @@ public sealed class RemoverVeiculoUseCase
     private readonly IValidator<RemoverVeiculoRequest> _validator;
     private readonly IMapper _mapper;
 
-    public RemoverVeiculoUseCase(
-        IVeiculoRepository veiculoRepository,
-        IValidator<RemoverVeiculoRequest> validator,
-        IMapper mapper)
+    public RemoverVeiculoUseCase(IVeiculoRepository veiculoRepository, IValidator<RemoverVeiculoRequest> validator, IMapper mapper)
     {
         _veiculoRepository = veiculoRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<VeiculoResponse>> ExecuteAsync(
-        RemoverVeiculoRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<VeiculoResponse>> ExecuteAsync(RemoverVeiculoRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<VeiculoResponse>.Falha(
-                validationResult.Errors.First().ErrorMessage,
-                TipoErro.Validacao);
+            return Result<VeiculoResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
-        var veiculo = await _veiculoRepository.ObterPorIdAsync(
-            request.VeiculoId,
-            cancellationToken);
+        var veiculo = await _veiculoRepository.ObterPorIdAsync(request.VeiculoId, cancellationToken);
 
         if (veiculo is null)
         {
-            return Result<VeiculoResponse>.Falha(
-                VeiculoErrorMessages.VeiculoNaoEncontrado,
-                TipoErro.NaoEncontrado);
+            return Result<VeiculoResponse>.Falha(VeiculoErrorMessages.VeiculoNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
         await _veiculoRepository.RemoverAsync(veiculo, cancellationToken);

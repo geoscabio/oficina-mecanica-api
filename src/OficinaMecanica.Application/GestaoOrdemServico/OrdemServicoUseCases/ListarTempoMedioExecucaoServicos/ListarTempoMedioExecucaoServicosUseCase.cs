@@ -15,11 +15,7 @@ public sealed class ListarTempoMedioExecucaoServicosUseCase
     private readonly IValidator<ListarTempoMedioExecucaoServicosRequest> _validator;
     private readonly IMapper _mapper;
 
-    public ListarTempoMedioExecucaoServicosUseCase(
-        IServicoCatalogoRepository servicoCatalogoRepository,
-        IOrdemServicoRepository ordemServicoRepository,
-        IValidator<ListarTempoMedioExecucaoServicosRequest> validator,
-        IMapper mapper)
+    public ListarTempoMedioExecucaoServicosUseCase(IServicoCatalogoRepository servicoCatalogoRepository, IOrdemServicoRepository ordemServicoRepository, IValidator<ListarTempoMedioExecucaoServicosRequest> validator, IMapper mapper)
     {
         _servicoCatalogoRepository = servicoCatalogoRepository;
         _ordemServicoRepository = ordemServicoRepository;
@@ -27,32 +23,23 @@ public sealed class ListarTempoMedioExecucaoServicosUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<PagedResult<TempoMedioExecucaoServicoResponse>>> ExecuteAsync(
-        ListarTempoMedioExecucaoServicosRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<PagedResult<TempoMedioExecucaoServicoResponse>>> ExecuteAsync(ListarTempoMedioExecucaoServicosRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<PagedResult<TempoMedioExecucaoServicoResponse>>.Falha(
-                validationResult.Errors.First().ErrorMessage,
-                TipoErro.Validacao);
+            return Result<PagedResult<TempoMedioExecucaoServicoResponse>>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
-        var servicosCatalogo = await _servicoCatalogoRepository.ListarAsync(
-            request.Pagina,
-            request.TamanhoPagina,
-            cancellationToken);
+        var servicosCatalogo = await _servicoCatalogoRepository.ListarAsync(request.Pagina, request.TamanhoPagina, cancellationToken);
         var totalItens = await _servicoCatalogoRepository.ContarAsync(cancellationToken);
         var servicosCatalogoIds = servicosCatalogo
             .Select(servicoCatalogo => servicoCatalogo.Id)
             .ToArray();
         var temposMedios = servicosCatalogoIds.Length == 0
             ? new Dictionary<Guid, double>()
-            : await _ordemServicoRepository.ListarTemposMediosExecucaoServicosAsync(
-                servicosCatalogoIds,
-                cancellationToken);
+            : await _ordemServicoRepository.ListarTemposMediosExecucaoServicosAsync(servicosCatalogoIds, cancellationToken);
 
         var response = servicosCatalogo
             .Select(servicoCatalogo =>
@@ -61,17 +48,12 @@ public sealed class ListarTempoMedioExecucaoServicosUseCase
                     ? valor
                     : (double?)null;
 
-                return _mapper.Map<TempoMedioExecucaoServicoResponse>(
-                    servicoCatalogo,
-                    opcao => opcao.Items[OrdemServicoMappingProfile.TempoMedioExecucaoEmMinutosKey] = tempoMedio);
+                return _mapper.Map<TempoMedioExecucaoServicoResponse>(servicoCatalogo, opcao => opcao.Items[OrdemServicoMappingProfile.TempoMedioExecucaoEmMinutosKey] = tempoMedio);
             })
             .ToArray();
-        var pagedResult = new PagedResult<TempoMedioExecucaoServicoResponse>(
-            response,
-            request.Pagina,
-            request.TamanhoPagina,
-            totalItens);
+        var pagedResult = new PagedResult<TempoMedioExecucaoServicoResponse>(response, request.Pagina, request.TamanhoPagina, totalItens);
 
         return Result<PagedResult<TempoMedioExecucaoServicoResponse>>.Ok(pagedResult);
     }
 }
+

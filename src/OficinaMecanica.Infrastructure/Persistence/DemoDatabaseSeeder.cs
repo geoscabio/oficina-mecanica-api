@@ -7,9 +7,7 @@ namespace OficinaMecanica.Infrastructure.Persistence;
 
 internal static class DemoDatabaseSeeder
 {
-    public static async Task SeedAsync(
-        OficinaMecanicaDbContext dbContext,
-        CancellationToken cancellationToken = default)
+    public static async Task SeedAsync(OficinaMecanicaDbContext dbContext, CancellationToken cancellationToken = default)
     {
         var administrativo = await AdministrativoSeedData.SeedAsync(dbContext, cancellationToken);
         var estoque = await EstoqueSeedData.SeedAsync(dbContext, administrativo, cancellationToken);

@@ -16,9 +16,7 @@ public class ServicoCatalogoTests
         const decimal valor = ServicoCatalogoTestDataFactory.ValorPadrao;
 
         // Act
-        var servico = ServicoCatalogo.Criar(
-            descricao,
-            valor);
+        var servico = ServicoCatalogo.Criar(descricao, valor);
 
         // Assert
         servico.Id.Should().NotBeEmpty();
@@ -29,16 +27,13 @@ public class ServicoCatalogoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_DescricaoInvalida_Quando_CriarServicoCatalogo_Entao_DeveLancarDomainException(
-        string descricao)
+    public void Dado_DescricaoInvalida_Quando_CriarServicoCatalogo_Entao_DeveLancarDomainException(string descricao)
     {
         // Arrange
         const decimal valor = ServicoCatalogoTestDataFactory.ValorPadrao;
 
         // Act
-        var acao = () => ServicoCatalogo.Criar(
-            descricao,
-            valor);
+        var acao = () => ServicoCatalogo.Criar(descricao, valor);
 
         // Assert
         acao.Should()
@@ -49,16 +44,13 @@ public class ServicoCatalogoTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Dado_ValorInvalido_Quando_CriarServicoCatalogo_Entao_DeveLancarDomainException(
-        decimal valor)
+    public void Dado_ValorInvalido_Quando_CriarServicoCatalogo_Entao_DeveLancarDomainException(decimal valor)
     {
         // Arrange
         const string descricao = ServicoCatalogoTestDataFactory.DescricaoPadrao;
 
         // Act
-        var acao = () => ServicoCatalogo.Criar(
-            descricao,
-            valor);
+        var acao = () => ServicoCatalogo.Criar(descricao, valor);
 
         // Assert
         acao.Should()
@@ -73,9 +65,7 @@ public class ServicoCatalogoTests
         var servico = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
 
         // Act
-        servico.Atualizar(
-            ServicoCatalogoTestDataFactory.DescricaoAtualizada,
-            ServicoCatalogoTestDataFactory.ValorAtualizado);
+        servico.Atualizar(ServicoCatalogoTestDataFactory.DescricaoAtualizada, ServicoCatalogoTestDataFactory.ValorAtualizado);
 
         // Assert
         servico.Descricao.Should().Be(ServicoCatalogoTestDataFactory.DescricaoAtualizada);
@@ -85,16 +75,13 @@ public class ServicoCatalogoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_DescricaoInvalida_Quando_AtualizarServicoCatalogo_Entao_DeveLancarDomainException(
-        string descricao)
+    public void Dado_DescricaoInvalida_Quando_AtualizarServicoCatalogo_Entao_DeveLancarDomainException(string descricao)
     {
         // Arrange
         var servico = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
 
         // Act
-        var acao = () => servico.Atualizar(
-            descricao,
-            ServicoCatalogoTestDataFactory.ValorAtualizado);
+        var acao = () => servico.Atualizar(descricao, ServicoCatalogoTestDataFactory.ValorAtualizado);
 
         // Assert
         acao.Should()
@@ -105,16 +92,13 @@ public class ServicoCatalogoTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Dado_ValorInvalido_Quando_AtualizarServicoCatalogo_Entao_DeveLancarDomainException(
-        decimal valor)
+    public void Dado_ValorInvalido_Quando_AtualizarServicoCatalogo_Entao_DeveLancarDomainException(decimal valor)
     {
         // Arrange
         var servico = ServicoCatalogoTestDataFactory.CriarServicoCatalogoPadrao();
 
         // Act
-        var acao = () => servico.Atualizar(
-            ServicoCatalogoTestDataFactory.DescricaoAtualizada,
-            valor);
+        var acao = () => servico.Atualizar(ServicoCatalogoTestDataFactory.DescricaoAtualizada, valor);
 
         // Assert
         acao.Should()

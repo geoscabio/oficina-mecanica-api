@@ -19,7 +19,7 @@ public sealed class VeiculosControllerTests : ApiIntegrationTestBase
         await AutenticarComoAdministradorAsync();
     }
 
-    [Fact]
+    [RequiresDockerFact]
     public async Task Dado_VeiculoValido_Quando_ExecutarCrud_Entao_DevePersistirAlterarListarERemover()
     {
         // Arrange
@@ -29,10 +29,7 @@ public sealed class VeiculosControllerTests : ApiIntegrationTestBase
             .BuildCadastro();
 
         // Act
-        var veiculoCriado = await PostJsonAsync(
-            "/api/v1/atendimento/veiculos/cadastrar",
-            cadastro,
-            HttpStatusCode.Created);
+        var veiculoCriado = await PostJsonAsync("/api/v1/atendimento/veiculos/cadastrar", cadastro, HttpStatusCode.Created);
         var veiculoId = ObterGuid(veiculoCriado, "id");
 
         var veiculoConsultado = await GetJsonAsync($"/api/v1/atendimento/veiculos/consultar/{veiculoId}");
@@ -44,9 +41,7 @@ public sealed class VeiculosControllerTests : ApiIntegrationTestBase
             .ComPlaca("XYZ-9876")
             .ComModelo("Palio")
             .BuildAtualizacao(veiculoId);
-        var veiculoAtualizado = await PutJsonAsync(
-            $"/api/v1/atendimento/veiculos/{veiculoId}/atualizar",
-            atualizacao);
+        var veiculoAtualizado = await PutJsonAsync($"/api/v1/atendimento/veiculos/{veiculoId}/atualizar", atualizacao);
 
         await DeleteAsync($"/api/v1/atendimento/veiculos/{veiculoId}/remover");
         var consultaAposRemocao = await Client.GetAsync($"/api/v1/atendimento/veiculos/consultar/{veiculoId}");
@@ -61,11 +56,9 @@ public sealed class VeiculosControllerTests : ApiIntegrationTestBase
 
     private async Task<Guid> CadastrarClienteAsync()
     {
-        var response = await PostJsonAsync(
-            "/api/v1/atendimento/clientes/cadastrar",
-            ClienteRequestBuilder.Novo().BuildCadastro(),
-            HttpStatusCode.Created);
+        var response = await PostJsonAsync("/api/v1/atendimento/clientes/cadastrar", ClienteRequestBuilder.Novo().BuildCadastro(), HttpStatusCode.Created);
 
         return ObterGuid(response, "id");
     }
 }
+

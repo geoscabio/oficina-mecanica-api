@@ -6,10 +6,7 @@ namespace OficinaMecanica.API.Extensions.Swagger;
 
 internal static class OpenApiSuccessResponseFactory
 {
-    public static OpenApiResponse Create(
-        OperationFilterContext context,
-        string description,
-        Type? responseType)
+    public static OpenApiResponse Create(OperationFilterContext context, string description, Type? responseType)
     {
         var response = new OpenApiResponse
         {
@@ -25,9 +22,7 @@ internal static class OpenApiSuccessResponseFactory
         {
             [ApiResponseContentTypes.Json] = new()
             {
-                Schema = context.SchemaGenerator.GenerateSchema(
-                    responseType,
-                    context.SchemaRepository)
+                Schema = context.SchemaGenerator.GenerateSchema(responseType, context.SchemaRepository)
             }
         };
 

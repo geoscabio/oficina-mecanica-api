@@ -20,10 +20,7 @@ internal sealed class ApiSuccessResponsesOperationFilter : IOperationFilter
 
         operation.Responses[statusCodeTexto] = statusCode == StatusCodes.Status204NoContent
             ? OpenApiSuccessResponseFactory.CreateNoContent(ApiResponseMessages.RecursoRemovidoComSucesso)
-            : OpenApiSuccessResponseFactory.Create(
-                context,
-                ObterDescricaoSucesso(statusCode),
-                ObterTipoResponse(context.MethodInfo));
+            : OpenApiSuccessResponseFactory.Create(context, ObterDescricaoSucesso(statusCode), ObterTipoResponse(context.MethodInfo));
     }
 
     private static int ObterStatusCodeSucesso(MethodInfo methodInfo)

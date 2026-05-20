@@ -22,8 +22,7 @@ public class DetalharOrdemServicoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarDetalharOrdemServicoRequestValido(
-            ordemServico.Id);
+        var request = OrdemServicoTestDataFactory.CriarDetalharOrdemServicoRequestValido(ordemServico.Id);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -37,11 +36,7 @@ public class DetalharOrdemServicoUseCaseTests
         resultado.Valor.VeiculoId.Should().Be(ordemServico.VeiculoId);
         resultado.Valor.MecanicoId.Should().Be(ordemServico.MecanicoId);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -63,11 +58,7 @@ public class DetalharOrdemServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(OrdemServicoErrorMessages.OrdemServicoNaoEncontrada);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.OrdemServicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.OrdemServicoId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -78,8 +69,7 @@ public class DetalharOrdemServicoUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = OrdemServicoTestDataFactory.CriarDetalharOrdemServicoRequestValido(
-            Guid.Empty);
+        var request = OrdemServicoTestDataFactory.CriarDetalharOrdemServicoRequestValido(Guid.Empty);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -90,11 +80,7 @@ public class DetalharOrdemServicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IOrdemServicoRepository> CriarRepository(OrdemServico? ordemServico)
@@ -102,20 +88,14 @@ public class DetalharOrdemServicoUseCaseTests
         var repository = new Mock<IOrdemServicoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(ordemServico);
 
         return repository;
     }
 
-    private static DetalharOrdemServicoUseCase CriarUseCase(
-        Mock<IOrdemServicoRepository> repository)
+    private static DetalharOrdemServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
     {
-        return new DetalharOrdemServicoUseCase(
-            repository.Object,
-            new DetalharOrdemServicoValidator(),
-            MapperFactory.Criar());
+        return new DetalharOrdemServicoUseCase(repository.Object, new DetalharOrdemServicoValidator(), MapperFactory.Criar());
     }
 }

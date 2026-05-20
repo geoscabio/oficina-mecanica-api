@@ -2,6 +2,4 @@ using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 
 namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.CancelarOrdemServico;
 
-public sealed record CancelarOrdemServicoRequest(
-    Guid OrdemServicoId,
-    MotivoCancelamentoOrdemServico Motivo);
+public sealed record CancelarOrdemServicoRequest(Guid OrdemServicoId, MotivoCancelamentoOrdemServico Motivo);

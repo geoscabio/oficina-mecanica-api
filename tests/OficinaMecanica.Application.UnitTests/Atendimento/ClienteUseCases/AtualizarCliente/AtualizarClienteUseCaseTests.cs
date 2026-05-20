@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Atendimento.ClienteUseCases.AtualizarCliente;
 using OficinaMecanica.Application.Common;
@@ -65,11 +65,7 @@ public class AtualizarClienteUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(ClienteErrorMessages.ClienteNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Cliente>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -91,17 +87,9 @@ public class AtualizarClienteUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Cliente>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Theory]
@@ -114,8 +102,7 @@ public class AtualizarClienteUseCaseTests
 
         var useCase = CriarUseCase(repository);
 
-        var request = ClienteTestDataFactory.CriarAtualizarClienteRequestValido(
-            nome: nome);
+        var request = ClienteTestDataFactory.CriarAtualizarClienteRequestValido(nome: nome);
 
         // Act
         var resultado = await useCase.ExecuteAsync(request);
@@ -126,17 +113,9 @@ public class AtualizarClienteUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
 
-        repository.Verify(
-            repo => repo.AtualizarAsync(
-                It.IsAny<Cliente>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.AtualizarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IClienteRepository> CriarRepository(Cliente? cliente)
@@ -144,9 +123,7 @@ public class AtualizarClienteUseCaseTests
         var repository = new Mock<IClienteRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(cliente);
 
         return repository;
@@ -154,9 +131,6 @@ public class AtualizarClienteUseCaseTests
 
     private static AtualizarClienteUseCase CriarUseCase(Mock<IClienteRepository> repository)
     {
-        return new AtualizarClienteUseCase(
-            repository.Object,
-            new AtualizarClienteValidator(),
-            MapperFactory.Criar());
+        return new AtualizarClienteUseCase(repository.Object, new AtualizarClienteValidator(), MapperFactory.Criar());
     }
 }

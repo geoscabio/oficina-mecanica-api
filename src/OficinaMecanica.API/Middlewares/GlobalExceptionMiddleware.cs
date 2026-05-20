@@ -27,10 +27,7 @@ public sealed class GlobalExceptionMiddleware
                 throw;
             }
 
-            await WriteErrorAsync(
-                context,
-                TipoErro.RegraNegocio.ToHttpStatusCode(),
-                new ErrorResponse(exception.Message, TipoErro.RegraNegocio));
+            await WriteErrorAsync(context, TipoErro.RegraNegocio.ToHttpStatusCode(), new ErrorResponse(exception.Message, TipoErro.RegraNegocio));
         }
         catch
         {
@@ -39,17 +36,11 @@ public sealed class GlobalExceptionMiddleware
                 throw;
             }
 
-            await WriteErrorAsync(
-                context,
-                TipoErro.ErroInterno.ToHttpStatusCode(),
-                new ErrorResponse(ApiResponseMessages.ErroInternoInesperado, TipoErro.ErroInterno));
+            await WriteErrorAsync(context, TipoErro.ErroInterno.ToHttpStatusCode(), new ErrorResponse(ApiResponseMessages.ErroInternoInesperado, TipoErro.ErroInterno));
         }
     }
 
-    private static async Task WriteErrorAsync(
-        HttpContext context,
-        int statusCode,
-        ErrorResponse error)
+    private static async Task WriteErrorAsync(HttpContext context, int statusCode, ErrorResponse error)
     {
         context.Response.StatusCode = statusCode;
 

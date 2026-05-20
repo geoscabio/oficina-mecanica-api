@@ -16,69 +16,41 @@ namespace OficinaMecanica.API.Administrativo.Controllers;
 public sealed class PecasInsumosCatalogoController : ControllerBase
 {
     [HttpPost("cadastrar")]
-    public async Task<IActionResult> Cadastrar(
-        [FromServices] CadastrarPecaInsumoCatalogoUseCase useCase,
-        [FromBody] CadastrarPecaInsumoCatalogoRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Cadastrar([FromServices] CadastrarPecaInsumoCatalogoUseCase useCase, [FromBody] CadastrarPecaInsumoCatalogoRequest request, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
-        return this.ToCreatedAtActionResult(
-            result,
-            nameof(Consultar),
-            pecaInsumo => new { pecaInsumoCatalogoId = pecaInsumo.Id });
+        return this.ToCreatedAtActionResult(result, nameof(Consultar), pecaInsumo => new { pecaInsumoCatalogoId = pecaInsumo.Id });
     }
 
     [HttpGet("consultar/{pecaInsumoCatalogoId:guid}")]
-    public async Task<IActionResult> Consultar(
-        [FromServices] ConsultarPecaInsumoCatalogoUseCase useCase,
-        Guid pecaInsumoCatalogoId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Consultar([FromServices] ConsultarPecaInsumoCatalogoUseCase useCase, Guid pecaInsumoCatalogoId, CancellationToken cancellationToken)
     {
-        var result = await useCase.ExecuteAsync(
-            new ConsultarPecaInsumoCatalogoRequest(pecaInsumoCatalogoId),
-            cancellationToken);
+        var result = await useCase.ExecuteAsync(new ConsultarPecaInsumoCatalogoRequest(pecaInsumoCatalogoId), cancellationToken);
 
         return this.ToActionResult(result);
     }
 
     [HttpGet("listar")]
-    public async Task<IActionResult> Listar(
-        [FromServices] ListarPecasInsumosCatalogoUseCase useCase,
-        [FromQuery] int pagina = 1,
-        [FromQuery] int tamanhoPagina = 10,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Listar([FromServices] ListarPecasInsumosCatalogoUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
     {
-        var result = await useCase.ExecuteAsync(
-            new ListarPecasInsumosCatalogoRequest(pagina, tamanhoPagina),
-            cancellationToken);
+        var result = await useCase.ExecuteAsync(new ListarPecasInsumosCatalogoRequest(pagina, tamanhoPagina), cancellationToken);
 
         return this.ToActionResult(result);
     }
 
     [HttpPut("{pecaInsumoCatalogoId:guid}/atualizar")]
-    public async Task<IActionResult> Atualizar(
-        [FromServices] AtualizarPecaInsumoCatalogoUseCase useCase,
-        Guid pecaInsumoCatalogoId,
-        [FromBody] AtualizarPecaInsumoCatalogoRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Atualizar([FromServices] AtualizarPecaInsumoCatalogoUseCase useCase, Guid pecaInsumoCatalogoId, [FromBody] AtualizarPecaInsumoCatalogoRequest request, CancellationToken cancellationToken)
     {
-        var result = await useCase.ExecuteAsync(
-            request with { PecaInsumoCatalogoId = pecaInsumoCatalogoId },
-            cancellationToken);
+        var result = await useCase.ExecuteAsync(request with { PecaInsumoCatalogoId = pecaInsumoCatalogoId }, cancellationToken);
 
         return this.ToActionResult(result);
     }
 
     [HttpDelete("{pecaInsumoCatalogoId:guid}/remover")]
-    public async Task<IActionResult> Remover(
-        [FromServices] RemoverPecaInsumoCatalogoUseCase useCase,
-        Guid pecaInsumoCatalogoId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Remover([FromServices] RemoverPecaInsumoCatalogoUseCase useCase, Guid pecaInsumoCatalogoId, CancellationToken cancellationToken)
     {
-        var result = await useCase.ExecuteAsync(
-            new RemoverPecaInsumoCatalogoRequest(pecaInsumoCatalogoId),
-            cancellationToken);
+        var result = await useCase.ExecuteAsync(new RemoverPecaInsumoCatalogoRequest(pecaInsumoCatalogoId), cancellationToken);
 
         return this.ToNoContentResult(result);
     }

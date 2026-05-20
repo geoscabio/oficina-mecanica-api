@@ -13,25 +13,20 @@ public sealed class ConsultarClienteUseCase
     private readonly IValidator<ConsultarClienteRequest> _validator;
     private readonly IMapper _mapper;
 
-    public ConsultarClienteUseCase(
-        IClienteRepository clienteRepository,
-        IValidator<ConsultarClienteRequest> validator,
-        IMapper mapper)
+    public ConsultarClienteUseCase(IClienteRepository clienteRepository, IValidator<ConsultarClienteRequest> validator, IMapper mapper)
     {
         _clienteRepository = clienteRepository;
         _validator = validator;
         _mapper = mapper;
     }
 
-    public async Task<Result<ClienteResponse>> ExecuteAsync(
-        ConsultarClienteRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<ClienteResponse>> ExecuteAsync(ConsultarClienteRequest request, CancellationToken cancellationToken = default)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
-            return Result<ClienteResponse>.Falha(validationResult.Errors.First().ErrorMessage, TipoErro.Validacao);
+            return Result<ClienteResponse>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
         var cliente = await _clienteRepository.ObterPorIdAsync(request.Id, cancellationToken);
@@ -44,6 +39,7 @@ public sealed class ConsultarClienteUseCase
         return Result<ClienteResponse>.Ok(_mapper.Map<ClienteResponse>(cliente));
     }
 }
+
 
 
 

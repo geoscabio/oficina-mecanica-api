@@ -12,18 +12,14 @@ public class PecaInsumoCatalogoTests
     [Theory]
     [InlineData(TipoPecaInsumo.PECA)]
     [InlineData(TipoPecaInsumo.INSUMO)]
-    public void Dado_DadosValidos_Quando_CriarPecaInsumoCatalogo_Entao_DeveRegistrarItemComTipoEValor(
-        TipoPecaInsumo tipo)
+    public void Dado_DadosValidos_Quando_CriarPecaInsumoCatalogo_Entao_DeveRegistrarItemComTipoEValor(TipoPecaInsumo tipo)
     {
         // Arrange
         const string descricao = PecaInsumoCatalogoTestDataFactory.DescricaoPadrao;
         const decimal valor = PecaInsumoCatalogoTestDataFactory.ValorPadrao;
 
         // Act
-        var item = PecaInsumoCatalogo.Criar(
-            descricao,
-            tipo,
-            valor);
+        var item = PecaInsumoCatalogo.Criar(descricao, tipo, valor);
 
         // Assert
         item.Id.Should().NotBeEmpty();
@@ -35,18 +31,14 @@ public class PecaInsumoCatalogoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_DescricaoInvalida_Quando_CriarPecaInsumoCatalogo_Entao_DeveLancarDomainException(
-        string descricao)
+    public void Dado_DescricaoInvalida_Quando_CriarPecaInsumoCatalogo_Entao_DeveLancarDomainException(string descricao)
     {
         // Arrange
         const TipoPecaInsumo tipo = PecaInsumoCatalogoTestDataFactory.TipoPadrao;
         const decimal valor = PecaInsumoCatalogoTestDataFactory.ValorPadrao;
 
         // Act
-        var acao = () => PecaInsumoCatalogo.Criar(
-            descricao,
-            tipo,
-            valor);
+        var acao = () => PecaInsumoCatalogo.Criar(descricao, tipo, valor);
 
         // Assert
         acao.Should()
@@ -63,10 +55,7 @@ public class PecaInsumoCatalogoTests
         const decimal valor = PecaInsumoCatalogoTestDataFactory.ValorPadrao;
 
         // Act
-        var acao = () => PecaInsumoCatalogo.Criar(
-            descricao,
-            tipo,
-            valor);
+        var acao = () => PecaInsumoCatalogo.Criar(descricao, tipo, valor);
 
         // Assert
         acao.Should()
@@ -77,18 +66,14 @@ public class PecaInsumoCatalogoTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Dado_ValorInvalido_Quando_CriarPecaInsumoCatalogo_Entao_DeveLancarDomainException(
-        decimal valor)
+    public void Dado_ValorInvalido_Quando_CriarPecaInsumoCatalogo_Entao_DeveLancarDomainException(decimal valor)
     {
         // Arrange
         const string descricao = PecaInsumoCatalogoTestDataFactory.DescricaoPadrao;
         const TipoPecaInsumo tipo = PecaInsumoCatalogoTestDataFactory.TipoPadrao;
 
         // Act
-        var acao = () => PecaInsumoCatalogo.Criar(
-            descricao,
-            tipo,
-            valor);
+        var acao = () => PecaInsumoCatalogo.Criar(descricao, tipo, valor);
 
         // Assert
         acao.Should()
@@ -103,10 +88,7 @@ public class PecaInsumoCatalogoTests
         var item = PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao();
 
         // Act
-        item.Atualizar(
-            PecaInsumoCatalogoTestDataFactory.DescricaoAtualizada,
-            PecaInsumoCatalogoTestDataFactory.TipoAtualizado,
-            PecaInsumoCatalogoTestDataFactory.ValorAtualizado);
+        item.Atualizar(PecaInsumoCatalogoTestDataFactory.DescricaoAtualizada, PecaInsumoCatalogoTestDataFactory.TipoAtualizado, PecaInsumoCatalogoTestDataFactory.ValorAtualizado);
 
         // Assert
         item.Descricao.Should().Be(PecaInsumoCatalogoTestDataFactory.DescricaoAtualizada);
@@ -117,17 +99,13 @@ public class PecaInsumoCatalogoTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Dado_DescricaoInvalida_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveLancarDomainException(
-        string descricao)
+    public void Dado_DescricaoInvalida_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveLancarDomainException(string descricao)
     {
         // Arrange
         var item = PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao();
 
         // Act
-        var acao = () => item.Atualizar(
-            descricao,
-            PecaInsumoCatalogoTestDataFactory.TipoAtualizado,
-            PecaInsumoCatalogoTestDataFactory.ValorAtualizado);
+        var acao = () => item.Atualizar(descricao, PecaInsumoCatalogoTestDataFactory.TipoAtualizado, PecaInsumoCatalogoTestDataFactory.ValorAtualizado);
 
         // Assert
         acao.Should()
@@ -142,10 +120,7 @@ public class PecaInsumoCatalogoTests
         var item = PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao();
 
         // Act
-        var acao = () => item.Atualizar(
-            PecaInsumoCatalogoTestDataFactory.DescricaoAtualizada,
-            (TipoPecaInsumo)99,
-            PecaInsumoCatalogoTestDataFactory.ValorAtualizado);
+        var acao = () => item.Atualizar(PecaInsumoCatalogoTestDataFactory.DescricaoAtualizada, (TipoPecaInsumo)99, PecaInsumoCatalogoTestDataFactory.ValorAtualizado);
 
         // Assert
         acao.Should()
@@ -156,17 +131,13 @@ public class PecaInsumoCatalogoTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Dado_ValorInvalido_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveLancarDomainException(
-        decimal valor)
+    public void Dado_ValorInvalido_Quando_AtualizarPecaInsumoCatalogo_Entao_DeveLancarDomainException(decimal valor)
     {
         // Arrange
         var item = PecaInsumoCatalogoTestDataFactory.CriarPecaInsumoCatalogoPadrao();
 
         // Act
-        var acao = () => item.Atualizar(
-            PecaInsumoCatalogoTestDataFactory.DescricaoAtualizada,
-            PecaInsumoCatalogoTestDataFactory.TipoAtualizado,
-            valor);
+        var acao = () => item.Atualizar(PecaInsumoCatalogoTestDataFactory.DescricaoAtualizada, PecaInsumoCatalogoTestDataFactory.TipoAtualizado, valor);
 
         // Assert
         acao.Should()

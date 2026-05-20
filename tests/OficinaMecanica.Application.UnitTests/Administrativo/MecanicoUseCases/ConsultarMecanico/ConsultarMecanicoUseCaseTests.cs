@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using OficinaMecanica.Application.Administrativo.MecanicoUseCases.ConsultarMecanico;
 using OficinaMecanica.Application.Common;
@@ -34,11 +34,7 @@ public class ConsultarMecanicoUseCaseTests
         resultado.Valor.Nome.Should().Be(MecanicoTestDataFactory.NomePadrao);
         resultado.Valor.Funcional.Should().Be(MecanicoTestDataFactory.FuncionalPadrao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.MecanicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.MecanicoId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -60,11 +56,7 @@ public class ConsultarMecanicoUseCaseTests
         resultado.Erro!.Mensagem.Should().Be(MecanicoErrorMessages.MecanicoNaoEncontrado);
         resultado.Erro.Tipo.Should().Be(TipoErro.NaoEncontrado);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                request.MecanicoId,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        repository.Verify(repo => repo.ObterPorIdAsync(request.MecanicoId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -86,11 +78,7 @@ public class ConsultarMecanicoUseCaseTests
         resultado.Erro!.Mensagem.Should().NotBeNullOrWhiteSpace();
         resultado.Erro.Tipo.Should().Be(TipoErro.Validacao);
 
-        repository.Verify(
-            repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        repository.Verify(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Mock<IMecanicoRepository> CriarRepository(Mecanico? mecanico)
@@ -98,9 +86,7 @@ public class ConsultarMecanicoUseCaseTests
         var repository = new Mock<IMecanicoRepository>();
 
         repository
-            .Setup(repo => repo.ObterPorIdAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mecanico);
 
         return repository;
@@ -108,9 +94,6 @@ public class ConsultarMecanicoUseCaseTests
 
     private static ConsultarMecanicoUseCase CriarUseCase(Mock<IMecanicoRepository> repository)
     {
-        return new ConsultarMecanicoUseCase(
-            repository.Object,
-            new ConsultarMecanicoValidator(),
-            MapperFactory.Criar());
+        return new ConsultarMecanicoUseCase(repository.Object, new ConsultarMecanicoValidator(), MapperFactory.Criar());
     }
 }
