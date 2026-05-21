@@ -11,7 +11,12 @@ public static class ApiApplicationBuilderExtensions
         app.UseSecurityHeaders();
         app.UseMiddleware<GlobalExceptionMiddleware>();
         app.UseSwagger();
-        app.UseSwaggerUI();
+
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Oficina Mecânica API v1");
+            options.EnablePersistAuthorization();
+        });
 
         app.UseHttpsRedirection();
         app.UseAuthentication();
