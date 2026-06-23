@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oficina-api
+  namespace: oficina
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oficina-api
+  template:
+    metadata:
+      labels:
+        app: oficina-api
+    spec:
+      containers:
+        - name: oficina-api
+          image: gbsousadev/oficina-api:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: Jwt__Secret
+              value: "oficina-mecanica-jwt-secret-local-2026"
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: Database__ApplyMigrationsOnStartup
+              value: "true"
+            - name: Database__SeedDemoData
+              value: "true"
+            - name: Jwt__Secret
+              value: "oficina-mecanica-jwt-secret-local-2026"
+            - name: ConnectionStrings__DefaultConnection
+              value: "Server=sqlserver,1433;Database=OficinaMecanicaDb;User Id=sa;Password=OficinaMecanicaDbLocal@2026;TrustServerCertificate=True;"
