@@ -108,7 +108,7 @@ A ideia principal é manter o domínio protegido de detalhes externos, como HTTP
 | Validacao e mapeamento | FluentValidation e AutoMapper |
 | Testes automatizados | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
 | Qualidade e evidencias | SonarQube, OWASP ZAP e `dotnet format` |
-| Execucao local | Docker, Docker Compose, Kubernetes (Docker Desktop), Metrics Server, Horizontal Pod Autoscaler (HPA) e .NET SDK |
+| Execucao local | Docker, Docker Compose, Kubernetes (Docker Desktop), NGINX Ingress Controller, Metrics Server, Horizontal Pod Autoscaler (HPA) e .NET SDK |
 
 ---
 
@@ -242,6 +242,36 @@ kubectl get svc -n oficina
 kubectl get pvc -n oficina
 kubectl get hpa -n oficina
 ```
+
+### Acesso via Ingress
+
+Após aplicar os manifestos Kubernetes, a API também pode ser acessada através do NGINX Ingress Controller.
+
+Aplicação do manifesto:
+
+```bash
+kubectl apply -f k8s/api-ingress.yaml
+```
+
+Validação em ambiente local:
+
+```bash
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8081:80
+```
+
+Em outro terminal:
+
+```powershell
+Invoke-WebRequest -Headers @{Host="oficina.local"} http://localhost:8081
+```
+
+Resultado esperado:
+
+```text
+StatusCode : 200
+```
+
+Esse procedimento confirma que o NGINX Ingress Controller está roteando corretamente as requisições para a API.
 
 > **Observação:** durante o desenvolvimento com Docker Desktop pode ser necessário configurar o Metrics Server com o parâmetro `--kubelet-insecure-tls`, devido às características dos certificados TLS do ambiente local.
 
