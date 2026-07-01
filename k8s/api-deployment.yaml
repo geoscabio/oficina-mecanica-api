@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oficina-api
+  namespace: oficina
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: oficina-api
+
+  template:
+    metadata:
+      labels:
+        app: oficina-api
+
+    spec:
+      containers:
+        - name: oficina-api
+          image: gbsousadev/oficina-api:1.0
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          envFrom:
+            - configMapRef:
+                name: oficina-api-config
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: Jwt__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: oficina-api-secret
+                  key: Jwt__Secret
+
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: oficina-api-secret
+                  key: ConnectionStrings__DefaultConnection
