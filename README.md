@@ -108,7 +108,7 @@ A ideia principal é manter o domínio protegido de detalhes externos, como HTTP
 | Validacao e mapeamento | FluentValidation e AutoMapper |
 | Testes automatizados | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
 | Qualidade e evidencias | SonarQube, OWASP ZAP e `dotnet format` |
-| Execucao local | Docker, Docker Compose, Kubernetes (Docker Desktop), Metrics Server, Horizontal Pod Autoscaler (HPA) e .NET SDK |
+| Execucao local | Docker, Docker Compose e .NET SDK |
 
 ---
 
@@ -120,17 +120,7 @@ A ideia principal é manter o domínio protegido de detalhes externos, como HTTP
 ├── docker-compose.yml
 ├── OficinaMecanica.sln
 ├── README.md
-├── k8s
-│   ├── api-configmap.yaml
-│   ├── api-deployment.yaml
-│   ├── api-hpa.yaml
-│   ├── api-secret.yaml
-│   ├── namespace.yaml
-│   ├── sqlserver-deployment.yaml
-│   ├── sqlserver-pvc.yaml
-│   ├── sqlserver-secret.yaml
-│   ├── sqlserver-service.yaml
-└── src
+├── src
 │   ├── OficinaMecanica.API
 │   ├── OficinaMecanica.Application
 │   ├── OficinaMecanica.Domain
@@ -204,46 +194,6 @@ Ao iniciar, a aplicação:
 | Parar containers sem apagar o banco | `docker compose down` |
 | Parar containers e apagar o volume do banco | `docker compose down -v` |
 | Subir novamente do zero | repetir o comando de subida |
-
----
-
-## ☸️ Execução com Kubernetes
-
-Além da execução via Docker Compose, o projeto também pode ser executado utilizando o Kubernetes do Docker Desktop por meio dos manifestos disponíveis na pasta `k8s`.
-
-### Recursos implementados
-
-- Namespace dedicado para a aplicação.
-- Deployment da API.
-- Deployment do SQL Server.
-- Services para comunicação entre os Pods.
-- ConfigMap para configurações da aplicação.
-- Secrets para informações sensíveis.
-- PersistentVolumeClaim para persistência dos dados do SQL Server.
-- Horizontal Pod Autoscaler (HPA) baseado em utilização de CPU.
-
-### Pré-requisitos
-
-- Docker Desktop com Kubernetes habilitado.
-- `kubectl` configurado para acessar o cluster local.
-- Metrics Server instalado.
-
-### Aplicação dos manifestos
-
-```bash
-kubectl apply -f k8s/
-```
-
-### Validação
-
-```bash
-kubectl get pods -n oficina
-kubectl get svc -n oficina
-kubectl get pvc -n oficina
-kubectl get hpa -n oficina
-```
-
-> **Observação:** durante o desenvolvimento com Docker Desktop pode ser necessário configurar o Metrics Server com o parâmetro `--kubelet-insecure-tls`, devido às características dos certificados TLS do ambiente local.
 
 ---
 
@@ -407,8 +357,6 @@ Além dos testes automatizados, o projeto foi validado com evidências de cobert
 
 Os relatórios gerados serão enviados junto ao PDF de entrega exigido no Tech Challenge.
 
-Também foi validado o funcionamento do Horizontal Pod Autoscaler (HPA), comprovando o escalonamento automático da API durante testes de carga em ambiente Kubernetes local.
-
 ---
 
 ## 🧱 Banco de dados e seed
@@ -422,8 +370,6 @@ A aplicação usa **EF Core** com **SQL Server 2022**. A versão validada no Doc
 | `Database:SeedDemoData` | Carrega dados de demonstração |
 
 Quando `Database:SeedDemoData` está habilitado, a aplicação carrega dados de demonstração para facilitar a avaliação local.
-
-Na execução via Kubernetes, o SQL Server utiliza um `PersistentVolumeClaim` para garantir a persistência dos dados. Em um volume novo, a aplicação aplica automaticamente as migrations e cria o banco `OficinaMecanicaDb` durante a inicialização.
 
 ---
 
