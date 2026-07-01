@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: oficina-api
+  namespace: oficina
+
+spec:
+  ingressClassName: nginx
+
+  rules:
+    - host: oficina.local
+
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+
+            backend:
+              service:
+                name: oficina-api
+
+                port:
+                  number: 8080
