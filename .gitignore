@@ -14,3 +14,13 @@ docs/
 
 Contexto para IA.zip
 _contexto_para_ia_extracted/
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
