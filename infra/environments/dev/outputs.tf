@@ -1,0 +1,1 @@
+# Outputs serão adicionados conforme novos recursos forem sendo criados.
