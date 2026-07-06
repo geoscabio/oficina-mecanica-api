@@ -5,8 +5,8 @@ module "networking" {
   cidr_block = "10.0.0.0/16"
 
   availability_zones = [
-    "sa-east-1a",
-    "sa-east-1b"
+    "us-east-1a",
+    "us-east-1b"
   ]
 
   public_subnet_cidrs = [
