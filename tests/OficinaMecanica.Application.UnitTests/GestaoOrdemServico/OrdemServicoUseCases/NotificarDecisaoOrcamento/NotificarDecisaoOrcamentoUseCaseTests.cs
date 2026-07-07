@@ -50,7 +50,7 @@ public class NotificarDecisaoOrcamentoUseCaseTests
     }
 
     [Fact]
-    public async Task Dado_OrdemServicoAguardandoAprovacaoComPecaReservada_Quando_NotificarRecusa_Entao_DeveCancelarComMotivoOrcamentoRecusadoEEstornarEstoque()
+    public async Task Dado_OrdemServicoAguardandoAprovacaoComPecaReservada_Quando_NotificarRecusa_Entao_DeveCancelarComMotivoReprovacaoOrcamentoEEstornarEstoque()
     {
         // Arrange
         var pecaInsumoCatalogoId = Guid.NewGuid();
@@ -70,7 +70,7 @@ public class NotificarDecisaoOrcamentoUseCaseTests
         resultado.Valor.Should().NotBeNull();
         resultado.Valor!.Status.Should().Be(OrdemServicoTestDataFactory.StatusCancelada);
 
-        ordemServico.MotivoCancelamento.Should().Be(MotivoCancelamentoOrdemServico.OrcamentoRecusado);
+        ordemServico.MotivoCancelamento.Should().Be(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
         estoque.ObterItem(pecaInsumoCatalogoId).QuantidadeReservada.Should().Be(0);
         estoque.ObterItem(pecaInsumoCatalogoId).QuantidadeDisponivel.Should().Be(10);
 
@@ -82,7 +82,7 @@ public class NotificarDecisaoOrcamentoUseCaseTests
                 It.Is<OrdemServico>(ordemServicoAtualizada =>
                     ordemServicoAtualizada.Id == ordemServico.Id
                     && ordemServicoAtualizada.Status.ToString() == OrdemServicoTestDataFactory.StatusCancelada
-                    && ordemServicoAtualizada.MotivoCancelamento == MotivoCancelamentoOrdemServico.OrcamentoRecusado),
+                    && ordemServicoAtualizada.MotivoCancelamento == MotivoCancelamentoOrdemServico.ReprovacaoOrcamento),
                 It.IsAny<CancellationToken>()),
             Times.Once);
 

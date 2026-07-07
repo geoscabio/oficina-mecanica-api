@@ -24,5 +24,6 @@ public static class JwtSwaggerExtensions
         options.OperationFilter<ApiSuccessResponsesOperationFilter>();
         options.OperationFilter<ApiErrorResponsesOperationFilter>();
         options.OperationFilter<AuthorizeOperationFilter>();
+        options.OperationFilter<WebhookTokenOperationFilter>();
     }
 }

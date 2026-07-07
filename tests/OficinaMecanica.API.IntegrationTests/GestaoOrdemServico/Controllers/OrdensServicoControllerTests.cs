@@ -5,7 +5,7 @@ using OficinaMecanica.API.IntegrationTests.Administrativo.Builders;
 using OficinaMecanica.API.IntegrationTests.Atendimento.Builders;
 using OficinaMecanica.API.IntegrationTests.Fixtures;
 using OficinaMecanica.API.IntegrationTests.GestaoOrdemServico.Builders;
-using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.NotificarDecisaoOrcamento;
+using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 
 namespace OficinaMecanica.API.IntegrationTests.GestaoOrdemServico.Controllers;
 
@@ -113,6 +113,8 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         var ordemServicoId = await CriarOrdemServicoAguardandoAprovacaoAsync(servicoCatalogoId, clienteId, mecanicoId, "NTF-1001");
         var request = OrdemServicoRequestBuilder.Novo().BuildNotificacaoOrcamento(ordemServicoId, DecisaoOrcamento.Aprovado);
 
+        AutenticarWebhookOrcamento();
+
         var response = await PostJsonAsync($"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/orcamento/notificacoes", request);
 
         ObterGuid(response, "id").Should().Be(ordemServicoId);
@@ -128,6 +130,8 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         var ordemServicoId = await CriarOrdemServicoAguardandoAprovacaoAsync(servicoCatalogoId, clienteId, mecanicoId, "NTF-1002");
         var request = OrdemServicoRequestBuilder.Novo().BuildNotificacaoOrcamento(ordemServicoId, DecisaoOrcamento.Recusado);
 
+        AutenticarWebhookOrcamento();
+
         var response = await PostJsonAsync($"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/orcamento/notificacoes", request);
 
         ObterGuid(response, "id").Should().Be(ordemServicoId);
@@ -142,9 +146,43 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         var ordemServicoId = await CriarOrdemServicoRecebidaAsync(clienteId, mecanicoId, "NTF-1003");
         var request = OrdemServicoRequestBuilder.Novo().BuildNotificacaoOrcamento(ordemServicoId, DecisaoOrcamento.Aprovado);
 
+        AutenticarWebhookOrcamento();
+
         var response = await PostJsonAsync($"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/orcamento/notificacoes", request, HttpStatusCode.UnprocessableEntity);
 
         ObterString(response, "tipo").Should().Be("RegraNegocio");
+    }
+
+    [RequiresDockerFact]
+    public async Task Dado_OrdemServicoExistente_Quando_ConsultarStatusSemAutenticacao_Entao_DeveRetornarStatus()
+    {
+        var clienteId = await CadastrarClienteAsync();
+        var mecanicoId = await CadastrarMecanicoAsync();
+        var ordemServicoId = await CriarOrdemServicoRecebidaAsync(clienteId, mecanicoId, "NTF-1004");
+
+        Client.DefaultRequestHeaders.Authorization = null;
+
+        var response = await GetJsonAsync($"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/consultar-status");
+
+        ObterGuid(response, "ordemServicoId").Should().Be(ordemServicoId);
+        ObterString(response, "status").Should().Be("Recebida");
+    }
+
+    [RequiresDockerFact]
+    public async Task Dado_NotificacaoOrcamentoSemToken_Quando_NotificarDecisao_Entao_DeveRetornarNaoAutorizado()
+    {
+        var clienteId = await CadastrarClienteAsync();
+        var mecanicoId = await CadastrarMecanicoAsync();
+        var servicoCatalogoId = await CadastrarServicoCatalogoAsync();
+        var ordemServicoId = await CriarOrdemServicoAguardandoAprovacaoAsync(servicoCatalogoId, clienteId, mecanicoId, "NTF-1005");
+        var request = OrdemServicoRequestBuilder.Novo().BuildNotificacaoOrcamento(ordemServicoId, DecisaoOrcamento.Aprovado);
+
+        Client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Remove("X-Webhook-Token");
+
+        var response = await PostJsonAsync($"/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/orcamento/notificacoes", request, HttpStatusCode.Unauthorized);
+
+        ObterString(response, "tipo").Should().Be("NaoAutorizado");
     }
 
     private async Task<Guid> CadastrarVeiculoAsync()
@@ -268,6 +306,13 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
             .Single()
             .GetProperty("servicoId")
             .GetGuid();
+    }
+
+    private void AutenticarWebhookOrcamento()
+    {
+        Client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Remove("X-Webhook-Token");
+        Client.DefaultRequestHeaders.Add("X-Webhook-Token", "webhook-orcamento-teste");
     }
 }
 

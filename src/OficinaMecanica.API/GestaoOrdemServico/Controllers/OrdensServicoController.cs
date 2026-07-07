@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OficinaMecanica.API.Extensions.Responses;
+using OficinaMecanica.API.Extensions.Security;
 using OficinaMecanica.Application.Identidade;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AguardarAprovacaoOrcamento;
@@ -46,7 +47,7 @@ public sealed class OrdensServicoController : ControllerBase
     }
 
     [HttpGet("ordens-servico/{ordemServicoId:guid}/consultar-status")]
-    [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanicoCliente)]
+    [AllowAnonymous]
     public async Task<IActionResult> ConsultarStatus([FromServices] ConsultarStatusOrdemServicoUseCase useCase, Guid ordemServicoId, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(new ConsultarStatusOrdemServicoRequest(ordemServicoId), cancellationToken);
@@ -109,7 +110,8 @@ public sealed class OrdensServicoController : ControllerBase
     }
 
     [HttpPost("ordens-servico/{ordemServicoId:guid}/orcamento/notificacoes")]
-    [Authorize(Roles = PerfisAcesso.AdministradorAtendente)]
+    [AllowAnonymous]
+    [WebhookTokenAuthorize]
     public async Task<IActionResult> NotificarDecisaoOrcamento([FromServices] NotificarDecisaoOrcamentoUseCase useCase, Guid ordemServicoId, [FromBody] NotificarDecisaoOrcamentoRequest request, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(request is null ? request! : request with { OrdemServicoId = ordemServicoId }, cancellationToken);

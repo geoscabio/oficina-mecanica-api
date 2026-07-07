@@ -5,6 +5,7 @@ using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Respon
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
 using OficinaMecanica.Domain.GestaoEstoque.Messages;
 using OficinaMecanica.Domain.GestaoOrdemServico.Aggregates;
+using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 
@@ -50,7 +51,7 @@ public sealed class NotificarDecisaoOrcamentoUseCase
 
     private async Task<Result<OrdemServicoResponse>> AprovarOrcamentoAsync(OrdemServico ordemServico, CancellationToken cancellationToken)
     {
-        ordemServico.IniciarExecucao();
+        ordemServico.NotificarDecisaoOrcamento(DecisaoOrcamento.Aprovado);
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
 
@@ -69,7 +70,7 @@ public sealed class NotificarDecisaoOrcamentoUseCase
             return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
-        ordemServico.RecusarOrcamento();
+        ordemServico.NotificarDecisaoOrcamento(DecisaoOrcamento.Recusado);
 
         if (deveEstornarEstoque)
         {
