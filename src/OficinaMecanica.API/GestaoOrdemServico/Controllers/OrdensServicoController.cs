@@ -54,18 +54,18 @@ public sealed class OrdensServicoController : ControllerBase
     }
 
     [HttpGet("ordens-servico/listar")]
-    [HttpGet("ordens-servico/listar-total")]
+    [HttpGet("ordens-servico/listar-abertas")]
     [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanico)]
-    public async Task<IActionResult> Listar([FromServices] ListarOrdensServicoUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Listar([FromServices] ListarOrdensServicoAbertasUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
     {
         var result = await useCase.ExecuteAsync(new ListarOrdensServicoRequest(pagina, tamanhoPagina), cancellationToken);
 
         return this.ToActionResult(result);
     }
 
-    [HttpGet("ordens-servico/listar-abertas")]
+    [HttpGet("ordens-servico/listar-historico")]
     [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanico)]
-    public async Task<IActionResult> ListarAbertas([FromServices] ListarOrdensServicoAbertasUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ListarHistorico([FromServices] ListarOrdensServicoUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
     {
         var result = await useCase.ExecuteAsync(new ListarOrdensServicoRequest(pagina, tamanhoPagina), cancellationToken);
 

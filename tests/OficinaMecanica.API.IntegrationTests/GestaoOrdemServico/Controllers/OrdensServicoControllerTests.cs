@@ -52,7 +52,7 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
     }
 
     [RequiresDockerFact]
-    public async Task Dado_OrdensServicoComStatusDiversos_Quando_ListarAbertasETotal_Entao_DeveSepararFilaEHistorico()
+    public async Task Dado_OrdensServicoComStatusDiversos_Quando_Listar_Entao_DeveRetornarFilaOficialEHistoricoSeparado()
     {
         // Arrange
         var clienteId = await CadastrarClienteAsync();
@@ -73,29 +73,34 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         await CriarOrdemServicoCanceladaAsync(clienteId, mecanicoId, "LST-1008");
 
         // Act
+        var ordens = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar?tamanhoPagina=10");
         var ordensAbertas = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar-abertas?tamanhoPagina=10");
-        var ordensTotais = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar-total?tamanhoPagina=10");
+        var ordensHistorico = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar-historico?tamanhoPagina=10");
+        var itens = ordens.GetProperty("itens").EnumerateArray().ToArray();
         var itensAbertos = ordensAbertas.GetProperty("itens").EnumerateArray().ToArray();
-        var itensTotais = ordensTotais.GetProperty("itens").EnumerateArray().ToArray();
+        var itensHistorico = ordensHistorico.GetProperty("itens").EnumerateArray().ToArray();
 
         // Assert
-        ordensAbertas.GetProperty("totalItens").GetInt32().Should().Be(5);
-        itensAbertos.Select(item => ObterString(item, "status")).Should().Equal(
+        ordens.GetProperty("totalItens").GetInt32().Should().Be(5);
+        itens.Select(item => ObterString(item, "status")).Should().Equal(
             "EmExecucao",
             "AguardandoAprovacao",
             "EmDiagnostico",
             "Recebida",
             "Recebida");
 
-        itensAbertos.Select(item => ObterGuid(item, "id")).Should().Equal(
+        itens.Select(item => ObterGuid(item, "id")).Should().Equal(
             ordemEmExecucaoId,
             ordemAguardandoAprovacaoId,
             ordemEmDiagnosticoId,
             ordemRecebidaAntigaId,
             ordemRecebidaNovaId);
 
-        ordensTotais.GetProperty("totalItens").GetInt32().Should().Be(8);
-        itensTotais.Select(item => ObterString(item, "status")).Should().Contain(new[]
+        ordensAbertas.GetProperty("totalItens").GetInt32().Should().Be(5);
+        itensAbertos.Select(item => ObterGuid(item, "id")).Should().Equal(itens.Select(item => ObterGuid(item, "id")));
+
+        ordensHistorico.GetProperty("totalItens").GetInt32().Should().Be(8);
+        itensHistorico.Select(item => ObterString(item, "status")).Should().Contain(new[]
         {
             "Finalizada",
             "Entregue",
