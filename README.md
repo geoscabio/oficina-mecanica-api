@@ -363,6 +363,49 @@ A consulta de status da OS e publica por ID para representar o acompanhamento do
 
 `GET /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/consultar-status`
 
+### Contrato oficial de abertura da OS
+
+O endpoint oficial da Fase 2 para abrir Ordem de Servico permanece:
+
+`POST /api/v1/gestao-ordem-servico/ordens-servico/cadastrar`
+
+O projeto trabalha com cadastros previamente identificados por ID. Por isso, o payload de abertura recebe `clienteId` ou `documentoCliente`, `veiculoId`, `mecanicoId`, lista de servicos solicitados por ID e lista de pecas/insumos por ID e quantidade.
+
+Quando servicos ou pecas/insumos ainda nao se aplicarem na abertura, as listas devem ser enviadas vazias (`[]`). Quando forem enviadas, a OS ja registra esses itens, calcula o orcamento inicial e reserva estoque para pecas/insumos.
+
+Exemplo:
+
+```json
+{
+  "clienteId": "00000000-0000-0000-0000-000000000000",
+  "documentoCliente": null,
+  "veiculoId": "00000000-0000-0000-0000-000000000000",
+  "mecanicoId": "00000000-0000-0000-0000-000000000000",
+  "servicosCatalogoIds": [],
+  "pecasInsumos": []
+}
+```
+
+Exemplo com orcamento inicial:
+
+```json
+{
+  "clienteId": "00000000-0000-0000-0000-000000000000",
+  "documentoCliente": null,
+  "veiculoId": "00000000-0000-0000-0000-000000000000",
+  "mecanicoId": "00000000-0000-0000-0000-000000000000",
+  "servicosCatalogoIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "pecasInsumos": [
+    {
+      "pecaInsumoCatalogoId": "00000000-0000-0000-0000-000000000000",
+      "quantidade": 1
+    }
+  ]
+}
+```
+
 ---
 
 ## 🧪 Como testar a API

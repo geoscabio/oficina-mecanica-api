@@ -4,6 +4,7 @@ using FluentAssertions;
 using OficinaMecanica.API.IntegrationTests.Administrativo.Builders;
 using OficinaMecanica.API.IntegrationTests.Atendimento.Builders;
 using OficinaMecanica.API.IntegrationTests.Fixtures;
+using OficinaMecanica.API.IntegrationTests.GestaoEstoque.Builders;
 using OficinaMecanica.API.IntegrationTests.GestaoOrdemServico.Builders;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 
@@ -27,9 +28,11 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
     public async Task Dado_DadosValidos_Quando_AbrirConsultarListarECancelar_Entao_DevePersistirOrdemServico()
     {
         // Arrange
-        var veiculoId = await CadastrarVeiculoAsync();
+        var clienteId = await CadastrarClienteAsync();
+        var veiculoId = await CadastrarVeiculoAsync(clienteId, "CAD-1001");
         var mecanicoId = await CadastrarMecanicoAsync();
         var request = OrdemServicoRequestBuilder.Novo()
+            .ComClienteId(clienteId)
             .ComVeiculoId(veiculoId)
             .ComMecanicoId(mecanicoId)
             .BuildAbertura();
@@ -50,6 +53,37 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         ObterString(status, "status").Should().Be("Recebida");
         ListagemDevePossuirItens(ordens);
         ObterString(ordemCancelada, "status").Should().Be("Cancelada");
+    }
+
+    [RequiresDockerFact]
+    public async Task Dado_PayloadOficialComServicosEPecas_Quando_Abrir_Entao_DeveRegistrarOrcamentoInicial()
+    {
+        // Arrange
+        var clienteId = await CadastrarClienteAsync();
+        var veiculoId = await CadastrarVeiculoAsync(clienteId, "ABR-2001");
+        var mecanicoId = await CadastrarMecanicoAsync();
+        var servicoCatalogoId = await CadastrarServicoCatalogoAsync();
+        var pecaInsumoCatalogoId = await CadastrarPecaInsumoCatalogoAsync();
+
+        await RegistrarEntradaEstoqueAsync(pecaInsumoCatalogoId);
+
+        var request = OrdemServicoRequestBuilder.Novo()
+            .ComClienteId(clienteId)
+            .ComVeiculoId(veiculoId)
+            .ComMecanicoId(mecanicoId)
+            .ComServicoCatalogoId(servicoCatalogoId)
+            .ComPecaInsumo(pecaInsumoCatalogoId, quantidade: 1)
+            .BuildAbertura();
+
+        // Act
+        var response = await PostJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/cadastrar", request, HttpStatusCode.Created);
+
+        // Assert
+        ObterGuid(response, "id").Should().NotBeEmpty();
+        ObterString(response, "status").Should().Be("Recebida");
+        response.GetProperty("valorTotal").GetDecimal().Should().BeGreaterThan(0);
+        response.GetProperty("servicos").EnumerateArray().Should().ContainSingle();
+        response.GetProperty("pecasInsumos").EnumerateArray().Should().ContainSingle();
     }
 
     [RequiresDockerFact]
@@ -185,14 +219,6 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         ObterString(response, "tipo").Should().Be("NaoAutorizado");
     }
 
-    private async Task<Guid> CadastrarVeiculoAsync()
-    {
-        var clienteId = await CadastrarClienteAsync();
-        var response = await PostJsonAsync("/api/v1/atendimento/veiculos/cadastrar", VeiculoRequestBuilder.Novo().ComClienteId(clienteId).BuildCadastro(), HttpStatusCode.Created);
-
-        return ObterGuid(response, "id");
-    }
-
     private async Task<Guid> CadastrarClienteAsync()
     {
         var response = await PostJsonAsync("/api/v1/atendimento/clientes/cadastrar", ClienteRequestBuilder.Novo().BuildCadastro(), HttpStatusCode.Created);
@@ -221,10 +247,23 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         return ObterGuid(response, "id");
     }
 
+    private async Task<Guid> CadastrarPecaInsumoCatalogoAsync()
+    {
+        var response = await PostJsonAsync("/api/v1/administrativo/pecas-insumos-catalogo/cadastrar", PecaInsumoCatalogoRequestBuilder.Novo().BuildCadastro(), HttpStatusCode.Created);
+
+        return ObterGuid(response, "id");
+    }
+
+    private async Task RegistrarEntradaEstoqueAsync(Guid pecaInsumoCatalogoId)
+    {
+        await PostJsonAsync("/api/v1/gestao-estoque/estoque/registrar-entrada", EstoqueRequestBuilder.Novo().ComPecaInsumoCatalogoId(pecaInsumoCatalogoId).BuildRegistroEntrada(), HttpStatusCode.Created);
+    }
+
     private async Task<Guid> CriarOrdemServicoRecebidaAsync(Guid clienteId, Guid mecanicoId, string placa)
     {
         var veiculoId = await CadastrarVeiculoAsync(clienteId, placa);
         var request = OrdemServicoRequestBuilder.Novo()
+            .ComClienteId(clienteId)
             .ComVeiculoId(veiculoId)
             .ComMecanicoId(mecanicoId)
             .BuildAbertura();
