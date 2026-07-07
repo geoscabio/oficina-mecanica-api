@@ -258,6 +258,27 @@ infra/modules/registry
 
 Sua utilização será integrada ao pipeline de CI/CD e ao provisionamento do cluster Amazon EKS nas próximas etapas do projeto.
 
+### Banco de dados gerenciado (Amazon RDS)
+
+A infraestrutura Terraform também provisiona uma instância gerenciada do Amazon Relational Database Service (RDS), utilizada como banco de dados da aplicação em ambiente AWS.
+
+A configuração implementada contempla:
+
+- Engine **Amazon RDS for SQL Server Express**;
+- Implantação em sub-redes privadas da VPC por meio de um **DB Subnet Group**;
+- Security Group dedicado permitindo acesso somente pela porta **1433** dentro da rede privada da aplicação;
+- Banco não exposto à Internet (`publicly_accessible = false`);
+- Configuração preparada para ambientes de desenvolvimento e laboratório, com `skip_final_snapshot = true` e `backup_retention_period = 0`;
+- Aplicação das tags compartilhadas da infraestrutura para padronização dos recursos provisionados.
+
+O banco é provisionado pelo módulo Terraform `database`, localizado em:
+
+```text
+infra/modules/database
+```
+
+A aplicação utilizará o endpoint gerado pelo Amazon RDS para estabelecer a conexão com o banco de dados durante a execução no cluster Amazon EKS.
+
 ### Aplicação dos manifestos
 
 ```bash
