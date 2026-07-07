@@ -53,6 +53,7 @@ public static class DependencyInjection
         services.AddScoped<EntregarOrdemServicoUseCase>();
         services.AddScoped<DetalharOrdemServicoUseCase>();
         services.AddScoped<ListarOrdensServicoUseCase>();
+        services.AddScoped<ListarOrdensServicoAbertasUseCase>();
         services.AddScoped<ConsultarStatusOrdemServicoUseCase>();
         services.AddScoped<ConsultarTempoMedioExecucaoServicoUseCase>();
         services.AddScoped<ListarTempoMedioExecucaoServicosUseCase>();

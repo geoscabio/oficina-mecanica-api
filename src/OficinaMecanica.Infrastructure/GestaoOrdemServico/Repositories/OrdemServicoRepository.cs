@@ -9,6 +9,14 @@ namespace OficinaMecanica.Infrastructure.GestaoOrdemServico.Repositories;
 
 public sealed class OrdemServicoRepository : IOrdemServicoRepository
 {
+    private static readonly StatusOrdemServico[] StatusAbertos =
+    [
+        StatusOrdemServico.EmExecucao,
+        StatusOrdemServico.AguardandoAprovacao,
+        StatusOrdemServico.EmDiagnostico,
+        StatusOrdemServico.Recebida
+    ];
+
     private readonly OficinaMecanicaDbContext _dbContext;
 
     public OrdemServicoRepository(OficinaMecanicaDbContext dbContext)
@@ -48,17 +56,9 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
 
     public async Task<IReadOnlyCollection<OrdemServico>> ListarAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
     {
-        return await ObterOrdensServicoListaveis()
-            .AsNoTracking()
-            .Include(ordemServico => ordemServico.Servicos)
-            .Include(ordemServico => ordemServico.PecasInsumos)
-            .AsSplitQuery()
-            .OrderBy(ordemServico => ordemServico.Status == StatusOrdemServico.EmExecucao ? 0
-                : ordemServico.Status == StatusOrdemServico.AguardandoAprovacao ? 1
-                : ordemServico.Status == StatusOrdemServico.EmDiagnostico ? 2
-                : 3)
-            .ThenBy(ordemServico => ordemServico.DataInicio)
-            .ThenBy(ordemServico => ordemServico.Numero)
+        return await ObterOrdensServicoComDetalhes()
+            .OrderByDescending(ordemServico => ordemServico.DataInicio)
+            .ThenByDescending(ordemServico => ordemServico.Numero)
             .Skip((pagina - 1) * tamanhoPagina)
             .Take(tamanhoPagina)
             .ToArrayAsync(cancellationToken);
@@ -66,7 +66,27 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
 
     public Task<int> ContarAsync(CancellationToken cancellationToken = default)
     {
-        return ObterOrdensServicoListaveis().CountAsync(cancellationToken);
+        return _dbContext.OrdensServico.CountAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<OrdemServico>> ListarAbertasAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
+    {
+        return await ObterOrdensServicoAbertas()
+            .AsNoTracking()
+            .Include(ordemServico => ordemServico.Servicos)
+            .Include(ordemServico => ordemServico.PecasInsumos)
+            .AsSplitQuery()
+            .OrderByDescending(ordemServico => ordemServico.Status)
+            .ThenBy(ordemServico => ordemServico.DataInicio)
+            .ThenBy(ordemServico => ordemServico.Numero)
+            .Skip((pagina - 1) * tamanhoPagina)
+            .Take(tamanhoPagina)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public Task<int> ContarAbertasAsync(CancellationToken cancellationToken = default)
+    {
+        return ObterOrdensServicoAbertas().CountAsync(cancellationToken);
     }
 
     public Task<double?> ObterTempoMedioExecucaoServicoAsync(Guid servicoCatalogoId, CancellationToken cancellationToken = default)
@@ -97,13 +117,19 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
             .ToDictionaryAsync(item => item.ServicoCatalogoId, item => item.TempoMedio!.Value, cancellationToken);
     }
 
-    private IQueryable<OrdemServico> ObterOrdensServicoListaveis()
+    private IQueryable<OrdemServico> ObterOrdensServicoComDetalhes()
     {
         return _dbContext.OrdensServico
-            .Where(ordemServico => ordemServico.Status == StatusOrdemServico.EmExecucao
-                || ordemServico.Status == StatusOrdemServico.AguardandoAprovacao
-                || ordemServico.Status == StatusOrdemServico.EmDiagnostico
-                || ordemServico.Status == StatusOrdemServico.Recebida);
+            .AsNoTracking()
+            .Include(ordemServico => ordemServico.Servicos)
+            .Include(ordemServico => ordemServico.PecasInsumos)
+            .AsSplitQuery();
+    }
+
+    private IQueryable<OrdemServico> ObterOrdensServicoAbertas()
+    {
+        return _dbContext.OrdensServico
+            .Where(ordemServico => StatusAbertos.Contains(ordemServico.Status));
     }
 }
 

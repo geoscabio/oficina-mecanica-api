@@ -52,7 +52,7 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
     }
 
     [RequiresDockerFact]
-    public async Task Dado_OrdensServicoComStatusDiversos_Quando_Listar_Entao_DeveFiltrarEOrdenarPorPrioridade()
+    public async Task Dado_OrdensServicoComStatusDiversos_Quando_ListarAbertasETotal_Entao_DeveSepararFilaEHistorico()
     {
         // Arrange
         var clienteId = await CadastrarClienteAsync();
@@ -73,24 +73,34 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         await CriarOrdemServicoCanceladaAsync(clienteId, mecanicoId, "LST-1008");
 
         // Act
-        var ordens = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar?tamanhoPagina=10");
-        var itens = ordens.GetProperty("itens").EnumerateArray().ToArray();
+        var ordensAbertas = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar-abertas?tamanhoPagina=10");
+        var ordensTotais = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar-total?tamanhoPagina=10");
+        var itensAbertos = ordensAbertas.GetProperty("itens").EnumerateArray().ToArray();
+        var itensTotais = ordensTotais.GetProperty("itens").EnumerateArray().ToArray();
 
         // Assert
-        ordens.GetProperty("totalItens").GetInt32().Should().Be(5);
-        itens.Select(item => ObterString(item, "status")).Should().Equal(
+        ordensAbertas.GetProperty("totalItens").GetInt32().Should().Be(5);
+        itensAbertos.Select(item => ObterString(item, "status")).Should().Equal(
             "EmExecucao",
             "AguardandoAprovacao",
             "EmDiagnostico",
             "Recebida",
             "Recebida");
 
-        itens.Select(item => ObterGuid(item, "id")).Should().Equal(
+        itensAbertos.Select(item => ObterGuid(item, "id")).Should().Equal(
             ordemEmExecucaoId,
             ordemAguardandoAprovacaoId,
             ordemEmDiagnosticoId,
             ordemRecebidaAntigaId,
             ordemRecebidaNovaId);
+
+        ordensTotais.GetProperty("totalItens").GetInt32().Should().Be(8);
+        itensTotais.Select(item => ObterString(item, "status")).Should().Contain(new[]
+        {
+            "Finalizada",
+            "Entregue",
+            "Cancelada"
+        });
     }
 
     private async Task<Guid> CadastrarVeiculoAsync()
