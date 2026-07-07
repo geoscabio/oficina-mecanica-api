@@ -239,6 +239,33 @@ infra/environments/dev/locals.tf
 
 Essas tags são repassadas para todos os módulos por meio da variável `tags`, garantindo padronização na identificação dos recursos provisionados e evitando duplicação de configuração entre os módulos de infraestrutura.
 
+
+
+### Rede privada (Amazon VPC)
+
+A infraestrutura Terraform provisiona uma Virtual Private Cloud (VPC) composta por sub-redes públicas e privadas distribuídas em múltiplas Availability Zones.
+
+Além da conectividade pública por meio do Internet Gateway, a infraestrutura utiliza um NAT Gateway associado a um Elastic IP para fornecer acesso de saída à Internet aos recursos implantados nas sub-redes privadas.
+
+A configuração implementada contempla:
+
+- Virtual Private Cloud (VPC);
+- Internet Gateway para acesso das sub-redes públicas;
+- Duas sub-redes públicas;
+- Duas sub-redes privadas;
+- NAT Gateway associado a um Elastic IP;
+- Route Table pública com rota para o Internet Gateway;
+- Route Table privada com rota padrão (`0.0.0.0/0`) apontando para o NAT Gateway;
+- Aplicação das tags compartilhadas da infraestrutura para padronização dos recursos provisionados.
+
+A utilização do NAT Gateway permite que recursos executados nas sub-redes privadas, como os nós do Amazon EKS e a instância do Amazon RDS, realizem conexões de saída para serviços da AWS e para a Internet sem exposição direta por endereço IP público.
+
+A infraestrutura de rede é provisionada pelo módulo Terraform localizado em:
+
+```text
+infra/modules/networking
+```
+
 ### Registro de imagens (Amazon ECR)
 
 A infraestrutura Terraform cria automaticamente um repositório privado no Amazon Elastic Container Registry (ECR), responsável por armazenar as imagens Docker da aplicação que serão utilizadas durante o provisionamento do ambiente na AWS.
