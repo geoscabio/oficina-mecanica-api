@@ -21,7 +21,7 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
         }
         k8sManifests = softwareSystem "Manifestos Kubernetes" "Deployment, Service, Ingress, HPA, ConfigMap, Secrets, PVC e namespace oficina." "Kubernetes YAML"
         aws = softwareSystem "AWS" "Conta de desenvolvimento com VPC e ECR provisionados por Terraform; EKS e RDS estao planejados nas proximas etapas." "Provedor de Nuvem" {
-            tags "Amazon Web Services - AWS Cloud" "Planned"
+            tags "Amazon Web Services - Cloud" "Amazon Web Services - AWS Cloud" "Planned"
         }
 
         oficina = softwareSystem "Oficina Mecanica API" "Sistema de atendimento, execucao e acompanhamento de ordens de servico para uma oficina mecanica." {
@@ -198,49 +198,49 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
 
         awsDev = deploymentEnvironment "AWS Dev Terraform" {
             deploymentNode "Amazon Web Services" "Conta de desenvolvimento AWS modelada pelo Terraform." "AWS" {
-                tags "Amazon Web Services - AWS Cloud"
+                tags "Amazon Web Services - Cloud" "Amazon Web Services - AWS Cloud"
 
                 deploymentNode "Regiao us-east-1" "Regiao alvo do ambiente dev." "AWS Region" {
                     tags "Amazon Web Services - Region"
 
+                    ecrRepo = infrastructureNode "Amazon ECR oficina-api" "Repositorio privado provisionado com image_tag_mutability IMMUTABLE e scan_on_push." "Amazon ECR" {
+                        tags "Amazon Web Services - Elastic Container Registry"
+                    }
+
                     deploymentNode "VPC oficina-vpc-dev" "CIDR 10.0.0.0/16 com DNS support e hostnames habilitados." "Amazon VPC" {
                         tags "Amazon Web Services - Virtual Private Cloud"
 
-                        publicSubnetA = infrastructureNode "Subnet publica us-east-1a" "CIDR 10.0.1.0/24." "Amazon VPC subnet" {
+                        publicSubnets = infrastructureNode "Subnets publicas" "Subnets us-east-1a/us-east-1b para recursos expostos publicamente." "Amazon VPC subnet" {
                             tags "Amazon Web Services - Public subnet"
                         }
-                        publicSubnetB = infrastructureNode "Subnet publica us-east-1b" "CIDR 10.0.2.0/24." "Amazon VPC subnet" {
-                            tags "Amazon Web Services - Public subnet"
-                        }
-                        privateSubnetA = infrastructureNode "Subnet privada us-east-1a" "CIDR 10.0.11.0/24." "Amazon VPC subnet" {
-                            tags "Amazon Web Services - Private subnet"
-                        }
-                        privateSubnetB = infrastructureNode "Subnet privada us-east-1b" "CIDR 10.0.12.0/24." "Amazon VPC subnet" {
+                        privateSubnets = infrastructureNode "Subnets privadas" "Subnets us-east-1a/us-east-1b para banco e workloads internos." "Amazon VPC subnet" {
                             tags "Amazon Web Services - Private subnet"
                         }
                         publicRouteTable = infrastructureNode "Tabela de rotas publica" "Tabela de rotas publica." "Amazon VPC Route Table" {
-                            -> publicSubnetA "Associa subnet publica" "AWS route table association"
-                            -> publicSubnetB "Associa subnet publica" "AWS route table association"
+                            -> publicSubnets "Associa subnets publicas" "AWS route table association"
                         }
                         privateRouteTable = infrastructureNode "Tabela de rotas privada" "Tabela de rotas privada." "Amazon VPC Route Table" {
-                            -> privateSubnetA "Associa subnet privada" "AWS route table association"
-                            -> privateSubnetB "Associa subnet privada" "AWS route table association"
+                            -> privateSubnets "Associa subnets privadas" "AWS route table association"
                         }
                         internetGateway = infrastructureNode "Internet Gateway" "Gateway de internet conectado a VPC." "Amazon VPC Internet Gateway" {
                             -> publicRouteTable "Fornece rota para Internet" "AWS route"
                         }
-                    }
 
-                    ecrRepo = infrastructureNode "Amazon ECR oficina-api" "Repositorio privado provisionado com image_tag_mutability IMMUTABLE e scan_on_push." "Amazon ECR" {
-                        tags "Amazon Web Services - Elastic Container Registry"
-                    }
-                    rdsPlanned = infrastructureNode "Amazon RDS SQL Server" "Banco gerenciado planejado para substituir SQL Server em container no ambiente AWS." "Amazon RDS" {
-                        tags "Amazon Web Services - RDS" "Planned"
-                    }
-                    eksPlanned = infrastructureNode "Amazon EKS" "Cluster Kubernetes planejado para as proximas etapas." "Amazon EKS" {
-                        tags "Amazon Web Services - Elastic Kubernetes Service" "Planned"
-                        -> ecrRepo "Puxara imagens da API" "OCI image pull"
-                        -> rdsPlanned "Usara banco gerenciado" "TDS"
+                        eksPlanned = deploymentNode "Amazon EKS" "Cluster Kubernetes planejado para hospedar a API nas proximas etapas." "Amazon EKS" {
+                            tags "Amazon Web Services - Elastic Kubernetes Service" "Planned"
+
+                            apiAwsInstance = containerInstance oficina.api
+
+                            -> ecrRepo "Puxa imagem da API" "OCI image pull"
+                        }
+
+                        rdsPlanned = deploymentNode "Amazon RDS SQL Server" "Banco gerenciado planejado para substituir SQL Server em container no ambiente AWS." "Amazon RDS" {
+                            tags "Amazon Web Services - RDS" "Planned"
+
+                            dbAwsInstance = containerInstance oficina.database
+                        }
+
+                        eksPlanned -> rdsPlanned "Usa banco gerenciado" "TDS"
                     }
                 }
             }
@@ -249,7 +249,7 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
     }
 
     views {
-        themes amazon-web-services-2025.07 kubernetes
+        themes amazon-web-services-2025.07 amazon-web-services-2020.04 kubernetes
 
         systemLandscape "SystemLandscape" "Nivel 0 - paisagem de sistemas e plataformas relacionadas." {
             include *
@@ -317,6 +317,7 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
 
         deployment oficina awsDev "DeploymentAwsDev" "Deployment - infraestrutura AWS dev atual e proximos passos planejados." {
             include *
+            autoLayout lr 300 220
         }
 
         styles {
