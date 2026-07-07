@@ -1,4 +1,4 @@
-workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com arquitetura limpa, monolito modular, Kubernetes local e infraestrutura AWS em evolucao." {
+workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com Clean Architecture, monolito modular, Kubernetes local e infraestrutura AWS em evolucao." {
     !identifiers hierarchical
 
     model {
@@ -12,25 +12,25 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
         administrador = person "Administrador" "Mantem cadastros administrativos e apoia a operacao."
 
         canalOrcamento = softwareSystem "Canal externo de orcamento" "Canal externo usado para enviar orcamento ao cliente e notificar aprovacao ou recusa via webhook." "Sistema Externo"
-        github = softwareSystem "GitHub" "Repositorio privado usado para versionamento e revisoes via PR." "GitHub"
-        dockerHub = softwareSystem "Docker Hub" "Registro usado hoje pelos manifestos Kubernetes locais para a imagem gbsousadev/oficina-api:1.0." "Registro de Containers"
+        github = softwareSystem "GitHub" "Repositorio privado usado para versionamento e Pull Requests." "GitHub"
+        dockerHub = softwareSystem "Docker Hub" "Registry usado hoje pelos manifestos Kubernetes locais para a imagem gbsousadev/oficina-api:1.0." "Registro de Containers"
         terraform = softwareSystem "Terraform dev" "Codigo de infraestrutura que provisiona VPC, subnets publicas/privadas, route tables, internet gateway e ECR." "Terraform"
-        dockerImage = softwareSystem "Imagem Docker oficina-api" "Artefato OCI gerado pelo Dockerfile multi-stage da API." "Imagem Docker"
+        dockerImage = softwareSystem "Imagem Docker oficina-api" "Artefato OCI gerado pelo Dockerfile multi-stage da API." "Docker image"
         ecr = softwareSystem "Amazon ECR oficina-api" "Repositorio privado com tags imutaveis e scan on push, provisionado pelo modulo Terraform registry." "Amazon ECR" {
-            tags "Amazon Web Services - Elastic Container Registry" "Registro"
+            tags "Amazon Web Services - Elastic Container Registry" "Registry"
         }
         k8sManifests = softwareSystem "Manifestos Kubernetes" "Deployment, Service, Ingress, HPA, ConfigMap, Secrets, PVC e namespace oficina." "Kubernetes YAML"
         aws = softwareSystem "AWS" "Conta de desenvolvimento com VPC e ECR provisionados por Terraform; EKS e RDS estao planejados nas proximas etapas." "Provedor de Nuvem" {
-            tags "Amazon Web Services - AWS Cloud" "Planejado"
+            tags "Amazon Web Services - AWS Cloud" "Planned"
         }
 
         oficina = softwareSystem "Oficina Mecanica API" "Sistema de atendimento, execucao e acompanhamento de ordens de servico para uma oficina mecanica." {
-            tags "Sistema Principal"
+            tags "Core System"
 
             api = container "OficinaMecanica.API" "Monolito modular ASP.NET Core que expoe endpoints REST, Swagger, autenticacao JWT, webhook de orcamento e inicializacao do banco." "ASP.NET Core Web API / .NET 10" {
                 tags "API"
 
-                controllers = component "Controladores HTTP" "Adaptadores de entrada para Identidade, Atendimento, Administrativo, Gestao de Estoque e Gestao de Ordem de Servico." "Controladores MVC ASP.NET Core" {
+                controllers = component "Controllers HTTP" "Adaptadores de entrada para Identidade, Atendimento, Administrativo, Gestao de Estoque e Gestao de Ordem de Servico." "ASP.NET Core MVC Controllers" {
                     tags "API"
                 }
 
@@ -38,53 +38,53 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
                     tags "API"
                 }
 
-                application = component "Casos de uso da aplicacao" "Orquestra casos de uso, validacoes, mapeamentos e transacoes de aplicacao." "C# / FluentValidation / AutoMapper" {
-                    tags "Aplicacao"
+                application = component "Casos de Uso da Aplicacao" "Orquestra casos de uso, validacoes, mapeamentos e transacoes de aplicacao." "C# / FluentValidation / AutoMapper" {
+                    tags "Application"
                 }
 
-                domain = component "Modelo de dominio" "Contem agregados, entidades, objetos de valor, enums, regras de negocio e contratos de repositorio." "Modelo de dominio C#" {
-                    tags "Dominio"
+                domain = component "Modelo de Dominio" "Contem agregados, entidades, value objects, enums, regras de negocio e contratos de repositories." "C# domain model" {
+                    tags "Domain"
                 }
 
-                infrastructure = component "Adaptadores de infraestrutura" "Implementa repositorios, EF Core, unidade de trabalho, migrations, seed, servicos JWT e usuario demo." "C# / EF Core / SQL Server" {
-                    tags "Infraestrutura"
+                infrastructure = component "Adaptadores de Infraestrutura" "Implementa repositories, EF Core, Unit of Work, migrations, seed, servicos JWT e usuario demo." "C# / EF Core / SQL Server" {
+                    tags "Infrastructure"
                 }
 
                 dbContext = component "OficinaMecanicaDbContext" "Mapeia os agregados e entidades para tabelas SQL Server." "Entity Framework Core DbContext" {
-                    tags "Infraestrutura"
+                    tags "Infrastructure"
                 }
 
                 workOrderController = component "OrdensServicoController" "Endpoint REST do fluxo principal de ordem de servico." "ASP.NET Core Controller" {
-                    tags "Codigo"
+                    tags "Code"
                 }
 
-                openWorkOrderUseCase = component "AbrirOrdemServicoUseCase" "Valida cliente, veiculo, mecanico, catalogos e estoque antes de abrir uma OS." "Caso de uso C#" {
-                    tags "Codigo"
+                openWorkOrderUseCase = component "AbrirOrdemServicoUseCase" "Valida cliente, veiculo, mecanico, catalogos e estoque antes de abrir uma OS." "C# use case" {
+                    tags "Code"
                 }
 
-                budgetDecisionUseCase = component "NotificarDecisaoOrcamentoUseCase" "Processa aprovacao ou recusa de orcamento recebida por webhook tecnico." "Caso de uso C#" {
-                    tags "Codigo"
+                budgetDecisionUseCase = component "NotificarDecisaoOrcamentoUseCase" "Processa aprovacao ou recusa de orcamento recebida por webhook tecnico." "C# use case" {
+                    tags "Code"
                 }
 
-                workOrderAggregate = component "Agregado OrdemServico" "Controla transicoes de estado, orcamento, execucao, finalizacao, entrega e cancelamento." "Agregado C#" {
-                    tags "Codigo" "Dominio"
+                workOrderAggregate = component "OrdemServico aggregate" "Controla transicoes de estado, orcamento, execucao, finalizacao, entrega e cancelamento." "C# aggregate" {
+                    tags "Code" "Domain"
                 }
 
-                stockAggregate = component "Agregado Estoque" "Controla disponibilidade, reserva, baixa, estorno e entrada de pecas/insumos." "Agregado C#" {
-                    tags "Codigo" "Dominio"
+                stockAggregate = component "Estoque aggregate" "Controla disponibilidade, reserva, baixa, estorno e entrada de pecas/insumos." "C# aggregate" {
+                    tags "Code" "Domain"
                 }
 
-                repositories = component "Implementacoes de repositorio" "Implementa repositorios dos contextos Administrativo, Atendimento, Estoque e Ordem de Servico." "Repositorios EF Core" {
-                    tags "Codigo" "Infraestrutura"
+                repositories = component "Implementacoes de Repositorio" "Implementa repositories dos contextos Administrativo, Atendimento, Estoque e Ordem de Servico." "EF Core repositories" {
+                    tags "Code" "Infrastructure"
                 }
 
-                unitOfWork = component "Unidade de trabalho" "Confirma transacoes de persistencia envolvendo OS e estoque." "Fronteira transacional EF Core" {
-                    tags "Codigo" "Infraestrutura"
+                unitOfWork = component "UnitOfWork" "Confirma transacoes de persistencia envolvendo OS e estoque." "EF Core transaction boundary" {
+                    tags "Code" "Infrastructure"
                 }
             }
 
             database = container "OficinaMecanicaDb" "Banco relacional da aplicacao, criado localmente por Docker Compose/Kubernetes e acessado via EF Core." "SQL Server 2022" {
-                tags "Banco de Dados"
+                tags "Database"
             }
         }
 
@@ -98,32 +98,32 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
         github -> terraform "Versiona codigo de infraestrutura" "Git"
         github -> k8sManifests "Versiona manifestos" "Git"
         terraform -> aws "Provisiona recursos dev" "Terraform AWS provider"
-        dockerImage -> dockerHub "Imagem publicada para uso local atual" "Publicacao Docker"
-        dockerImage -> ecr "Imagem planejada para pipeline AWS" "Publicacao Docker"
-        k8sManifests -> dockerHub "Referencia imagem atual gbsousadev/oficina-api:1.0" "Pull de imagem"
+        dockerImage -> dockerHub "Imagem publicada para uso local atual" "Docker push"
+        dockerImage -> ecr "Imagem planejada para pipeline AWS" "Docker push"
+        k8sManifests -> dockerHub "Referencia imagem atual gbsousadev/oficina-api:1.0" "imagePull"
 
         oficina.api -> oficina.database "Le e grava dados operacionais" "EF Core / TDS"
         oficina.api.controllers -> oficina.api.security "Aplica autenticacao, autorizacao, Swagger e tratamento de erros" "ASP.NET Core pipeline"
-        oficina.api.controllers -> oficina.api.application "Invoca casos de uso" "Chamadas C#"
-        oficina.api.application -> oficina.api.domain "Executa regras de negocio" "Chamadas C#"
-        oficina.api.application -> oficina.api.infrastructure "Usa repositorios e unidade de trabalho via DI" "Interfaces C# / DI"
+        oficina.api.controllers -> oficina.api.application "Invoca use cases" "C# method calls"
+        oficina.api.application -> oficina.api.domain "Executa regras de negocio" "C# method calls"
+        oficina.api.application -> oficina.api.infrastructure "Usa repositories e Unit of Work via DI" "C# interfaces / DI"
         oficina.api.infrastructure -> oficina.api.dbContext "Executa consultas e persistencia" "Entity Framework Core"
         oficina.api.dbContext -> oficina.database "Mapeia entidades e aplica migrations" "EF Core / TDS"
-        oficina.api.infrastructure -> oficina.api.domain "Materializa agregados e aplica contratos do dominio" "Referencias C#"
+        oficina.api.infrastructure -> oficina.api.domain "Materializa agregados e aplica contratos do dominio" "C# references"
 
-        oficina.api.workOrderController -> oficina.api.openWorkOrderUseCase "Chama abertura de OS" "Chamada C#"
-        oficina.api.workOrderController -> oficina.api.budgetDecisionUseCase "Chama notificacao de decisao de orcamento" "Chamada C#"
+        oficina.api.workOrderController -> oficina.api.openWorkOrderUseCase "Chama abertura de OS" "C# method call"
+        oficina.api.workOrderController -> oficina.api.budgetDecisionUseCase "Chama notificacao de decisao de orcamento" "C# method call"
         atendente -> oficina.api.workOrderController "Abre ordens de servico" "HTTPS/JSON"
         canalOrcamento -> oficina.api.workOrderController "Notifica decisao de orcamento" "Webhook HTTP"
         oficina.api.workOrderController -> oficina.api.security "Valida JWT, perfis e token tecnico" "ASP.NET Core filters/middleware"
-        oficina.api.openWorkOrderUseCase -> oficina.api.workOrderAggregate "Cria OS e calcula orcamento" "Chamadas de dominio C#"
-        oficina.api.openWorkOrderUseCase -> oficina.api.stockAggregate "Verifica e reserva pecas/insumos" "Chamadas de dominio C#"
-        oficina.api.budgetDecisionUseCase -> oficina.api.workOrderAggregate "Aprova ou recusa orcamento" "Chamadas de dominio C#"
-        oficina.api.budgetDecisionUseCase -> oficina.api.stockAggregate "Estorna estoque quando necessario" "Chamadas de dominio C#"
-        oficina.api.openWorkOrderUseCase -> oficina.api.repositories "Busca cliente, veiculo, mecanico, catalogos, estoque e OS" "Interfaces de repositorio"
-        oficina.api.budgetDecisionUseCase -> oficina.api.repositories "Carrega OS e estoque" "Interfaces de repositorio"
-        oficina.api.openWorkOrderUseCase -> oficina.api.unitOfWork "Confirma alteracoes" "Fronteira transacional C#"
-        oficina.api.budgetDecisionUseCase -> oficina.api.unitOfWork "Confirma alteracoes" "Fronteira transacional C#"
+        oficina.api.openWorkOrderUseCase -> oficina.api.workOrderAggregate "Cria OS e calcula orcamento" "C# domain calls"
+        oficina.api.openWorkOrderUseCase -> oficina.api.stockAggregate "Verifica e reserva pecas/insumos" "C# domain calls"
+        oficina.api.budgetDecisionUseCase -> oficina.api.workOrderAggregate "Aprova ou recusa orcamento" "C# domain calls"
+        oficina.api.budgetDecisionUseCase -> oficina.api.stockAggregate "Estorna estoque quando necessario" "C# domain calls"
+        oficina.api.openWorkOrderUseCase -> oficina.api.repositories "Busca cliente, veiculo, mecanico, catalogos, estoque e OS" "Repository interfaces"
+        oficina.api.budgetDecisionUseCase -> oficina.api.repositories "Carrega OS e estoque" "Repository interfaces"
+        oficina.api.openWorkOrderUseCase -> oficina.api.unitOfWork "Confirma alteracoes" "C# transaction boundary"
+        oficina.api.budgetDecisionUseCase -> oficina.api.unitOfWork "Confirma alteracoes" "C# transaction boundary"
         oficina.api.repositories -> oficina.api.dbContext "Consulta e persiste entidades" "Entity Framework Core"
 
         local = deploymentEnvironment "Local Docker Compose" {
@@ -235,10 +235,10 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
                         tags "Amazon Web Services - Elastic Container Registry"
                     }
                     rdsPlanned = infrastructureNode "Amazon RDS SQL Server" "Banco gerenciado planejado para substituir SQL Server em container no ambiente AWS." "Amazon RDS" {
-                        tags "Amazon Web Services - RDS" "Planejado"
+                        tags "Amazon Web Services - RDS" "Planned"
                     }
                     eksPlanned = infrastructureNode "Amazon EKS" "Cluster Kubernetes planejado para as proximas etapas." "Amazon EKS" {
-                        tags "Amazon Web Services - Elastic Kubernetes Service" "Planejado"
+                        tags "Amazon Web Services - Elastic Kubernetes Service" "Planned"
                         -> ecrRepo "Puxara imagens da API" "OCI image pull"
                         -> rdsPlanned "Usara banco gerenciado" "TDS"
                     }
@@ -251,23 +251,19 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
     views {
         themes amazon-web-services-2025.07 kubernetes
 
-        systemLandscape "PaisagemSistemas" "Nivel 0 - paisagem de sistemas e plataformas relacionadas." {
-            title "Paisagem de sistemas"
+        systemLandscape "SystemLandscape" "Nivel 0 - paisagem de sistemas e plataformas relacionadas." {
             include *
         }
 
-        systemContext oficina "ContextoSistema" "Nivel 1 - contexto do sistema Oficina Mecanica API." {
-            title "Contexto da Oficina Mecanica API"
+        systemContext oficina "SystemContext" "Nivel 1 - contexto do sistema Oficina Mecanica API." {
             include *
         }
 
-        container oficina "ContainersAplicacao" "Nivel 2 - containers executaveis e banco de dados." {
-            title "Containers da aplicacao"
+        container oficina "Containers" "Nivel 2 - containers executaveis e banco de dados." {
             include *
         }
 
-        component oficina.api "ComponentesApi" "Nivel 3 - componentes principais do monolito modular." {
-            title "Componentes da API"
+        component oficina.api "ComponentsApi" "Nivel 3 - componentes principais do monolito modular." {
             include oficina.api.controllers
             include oficina.api.security
             include oficina.api.application
@@ -277,8 +273,7 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
             include oficina.database
         }
 
-        component oficina.api "CodigoOrdemServico" "Nivel 4 - detalhe de codigo da Ordem de Servico." {
-            title "Detalhe de codigo: Ordem de Servico"
+        component oficina.api "CodeWorkOrder" "Nivel 4 - detalhe de codigo do fluxo critico de Ordem de Servico." {
             include oficina.api.workOrderController
             include oficina.api.openWorkOrderUseCase
             include oficina.api.budgetDecisionUseCase
@@ -290,18 +285,37 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
             include oficina.database
         }
 
-        deployment oficina local "ImplantacaoDockerComposeLocal" "Implantacao - execucao local via Docker Compose." {
-            title "Implantacao local: Docker Compose"
+        dynamic oficina.api "DynamicOpenWorkOrder" "Fluxo dinamico - abertura de ordem de servico com servicos e pecas opcionais." {
+            atendente -> oficina.api.workOrderController "POST /api/v1/gestao-ordem-servico/ordens-servico/cadastrar"
+            oficina.api.workOrderController -> oficina.api.openWorkOrderUseCase "Executa abertura"
+            oficina.api.openWorkOrderUseCase -> oficina.api.repositories "Valida cliente, veiculo, mecanico e catalogos"
+            oficina.api.repositories -> oficina.api.dbContext "Consulta dados"
+            oficina.api.openWorkOrderUseCase -> oficina.api.stockAggregate "Verifica disponibilidade e reserva itens"
+            oficina.api.openWorkOrderUseCase -> oficina.api.workOrderAggregate "Cria OS e registra itens iniciais"
+            oficina.api.openWorkOrderUseCase -> oficina.api.unitOfWork "Confirma transacao"
+            oficina.api.dbContext -> oficina.database "Persiste OS, itens e reservas"
+        }
+
+        dynamic oficina.api "DynamicBudgetDecision" "Fluxo dinamico - decisao externa de orcamento." {
+            canalOrcamento -> oficina.api.workOrderController "POST /ordens-servico/{id}/orcamento/notificacoes com X-Webhook-Token"
+            oficina.api.workOrderController -> oficina.api.security "Valida token tecnico"
+            oficina.api.workOrderController -> oficina.api.budgetDecisionUseCase "Processa decisao"
+            oficina.api.budgetDecisionUseCase -> oficina.api.repositories "Carrega OS e estoque"
+            oficina.api.budgetDecisionUseCase -> oficina.api.workOrderAggregate "Aprova para execucao ou cancela por reprovacao"
+            oficina.api.budgetDecisionUseCase -> oficina.api.stockAggregate "Estorna reservas quando reprovado"
+            oficina.api.budgetDecisionUseCase -> oficina.api.unitOfWork "Confirma transacao"
+            oficina.api.dbContext -> oficina.database "Atualiza status e estoque"
+        }
+
+        deployment oficina local "DeploymentLocalCompose" "Deployment - execucao local via Docker Compose." {
             include *
         }
 
-        deployment oficina kubernetesLocal "ImplantacaoKubernetesLocal" "Implantacao - Kubernetes local no Docker Desktop." {
-            title "Implantacao local: Kubernetes"
+        deployment oficina kubernetesLocal "DeploymentKubernetesLocal" "Deployment - Kubernetes local no Docker Desktop." {
             include *
         }
 
-        deployment oficina awsDev "ImplantacaoAwsDesenvolvimento" "Implantacao - infraestrutura AWS de desenvolvimento e proximos passos planejados." {
-            title "Implantacao AWS: desenvolvimento"
+        deployment oficina awsDev "DeploymentAwsDev" "Deployment - infraestrutura AWS dev atual e proximos passos planejados." {
             include *
         }
 
@@ -317,12 +331,12 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
                 color #ffffff
             }
 
-            element "Sistema Principal" {
+            element "Core System" {
                 background #0b7285
                 color #ffffff
             }
 
-            element "Sistema de Apoio" {
+            element "Support System" {
                 background #5f6368
                 color #ffffff
             }
@@ -342,27 +356,27 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
                 color #ffffff
             }
 
-            element "Aplicacao" {
+            element "Application" {
                 background #6f42c1
                 color #ffffff
             }
 
-            element "Dominio" {
+            element "Domain" {
                 background #2f9e44
                 color #ffffff
             }
 
-            element "Infraestrutura" {
+            element "Infrastructure" {
                 background #495057
                 color #ffffff
             }
 
-            element "Codigo" {
+            element "Code" {
                 background #f59f00
                 color #000000
             }
 
-            element "Banco de Dados" {
+            element "Database" {
                 shape Cylinder
                 background #7048e8
                 color #ffffff
@@ -373,196 +387,23 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
                 color #000000
             }
 
-            element "Registro" {
+            element "Registry" {
                 background #cc7a00
                 color #000000
             }
 
-            element "Artefato" {
+            element "Artifact" {
                 background #7950f2
                 color #ffffff
             }
 
-            element "Planejado" {
+            element "Planned" {
                 opacity 50
-            }
-
-            element "Amazon Web Services - AWS Cloud" {
-                width 180
-                height 110
-                background #ffffff
-                color #232f3e
-                stroke #ff9900
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Amazon Web Services - Region" {
-                width 180
-                height 110
-                background #ffffff
-                color #232f3e
-                stroke #ff9900
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Amazon Web Services - Virtual Private Cloud" {
-                width 220
-                height 130
-                background #ffffff
-                color #232f3e
-                stroke #ff9900
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Amazon Web Services - Public subnet" {
-                width 180
-                height 100
-                background #ffffff
-                color #232f3e
-                stroke #ff9900
-                metadata false
-                description false
-            }
-
-            element "Amazon Web Services - Private subnet" {
-                width 180
-                height 100
-                background #ffffff
-                color #232f3e
-                stroke #ff9900
-                metadata false
-                description false
-            }
-
-            element "Amazon Web Services - Elastic Container Registry" {
-                width 190
-                height 120
-                background #ffffff
-                color #232f3e
-                stroke #ff9900
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Amazon Web Services - RDS" {
-                width 190
-                height 120
-                background #ffffff
-                color #232f3e
-                stroke #ff9900
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Amazon Web Services - Elastic Kubernetes Service" {
-                width 190
-                height 120
-                background #ffffff
-                color #232f3e
-                stroke #ff9900
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Kubernetes - control-plane" {
-                width 190
-                height 110
-                background #ffffff
-                color #326ce5
-                stroke #326ce5
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Kubernetes - ns" {
-                width 180
-                height 110
-                background #ffffff
-                color #326ce5
-                stroke #326ce5
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Kubernetes - deploy" {
-                width 180
-                height 110
-                background #ffffff
-                color #326ce5
-                stroke #326ce5
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Kubernetes - svc" {
-                width 170
-                height 100
-                background #ffffff
-                color #326ce5
-                stroke #326ce5
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Kubernetes - ing" {
-                width 170
-                height 100
-                background #ffffff
-                color #326ce5
-                stroke #326ce5
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Kubernetes - hpa" {
-                width 170
-                height 100
-                background #ffffff
-                color #326ce5
-                stroke #326ce5
-                strokeWidth 2
-                metadata false
-                description false
-            }
-
-            element "Kubernetes - pvc" {
-                width 170
-                height 100
-                background #ffffff
-                color #326ce5
-                stroke #326ce5
-                strokeWidth 2
-                metadata false
-                description false
             }
 
             relationship "Relationship" {
                 color #495057
             }
-        }
-
-        terminology {
-            person "Pessoa"
-            softwareSystem "Sistema"
-            container "Container"
-            component "Componente"
-            deploymentNode "No de implantacao"
-            infrastructureNode "Recurso de infraestrutura"
-            relationship "Relacionamento"
         }
     }
 
