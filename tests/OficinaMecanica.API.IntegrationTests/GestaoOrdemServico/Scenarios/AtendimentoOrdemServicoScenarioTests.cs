@@ -36,6 +36,7 @@ public sealed class AtendimentoOrdemServicoScenarioTests : ApiIntegrationTestBas
         await RegistrarEntradaEstoqueAsync(pecaInsumoCatalogoId);
 
         var abertura = OrdemServicoRequestBuilder.Novo()
+            .ComClienteId(clienteId)
             .ComVeiculoId(veiculoId)
             .ComMecanicoId(mecanicoId)
             .BuildAbertura();
