@@ -11,22 +11,20 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
         mecanico = person "Mecanico" "Executa diagnostico, define servicos, reserva pecas e finaliza trabalhos."
         administrador = person "Administrador" "Mantem cadastros administrativos e apoia a operacao."
 
-        canalOrcamento = softwareSystem "Canal externo de orcamento" "Canal externo usado para enviar orcamento ao cliente e notificar aprovacao ou recusa via webhook." "External System"
+        canalOrcamento = softwareSystem "Canal externo de orcamento" "Canal externo usado para enviar orcamento ao cliente e notificar aprovacao ou recusa via webhook." "Sistema Externo"
         github = softwareSystem "GitHub" "Repositorio privado usado para versionamento e Pull Requests." "GitHub"
-        dockerHub = softwareSystem "Docker Hub" "Registry usado hoje pelos manifestos Kubernetes locais para a imagem gbsousadev/oficina-api:1.0." "Container Registry"
+        dockerHub = softwareSystem "Docker Hub" "Registry usado hoje pelos manifestos Kubernetes locais para a imagem gbsousadev/oficina-api:1.0." "Registro de Containers"
         terraform = softwareSystem "Terraform dev" "Codigo de infraestrutura que provisiona VPC, subnets publicas/privadas, route tables, internet gateway e ECR." "Terraform"
         dockerImage = softwareSystem "Imagem Docker oficina-api" "Artefato OCI gerado pelo Dockerfile multi-stage da API." "Docker image"
         ecr = softwareSystem "Amazon ECR oficina-api" "Repositorio privado com tags imutaveis e scan on push, provisionado pelo modulo Terraform registry." "Amazon ECR" {
-            tags "AWS" "Registry"
+            tags "Amazon Web Services - Elastic Container Registry" "Registry"
         }
         k8sManifests = softwareSystem "Manifestos Kubernetes" "Deployment, Service, Ingress, HPA, ConfigMap, Secrets, PVC e namespace oficina." "Kubernetes YAML"
-        aws = softwareSystem "AWS" "Conta de desenvolvimento com VPC e ECR provisionados por Terraform; EKS e RDS estao planejados nas proximas etapas." "Cloud Provider" {
-            tags "AWS" "Planned"
+        aws = softwareSystem "AWS" "Conta de desenvolvimento com VPC e ECR provisionados por Terraform; EKS e RDS estao planejados nas proximas etapas." "Provedor de Nuvem" {
+            tags "Amazon Web Services - AWS Cloud" "Planned"
         }
 
         oficina = softwareSystem "Oficina Mecanica API" "Sistema de atendimento, execucao e acompanhamento de ordens de servico para uma oficina mecanica." {
-            !docs README.md
-            !adrs adr
             tags "Core System"
 
             api = container "OficinaMecanica.API" "Monolito modular ASP.NET Core que expoe endpoints REST, Swagger, autenticacao JWT, webhook de orcamento e inicializacao do banco." "ASP.NET Core Web API / .NET 10" {
@@ -40,15 +38,15 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
                     tags "API"
                 }
 
-                application = component "Application Use Cases" "Orquestra casos de uso, validacoes, mapeamentos e transacoes de aplicacao." "C# / FluentValidation / AutoMapper" {
+                application = component "Casos de Uso da Aplicacao" "Orquestra casos de uso, validacoes, mapeamentos e transacoes de aplicacao." "C# / FluentValidation / AutoMapper" {
                     tags "Application"
                 }
 
-                domain = component "Domain Model" "Contem agregados, entidades, value objects, enums, regras de negocio e contratos de repositories." "C# domain model" {
+                domain = component "Modelo de Dominio" "Contem agregados, entidades, value objects, enums, regras de negocio e contratos de repositories." "C# domain model" {
                     tags "Domain"
                 }
 
-                infrastructure = component "Infrastructure adapters" "Implementa repositories, EF Core, Unit of Work, migrations, seed, servicos JWT e usuario demo." "C# / EF Core / SQL Server" {
+                infrastructure = component "Adaptadores de Infraestrutura" "Implementa repositories, EF Core, Unit of Work, migrations, seed, servicos JWT e usuario demo." "C# / EF Core / SQL Server" {
                     tags "Infrastructure"
                 }
 
@@ -76,7 +74,7 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
                     tags "Code" "Domain"
                 }
 
-                repositories = component "Repository implementations" "Implementa repositories dos contextos Administrativo, Atendimento, Estoque e Ordem de Servico." "EF Core repositories" {
+                repositories = component "Implementacoes de Repositorio" "Implementa repositories dos contextos Administrativo, Atendimento, Estoque e Ordem de Servico." "EF Core repositories" {
                     tags "Code" "Infrastructure"
                 }
 
@@ -129,13 +127,13 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
         oficina.api.repositories -> oficina.api.dbContext "Consulta e persiste entidades" "Entity Framework Core"
 
         local = deploymentEnvironment "Local Docker Compose" {
-            deploymentNode "Developer workstation" "Estacao Windows com Docker Desktop." "Windows / Docker Desktop" {
+            deploymentNode "Estacao de desenvolvimento" "Estacao Windows com Docker Desktop." "Windows / Docker Desktop" {
                 deploymentNode "Docker Compose" "Ambiente definido em docker-compose.yml." "Docker Compose" {
-                    deploymentNode "api service" "Container oficina-mecanica-api expondo localhost:5093 -> 8080." "Docker container" {
+                    deploymentNode "Servico API" "Container oficina-mecanica-api expondo localhost:5093 -> 8080." "Docker container" {
                         apiInstance = containerInstance oficina.api
                     }
 
-                    deploymentNode "sqlserver service" "Container oficina-mecanica-sqlserver expondo localhost:14333 -> 1433." "Docker container" {
+                    deploymentNode "Servico SQL Server" "Container oficina-mecanica-sqlserver expondo localhost:14333 -> 1433." "Docker container" {
                         dbInstance = containerInstance oficina.database
                     }
                 }
@@ -143,36 +141,54 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
         }
 
         kubernetesLocal = deploymentEnvironment "Kubernetes Local" {
-            deploymentNode "Developer workstation" "Estacao Windows com Docker Desktop Kubernetes." "Windows / Docker Desktop" {
+            deploymentNode "Estacao de desenvolvimento" "Estacao Windows com Docker Desktop Kubernetes." "Windows / Docker Desktop" {
                 deploymentNode "Cluster local" "Cluster Kubernetes do Docker Desktop." "Kubernetes" {
+                    tags "Kubernetes - control-plane"
+
                     deploymentNode "Namespace oficina" "Namespace dedicado da aplicacao." "Kubernetes Namespace" {
-                        pvc = infrastructureNode "PVC sqlserver-pvc" "Volume persistente para dados do SQL Server." "PersistentVolumeClaim"
+                        tags "Kubernetes - ns"
+
+                        pvc = infrastructureNode "PVC sqlserver-pvc" "Volume persistente para dados do SQL Server." "PersistentVolumeClaim" {
+                            tags "Kubernetes - pvc"
+                        }
 
                         deploymentNode "Deployment sqlserver" "Deployment do SQL Server 2022 Developer." "Kubernetes Deployment" {
+                            tags "Kubernetes - deploy"
+
                             dbK8sInstance = containerInstance oficina.database {
                                 -> pvc "Persiste dados" "Volume mount"
                             }
                         }
 
                         sqlService = infrastructureNode "Service sqlserver" "Service interno para SQL Server." "Kubernetes Service" {
+                            tags "Kubernetes - svc"
+
                             -> oficina.database "Encaminha para Pod SQL Server" "TDS"
                         }
 
                         deploymentNode "Deployment oficina-api" "Deployment com startup, liveness e readiness probes em /api/health." "Kubernetes Deployment" {
+                            tags "Kubernetes - deploy"
+
                             apiK8sInstance = containerInstance oficina.api {
                                 -> sqlService "Acessa banco por connection string em Secret" "TDS"
                             }
                         }
 
                         apiService = infrastructureNode "Service oficina-api" "Service ClusterIP na porta 8080." "Kubernetes Service" {
+                            tags "Kubernetes - svc"
+
                             -> oficina.api "Balanceia para Pods da API" "HTTP"
                         }
 
                         ingress = infrastructureNode "Ingress oficina-api" "Roteia oficina.local para o service da API." "NGINX Ingress" {
+                            tags "Kubernetes - ing"
+
                             -> apiService "Encaminha trafego HTTP" "HTTP"
                         }
 
                         hpa = infrastructureNode "HPA oficina-api-hpa" "Escala a API de 1 a 5 replicas por CPU e memoria." "HorizontalPodAutoscaler" {
+                            tags "Kubernetes - hpa"
+
                             -> oficina.api "Ajusta replicas com base em CPU e memoria" "Kubernetes metrics"
                         }
                     }
@@ -181,33 +197,51 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
         }
 
         awsDev = deploymentEnvironment "AWS Dev Terraform" {
-            deploymentNode "AWS us-east-1" "Regiao alvo do ambiente dev." "AWS" {
-                deploymentNode "VPC oficina-vpc-dev" "CIDR 10.0.0.0/16 com DNS support e hostnames habilitados." "Amazon VPC" {
-                    publicSubnetA = infrastructureNode "Public Subnet us-east-1a" "CIDR 10.0.1.0/24." "Amazon VPC subnet"
-                    publicSubnetB = infrastructureNode "Public Subnet us-east-1b" "CIDR 10.0.2.0/24." "Amazon VPC subnet"
-                    privateSubnetA = infrastructureNode "Private Subnet us-east-1a" "CIDR 10.0.11.0/24." "Amazon VPC subnet"
-                    privateSubnetB = infrastructureNode "Private Subnet us-east-1b" "CIDR 10.0.12.0/24." "Amazon VPC subnet"
-                    publicRouteTable = infrastructureNode "Public Route Table" "Tabela de rotas publica." "Amazon VPC Route Table" {
-                        -> publicSubnetA "Associa subnet publica" "AWS route table association"
-                        -> publicSubnetB "Associa subnet publica" "AWS route table association"
-                    }
-                    privateRouteTable = infrastructureNode "Private Route Table" "Tabela de rotas privada." "Amazon VPC Route Table" {
-                        -> privateSubnetA "Associa subnet privada" "AWS route table association"
-                        -> privateSubnetB "Associa subnet privada" "AWS route table association"
-                    }
-                    internetGateway = infrastructureNode "Internet Gateway" "Gateway de internet conectado a VPC." "Amazon VPC Internet Gateway" {
-                        -> publicRouteTable "Fornece rota para Internet" "AWS route"
-                    }
-                }
+            deploymentNode "Amazon Web Services" "Conta de desenvolvimento AWS modelada pelo Terraform." "AWS" {
+                tags "Amazon Web Services - AWS Cloud"
 
-                ecrRepo = infrastructureNode "Amazon ECR oficina-api" "Repositorio privado provisionado com image_tag_mutability IMMUTABLE e scan_on_push." "Amazon ECR"
-                rdsPlanned = infrastructureNode "Amazon RDS SQL Server" "Banco gerenciado planejado para substituir SQL Server em container no ambiente AWS." "Amazon RDS" {
-                    tags "Planned"
-                }
-                eksPlanned = infrastructureNode "Amazon EKS" "Cluster Kubernetes planejado para as proximas etapas." "Amazon EKS" {
-                    tags "Planned"
-                    -> ecrRepo "Puxara imagens da API" "OCI image pull"
-                    -> rdsPlanned "Usara banco gerenciado" "TDS"
+                deploymentNode "Regiao us-east-1" "Regiao alvo do ambiente dev." "AWS Region" {
+                    tags "Amazon Web Services - Region"
+
+                    deploymentNode "VPC oficina-vpc-dev" "CIDR 10.0.0.0/16 com DNS support e hostnames habilitados." "Amazon VPC" {
+                        tags "Amazon Web Services - Virtual Private Cloud"
+
+                        publicSubnetA = infrastructureNode "Subnet publica us-east-1a" "CIDR 10.0.1.0/24." "Amazon VPC subnet" {
+                            tags "Amazon Web Services - Public subnet"
+                        }
+                        publicSubnetB = infrastructureNode "Subnet publica us-east-1b" "CIDR 10.0.2.0/24." "Amazon VPC subnet" {
+                            tags "Amazon Web Services - Public subnet"
+                        }
+                        privateSubnetA = infrastructureNode "Subnet privada us-east-1a" "CIDR 10.0.11.0/24." "Amazon VPC subnet" {
+                            tags "Amazon Web Services - Private subnet"
+                        }
+                        privateSubnetB = infrastructureNode "Subnet privada us-east-1b" "CIDR 10.0.12.0/24." "Amazon VPC subnet" {
+                            tags "Amazon Web Services - Private subnet"
+                        }
+                        publicRouteTable = infrastructureNode "Tabela de rotas publica" "Tabela de rotas publica." "Amazon VPC Route Table" {
+                            -> publicSubnetA "Associa subnet publica" "AWS route table association"
+                            -> publicSubnetB "Associa subnet publica" "AWS route table association"
+                        }
+                        privateRouteTable = infrastructureNode "Tabela de rotas privada" "Tabela de rotas privada." "Amazon VPC Route Table" {
+                            -> privateSubnetA "Associa subnet privada" "AWS route table association"
+                            -> privateSubnetB "Associa subnet privada" "AWS route table association"
+                        }
+                        internetGateway = infrastructureNode "Internet Gateway" "Gateway de internet conectado a VPC." "Amazon VPC Internet Gateway" {
+                            -> publicRouteTable "Fornece rota para Internet" "AWS route"
+                        }
+                    }
+
+                    ecrRepo = infrastructureNode "Amazon ECR oficina-api" "Repositorio privado provisionado com image_tag_mutability IMMUTABLE e scan_on_push." "Amazon ECR" {
+                        tags "Amazon Web Services - Elastic Container Registry"
+                    }
+                    rdsPlanned = infrastructureNode "Amazon RDS SQL Server" "Banco gerenciado planejado para substituir SQL Server em container no ambiente AWS." "Amazon RDS" {
+                        tags "Amazon Web Services - RDS" "Planned"
+                    }
+                    eksPlanned = infrastructureNode "Amazon EKS" "Cluster Kubernetes planejado para as proximas etapas." "Amazon EKS" {
+                        tags "Amazon Web Services - Elastic Kubernetes Service" "Planned"
+                        -> ecrRepo "Puxara imagens da API" "OCI image pull"
+                        -> rdsPlanned "Usara banco gerenciado" "TDS"
+                    }
                 }
             }
         }
@@ -215,6 +249,8 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
     }
 
     views {
+        themes amazon-web-services-2025.07 kubernetes
+
         systemLandscape "SystemLandscape" "Nivel 0 - paisagem de sistemas e plataformas relacionadas." {
             include *
             autoLayout lr

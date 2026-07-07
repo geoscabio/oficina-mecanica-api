@@ -10,6 +10,4 @@ docker run `
     -p "${Port}:${Port}" `
     -e "PORT=${Port}" `
     structurizr/mcp `
-    -dsl `
-    -mermaid `
-    -plantuml
+    -dsl

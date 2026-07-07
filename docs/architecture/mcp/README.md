@@ -1,51 +1,38 @@
 # Structurizr MCP
 
-O Structurizr MCP e usado como camada de validacao e revisao assistida por IA para o workspace DSL.
+O MCP é opcional. Ele serve para um agente de IA revisar o `workspace.dsl` como um lint de arquitetura, sem entrar no build, nos testes ou no deploy da aplicação.
 
-## Servidor local
-
-Suba o servidor:
+## Subir localmente
 
 ```powershell
-.\docs\architecture\scripts\start-structurizr-mcp.ps1
+powershell -ExecutionPolicy Bypass -File docs\architecture\scripts\start-structurizr-mcp.ps1
 ```
 
-O script executa a imagem oficial:
+O script executa a imagem oficial com suporte apenas ao DSL:
 
 ```powershell
-docker run -it --rm -p 3000:3000 -e PORT=3000 structurizr/mcp -dsl -mermaid -plantuml
+docker run -it --rm -p 3000:3000 -e PORT=3000 structurizr/mcp -dsl
 ```
 
-Ferramentas habilitadas:
-
-- `-dsl`: validar, parsear e inspecionar Structurizr DSL.
-- `-mermaid`: exportar uma view para Mermaid.
-- `-plantuml`: exportar uma view para PlantUML e C4-PlantUML.
-
-## Conexao do agente
-
-Use `mcp/structurizr-mcp.json` como referencia. O servidor local expõe:
+Endpoint local:
 
 ```text
 http://localhost:3000/mcp
 ```
 
-## Checklist de IA como lint
+## Conectar um agente
+
+Use `mcp/structurizr-mcp.json` como exemplo de configuração. Ele aponta para o servidor local usando `npx mcp-remote`.
+
+## Checklist de revisão com IA
 
 Ao revisar `workspace.dsl`, o agente deve:
 
-1. Validar se o DSL e parseavel.
-2. Inspecionar violacoes de arquitetura apontadas pelo Structurizr.
-3. Conferir se cada view tem uma narrativa clara e escopo consistente.
-4. Exportar cada view para Mermaid e C4-PlantUML.
-5. Comparar a modelagem com codigo, Docker, Kubernetes e Terraform do repositorio.
+1. Validar se o DSL é parseável.
+2. Inspecionar inconsistências apontadas pelo Structurizr.
+3. Conferir se as views C4 continuam refletindo código, Docker, Kubernetes e Terraform.
+4. Sugerir ajustes no DSL sem gerar arquivos derivados.
 
-## Servidor remoto
+## Observação
 
-A documentacao oficial tambem informa uma instancia publica do MCP em:
-
-```text
-https://mcp.structurizr.com/mcp
-```
-
-Para este repositorio, o padrao preferido e local via Docker, porque evita enviar contexto privado do projeto para fora da maquina.
+Se Docker, Node, `npx` ou MCP não estiverem disponíveis, nada da aplicação deve falhar. Nesse caso, use apenas o Structurizr Playground para validar visualmente o `workspace.dsl`.

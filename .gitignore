@@ -7,6 +7,8 @@ TestResults/
 docs/*
 !docs/architecture/
 !docs/architecture/**
+!docs/ADRs/
+!docs/ADRs/**
 *.user
 *.suo
 *.nupkg
