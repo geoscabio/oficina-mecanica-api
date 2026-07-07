@@ -80,7 +80,7 @@ public sealed class AtendimentoOrdemServicoScenarioTests : ApiIntegrationTestBas
 
         var tempoMedio = await GetJsonAsync($"/api/v1/gestao-ordem-servico/tempo-medio-servicos/consultar/{servicoCatalogoId}");
         var temposMedios = await GetJsonAsync("/api/v1/gestao-ordem-servico/tempo-medio-servicos/listar");
-        var ordensServico = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar");
+        var ordensServico = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar-historico");
 
         // Assert
         ObterString(statusRecebida, "status").Should().Be("Recebida");
