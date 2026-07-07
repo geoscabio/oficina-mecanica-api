@@ -1,0 +1,39 @@
+@startuml
+title <size:24>Container View: Oficina Mecanica API</size>\n<size:24>Nivel 2 - containers executaveis e banco de dados.</size>
+
+set separator none
+left to right direction
+
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+
+Person(Cliente, "Cliente", $descr="Consulta o status publico de uma ordem de servico.", $tags="", $link="")
+Person(Atendente, "Atendente", $descr="Cadastra clientes e veiculos, abre ordens de servico, envia orcamentos e registra entregas.", $tags="", $link="")
+Person(Mecanico, "Mecanico", $descr="Executa diagnostico, define servicos, reserva pecas e finaliza trabalhos.", $tags="", $link="")
+Person(Administrador, "Administrador", $descr="Mantem cadastros administrativos e apoia a operacao.", $tags="", $link="")
+System(Canalexternodeorcamento, "Canal externo de orcamento", $descr="Canal externo usado para enviar orcamento ao cliente e notificar aprovacao ou recusa via webhook.", $tags="", $link="")
+
+System_Boundary("OficinaMecanicaAPI_boundary", "Oficina Mecanica API", $tags="") {
+  Container(OficinaMecanicaAPI.OficinaMecanicaAPI, "OficinaMecanica.API", $techn="ASP.NET Core Web API / .NET 10", $descr="Monolito modular ASP.NET Core que expoe endpoints REST, Swagger, autenticacao JWT, webhook de orcamento e inicializacao do banco.", $tags="", $link="")
+  ContainerDb(OficinaMecanicaAPI.OficinaMecanicaDb, "OficinaMecanicaDb", $techn="SQL Server 2022", $descr="Banco relacional da aplicacao, criado localmente por Docker Compose/Kubernetes e acessado via EF Core.", $tags="", $link="")
+}
+
+Rel(Atendente, OficinaMecanicaAPI.OficinaMecanicaAPI, "Usa para atendimento, abertura de OS, aprovacoes e entrega", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(Mecanico, OficinaMecanicaAPI.OficinaMecanicaAPI, "Usa para diagnostico, reserva de pecas e execucao de servicos", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(Administrador, OficinaMecanicaAPI.OficinaMecanicaAPI, "Mantem cadastros administrativos", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(Cliente, OficinaMecanicaAPI.OficinaMecanicaAPI, "Consulta status publico da ordem de servico", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(Atendente, Canalexternodeorcamento, "Envia orcamento ao cliente por canal externo", $techn="Manual/externo", $tags="", $link="")
+Rel(Canalexternodeorcamento, OficinaMecanicaAPI.OficinaMecanicaAPI, "Notifica decisao do orcamento", $techn="Webhook HTTP com X-Webhook-Token", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI, OficinaMecanicaAPI.OficinaMecanicaDb, "Le e grava dados operacionais", $techn="EF Core / TDS", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
+@enduml

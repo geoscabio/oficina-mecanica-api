@@ -1,0 +1,63 @@
+name: Architecture Docs
+
+on:
+  pull_request:
+    paths:
+      - "docs/architecture/**"
+      - ".github/workflows/architecture-docs.yml"
+  workflow_dispatch:
+
+jobs:
+  structurizr:
+    name: Validate Structurizr workspace
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate DSL
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}/docs/architecture:/workspace" \
+            structurizr/structurizr \
+            validate \
+            -workspace /workspace/workspace.dsl 2>&1 | tee structurizr-validate.log
+          ! grep -q "ERROR" structurizr-validate.log
+
+      - name: Inspect DSL
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}/docs/architecture:/workspace" \
+            structurizr/structurizr \
+            inspect \
+            -workspace /workspace/workspace.dsl 2>&1 | tee structurizr-inspect.log
+          ! grep -q "ERROR" structurizr-inspect.log
+
+      - name: Export Mermaid
+        run: |
+          set -euo pipefail
+          mkdir -p docs/architecture/generated/mermaid
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/repo" \
+            structurizr/structurizr \
+            export \
+            -workspace /repo/docs/architecture/workspace.dsl \
+            -format mermaid \
+            -output /repo/docs/architecture/generated/mermaid 2>&1 | tee structurizr-export-mermaid.log
+          ! grep -q "ERROR" structurizr-export-mermaid.log
+
+      - name: Export C4-PlantUML
+        run: |
+          set -euo pipefail
+          mkdir -p docs/architecture/generated/c4plantuml
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/repo" \
+            structurizr/structurizr \
+            export \
+            -workspace /repo/docs/architecture/workspace.dsl \
+            -format plantuml/c4plantuml \
+            -output /repo/docs/architecture/generated/c4plantuml 2>&1 | tee structurizr-export-c4plantuml.log
+          ! grep -q "ERROR" structurizr-export-c4plantuml.log

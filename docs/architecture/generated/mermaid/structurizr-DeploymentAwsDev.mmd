@@ -1,0 +1,45 @@
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Deployment View: Oficina Mecanica API - AWS Dev Terraform"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    subgraph 94 ["AWS us-east-1"]
+      style 94 fill:#ffffff,stroke:#444444,color:#444444
+
+      108["<div style='font-weight: bold'>Amazon ECR oficina-api</div><div style='font-size: 70%; margin-top: 0px'>[Infrastructure Node: Amazon ECR]</div><div style='font-size: 80%; margin-top:10px'>Repositorio privado<br />provisionado com<br />image_tag_mutability<br />IMMUTABLE e scan_on_push.</div>"]
+      style 108 fill:#ffffff,stroke:#444444,color:#444444
+      109["<div style='font-weight: bold'>Amazon RDS SQL Server</div><div style='font-size: 70%; margin-top: 0px'>[Infrastructure Node: Amazon RDS]</div><div style='font-size: 80%; margin-top:10px'>Banco gerenciado planejado<br />para substituir SQL Server em<br />container no ambiente AWS.</div>"]
+      style 109 fill:#ffffff,stroke:#444444,color:#444444
+      110["<div style='font-weight: bold'>Amazon EKS</div><div style='font-size: 70%; margin-top: 0px'>[Infrastructure Node: Amazon EKS]</div><div style='font-size: 80%; margin-top:10px'>Cluster Kubernetes planejado<br />para as proximas etapas.</div>"]
+      style 110 fill:#ffffff,stroke:#444444,color:#444444
+      subgraph 95 ["VPC oficina-vpc-dev"]
+        style 95 fill:#ffffff,stroke:#444444,color:#444444
+
+        100["<div style='font-weight: bold'>Public Route Table</div><div style='font-size: 70%; margin-top: 0px'>[Infrastructure Node: Amazon VPC Route Table]</div><div style='font-size: 80%; margin-top:10px'>Tabela de rotas publica.</div>"]
+        style 100 fill:#ffffff,stroke:#444444,color:#444444
+        103["<div style='font-weight: bold'>Private Route Table</div><div style='font-size: 70%; margin-top: 0px'>[Infrastructure Node: Amazon VPC Route Table]</div><div style='font-size: 80%; margin-top:10px'>Tabela de rotas privada.</div>"]
+        style 103 fill:#ffffff,stroke:#444444,color:#444444
+        106["<div style='font-weight: bold'>Internet Gateway</div><div style='font-size: 70%; margin-top: 0px'>[Infrastructure Node: Amazon VPC Internet Gateway]</div><div style='font-size: 80%; margin-top:10px'>Gateway de internet conectado<br />a VPC.</div>"]
+        style 106 fill:#ffffff,stroke:#444444,color:#444444
+        96["<div style='font-weight: bold'>Public Subnet us-east-1a</div><div style='font-size: 70%; margin-top: 0px'>[Infrastructure Node: Amazon VPC subnet]</div><div style='font-size: 80%; margin-top:10px'>CIDR 10.0.1.0/24.</div>"]
+        style 96 fill:#ffffff,stroke:#444444,color:#444444
+        97["<div style='font-weight: bold'>Public Subnet us-east-1b</div><div style='font-size: 70%; margin-top: 0px'>[Infrastructure Node: Amazon VPC subnet]</div><div style='font-size: 80%; margin-top:10px'>CIDR 10.0.2.0/24.</div>"]
+        style 97 fill:#ffffff,stroke:#444444,color:#444444
+        98["<div style='font-weight: bold'>Private Subnet us-east-1a</div><div style='font-size: 70%; margin-top: 0px'>[Infrastructure Node: Amazon VPC subnet]</div><div style='font-size: 80%; margin-top:10px'>CIDR 10.0.11.0/24.</div>"]
+        style 98 fill:#ffffff,stroke:#444444,color:#444444
+        99["<div style='font-weight: bold'>Private Subnet us-east-1b</div><div style='font-size: 70%; margin-top: 0px'>[Infrastructure Node: Amazon VPC subnet]</div><div style='font-size: 80%; margin-top:10px'>CIDR 10.0.12.0/24.</div>"]
+        style 99 fill:#ffffff,stroke:#444444,color:#444444
+      end
+
+    end
+
+    100-. "<div>Associa subnet publica</div><div style='font-size: 70%'>[AWS route table association]</div>" .->96
+    100-. "<div>Associa subnet publica</div><div style='font-size: 70%'>[AWS route table association]</div>" .->97
+    103-. "<div>Associa subnet privada</div><div style='font-size: 70%'>[AWS route table association]</div>" .->98
+    103-. "<div>Associa subnet privada</div><div style='font-size: 70%'>[AWS route table association]</div>" .->99
+    106-. "<div>Fornece rota para Internet</div><div style='font-size: 70%'>[AWS route]</div>" .->100
+    110-. "<div>Puxara imagens da API</div><div style='font-size: 70%'>[OCI image pull]</div>" .->108
+    110-. "<div>Usara banco gerenciado</div><div style='font-size: 70%'>[TDS]</div>" .->109
+
+  end

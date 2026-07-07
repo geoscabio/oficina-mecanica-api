@@ -1,0 +1,49 @@
+@startuml
+title <size:24>Component View: Oficina Mecanica API - OficinaMecanica.API</size>\n<size:24>Nivel 4 - detalhe de codigo do fluxo critico de Ordem de Servico.</size>
+
+set separator none
+left to right direction
+
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+System_Boundary("OficinaMecanicaAPI_boundary", "Oficina Mecanica API", $tags="") {
+  Container_Boundary("OficinaMecanicaAPI.OficinaMecanicaAPI_boundary", "OficinaMecanica.API", $tags="") {
+    Component(OficinaMecanicaAPI.OficinaMecanicaAPI.OficinaMecanicaDbContext, "OficinaMecanicaDbContext", $techn="Entity Framework Core DbContext", $descr="Mapeia os agregados e entidades para tabelas SQL Server.", $tags="", $link="")
+    Component(OficinaMecanicaAPI.OficinaMecanicaAPI.OrdensServicoController, "OrdensServicoController", $techn="ASP.NET Core Controller", $descr="Endpoint REST do fluxo principal de ordem de servico.", $tags="", $link="")
+    Component(OficinaMecanicaAPI.OficinaMecanicaAPI.AbrirOrdemServicoUseCase, "AbrirOrdemServicoUseCase", $techn="C# use case", $descr="Valida cliente, veiculo, mecanico, catalogos e estoque antes de abrir uma OS.", $tags="", $link="")
+    Component(OficinaMecanicaAPI.OficinaMecanicaAPI.NotificarDecisaoOrcamentoUseCase, "NotificarDecisaoOrcamentoUseCase", $techn="C# use case", $descr="Processa aprovacao ou recusa de orcamento recebida por webhook tecnico.", $tags="", $link="")
+    Component(OficinaMecanicaAPI.OficinaMecanicaAPI.OrdemServicoaggregate, "OrdemServico aggregate", $techn="C# aggregate", $descr="Controla transicoes de estado, orcamento, execucao, finalizacao, entrega e cancelamento.", $tags="", $link="")
+    Component(OficinaMecanicaAPI.OficinaMecanicaAPI.Estoqueaggregate, "Estoque aggregate", $techn="C# aggregate", $descr="Controla disponibilidade, reserva, baixa, estorno e entrada de pecas/insumos.", $tags="", $link="")
+    Component(OficinaMecanicaAPI.OficinaMecanicaAPI.Repositoryimplementations, "Repository implementations", $techn="EF Core repositories", $descr="Implementa repositories dos contextos Administrativo, Atendimento, Estoque e Ordem de Servico.", $tags="", $link="")
+    Component(OficinaMecanicaAPI.OficinaMecanicaAPI.UnitOfWork, "UnitOfWork", $techn="EF Core transaction boundary", $descr="Confirma transacoes de persistencia envolvendo OS e estoque.", $tags="", $link="")
+  }
+
+  ContainerDb(OficinaMecanicaAPI.OficinaMecanicaDb, "OficinaMecanicaDb", $techn="SQL Server 2022", $descr="Banco relacional da aplicacao, criado localmente por Docker Compose/Kubernetes e acessado via EF Core.", $tags="", $link="")
+}
+
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.OficinaMecanicaDbContext, OficinaMecanicaAPI.OficinaMecanicaDb, "Mapeia entidades e aplica migrations", $techn="EF Core / TDS", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.OrdensServicoController, OficinaMecanicaAPI.OficinaMecanicaAPI.AbrirOrdemServicoUseCase, "Chama abertura de OS", $techn="C# method call", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.OrdensServicoController, OficinaMecanicaAPI.OficinaMecanicaAPI.NotificarDecisaoOrcamentoUseCase, "Chama notificacao de decisao de orcamento", $techn="C# method call", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.AbrirOrdemServicoUseCase, OficinaMecanicaAPI.OficinaMecanicaAPI.OrdemServicoaggregate, "Cria OS e calcula orcamento", $techn="C# domain calls", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.AbrirOrdemServicoUseCase, OficinaMecanicaAPI.OficinaMecanicaAPI.Estoqueaggregate, "Verifica e reserva pecas/insumos", $techn="C# domain calls", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.NotificarDecisaoOrcamentoUseCase, OficinaMecanicaAPI.OficinaMecanicaAPI.OrdemServicoaggregate, "Aprova ou recusa orcamento", $techn="C# domain calls", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.NotificarDecisaoOrcamentoUseCase, OficinaMecanicaAPI.OficinaMecanicaAPI.Estoqueaggregate, "Estorna estoque quando necessario", $techn="C# domain calls", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.AbrirOrdemServicoUseCase, OficinaMecanicaAPI.OficinaMecanicaAPI.Repositoryimplementations, "Busca cliente, veiculo, mecanico, catalogos, estoque e OS", $techn="Repository interfaces", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.NotificarDecisaoOrcamentoUseCase, OficinaMecanicaAPI.OficinaMecanicaAPI.Repositoryimplementations, "Carrega OS e estoque", $techn="Repository interfaces", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.AbrirOrdemServicoUseCase, OficinaMecanicaAPI.OficinaMecanicaAPI.UnitOfWork, "Confirma alteracoes", $techn="C# transaction boundary", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.NotificarDecisaoOrcamentoUseCase, OficinaMecanicaAPI.OficinaMecanicaAPI.UnitOfWork, "Confirma alteracoes", $techn="C# transaction boundary", $tags="", $link="")
+Rel(OficinaMecanicaAPI.OficinaMecanicaAPI.Repositoryimplementations, OficinaMecanicaAPI.OficinaMecanicaAPI.OficinaMecanicaDbContext, "Consulta e persiste entidades", $techn="Entity Framework Core", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
+@enduml

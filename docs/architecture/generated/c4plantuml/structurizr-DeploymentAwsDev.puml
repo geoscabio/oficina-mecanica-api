@@ -1,0 +1,44 @@
+@startuml
+title <size:24>Deployment View: Oficina Mecanica API - AWS Dev Terraform</size>\n<size:24>Deployment - infraestrutura AWS dev atual e proximos passos planejados.</size>
+
+set separator none
+left to right direction
+
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Deployment>
+
+Deployment_Node(AWSDevTerraform.AWSuseast1, "AWS us-east-1", $type="AWS", $descr="Regiao alvo do ambiente dev.", $tags="", $link="") {
+  Deployment_Node(AWSDevTerraform.AWSuseast1.AmazonECRoficinaapi, "Amazon ECR oficina-api", $type="Amazon ECR", $descr="Repositorio privado provisionado com image_tag_mutability IMMUTABLE e scan_on_push.", $tags="", $link="")
+  Deployment_Node(AWSDevTerraform.AWSuseast1.AmazonRDSSQLServer, "Amazon RDS SQL Server", $type="Amazon RDS", $descr="Banco gerenciado planejado para substituir SQL Server em container no ambiente AWS.", $tags="", $link="")
+  Deployment_Node(AWSDevTerraform.AWSuseast1.AmazonEKS, "Amazon EKS", $type="Amazon EKS", $descr="Cluster Kubernetes planejado para as proximas etapas.", $tags="", $link="")
+  Deployment_Node(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev, "VPC oficina-vpc-dev", $type="Amazon VPC", $descr="CIDR 10.0.0.0/16 com DNS support e hostnames habilitados.", $tags="", $link="") {
+    Deployment_Node(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PublicRouteTable, "Public Route Table", $type="Amazon VPC Route Table", $descr="Tabela de rotas publica.", $tags="", $link="")
+    Deployment_Node(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PrivateRouteTable, "Private Route Table", $type="Amazon VPC Route Table", $descr="Tabela de rotas privada.", $tags="", $link="")
+    Deployment_Node(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.InternetGateway, "Internet Gateway", $type="Amazon VPC Internet Gateway", $descr="Gateway de internet conectado a VPC.", $tags="", $link="")
+    Deployment_Node(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PublicSubnetuseast1a, "Public Subnet us-east-1a", $type="Amazon VPC subnet", $descr="CIDR 10.0.1.0/24.", $tags="", $link="")
+    Deployment_Node(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PublicSubnetuseast1b, "Public Subnet us-east-1b", $type="Amazon VPC subnet", $descr="CIDR 10.0.2.0/24.", $tags="", $link="")
+    Deployment_Node(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PrivateSubnetuseast1a, "Private Subnet us-east-1a", $type="Amazon VPC subnet", $descr="CIDR 10.0.11.0/24.", $tags="", $link="")
+    Deployment_Node(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PrivateSubnetuseast1b, "Private Subnet us-east-1b", $type="Amazon VPC subnet", $descr="CIDR 10.0.12.0/24.", $tags="", $link="")
+  }
+
+}
+
+Rel(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PublicRouteTable, AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PublicSubnetuseast1a, "Associa subnet publica", $techn="AWS route table association", $tags="", $link="")
+Rel(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PublicRouteTable, AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PublicSubnetuseast1b, "Associa subnet publica", $techn="AWS route table association", $tags="", $link="")
+Rel(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PrivateRouteTable, AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PrivateSubnetuseast1a, "Associa subnet privada", $techn="AWS route table association", $tags="", $link="")
+Rel(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PrivateRouteTable, AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PrivateSubnetuseast1b, "Associa subnet privada", $techn="AWS route table association", $tags="", $link="")
+Rel(AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.InternetGateway, AWSDevTerraform.AWSuseast1.VPCoficinavpcdev.PublicRouteTable, "Fornece rota para Internet", $techn="AWS route", $tags="", $link="")
+Rel(AWSDevTerraform.AWSuseast1.AmazonEKS, AWSDevTerraform.AWSuseast1.AmazonECRoficinaapi, "Puxara imagens da API", $techn="OCI image pull", $tags="", $link="")
+Rel(AWSDevTerraform.AWSuseast1.AmazonEKS, AWSDevTerraform.AWSuseast1.AmazonRDSSQLServer, "Usara banco gerenciado", $techn="TDS", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
+@enduml

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "structurizr-mcp": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://localhost:3000/mcp"
+      ]
+    }
+  }
+}
