@@ -17,6 +17,7 @@ using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Inicia
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarExecucaoServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ListarOrdensServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ListarTempoMedioExecucaoServicos;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.NotificarDecisaoOrcamento;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
 
 namespace OficinaMecanica.API.GestaoOrdemServico.Controllers;
@@ -103,6 +104,15 @@ public sealed class OrdensServicoController : ControllerBase
     public async Task<IActionResult> AguardarAprovacaoOrcamento([FromServices] AguardarAprovacaoOrcamentoUseCase useCase, Guid ordemServicoId, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(new AguardarAprovacaoOrcamentoRequest(ordemServicoId), cancellationToken);
+
+        return this.ToActionResult(result);
+    }
+
+    [HttpPost("ordens-servico/{ordemServicoId:guid}/orcamento/notificacoes")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendente)]
+    public async Task<IActionResult> NotificarDecisaoOrcamento([FromServices] NotificarDecisaoOrcamentoUseCase useCase, Guid ordemServicoId, [FromBody] NotificarDecisaoOrcamentoRequest request, CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(request is null ? request! : request with { OrdemServicoId = ordemServicoId }, cancellationToken);
 
         return this.ToActionResult(result);
     }

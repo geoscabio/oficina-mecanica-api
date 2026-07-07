@@ -1,0 +1,3 @@
+namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.NotificarDecisaoOrcamento;
+
+public sealed record NotificarDecisaoOrcamentoRequest(Guid OrdemServicoId, DecisaoOrcamento Decisao);

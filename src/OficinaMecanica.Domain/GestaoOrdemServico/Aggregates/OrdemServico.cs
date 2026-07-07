@@ -105,6 +105,13 @@ public sealed class OrdemServico
         Status = StatusOrdemServico.EmExecucao;
     }
 
+    public void RecusarOrcamento()
+    {
+        ExigirStatus(StatusOrdemServico.AguardandoAprovacao);
+
+        Cancelar(MotivoCancelamentoOrdemServico.OrcamentoRecusado);
+    }
+
     public void IniciarExecucaoServico(Guid servicoId)
     {
         ExigirStatus(StatusOrdemServico.EmExecucao);

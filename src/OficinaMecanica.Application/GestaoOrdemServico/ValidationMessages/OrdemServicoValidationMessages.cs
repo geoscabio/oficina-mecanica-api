@@ -2,6 +2,8 @@ namespace OficinaMecanica.Application.GestaoOrdemServico.ValidationMessages;
 
 public static class OrdemServicoValidationMessages
 {
+    public const string RequestNotificarDecisaoOrcamentoObrigatorio = "Request para notificar decisao do orcamento e obrigatorio.";
+    public const string DecisaoOrcamentoObrigatoria = "Decisao do orcamento e obrigatoria.";
     public const string RequestAberturaOrdemServicoObrigatorio = "Request de abertura de ordem de serviço é obrigatório.";
     public const string RequestIniciarDiagnosticoObrigatorio = "Request para iniciar diagnóstico é obrigatório.";
     public const string RequestDefinirServicosObrigatorio = "Request para definir serviços é obrigatório.";
