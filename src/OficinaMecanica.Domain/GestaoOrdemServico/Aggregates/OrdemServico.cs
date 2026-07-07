@@ -105,6 +105,29 @@ public sealed class OrdemServico
         Status = StatusOrdemServico.EmExecucao;
     }
 
+    public void NotificarDecisaoOrcamento(DecisaoOrcamento decisao)
+    {
+        if (!Enum.IsDefined(decisao))
+        {
+            throw new DomainException(OrdemServicoErrorMessages.DecisaoOrcamentoInvalida);
+        }
+
+        if (decisao == DecisaoOrcamento.Aprovado)
+        {
+            IniciarExecucao();
+            return;
+        }
+
+        RecusarOrcamento();
+    }
+
+    private void RecusarOrcamento()
+    {
+        ExigirStatus(StatusOrdemServico.AguardandoAprovacao);
+
+        Cancelar(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
+    }
+
     public void IniciarExecucaoServico(Guid servicoId)
     {
         ExigirStatus(StatusOrdemServico.EmExecucao);

@@ -173,7 +173,7 @@ Bash, macOS ou Linux:
 cp .env.example .env
 ```
 
-O Docker Compose lê o arquivo `.env` automaticamente. Não é necessário criar o arquivo na mão. Se quiser trocar a senha do SQL Server ou o segredo JWT, edite os valores do `.env` antes de subir os containers.
+O Docker Compose lê o arquivo `.env` automaticamente. Não é necessário criar o arquivo na mão. Se quiser trocar a senha do SQL Server, o segredo JWT ou o token do webhook de orçamento, edite os valores do `.env` antes de subir os containers.
 
 Depois execute. Este comando é igual no Windows, macOS e Linux:
 
@@ -334,7 +334,7 @@ Use um dos usuários de demonstração abaixo para obter um token JWT.
 | Administrador | `admin` | `admin123` | Acesso completo aos fluxos protegidos |
 | Atendente | `atendente` | `atendente123` | Atendimento, clientes, veículos, abertura/andamento da OS e estoque |
 | Mecânico | `mecanico` | `mecanico123` | Diagnóstico, definição de serviços, reserva, execução e finalização |
-| Cliente | `cliente` | `cliente123` | Consulta de status da ordem de serviço |
+| Cliente | `cliente` | `cliente123` | Usuário demo mantido para avaliação local; a consulta de status da OS é pública por ID |
 
 ### Autorizar no Swagger
 
@@ -344,6 +344,24 @@ Use um dos usuários de demonstração abaixo para obter um token JWT.
 4. Clique em **Authorize**.
 5. Cole apenas o token JWT, sem escrever `Bearer` manualmente.
 6. Confirme em **Authorize**.
+
+### Endpoint externo de orçamento
+
+O recebimento da aprovacao ou reprovacao do orcamento do cliente e feito por endpoint externo dedicado:
+
+`POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/orcamento/notificacoes`
+
+Esse endpoint nao usa JWT de perfis internos. Para simular a integracao externa com seguranca simples, envie o header `X-Webhook-Token` com o mesmo valor configurado em `Integracoes:Orcamento:WebhookToken`.
+
+O segredo nao fica em `appsettings.json`: no Docker Compose ele vem da variavel `OFICINA_ORCAMENTO_WEBHOOK_TOKEN` do arquivo `.env`, mapeada para `Integracoes__Orcamento__WebhookToken`; no Kubernetes ele vem do Secret `oficina-api-secret`.
+
+Assim como o `Jwt__Secret`, a API valida essa configuracao na inicializacao e nao sobe se o token estiver ausente ou tiver menos de 32 caracteres. Para uso local sem Docker, configure a variavel de ambiente `Integracoes__Orcamento__WebhookToken` antes de executar a aplicacao.
+
+### Consulta pública de status
+
+A consulta de status da OS e publica por ID para representar o acompanhamento do cliente sem login obrigatorio:
+
+`GET /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/consultar-status`
 
 ---
 
@@ -371,7 +389,7 @@ O Swagger apresenta os contratos atualizados dos endpoints e deve ser usado para
 | 11 | Definir serviços | `PUT /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/definir-servicos` |
 | 12 | Reservar peças e insumos | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/reservar-pecas-insumos` |
 | 13 | Aguardar aprovação | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/aguardar-aprovacao` |
-| 14 | Iniciar execução da OS | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/iniciar-execucao` |
+| 14 | Notificar aprovação do orçamento externo | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/orcamento/notificacoes` |
 | 15 | Iniciar execução do serviço | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/servicos/{servicoId}/iniciar-execucao` |
 | 16 | Finalizar serviço | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/servicos/{servicoId}/finalizar` |
 | 17 | Finalizar OS | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/finalizar` |
@@ -471,19 +489,20 @@ Este projeto foi desenvolvido para fins acadêmicos. Algumas decisões foram fei
 
 - Os usuários demo existem apenas para facilitar a avaliação local.
 - O envio do orçamento ao cliente é representado como uma etapa externa ao sistema.
-- A aprovação ou reprovação do cliente é refletida por ações feitas pelo atendente na API.
+- A aprovação ou reprovação do cliente é recebida por endpoint externo de notificação de orçamento, protegido por `X-Webhook-Token`.
+- A consulta de status da OS é pública por ID para representar o acompanhamento do cliente sem login obrigatório.
 - A autenticação usa JWT com usuários demo, podendo evoluir para ASP.NET Identity ou provedor externo.
 - A solução é um monólito, mas foi organizada internamente por contextos, camadas e responsabilidades.
 - O Swagger documenta os contratos da API e auxilia na execução manual dos endpoints.
 - O Swagger é a documentação principal de execução manual; uma collection do Postman fica como melhoria complementar pós-MVP.
 
-### Limitações assumidas no MVP
+### Decisões técnicas e evolução recomendada
 
 | Item | Decisão para o MVP | Evolução recomendada |
 | --- | --- | --- |
-| Aprovação de orçamento | A chamada de iniciar execução representa que o orçamento foi aprovado fora do sistema | Criar endpoint/evento explícito de aprovação ou reprovação do cliente |
+| Webhook de orçamento | A decisão externa usa endpoint dedicado com header `X-Webhook-Token`; o segredo vem de `.env`/Secret e deve ter pelo menos 32 caracteres | Evoluir para assinatura HMAC, idempotência e trilha de auditoria |
 | Estoque insuficiente | A reserva retorna erro e bloqueia a operação | Avaliar cancelamento automático da OS quando essa regra for obrigatória |
-| Consulta de status pelo cliente | O usuário demo `Cliente` consulta por ID da OS | Vincular usuário autenticado a `ClienteId` real e validar posse da OS |
+| Consulta pública de status | O cliente acompanha a OS por ID sem login, conforme rota de acompanhamento prevista no desafio | Evoluir para código público de acompanhamento quando houver portal real |
 | Numeração da OS | O número é gerado com base no maior número existente | Usar sequence/identity transacional para alta concorrência |
 | Persistência | Repositórios simples ainda salvam diretamente; fluxos transacionais usam `IUnitOfWork` | Padronizar toda persistência em torno do Unit of Work |
 | Login demo | Usuários e senhas existem para facilitar avaliação local | Evoluir para hash de senha, ASP.NET Identity ou provedor externo |

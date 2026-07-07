@@ -20,6 +20,7 @@ public static class ApiServiceCollectionExtensions
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options => options.AddJwtSwagger());
         services.AddJwtAuthentication(configuration);
+        services.AddWebhookTokenAuthentication(configuration);
 
         services.Configure<ApiBehaviorOptions>(options =>
         {

@@ -32,6 +32,7 @@ services:
       Database__ApplyMigrationsOnStartup: "true"
       Database__SeedDemoData: "true"
       Jwt__Secret: ${OFICINA_JWT_SECRET:?Configure OFICINA_JWT_SECRET no arquivo .env antes de executar o docker compose.}
+      Integracoes__Orcamento__WebhookToken: ${OFICINA_ORCAMENTO_WEBHOOK_TOKEN:?Configure OFICINA_ORCAMENTO_WEBHOOK_TOKEN no arquivo .env antes de executar o docker compose.}
     ports:
       - "5093:8080"
 

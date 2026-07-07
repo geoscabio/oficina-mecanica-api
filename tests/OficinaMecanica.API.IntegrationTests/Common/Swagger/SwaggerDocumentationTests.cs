@@ -70,6 +70,51 @@ public sealed class SwaggerDocumentationTests : ApiIntegrationTestBase
     }
 
     [RequiresDockerFact]
+    public async Task Dado_EndpointWebhookOrcamento_Quando_GerarSwagger_Entao_DeveDocumentarTokenExternoSemBearer()
+    {
+        // Arrange
+        const string endpoint = "/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/orcamento/notificacoes";
+
+        // Act
+        var swagger = await GetJsonAsync("/swagger/v1/swagger.json");
+
+        // Assert
+        var operation = swagger
+            .GetProperty("paths")
+            .GetProperty(endpoint)
+            .GetProperty("post");
+
+        operation.TryGetProperty("security", out _).Should().BeFalse();
+
+        operation
+            .GetProperty("parameters")
+            .EnumerateArray()
+            .Should()
+            .Contain(parameter =>
+                parameter.GetProperty("name").GetString() == "X-Webhook-Token"
+                && parameter.GetProperty("in").GetString() == "header"
+                && parameter.GetProperty("required").GetBoolean());
+    }
+
+    [RequiresDockerFact]
+    public async Task Dado_EndpointConsultaStatus_Quando_GerarSwagger_Entao_NaoDeveExigirBearer()
+    {
+        // Arrange
+        const string endpoint = "/api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/consultar-status";
+
+        // Act
+        var swagger = await GetJsonAsync("/swagger/v1/swagger.json");
+
+        // Assert
+        var operation = swagger
+            .GetProperty("paths")
+            .GetProperty(endpoint)
+            .GetProperty("get");
+
+        operation.TryGetProperty("security", out _).Should().BeFalse();
+    }
+
+    [RequiresDockerFact]
     public async Task Dado_EndpointRemocao_Quando_GerarSwagger_Entao_DeveDocumentarNoContentSemBody()
     {
         // Arrange

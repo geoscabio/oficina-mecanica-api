@@ -279,6 +279,36 @@ public class OrdemServicoTests
     }
 
     [Fact]
+    public void Dado_OrdemServicoAguardandoAprovacao_Quando_NotificarRecusaOrcamento_Entao_DeveFicarCanceladaComMotivoReprovacaoOrcamento()
+    {
+        // Arrange
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacao();
+
+        // Act
+        ordemServico.NotificarDecisaoOrcamento(DecisaoOrcamento.Recusado);
+
+        // Assert
+        ordemServico.Status.Should().Be(StatusOrdemServico.Cancelada);
+        ordemServico.MotivoCancelamento.Should().Be(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
+        ordemServico.DataFim.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Dado_OrdemServicoEmDiagnostico_Quando_NotificarRecusaOrcamento_Entao_DeveLancarDomainException()
+    {
+        // Arrange
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnosticoComServico();
+
+        // Act
+        var acao = () => ordemServico.NotificarDecisaoOrcamento(DecisaoOrcamento.Recusado);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+    }
+
+    [Fact]
     public void Dado_OrdemServicoRecebida_Quando_IniciarExecucao_Entao_DeveLancarDomainException()
     {
         // Arrange

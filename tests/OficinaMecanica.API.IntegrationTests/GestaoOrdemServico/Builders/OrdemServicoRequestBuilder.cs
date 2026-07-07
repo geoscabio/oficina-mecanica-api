@@ -1,6 +1,7 @@
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.CancelarOrdemServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.DefinirServicos;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.NotificarDecisaoOrcamento;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
 using OficinaMecanica.Domain.GestaoOrdemServico.Enums;
 
@@ -65,5 +66,10 @@ public sealed class OrdemServicoRequestBuilder
     public CancelarOrdemServicoRequest BuildCancelamento(Guid ordemServicoId)
     {
         return new CancelarOrdemServicoRequest(ordemServicoId, _motivo);
+    }
+
+    public NotificarDecisaoOrcamentoRequest BuildNotificacaoOrcamento(Guid ordemServicoId, DecisaoOrcamento decisao)
+    {
+        return new NotificarDecisaoOrcamentoRequest(ordemServicoId, decisao);
     }
 }
