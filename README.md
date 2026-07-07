@@ -214,19 +214,20 @@ Além da execução via Docker Compose, o projeto também pode ser executado uti
 ### Recursos implementados
 
 - Namespace dedicado para a aplicação.
-- Deployment da API.
+- Deployment da API com Startup Probe, Liveness Probe e Readiness Probe.
 - Deployment do SQL Server.
 - Services para comunicação entre os Pods.
 - ConfigMap para configurações da aplicação.
 - Secrets para informações sensíveis.
 - PersistentVolumeClaim para persistência dos dados do SQL Server.
-- Horizontal Pod Autoscaler (HPA) baseado em utilização de CPU.
+- Horizontal Pod Autoscaler (HPA) baseado em utilização de CPU e memória.
 
 ### Pré-requisitos
 
 - Docker Desktop com Kubernetes habilitado.
 - `kubectl` configurado para acessar o cluster local.
 - Metrics Server instalado.
+> **Observação:** as probes da aplicação utilizam o endpoint `/api/health`, responsável por informar ao Kubernetes quando a aplicação está inicializada, saudável e pronta para receber requisições. O endpoint será implementado pela aplicação antes do deploy em ambiente AWS.
 
 ### Aplicação dos manifestos
 
@@ -241,6 +242,7 @@ kubectl get pods -n oficina
 kubectl get svc -n oficina
 kubectl get pvc -n oficina
 kubectl get hpa -n oficina
+kubectl describe hpa api-hpa -n oficina
 ```
 
 ### Acesso via Ingress
