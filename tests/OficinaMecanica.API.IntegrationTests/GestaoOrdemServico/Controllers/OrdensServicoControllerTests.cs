@@ -74,10 +74,8 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
 
         // Act
         var ordens = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar?tamanhoPagina=10");
-        var ordensAbertas = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar-abertas?tamanhoPagina=10");
         var ordensHistorico = await GetJsonAsync("/api/v1/gestao-ordem-servico/ordens-servico/listar-historico?tamanhoPagina=10");
         var itens = ordens.GetProperty("itens").EnumerateArray().ToArray();
-        var itensAbertos = ordensAbertas.GetProperty("itens").EnumerateArray().ToArray();
         var itensHistorico = ordensHistorico.GetProperty("itens").EnumerateArray().ToArray();
 
         // Assert
@@ -95,9 +93,6 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
             ordemEmDiagnosticoId,
             ordemRecebidaAntigaId,
             ordemRecebidaNovaId);
-
-        ordensAbertas.GetProperty("totalItens").GetInt32().Should().Be(5);
-        itensAbertos.Select(item => ObterGuid(item, "id")).Should().Equal(itens.Select(item => ObterGuid(item, "id")));
 
         ordensHistorico.GetProperty("totalItens").GetInt32().Should().Be(8);
         itensHistorico.Select(item => ObterString(item, "status")).Should().Contain(new[]

@@ -54,7 +54,6 @@ public sealed class OrdensServicoController : ControllerBase
     }
 
     [HttpGet("ordens-servico/listar")]
-    [HttpGet("ordens-servico/listar-abertas")]
     [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanico)]
     public async Task<IActionResult> Listar([FromServices] ListarOrdensServicoAbertasUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
     {
