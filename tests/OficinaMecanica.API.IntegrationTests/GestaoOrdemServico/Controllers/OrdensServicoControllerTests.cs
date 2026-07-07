@@ -312,7 +312,7 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
     {
         Client.DefaultRequestHeaders.Authorization = null;
         Client.DefaultRequestHeaders.Remove("X-Webhook-Token");
-        Client.DefaultRequestHeaders.Add("X-Webhook-Token", "webhook-orcamento-teste");
+        Client.DefaultRequestHeaders.Add("X-Webhook-Token", "webhook-orcamento-teste-local-2026");
     }
 }
 

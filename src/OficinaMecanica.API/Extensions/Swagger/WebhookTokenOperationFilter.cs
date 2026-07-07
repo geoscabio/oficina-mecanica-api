@@ -22,7 +22,7 @@ internal sealed class WebhookTokenOperationFilter : IOperationFilter
                 Name = WebhookTokenAuthorizationFilter.HeaderName,
                 In = ParameterLocation.Header,
                 Required = true,
-                Description = $"Token externo configurado em `{WebhookTokenAuthorizationFilter.ConfigurationKey}`."
+                Description = "Token externo configurado em `Integracoes:Orcamento:WebhookToken`."
             });
     }
 }

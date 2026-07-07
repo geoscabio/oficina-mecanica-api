@@ -43,6 +43,12 @@ spec:
                   name: oficina-api-secret
                   key: Jwt__Secret
 
+            - name: Integracoes__Orcamento__WebhookToken
+              valueFrom:
+                secretKeyRef:
+                  name: oficina-api-secret
+                  key: Integracoes__Orcamento__WebhookToken
+
             - name: ConnectionStrings__DefaultConnection
               valueFrom:
                 secretKeyRef:

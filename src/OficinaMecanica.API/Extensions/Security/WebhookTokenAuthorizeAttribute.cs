@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Options;
 using OficinaMecanica.API.Responses;
 using OficinaMecanica.Application.Common;
 
@@ -19,21 +20,19 @@ public sealed class WebhookTokenAuthorizeAttribute : TypeFilterAttribute
 internal sealed class WebhookTokenAuthorizationFilter : IAuthorizationFilter
 {
     public const string HeaderName = "X-Webhook-Token";
-    public const string ConfigurationKey = "Integracoes:Orcamento:WebhookToken";
 
-    private readonly IConfiguration _configuration;
+    private readonly WebhookTokenOptions _options;
 
-    public WebhookTokenAuthorizationFilter(IConfiguration configuration)
+    public WebhookTokenAuthorizationFilter(IOptions<WebhookTokenOptions> options)
     {
-        _configuration = configuration;
+        _options = options.Value;
     }
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        var expectedToken = _configuration[ConfigurationKey];
+        var expectedToken = _options.WebhookToken;
 
-        if (string.IsNullOrWhiteSpace(expectedToken)
-            || !context.HttpContext.Request.Headers.TryGetValue(HeaderName, out var providedToken)
+        if (!context.HttpContext.Request.Headers.TryGetValue(HeaderName, out var providedToken)
             || !TokensMatch(expectedToken, providedToken.ToString()))
         {
             context.Result = new UnauthorizedObjectResult(new ErrorResponse(ApiResponseMessages.NaoAutorizado, TipoErro.NaoAutorizado));

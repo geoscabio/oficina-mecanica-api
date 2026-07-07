@@ -173,7 +173,7 @@ Bash, macOS ou Linux:
 cp .env.example .env
 ```
 
-O Docker Compose lê o arquivo `.env` automaticamente. Não é necessário criar o arquivo na mão. Se quiser trocar a senha do SQL Server ou o segredo JWT, edite os valores do `.env` antes de subir os containers.
+O Docker Compose lê o arquivo `.env` automaticamente. Não é necessário criar o arquivo na mão. Se quiser trocar a senha do SQL Server, o segredo JWT ou o token do webhook de orçamento, edite os valores do `.env` antes de subir os containers.
 
 Depois execute. Este comando é igual no Windows, macOS e Linux:
 
@@ -353,11 +353,9 @@ O recebimento da aprovacao ou reprovacao do orcamento do cliente e feito por end
 
 Esse endpoint nao usa JWT de perfis internos. Para simular a integracao externa com seguranca simples, envie o header `X-Webhook-Token` com o mesmo valor configurado em `Integracoes:Orcamento:WebhookToken`.
 
-Em ambiente local, a configuracao recomendada e por variavel de ambiente:
+O segredo nao fica em `appsettings.json`: no Docker Compose ele vem da variavel `OFICINA_ORCAMENTO_WEBHOOK_TOKEN` do arquivo `.env`, mapeada para `Integracoes__Orcamento__WebhookToken`; no Kubernetes ele vem do Secret `oficina-api-secret`.
 
-```powershell
-$env:Integracoes__Orcamento__WebhookToken = "defina-um-token-local"
-```
+Assim como o `Jwt__Secret`, a API valida essa configuracao na inicializacao e nao sobe se o token estiver ausente ou tiver menos de 32 caracteres. Para uso local sem Docker, configure a variavel de ambiente `Integracoes__Orcamento__WebhookToken` antes de executar a aplicacao.
 
 ### Consulta pública de status
 
@@ -502,7 +500,7 @@ Este projeto foi desenvolvido para fins acadêmicos. Algumas decisões foram fei
 
 | Item | Decisão para o MVP | Evolução recomendada |
 | --- | --- | --- |
-| Webhook de orçamento | A decisão externa usa endpoint dedicado com header `X-Webhook-Token` configurado por ambiente | Evoluir para assinatura HMAC, idempotência e trilha de auditoria |
+| Webhook de orçamento | A decisão externa usa endpoint dedicado com header `X-Webhook-Token`; o segredo vem de `.env`/Secret e deve ter pelo menos 32 caracteres | Evoluir para assinatura HMAC, idempotência e trilha de auditoria |
 | Estoque insuficiente | A reserva retorna erro e bloqueia a operação | Avaliar cancelamento automático da OS quando essa regra for obrigatória |
 | Consulta pública de status | O cliente acompanha a OS por ID sem login, conforme rota de acompanhamento prevista no desafio | Evoluir para código público de acompanhamento quando houver portal real |
 | Numeração da OS | O número é gerado com base no maior número existente | Usar sequence/identity transacional para alta concorrência |
