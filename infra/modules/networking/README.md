@@ -12,6 +12,8 @@ Atualmente este módulo provisiona os seguintes recursos:
 
 - Virtual Private Cloud (VPC)
 - Internet Gateway
+- Elastic IP
+- NAT Gateway
 - Subnets públicas
 - Subnets privadas
 - Route Table pública
@@ -21,19 +23,23 @@ Atualmente este módulo provisiona os seguintes recursos:
 ## Arquitetura
 
 ```text
-                    Internet
-                        │
-                Internet Gateway
-                        │
-               Public Route Table
-                  │            │
-          Public Subnet A  Public Subnet B
-
-──────────────────────────────────────────────
-
-              Private Route Table
-                  │            │
-        Private Subnet A  Private Subnet B
+                         Internet
+                             │
+                     Internet Gateway
+                             │
+                 Public Route Table
+                  │                 │
+          Public Subnet A    Public Subnet B
+                  │
+            NAT Gateway
+                  │
+──────────────────────────────────────────────────────
+                  │
+            Private Route Table
+                  │
+       ┌──────────┴──────────┐
+       │                     │
+Private Subnet A     Private Subnet B
 ```
 
 ## Estrutura do módulo
@@ -42,6 +48,7 @@ Atualmente este módulo provisiona os seguintes recursos:
 networking/
 ├── internet-gateway.tf
 ├── locals.tf
+├── nat-gateway.tf
 ├── outputs.tf
 ├── README.md
 ├── route-tables.tf
@@ -50,14 +57,13 @@ networking/
 └── vpc.tf
 ```
 
-## Próximos passos
+## Decisões de arquitetura
 
-Este módulo será expandido nas próximas etapas do projeto para incluir:
+A VPC foi projetada seguindo a arquitetura recomendada pela AWS para aplicações executadas em ambientes privados.
 
-- Elastic IP
-- NAT Gateway
-- Rotas privadas para acesso à Internet
-- Tags específicas para integração com Amazon EKS
+Os recursos de banco de dados e Kubernetes são implantados em sub-redes privadas, enquanto o NAT Gateway permanece em uma subnet pública, permitindo que esses recursos realizem conexões de saída para serviços da AWS sem exposição direta à Internet.
+
+Essa arquitetura atende aos requisitos de isolamento de rede definidos para a segunda fase do Tech Challenge e aproxima a solução de um ambiente de produção.
 
 ## Boas práticas adotadas
 
