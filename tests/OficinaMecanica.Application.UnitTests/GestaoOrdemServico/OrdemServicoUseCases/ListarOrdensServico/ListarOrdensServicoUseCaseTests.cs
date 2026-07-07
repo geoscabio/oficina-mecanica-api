@@ -18,7 +18,7 @@ public class ListarOrdensServicoUseCaseTests
         var ordensServico = new[]
         {
             OrdemServicoTestDataFactory.CriarOrdemServicoRecebida(),
-            OrdemServicoTestDataFactory.CriarOrdemServicoFinalizada()
+            OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnostico()
         };
 
         var repository = CriarRepository(ordensServico, totalItens: ordensServico.Length);
