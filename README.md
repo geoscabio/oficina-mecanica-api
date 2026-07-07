@@ -229,6 +229,35 @@ Além da execução via Docker Compose, o projeto também pode ser executado uti
 - Metrics Server instalado.
 > **Observação:** as probes da aplicação utilizam o endpoint `/api/health`, responsável por informar ao Kubernetes quando a aplicação está inicializada, saudável e pronta para receber requisições. O endpoint será implementado pela aplicação antes do deploy em ambiente AWS.
 
+### Padronização das tags da infraestrutura
+
+Os módulos Terraform utilizam um conjunto de tags compartilhadas, centralizadas no arquivo:
+
+```text
+infra/environments/dev/locals.tf
+```
+
+Essas tags são repassadas para todos os módulos por meio da variável `tags`, garantindo padronização na identificação dos recursos provisionados e evitando duplicação de configuração entre os módulos de infraestrutura.
+
+### Registro de imagens (Amazon ECR)
+
+A infraestrutura Terraform cria automaticamente um repositório privado no Amazon Elastic Container Registry (ECR), responsável por armazenar as imagens Docker da aplicação que serão utilizadas durante o provisionamento do ambiente na AWS.
+
+A configuração do repositório contempla:
+
+- Tags de imagem imutáveis (`IMMUTABLE`), evitando a sobrescrita de versões já publicadas;
+- Verificação automática de vulnerabilidades (`scan_on_push`) a cada envio de imagem;
+- Criptografia padrão da AWS (`AES-256`);
+- Aplicação das tags compartilhadas da infraestrutura para padronização dos recursos provisionados.
+
+O repositório é provisionado pelo módulo Terraform `registry`, localizado em:
+
+```text
+infra/modules/registry
+```
+
+Sua utilização será integrada ao pipeline de CI/CD e ao provisionamento do cluster Amazon EKS nas próximas etapas do projeto.
+
 ### Aplicação dos manifestos
 
 ```bash
