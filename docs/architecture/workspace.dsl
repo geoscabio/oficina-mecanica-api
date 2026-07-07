@@ -253,17 +253,14 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
 
         systemLandscape "SystemLandscape" "Nivel 0 - paisagem de sistemas e plataformas relacionadas." {
             include *
-            autoLayout lr
         }
 
         systemContext oficina "SystemContext" "Nivel 1 - contexto do sistema Oficina Mecanica API." {
             include *
-            autoLayout lr
         }
 
         container oficina "Containers" "Nivel 2 - containers executaveis e banco de dados." {
             include *
-            autoLayout lr
         }
 
         component oficina.api "ComponentsApi" "Nivel 3 - componentes principais do monolito modular." {
@@ -274,7 +271,6 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
             include oficina.api.infrastructure
             include oficina.api.dbContext
             include oficina.database
-            autoLayout lr
         }
 
         component oficina.api "CodeWorkOrder" "Nivel 4 - detalhe de codigo do fluxo critico de Ordem de Servico." {
@@ -287,7 +283,6 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
             include oficina.api.unitOfWork
             include oficina.api.dbContext
             include oficina.database
-            autoLayout lr
         }
 
         dynamic oficina.api "DynamicOpenWorkOrder" "Fluxo dinamico - abertura de ordem de servico com servicos e pecas opcionais." {
@@ -299,7 +294,6 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
             oficina.api.openWorkOrderUseCase -> oficina.api.workOrderAggregate "Cria OS e registra itens iniciais"
             oficina.api.openWorkOrderUseCase -> oficina.api.unitOfWork "Confirma transacao"
             oficina.api.dbContext -> oficina.database "Persiste OS, itens e reservas"
-            autoLayout lr
         }
 
         dynamic oficina.api "DynamicBudgetDecision" "Fluxo dinamico - decisao externa de orcamento." {
@@ -311,22 +305,18 @@ workspace "Oficina Mecanica API" "Arquitetura C4 da API de oficina mecanica, com
             oficina.api.budgetDecisionUseCase -> oficina.api.stockAggregate "Estorna reservas quando reprovado"
             oficina.api.budgetDecisionUseCase -> oficina.api.unitOfWork "Confirma transacao"
             oficina.api.dbContext -> oficina.database "Atualiza status e estoque"
-            autoLayout lr
         }
 
         deployment oficina local "DeploymentLocalCompose" "Deployment - execucao local via Docker Compose." {
             include *
-            autoLayout lr
         }
 
         deployment oficina kubernetesLocal "DeploymentKubernetesLocal" "Deployment - Kubernetes local no Docker Desktop." {
             include *
-            autoLayout lr
         }
 
         deployment oficina awsDev "DeploymentAwsDev" "Deployment - infraestrutura AWS dev atual e proximos passos planejados." {
             include *
-            autoLayout lr
         }
 
         styles {
