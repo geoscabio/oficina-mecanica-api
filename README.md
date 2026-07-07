@@ -369,7 +369,9 @@ O endpoint oficial da Fase 2 para abrir Ordem de Servico permanece:
 
 `POST /api/v1/gestao-ordem-servico/ordens-servico/cadastrar`
 
-O projeto trabalha com cadastros previamente identificados por ID. Por isso, o payload de abertura recebe `clienteId` ou `documentoCliente`, `veiculoId`, `mecanicoId`, lista de servicos solicitados por ID e lista de pecas/insumos por ID e quantidade.
+O fluxo completo da aplicação prevê que cliente e veículo sejam previamente identificados ou cadastrados por meio dos endpoints específicos de Atendimento. Dessa forma, a abertura da Ordem de Serviço referencia cliente, veículo e mecânico por seus identificadores (ou documento do cliente, quando aplicável), preservando a consistência transacional e evitando duplicidade de cadastros.
+
+Os serviços e peças/insumos podem ser enviados já na abertura da Ordem de Serviço, quando conhecidos, ou definidos posteriormente durante a etapa de diagnóstico pelo mecânico, conforme o fluxo de negócio modelado no Domain Storytelling e Event Storming do projeto.
 
 Quando servicos ou pecas/insumos ainda nao se aplicarem na abertura, as listas devem ser enviadas vazias (`[]`). Quando forem enviadas, a OS ja registra esses itens, calcula o orcamento inicial e reserva estoque para pecas/insumos.
 
@@ -407,6 +409,16 @@ Exemplo com orcamento inicial:
 ```
 
 ---
+
+## 📚 Documentação da API (Swagger/OpenAPI)
+
+A documentação oficial da API é disponibilizada através do Swagger/OpenAPI da própria aplicação.
+
+Após executar o projeto localmente, toda a documentação dos endpoints poderá ser acessada em:
+
+`http://localhost:5093/swagger`
+
+O Swagger é a fonte oficial da documentação da API deste projeto e atende ao requisito do Tech Challenge.
 
 ## 🧪 Como testar a API
 
@@ -504,7 +516,13 @@ Também foi validado o funcionamento do Horizontal Pod Autoscaler (HPA), comprov
 
 ## 🧱 Banco de dados e seed
 
-A aplicação usa **EF Core** com **SQL Server 2022**. A versão validada no Docker Compose e nos Testcontainers é `mcr.microsoft.com/mssql/server:2022-latest`.
+A aplicação usa **EF Core** com **SQL Server 2022**.
+
+### Justificativa da escolha do SQL Server
+
+O SQL Server foi escolhido por sua aderência ao domínio relacional da aplicação, que exige integridade transacional entre Ordens de Serviço, estoque, clientes, veículos e serviços. A solução possui integração nativa com o Entity Framework Core, funciona de forma consistente tanto no Docker Compose quanto nos Testcontainers utilizados pelos testes automatizados e simplifica a execução e avaliação local durante o Tech Challenge.
+
+Esta é uma decisão arquitetural voltada ao contexto acadêmico do projeto e poderá evoluir conforme necessidades futuras da solução. A versão validada no Docker Compose e nos Testcontainers é `mcr.microsoft.com/mssql/server:2022-latest`.
 
 | Configuração | Função |
 | --- | --- |
