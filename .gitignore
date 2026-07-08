@@ -4,7 +4,6 @@ obj/
 .vscode/
 .sonarqube/
 TestResults/
-docs/
 *.user
 *.suo
 *.nupkg
