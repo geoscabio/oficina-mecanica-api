@@ -39,14 +39,14 @@ spec:
 
           startupProbe:
             httpGet:
-              path: /api/health
+              path: /swagger/index.html
               port: 8080
             failureThreshold: 30
             periodSeconds: 10
 
           livenessProbe:
             httpGet:
-              path: /api/health
+              path: /swagger/index.html
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 15
@@ -55,7 +55,7 @@ spec:
 
           readinessProbe:
             httpGet:
-              path: /api/health
+              path: /swagger/index.html
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10
