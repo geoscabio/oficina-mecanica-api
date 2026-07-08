@@ -5,6 +5,9 @@ obj/
 .sonarqube/
 TestResults/
 docs/
+!docs/
+!docs/architecture/
+!docs/architecture/**
 *.user
 *.suo
 *.nupkg
