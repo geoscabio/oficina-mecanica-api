@@ -300,7 +300,6 @@ Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separad
 
 | Evento | O que acontece |
 | --- | --- |
-| `Auto PR to Develop` | Em `push` de branch de trabalho, abre ou mantém PR automático para `develop`. |
 | `CI` | Em `pull_request` para `develop`, `release` ou `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
 | `CD Development` | Em `push` na `develop`, faz deploy em `development` e abre PR para `release`. |
 | `CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
@@ -323,9 +322,9 @@ A esteira falha se:
 feature/* -> PR develop -> deploy development -> PR release -> deploy homologation -> PR main -> deploy production
 ```
 
-O merge continua manual via PR e revisão. A automação só abre o próximo PR depois que a validação e a etapa operacional do estágio anterior passam.
+O PR de branch de trabalho para `develop` é manual para economizar GitHub Actions no plano gratuito. Depois do merge em `develop`, a automação abre o próximo PR somente após o deploy do estágio anterior passar.
 
-Para evitar automações acidentais, o deploy AWS real de `development` só executa com `AWS_DEPLOY_ENABLED=true`, e a abertura automática de PR só executa com `AUTO_PR_ENABLED=true`.
+Para evitar automações acidentais, o deploy AWS real de `development` só executa com `AWS_DEPLOY_ENABLED=true`, e os PRs automáticos de `develop -> release` e `release -> main` só executam com `AUTO_PR_ENABLED=true`.
 
 Branches `develop` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks quando o plano do GitHub permitir.
 

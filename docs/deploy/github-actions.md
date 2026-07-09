@@ -6,7 +6,6 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 
 | Workflow | Arquivo | Quando roda | Objetivo |
 | --- | --- | --- | --- |
-| `Auto PR to Develop` | `.github/workflows/auto-pr-develop.yml` | `push` em branch de trabalho | Abrir ou manter PR automático para `develop`. |
 | `CI` | `.github/workflows/ci.yml` | `pull_request` | Validar qualidade antes do merge. |
 | `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Fazer deploy em `development` e abrir PR para `release`. |
 | `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Registrar deploy lógico em `homologation` e abrir PR para `main`. |
@@ -22,7 +21,7 @@ Workflows reutilizáveis:
 
 ```text
 feature/*, bugfix/*, hotfix/* ...
-  -> PR automático para develop
+  -> PR manual para develop
   -> CI no pull request
   -> merge manual/revisado
   -> CD Development
@@ -41,10 +40,11 @@ No estágio `development`, o deploy AWS é o último passo antes da abertura do 
 
 ## CI
 
-O fluxo de integração tem dois workflows separados:
+O fluxo de integração economiza GitHub Actions no plano gratuito:
 
-- `.github/workflows/auto-pr-develop.yml`: em `push` nas branches `feature/**`, `bugfix/**`, `hotfix/**`, `fix/**`, `refactor/**`, `chore/**`, `docs/**`, `test/**` e `ci/**`, abre ou mantém PR para `develop`.
-- `.github/workflows/ci.yml`: em `pull_request` para `develop`, `release`, `release/**` ou `main`, executa os checks completos.
+- O PR de branch de trabalho para `develop` é aberto manualmente.
+- `.github/workflows/ci.yml` roda em `pull_request` para `develop`, `release`, `release/**` ou `main`.
+- PR automático fica reservado para os CDs: `develop -> release` e `release -> main`.
 
 Valida:
 
@@ -57,7 +57,7 @@ Valida:
 7. build local da imagem Docker, sem push para registry;
 8. dry-run client-side dos manifests `k8s/` e `infra/aws/k8s/`, sem subir cluster KinD no CI.
 
-Em `push` de branch de trabalho, a esteira não roda checks pesados. Ela apenas abre ou mantém o PR para `develop`; os checks completos rodam uma vez no próprio PR.
+Em `push` de branch de trabalho, a esteira não roda checks pesados nem abre PR automático. Os checks completos rodam uma vez no próprio PR.
 
 O workflow usa `concurrency` por branch/PR para cancelar execuções antigas quando um novo commit chega na mesma branch. Isso evita fila duplicada e reduz custo de tempo no GitHub Actions.
 
@@ -107,10 +107,10 @@ Workflow manual para remover recursos Kubernetes:
 | Nome | Tipo | Uso |
 | --- | --- | --- |
 | `AWS_DEPLOY_ENABLED` | Repository variable | Habilita deploy automático real em `development` quando `true`. |
-| `AUTO_PR_ENABLED` | Repository variable | Habilita abertura automática de PR quando `true`. |
+| `AUTO_PR_ENABLED` | Repository variable | Habilita PR automático após deploy: `develop -> release` e `release -> main`. |
 | `RELEASE_BRANCH` | Repository variable opcional | Nome da branch de release. Default: `release`. |
 
-Para usar `AUTO_PR_ENABLED=true`, também é necessário habilitar no GitHub:
+Para usar `AUTO_PR_ENABLED=true` nos workflows de CD, também é necessário habilitar no GitHub:
 
 ```text
 Settings > Actions > General > Workflow permissions >
