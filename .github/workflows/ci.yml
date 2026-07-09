@@ -57,5 +57,5 @@ jobs:
           gh pr create \
             --base develop \
             --head "$SOURCE_BRANCH" \
-            --title "ci(flow): promote $SOURCE_BRANCH to develop" \
+            --title "ci(flow): integrate $SOURCE_BRANCH into develop" \
             --body "PR automático aberto após a branch \`$SOURCE_BRANCH\` passar no CI. O merge continua manual, com revisão normal antes de integrar na \`develop\`."
