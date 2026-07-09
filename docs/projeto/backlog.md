@@ -5,6 +5,9 @@
 - [x] Database (RDS)
 - [x] Kubernetes (EKS)
 - [x] Service
-- [ ] GitHub Actions
+- [x] GitHub Actions
 - [x] Health Check
-- [ ] Documentacao Final
+- [x] Documentacao Final
+- [ ] Prints reais de SonarQube, OWASP ZAP, HPA e Terraform
+- [ ] Video de demonstracao
+- [ ] PDF final de entrega
