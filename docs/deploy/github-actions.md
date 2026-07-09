@@ -109,7 +109,7 @@ Destroy não fica acoplado na esteira de CD. A esteira faz delivery/deploy; o en
 | `AUTO_PR_ENABLED` | Repository variable | Habilita PR automático após deploy: `develop -> release` e `release -> main`. |
 | `RELEASE_BRANCH` | Repository variable opcional | Nome da branch de release. Default: `release`. |
 | `AWS_REGION` | Repository ou environment variable opcional | Região AWS. Default: `us-east-1`. |
-| `TF_STATE_BUCKET` | Environment variable opcional | Bucket S3 do Terraform state. Se ausente, o CD usa `oficina-mecanica-terraform-state-<account-id>`. |
+| `TF_STATE_BUCKET` | Environment variable obrigatória | Bucket S3 preexistente do Terraform state. A esteira não cria bucket automaticamente. |
 | `TF_STATE_KEY` | Environment variable opcional | Caminho do state. Default: `oficina-mecanica/development/terraform.tfstate`. |
 | `EKS_CLUSTER_ROLE_NAME` | Environment variable opcional | Role IAM existente para o cluster EKS. Default: `LabRole`. |
 | `EKS_NODE_ROLE_NAME` | Environment variable opcional | Role IAM existente para o node group. Default: `LabRole`. |

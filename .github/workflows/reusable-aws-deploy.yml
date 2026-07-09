@@ -58,39 +58,29 @@ jobs:
             exit 1
           fi
 
-      - name: Prepare Terraform backend
+      - name: Prepare deployment variables
         env:
-          TF_STATE_BUCKET_INPUT: ${{ vars.TF_STATE_BUCKET }}
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
         run: |
-          account_id="$(aws sts get-caller-identity --query Account --output text)"
-          state_bucket="${TF_STATE_BUCKET_INPUT:-oficina-mecanica-terraform-state-$account_id}"
+          if [ -z "$TF_STATE_BUCKET" ]; then
+            echo "TF_STATE_BUCKET environment variable is required."
+            echo "Create or choose the Terraform state bucket explicitly before enabling AWS deploy."
+            echo "The CD pipeline does not create Terraform backend resources automatically."
+            exit 1
+          fi
 
-          echo "TF_STATE_BUCKET=$state_bucket" >> "$GITHUB_ENV"
+          account_id="$(aws sts get-caller-identity --query Account --output text)"
+
           echo "AWS_ACCOUNT_ID=$account_id" >> "$GITHUB_ENV"
           echo "ECR_IMAGE_URI=$account_id.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY_NAME:sha-$GITHUB_SHA" >> "$GITHUB_ENV"
 
-          if aws s3api head-bucket --bucket "$state_bucket" 2>/dev/null; then
-            echo "Terraform state bucket already exists: $state_bucket"
-          else
-            echo "Creating Terraform state bucket: $state_bucket"
-
-            if [ "$AWS_REGION" = "us-east-1" ]; then
-              aws s3api create-bucket --bucket "$state_bucket" --region "$AWS_REGION"
-            else
-              aws s3api create-bucket \
-                --bucket "$state_bucket" \
-                --region "$AWS_REGION" \
-                --create-bucket-configuration LocationConstraint="$AWS_REGION"
-            fi
+          if ! aws s3api head-bucket --bucket "$TF_STATE_BUCKET" 2>/dev/null; then
+            echo "Terraform state bucket '$TF_STATE_BUCKET' does not exist or is not accessible."
+            echo "The CD pipeline will not create AWS resources implicitly."
+            exit 1
           fi
 
-          aws s3api put-bucket-versioning \
-            --bucket "$state_bucket" \
-            --versioning-configuration Status=Enabled
-
-          aws s3api put-bucket-encryption \
-            --bucket "$state_bucket" \
-            --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+          echo "Terraform state bucket confirmed: $TF_STATE_BUCKET"
 
       - name: Write Terraform variables
         env:

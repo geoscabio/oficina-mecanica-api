@@ -58,7 +58,7 @@ Repository variables:
 | `AUTO_PR_ENABLED` | `true` para abrir PR automático após deploy: `develop -> release` e `release -> main`. |
 | `RELEASE_BRANCH` | Opcional. Default: `release`. |
 | `AWS_REGION` | Opcional. Default: `us-east-1`. |
-| `TF_STATE_BUCKET` | Opcional. Bucket S3 do Terraform state; se ausente, a esteira usa `oficina-mecanica-terraform-state-<account-id>`. |
+| `TF_STATE_BUCKET` | Obrigatório para CD com Terraform. Deve apontar para um bucket S3 preexistente; a esteira não cria bucket automaticamente. |
 | `TF_STATE_KEY` | Opcional. Default: `oficina-mecanica/development/terraform.tfstate`. |
 | `EKS_CLUSTER_ROLE_NAME` | Opcional. Default: `LabRole`. |
 | `EKS_NODE_ROLE_NAME` | Opcional. Default: `LabRole`. |
@@ -101,4 +101,4 @@ terraform -chdir=infra/terraform/environments/dev destroy
 
 Como os recursos Kubernetes da API também estão no state, o `terraform destroy` remove Service/Load Balancer, Deployment, Secret, ConfigMap, Namespace, EKS, RDS, ECR, NAT Gateway e VPC.
 
-Por fim, conferir que não restaram EKS, EC2, RDS, NAT Gateway, ECR, Load Balancer ou bucket de state temporário ativo.
+Por fim, conferir que não restaram EKS, EC2, RDS, NAT Gateway, ECR ou Load Balancer ativos. Se o bucket de state foi criado apenas para a demonstração, remover também após confirmar que o destroy terminou com sucesso.
