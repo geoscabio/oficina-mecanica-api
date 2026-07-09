@@ -20,13 +20,16 @@ Executa a validacao principal do backend:
 4. `dotnet build OficinaMecanica.sln --configuration Release --no-restore`.
 5. `dotnet format OficinaMecanica.sln --verify-no-changes --no-restore`.
 6. `dotnet test` com Coverlet collector (`XPlat Code Coverage`).
-7. Gera relatorio com `ReportGenerator`.
-8. Publica o artifact `test-and-coverage-results`.
+7. Valida que nenhum teste foi ignorado antes de consolidar cobertura.
+8. Gera relatorio com `ReportGenerator`.
+9. Falha o pipeline se a cobertura global de linhas ficar abaixo de `90%`.
+10. Publica o artifact `test-and-coverage-results`.
 
 O artifact contem:
 
 - arquivos `.trx` dos testes;
 - `coverage.cobertura.xml`;
+- `coverage.opencover.xml`;
 - relatorio HTML e resumo Markdown da cobertura.
 
 ### `docker-image`
