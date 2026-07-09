@@ -60,13 +60,14 @@ kubectl apply --dry-run=client -R -f infra/k8s/aws/
 
 Para evitar dependencia de um cluster externo, o job cria um cluster KinD efemero no runner. Esse cluster existe apenas durante o workflow e serve para o `kubectl` descobrir os tipos de API durante o dry-run.
 
-### `deploy-kubernetes`
+### `deploy-local-kubernetes`
 
-Job manual e protegido por GitHub Environment.
+Job manual para cluster Kubernetes local.
 
 Condicoes:
 
 - roda apenas em `workflow_dispatch`;
+- exige selecionar `deployment_target=local-kubernetes`;
 - exige aprovacao no environment `local-kubernetes`;
 - precisa do secret `KUBE_CONFIG`.
 
@@ -77,9 +78,46 @@ Depois da aprovacao:
 3. aplica namespace, banco SQL Server, API, service, HPA e ingress;
 4. aguarda rollout de `sqlserver` e `oficina-api`.
 
+### `deploy-aws-academy`
+
+Job manual para demonstracao real no AWS Academy.
+
+Condicoes:
+
+- roda apenas em `workflow_dispatch`;
+- exige selecionar `deployment_target=aws-academy-deploy`;
+- exige aprovacao no environment `aws-academy`;
+- exige que a infraestrutura AWS ja exista via Terraform;
+- exige secrets temporarios da sessao AWS Academy atual.
+
+Depois da aprovacao:
+
+1. autentica na AWS Academy;
+2. faz login no ECR;
+3. faz build da imagem Docker;
+4. envia a imagem para o ECR criado pelo Terraform;
+5. configura o kubeconfig do EKS;
+6. cria ou atualiza o Secret da API no cluster;
+7. aplica os manifests de `infra/k8s/aws/`;
+8. aguarda rollout da API;
+9. imprime o endpoint do Service `LoadBalancer`.
+
+### `destroy-aws-academy-kubernetes`
+
+Job manual para remover somente os recursos Kubernetes da demonstracao AWS.
+
+Condicoes:
+
+- roda apenas em `workflow_dispatch`;
+- exige selecionar `deployment_target=aws-academy-destroy-k8s`;
+- exige aprovacao no environment `aws-academy`;
+- precisa das mesmas credenciais AWS temporarias usadas no deploy.
+
+Esse job remove Service, Deployment, Secret, ConfigMap e Namespace. Ele ajuda a apagar o Load Balancer criado pelo Kubernetes, mas nao substitui `terraform destroy`.
+
 ## Secrets e variables esperados
 
-### Obrigatorios para deploy manual
+### Obrigatorios para deploy local
 
 | Nome | Tipo | Uso |
 | --- | --- | --- |
@@ -97,6 +135,29 @@ Para gerar o valor em Base64 no PowerShell:
 | --- | --- | --- |
 | `GITHUB_TOKEN` | Secret automatico | Publicacao no GitHub Container Registry. |
 
+### Obrigatorios para deploy AWS Academy
+
+Environment `aws-academy`:
+
+| Nome | Tipo | Uso |
+| --- | --- | --- |
+| `AWS_ACCESS_KEY_ID` | Environment secret | Access key temporaria da sessao AWS Academy. |
+| `AWS_SECRET_ACCESS_KEY` | Environment secret | Secret key temporaria da sessao AWS Academy. |
+| `AWS_SESSION_TOKEN` | Environment secret | Session token temporario da sessao AWS Academy. |
+| `JWT_SECRET` | Environment secret | Chave JWT da API, com pelo menos 32 caracteres. |
+| `WEBHOOK_TOKEN` | Environment secret | Token do webhook de orcamento, com pelo menos 32 caracteres. |
+| `RDS_CONNECTION_STRING` | Environment secret | Connection string completa do RDS. |
+| `ECR_REPOSITORY_URL` | Environment variable | Output `terraform output ecr_repository_url`. |
+| `EKS_CLUSTER_NAME` | Environment variable | Output `terraform output eks_cluster_name`. |
+
+Exemplo de `RDS_CONNECTION_STRING`:
+
+```text
+Server=<rds-address>,1433;Database=OficinaMecanicaDb;User Id=adminoficina;Password=<senha-rds>;TrustServerCertificate=True;
+```
+
+Os secrets da AWS Academy expiram quando a sessao do lab expira. Atualize os secrets do environment antes de rodar o deploy real.
+
 ### Opcionais para registry externo
 
 | Nome | Tipo | Uso |
@@ -104,17 +165,62 @@ Para gerar o valor em Base64 no PowerShell:
 | `REGISTRY_USERNAME` | Repository secret | Usuario de registry externo. |
 | `REGISTRY_TOKEN` | Repository secret | Token de registry externo. |
 
-## Como trocar GHCR por ECR
+## Como aprovar o deploy AWS Academy
 
-O workflow usa GHCR por padrao para evitar custo e dependencia da AWS Academy. Para usar ECR na demonstracao:
+O botao de aprovacao nao aparece em runs de `pull_request`. Em PR, o job de deploy fica cinza/skipped porque deploy real nao deve rodar em validacao de PR.
 
-1. provisionar o ECR pelo modulo `infra/modules/registry`;
-2. executar `terraform output ecr_repository_url`;
-3. trocar `IMAGE_NAME` no workflow pelo repository URL do ECR;
-4. substituir o login GHCR por `aws-actions/configure-aws-credentials` e `aws-actions/amazon-ecr-login`;
-5. garantir que a imagem enviada ao ECR seja a mesma usada nos manifests AWS.
+Para abrir a aprovacao:
+
+1. Abra `Actions > CI/CD`.
+2. Clique em `Run workflow`.
+3. Escolha a branch do PR, por exemplo `feature/fase2-ci-cd`.
+4. Em `deployment_target`, selecione `aws-academy-deploy`.
+5. Clique em `Run workflow`.
+6. Abra o run criado.
+7. O job `Manual AWS Academy deploy` ficara aguardando aprovacao no environment `aws-academy`.
+8. Clique em `Review deployments`.
+9. Selecione `aws-academy`.
+10. Clique em `Approve and deploy`.
+
+Depois da aprovacao, o job faz build/push no ECR, aplica os manifests no EKS e imprime o endpoint da API.
 
 Nao executar `terraform apply` apenas para testar CI/CD sem aprovacao explicita e sem plano de `terraform destroy`.
+
+## Pre-requisitos antes do deploy AWS Academy
+
+1. Iniciar a sessao do AWS Academy Learner Lab.
+2. Configurar credenciais temporarias no environment `aws-academy`.
+3. Rodar Terraform localmente com aprovacao explicita:
+
+```powershell
+terraform -chdir=infra/environments/dev init
+terraform -chdir=infra/environments/dev plan
+terraform -chdir=infra/environments/dev apply
+```
+
+4. Copiar os outputs para as variables/secrets do environment:
+
+```powershell
+terraform -chdir=infra/environments/dev output ecr_repository_url
+terraform -chdir=infra/environments/dev output eks_cluster_name
+terraform -chdir=infra/environments/dev output rds_address
+```
+
+5. Rodar o workflow manual com `deployment_target=aws-academy-deploy`.
+
+## Cleanup obrigatorio AWS Academy
+
+Depois da demonstracao:
+
+1. Rode o workflow manual com `deployment_target=aws-academy-destroy-k8s`.
+2. Aguarde a remocao do Service `LoadBalancer`.
+3. Rode localmente:
+
+```powershell
+terraform -chdir=infra/environments/dev destroy
+```
+
+Nao deixar recursos ativos no AWS Academy apos a demonstracao.
 
 ## Execucao manual sem acesso ao cluster
 
@@ -136,9 +242,10 @@ kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
 No GitHub:
 
 1. abrir `Settings > Environments`;
-2. criar o environment `local-kubernetes`;
-3. adicionar reviewer obrigatorio;
-4. adicionar o secret `KUBE_CONFIG`;
-5. executar o workflow via `workflow_dispatch`.
+2. criar o environment `local-kubernetes`, se for usar deploy local remoto;
+3. criar o environment `aws-academy`, se for usar deploy real na AWS Academy;
+4. adicionar reviewer obrigatorio nos environments;
+5. adicionar os secrets e variables descritos nesta documentacao;
+6. executar o workflow via `workflow_dispatch`.
 
 Sem aprovacao no environment, o deploy real nao e executado.
