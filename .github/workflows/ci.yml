@@ -36,7 +36,7 @@ jobs:
     name: Open PR to develop
     runs-on: ubuntu-latest
     needs: quality-gate
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && vars.AUTO_PR_ENABLED == 'true'
 
     steps:
       - name: Checkout code

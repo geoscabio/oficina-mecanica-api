@@ -59,6 +59,7 @@ Repository variables:
 | Nome | Valor |
 | --- | --- |
 | `AWS_DEPLOY_ENABLED` | `true` apenas durante a janela de deploy/demonstração. |
+| `AUTO_PR_ENABLED` | `true` apenas depois de habilitar o GitHub Actions a criar PRs. |
 | `RELEASE_BRANCH` | Opcional. Default: `release`. |
 
 ## Deploy pela esteira

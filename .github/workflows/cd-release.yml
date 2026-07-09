@@ -32,7 +32,7 @@ jobs:
     name: Open PR to main
     runs-on: ubuntu-latest
     needs: deploy-homologation
-    if: needs.deploy-homologation.result == 'success'
+    if: needs.deploy-homologation.result == 'success' && vars.AUTO_PR_ENABLED == 'true'
 
     steps:
       - name: Checkout code

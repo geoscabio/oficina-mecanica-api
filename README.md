@@ -324,7 +324,7 @@ feature/* -> PR develop -> deploy development -> PR release -> deploy homologati
 
 O merge continua manual via PR e revisão. A automação só promove o próximo PR depois que a validação e o deploy do estágio anterior passam.
 
-Para evitar deploy acidental, os jobs AWS só executam quando `AWS_DEPLOY_ENABLED=true` estiver configurado no repositório. O cleanup Kubernetes fica no workflow `AWS Cleanup`.
+Para evitar automações acidentais, deploy AWS só executa com `AWS_DEPLOY_ENABLED=true`, e abertura automática de PR só executa com `AUTO_PR_ENABLED=true`.
 
 Branches `develop` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks.
 

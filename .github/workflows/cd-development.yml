@@ -34,7 +34,7 @@ jobs:
     name: Open PR to release
     runs-on: ubuntu-latest
     needs: deploy-development
-    if: needs.deploy-development.result == 'success'
+    if: needs.deploy-development.result == 'success' && vars.AUTO_PR_ENABLED == 'true'
 
     steps:
       - name: Checkout code

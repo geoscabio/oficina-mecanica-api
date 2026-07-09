@@ -115,7 +115,17 @@ Workflow manual para remover recursos Kubernetes:
 | Nome | Tipo | Uso |
 | --- | --- | --- |
 | `AWS_DEPLOY_ENABLED` | Repository variable | Habilita deploy automático quando `true`. |
+| `AUTO_PR_ENABLED` | Repository variable | Habilita abertura automática de PR quando `true`. |
 | `RELEASE_BRANCH` | Repository variable opcional | Nome da branch de release. Default: `release`. |
+
+Para usar `AUTO_PR_ENABLED=true`, também é necessário habilitar no GitHub:
+
+```text
+Settings > Actions > General > Workflow permissions >
+Allow GitHub Actions to create and approve pull requests
+```
+
+Sem essa permissão, o GitHub bloqueia a criação automática de PR por segurança.
 
 ## Environments
 
