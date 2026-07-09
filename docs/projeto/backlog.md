@@ -16,7 +16,7 @@
 - [x] GitHub Actions CI/CD.
 - [x] Git Flow automatizado com PR para `develop`, `release` e `main`.
 - [x] Bloqueio de cobertura mínima de 90% na esteira.
-- [x] Deploy automático por environment quando `AWS_DEPLOY_ENABLED=true`.
+- [x] Deploy real em `development` e deploy lógico em `homologation`/`production`.
 - [x] Cleanup Kubernetes AWS via workflow manual.
 - [x] Evidências versionadas em `docs/evidencias`.
 - [x] OpenAPI JSON versionado.

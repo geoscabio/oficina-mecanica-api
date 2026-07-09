@@ -22,11 +22,14 @@ jobs:
   deploy-homologation:
     name: Deploy homologation
     needs: quality-gate
-    if: vars.AWS_DEPLOY_ENABLED == 'true'
-    uses: ./.github/workflows/reusable-aws-deploy.yml
-    with:
-      environment_name: homologation
-    secrets: inherit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Register logical homologation deploy
+        run: |
+          echo "Homologation deploy is logical in this Tech Challenge repository."
+          echo "No AWS homologation resources are provisioned because the physical environment does not exist."
+          echo "The deploy flow continues through pull requests to keep the Git Flow complete and auditable."
 
   open-pr-to-main:
     name: Open PR to main
@@ -63,5 +66,5 @@ jobs:
           gh pr create \
             --base main \
             --head "$SOURCE_BRANCH" \
-            --title "ci(production): promote $SOURCE_BRANCH to main" \
-            --body "PR automático aberto após deploy bem-sucedido em homologation. Este PR deve exigir aprovação manual e branch protection antes do merge para \`main\`."
+            --title "ci(production): deploy $SOURCE_BRANCH to main" \
+            --body "PR automático aberto após deploy lógico em homologation. Este PR deve exigir aprovação manual antes do merge para \`main\`."

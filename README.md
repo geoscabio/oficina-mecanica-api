@@ -18,6 +18,7 @@ Projeto desenvolvido para o **Tech Challenge - Fase 2 da Pós Tech FIAP em Arqui
 - [☸️ Execução local com Kubernetes](#execucao-local-kubernetes)
 - [☁️ Deploy AWS](#deploy-aws)
 - [🔁 CI/CD](#cicd)
+- [🌿 Convenção Git Flow](#convencao-git-flow)
 - [🧪 Testes e qualidade](#testes-e-qualidade)
 - [🔐 Autenticação](#autenticacao)
 - [📚 Swagger, OpenAPI e collection](#swagger-openapi-collection)
@@ -266,7 +267,7 @@ kubectl describe hpa oficina-api-hpa -n oficina
 
 ## ☁️ Deploy AWS
 
-A infraestrutura é provisionada por Terraform e a aplicação é entregue automaticamente pela esteira Git Flow quando o ambiente de deploy está habilitado.
+A infraestrutura AWS real é provisionada por Terraform para o ambiente `development`. Os estágios `homologation` e `production` permanecem como deploys lógicos via Git Flow, mantendo rastreabilidade por PR mesmo sem ambientes físicos separados.
 
 > Regra operacional: qualquer recurso criado em ambiente temporário precisa ter cleanup Kubernetes e `terraform destroy` planejados após a demonstração.
 
@@ -274,11 +275,11 @@ A infraestrutura é provisionada por Terraform e a aplicação é entregue autom
 
 1. Provisionar a infraestrutura com Terraform em `infra/terraform/environments/dev`.
 2. Configurar secrets e variables nos GitHub Environments.
-3. Habilitar deploy com `AWS_DEPLOY_ENABLED=true`.
+3. Habilitar deploy com `AWS_DEPLOY_ENABLED=true` para o ambiente `development`.
 4. Integrar feature em `develop`.
 5. A esteira faz deploy em `development` e abre PR automático para `release`.
-6. O merge em `release` faz deploy em `homologation` e abre PR automático para `main`.
-7. O merge em `main` exige revisão/proteção e dispara o deploy em `production`.
+6. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
+7. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
 8. Ao final da demonstração, executar cleanup Kubernetes e `terraform destroy`.
 
 Guias:
@@ -302,8 +303,8 @@ Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separad
 | `CI` | `push` em branches de trabalho e `pull_request` para `develop`, `release` ou `main`. Valida build, format, testes, cobertura, Docker e Kubernetes. |
 | `CI` | Em `push` de branch de trabalho, abre PR automático para `develop` após a validação passar. |
 | `CD Development` | Em `push` na `develop`, valida qualidade, faz deploy em `development` e abre PR para `release`. |
-| `CD Release` | Em `push` na `release` ou `release/**`, valida qualidade, faz deploy em `homologation` e abre PR para `main`. |
-| `CD Production` | Em `push` na `main`, valida qualidade e faz deploy em `production`. |
+| `CD Release` | Em `push` na `release` ou `release/**`, valida qualidade, registra deploy lógico em `homologation` e abre PR para `main`. |
+| `CD Production` | Em `push` na `main`, valida qualidade e registra deploy lógico em `production`. |
 | `AWS Cleanup` | Execução manual para remover recursos Kubernetes do environment escolhido. |
 
 ### Bloqueios de qualidade
@@ -322,11 +323,20 @@ A esteira falha se:
 feature/* -> PR develop -> deploy development -> PR release -> deploy homologation -> PR main -> deploy production
 ```
 
-O merge continua manual via PR e revisão. A automação só promove o próximo PR depois que a validação e o deploy do estágio anterior passam.
+O merge continua manual via PR e revisão. A automação só abre o próximo PR depois que a validação e a etapa operacional do estágio anterior passam.
 
-Para evitar automações acidentais, deploy AWS só executa com `AWS_DEPLOY_ENABLED=true`, e abertura automática de PR só executa com `AUTO_PR_ENABLED=true`.
+Para evitar automações acidentais, o deploy AWS real de `development` só executa com `AWS_DEPLOY_ENABLED=true`, e a abertura automática de PR só executa com `AUTO_PR_ENABLED=true`.
 
 Branches `develop` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks.
+
+<a id="convencao-git-flow"></a>
+
+### Convenção Git Flow
+
+- Branches de trabalho nascem a partir de `develop` e seguem prefixos como `feature/*`, `bugfix/*`, `hotfix/*`, `docs/*`, `test/*`, `ci/*` e `chore/*`.
+- O fluxo padrão é `branch de trabalho -> PR develop -> deploy development -> PR release -> deploy homologation -> PR main -> deploy production`.
+- `develop`, `release` e `main` não recebem commit direto; toda integração deve passar por PR, revisão e checks obrigatórios.
+- Commits e PRs seguem Conventional Commits: `<type>(scope): <description>`, por exemplo `feat(api): add healthcheck endpoint`.
 
 ---
 
@@ -470,5 +480,5 @@ Itens manuais restantes:
 
 - Não versionar credenciais, tokens, kubeconfig, secrets ou outputs sensíveis.
 - Ambientes AWS temporários devem ser destruídos após a demonstração.
-- O deploy para `main` deve usar branch protection e environment `production` com aprovação obrigatória.
+- O deploy para `main` deve usar branch protection e aprovação obrigatória de PR.
 - O projeto prioriza rastreabilidade e simplicidade operacional para a banca avaliar sem depender de contexto externo.

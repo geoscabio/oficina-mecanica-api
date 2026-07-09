@@ -6,7 +6,7 @@ Esta pasta concentra os guias operacionais de CI/CD, Kubernetes, Terraform e AWS
 
 | Arquivo | Objetivo |
 | --- | --- |
-| `github-actions.md` | Explica a esteira Git Flow automatizada, artifacts, GHCR, deploys e PRs automáticos. |
+| `github-actions.md` | Explica a esteira Git Flow automatizada, artifacts, GHCR, deploy em development e PRs automáticos. |
 | `deploy-aws.md` | Checklist de provisionamento, configuração dos environments e encerramento seguro. |
 | `aws-academy-guardrails.md` | Regras obrigatórias para evitar gasto indevido no Learner Lab. |
 
@@ -16,5 +16,5 @@ Esta pasta concentra os guias operacionais de CI/CD, Kubernetes, Terraform e AWS
 - Planejar e executar `terraform destroy` ao final de qualquer teste AWS temporário.
 - Não versionar kubeconfig, tokens, senhas ou secrets reais.
 - Deploy em PR não executa: PR valida qualidade, build, imagem e manifests.
-- Deploy automático só roda em `develop`, `release`/`release/**` e `main` quando `AWS_DEPLOY_ENABLED=true`.
+- Deploy AWS automático só roda em `develop` quando `AWS_DEPLOY_ENABLED=true`; `release` e `main` fazem deploys lógicos.
 - A esteira bloqueia testes ignorados e cobertura global abaixo de 90%.

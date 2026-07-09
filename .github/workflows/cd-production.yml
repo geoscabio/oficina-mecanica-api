@@ -20,8 +20,11 @@ jobs:
   deploy-production:
     name: Deploy production
     needs: quality-gate
-    if: vars.AWS_DEPLOY_ENABLED == 'true'
-    uses: ./.github/workflows/reusable-aws-deploy.yml
-    with:
-      environment_name: production
-    secrets: inherit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Register logical production deploy
+        run: |
+          echo "Production deploy is logical in this Tech Challenge repository."
+          echo "No AWS production resources are provisioned because the physical environment does not exist."
+          echo "The main branch records the approved production deploy."

@@ -8,8 +8,8 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 | --- | --- | --- | --- |
 | `CI` | `.github/workflows/ci.yml` | Branches de trabalho e PRs | Validar qualidade e abrir PR automático para `develop` quando aplicável. |
 | `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Validar, fazer deploy em `development` e abrir PR para `release`. |
-| `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Validar, fazer deploy em `homologation` e abrir PR para `main`. |
-| `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Validar e fazer deploy em `production`. |
+| `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Validar, registrar deploy lógico em `homologation` e abrir PR para `main`. |
+| `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Validar e registrar deploy lógico em `production`. |
 | `AWS Cleanup` | `.github/workflows/aws-cleanup.yml` | Manual | Remover recursos Kubernetes do environment escolhido. |
 
 Workflows reutilizáveis:
@@ -25,18 +25,18 @@ feature/*, bugfix/*, hotfix/* ...
   -> PR automático para develop
   -> merge manual/revisado
   -> CD Development
-  -> deploy development
+  -> deploy development na AWS
   -> PR automático para release
   -> merge manual/revisado
   -> CD Release
-  -> deploy homologation
+  -> deploy lógico em homologation
   -> PR automático para main
   -> aprovação obrigatória
   -> CD Production
-  -> deploy production
+  -> deploy lógico em production
 ```
 
-O deploy é o último passo operacional de cada CD. A abertura automática do próximo PR acontece apenas depois do deploy bem-sucedido.
+No estágio `development`, o deploy AWS é o último passo antes da abertura do PR para `release`. Como `homologation` e `production` não existem como ambientes físicos neste projeto, esses estágios registram deploys lógicos para manter o Git Flow completo e auditável.
 
 ## CI
 
@@ -74,8 +74,8 @@ Fluxo:
 
 1. Quality gate.
 2. Publicação da imagem no GHCR.
-3. Deploy em `development`, se `AWS_DEPLOY_ENABLED=true`.
-4. PR automático de `develop` para `release`, se o deploy passou.
+3. Deploy real em `development`, se `AWS_DEPLOY_ENABLED=true`.
+4. PR automático de `develop` para `release`, somente se o deploy passou.
 
 ## CD Release
 
@@ -85,8 +85,8 @@ Fluxo:
 
 1. Quality gate.
 2. Publicação da imagem no GHCR.
-3. Deploy em `homologation`, se `AWS_DEPLOY_ENABLED=true`.
-4. PR automático de `release` para `main`, se o deploy passou.
+3. Deploy lógico em `homologation`.
+4. PR automático de `release` para `main`, se o deploy lógico passou.
 
 ## CD Production
 
@@ -96,9 +96,9 @@ Fluxo:
 
 1. Quality gate.
 2. Publicação da imagem no GHCR.
-3. Deploy em `production`, se `AWS_DEPLOY_ENABLED=true`.
+3. Deploy lógico em `production`.
 
-O environment `production` deve exigir aprovação/reviewer no GitHub.
+O PR para `main` deve exigir aprovação/reviewer antes do merge.
 
 ## AWS Cleanup
 
@@ -114,7 +114,7 @@ Workflow manual para remover recursos Kubernetes:
 
 | Nome | Tipo | Uso |
 | --- | --- | --- |
-| `AWS_DEPLOY_ENABLED` | Repository variable | Habilita deploy automático quando `true`. |
+| `AWS_DEPLOY_ENABLED` | Repository variable | Habilita deploy automático real em `development` quando `true`. |
 | `AUTO_PR_ENABLED` | Repository variable | Habilita abertura automática de PR quando `true`. |
 | `RELEASE_BRANCH` | Repository variable opcional | Nome da branch de release. Default: `release`. |
 
@@ -129,13 +129,11 @@ Sem essa permissão, o GitHub bloqueia a criação automática de PR por seguran
 
 ## Environments
 
-Criar:
+Obrigatório para o deploy real:
 
 - `development`
-- `homologation`
-- `production`
 
-Cada environment precisa conter:
+O environment `development` precisa conter:
 
 | Nome | Tipo | Uso |
 | --- | --- | --- |
@@ -156,6 +154,6 @@ Configurar branch protection em `develop` e `main`:
 - exigir PR antes de merge;
 - exigir status checks do `CI`;
 - exigir pelo menos um reviewer para `main`;
-- configurar reviewer obrigatório no environment `production`.
+- exigir reviewer obrigatório antes do merge para `main`.
 
-Com isso, o fluxo fica coerente: ninguém commita direto nas branches protegidas, e a promoção acontece por PR.
+Com isso, o fluxo fica coerente: ninguém commita direto nas branches protegidas, e o deploy entre estágios acontece por PR.

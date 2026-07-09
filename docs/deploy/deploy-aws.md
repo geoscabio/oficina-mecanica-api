@@ -1,6 +1,6 @@
 # Deploy na AWS
 
-Este guia descreve como preparar a infraestrutura e deixar a esteira Git Flow entregar a aplicação nos environments `development`, `homologation` e `production`.
+Este guia descreve como preparar a infraestrutura AWS real do environment `development` e como a esteira Git Flow executa deploy lógico para `homologation` e `production`.
 
 ## Regra de ouro
 
@@ -35,13 +35,11 @@ Use os valores nos GitHub Environments correspondentes.
 
 ## GitHub Environments
 
-Criar:
+Criar para o deploy real:
 
 - `development`
-- `homologation`
-- `production`
 
-Cada environment precisa conter:
+O environment `development` precisa conter:
 
 | Nome | Tipo | Uso |
 | --- | --- | --- |
@@ -58,7 +56,7 @@ Repository variables:
 
 | Nome | Valor |
 | --- | --- |
-| `AWS_DEPLOY_ENABLED` | `true` apenas durante a janela de deploy/demonstração. |
+| `AWS_DEPLOY_ENABLED` | `true` apenas durante a janela de deploy/demonstração em `development`. |
 | `AUTO_PR_ENABLED` | `true` apenas depois de habilitar o GitHub Actions a criar PRs. |
 | `RELEASE_BRANCH` | Opcional. Default: `release`. |
 
@@ -66,11 +64,11 @@ Repository variables:
 
 | Branch | Ambiente | Próximo passo automático |
 | --- | --- | --- |
-| `develop` | `development` | Abre PR para `release`. |
-| `release` ou `release/**` | `homologation` | Abre PR para `main`. |
-| `main` | `production` | Deploy final protegido por environment/branch protection. |
+| `develop` | `development` | Faz deploy AWS real e abre PR para `release`. |
+| `release` ou `release/**` | `homologation` | Registra deploy lógico e abre PR para `main`. |
+| `main` | `production` | Registra deploy lógico final após PR aprovado. |
 
-O deploy aplica os manifests de `infra/aws/k8s/`, aguarda rollout e imprime o endpoint do Load Balancer.
+O deploy AWS real aplica os manifests de `infra/aws/k8s/`, aguarda rollout e imprime o endpoint do Load Balancer. Os estágios `homologation` e `production` não provisionam AWS enquanto não existirem ambientes físicos separados.
 
 ## Validação
 
