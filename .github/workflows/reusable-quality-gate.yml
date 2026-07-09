@@ -2,16 +2,9 @@ name: Reusable Quality Gate
 
 on:
   workflow_call:
-    inputs:
-      publish_image:
-        description: "Publish image to GHCR after build."
-        required: false
-        default: false
-        type: boolean
 
 env:
   DOTNET_VERSION: "10.0.x"
-  IMAGE_NAME: ghcr.io/${{ github.repository }}
   AWS_K8S_PATH: infra/aws/k8s
 
 jobs:
@@ -27,6 +20,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.sln', '**/*.csproj', '**/*.props', '**/*.targets') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
         run: dotnet restore OficinaMecanica.sln
@@ -124,32 +125,15 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=sha,prefix=sha-
-            type=ref,event=branch
-            type=ref,event=pr
-
-      - name: Login to GitHub Container Registry
-        if: inputs.publish_image
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
-          push: ${{ inputs.publish_image }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          push: false
+          tags: oficina-mecanica-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   kubernetes-dry-run:
     name: Kubernetes manifest validation

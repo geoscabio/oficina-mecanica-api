@@ -1,17 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - "feature/**"
-      - "bugfix/**"
-      - "hotfix/**"
-      - "fix/**"
-      - "refactor/**"
-      - "chore/**"
-      - "docs/**"
-      - "test/**"
-      - "ci/**"
   pull_request:
     branches:
       - develop
@@ -21,41 +10,13 @@ on:
 
 permissions:
   contents: read
-  packages: write
-  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   quality-gate:
     name: Quality gate
     uses: ./.github/workflows/reusable-quality-gate.yml
-    with:
-      publish_image: false
     secrets: inherit
-
-  open-pr-to-develop:
-    name: Open PR to develop
-    runs-on: ubuntu-latest
-    needs: quality-gate
-    if: github.event_name == 'push' && vars.AUTO_PR_ENABLED == 'true'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Create or keep pull request
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SOURCE_BRANCH: ${{ github.ref_name }}
-        run: |
-          existing_pr="$(gh pr list --base develop --head "$SOURCE_BRANCH" --state open --json number --jq '.[0].number // empty')"
-
-          if [ -n "$existing_pr" ]; then
-            echo "Pull request #$existing_pr already exists for $SOURCE_BRANCH -> develop."
-            exit 0
-          fi
-
-          gh pr create \
-            --base develop \
-            --head "$SOURCE_BRANCH" \
-            --title "ci(flow): integrate $SOURCE_BRANCH into develop" \
-            --body "PR automático aberto após a branch \`$SOURCE_BRANCH\` passar no CI. O merge continua manual, com revisão normal antes de integrar na \`develop\`."

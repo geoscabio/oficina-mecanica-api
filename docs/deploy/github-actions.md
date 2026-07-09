@@ -6,10 +6,11 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 
 | Workflow | Arquivo | Quando roda | Objetivo |
 | --- | --- | --- | --- |
-| `CI` | `.github/workflows/ci.yml` | Branches de trabalho e PRs | Validar qualidade e abrir PR automático para `develop` quando aplicável. |
-| `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Validar, fazer deploy em `development` e abrir PR para `release`. |
-| `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Validar, registrar deploy lógico em `homologation` e abrir PR para `main`. |
-| `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Validar e registrar deploy lógico em `production`. |
+| `Auto PR to Develop` | `.github/workflows/auto-pr-develop.yml` | `push` em branch de trabalho | Abrir ou manter PR automático para `develop`. |
+| `CI` | `.github/workflows/ci.yml` | `pull_request` | Validar qualidade antes do merge. |
+| `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Fazer deploy em `development` e abrir PR para `release`. |
+| `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Registrar deploy lógico em `homologation` e abrir PR para `main`. |
+| `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Registrar deploy lógico em `production`. |
 | `AWS Cleanup` | `.github/workflows/aws-cleanup.yml` | Manual | Remover recursos Kubernetes do environment escolhido. |
 
 Workflows reutilizáveis:
@@ -21,8 +22,8 @@ Workflows reutilizáveis:
 
 ```text
 feature/*, bugfix/*, hotfix/* ...
-  -> CI
   -> PR automático para develop
+  -> CI no pull request
   -> merge manual/revisado
   -> CD Development
   -> deploy development na AWS
@@ -40,18 +41,10 @@ No estágio `development`, o deploy AWS é o último passo antes da abertura do 
 
 ## CI
 
-Executa para:
+O fluxo de integração tem dois workflows separados:
 
-- `feature/**`
-- `bugfix/**`
-- `hotfix/**`
-- `fix/**`
-- `refactor/**`
-- `chore/**`
-- `docs/**`
-- `test/**`
-- `ci/**`
-- `pull_request` para `develop`, `release`, `release/**` ou `main`
+- `.github/workflows/auto-pr-develop.yml`: em `push` nas branches `feature/**`, `bugfix/**`, `hotfix/**`, `fix/**`, `refactor/**`, `chore/**`, `docs/**`, `test/**` e `ci/**`, abre ou mantém PR para `develop`.
+- `.github/workflows/ci.yml`: em `pull_request` para `develop`, `release`, `release/**` ou `main`, executa os checks completos.
 
 Valida:
 
@@ -64,7 +57,11 @@ Valida:
 7. build da imagem Docker;
 8. dry-run dos manifests `k8s/` e `infra/aws/k8s/`.
 
-Em `push` de branch de trabalho, se tudo passar, abre PR automático para `develop`.
+Em `push` de branch de trabalho, a esteira não roda checks pesados. Ela apenas abre ou mantém o PR para `develop`; os checks completos rodam uma vez no próprio PR.
+
+O workflow usa `concurrency` por branch/PR para cancelar execuções antigas quando um novo commit chega na mesma branch. Isso evita fila duplicada e reduz custo de tempo no GitHub Actions.
+
+Para acelerar execuções repetidas, a esteira usa cache de pacotes NuGet e cache de camadas Docker via GitHub Actions cache.
 
 ## CD Development
 
@@ -72,10 +69,9 @@ Roda após merge/push na `develop`.
 
 Fluxo:
 
-1. Quality gate.
-2. Publicação da imagem no GHCR.
-3. Deploy real em `development`, se `AWS_DEPLOY_ENABLED=true`.
-4. PR automático de `develop` para `release`, somente se o deploy passou.
+1. Deploy real em `development`, se `AWS_DEPLOY_ENABLED=true`.
+2. Build e push da imagem para ECR durante o deploy AWS.
+3. PR automático de `develop` para `release`, somente se o deploy passou.
 
 ## CD Release
 
@@ -83,10 +79,8 @@ Roda após merge/push na `release` ou `release/**`.
 
 Fluxo:
 
-1. Quality gate.
-2. Publicação da imagem no GHCR.
-3. Deploy lógico em `homologation`.
-4. PR automático de `release` para `main`, se o deploy lógico passou.
+1. Deploy lógico em `homologation`.
+2. PR automático de `release` para `main`, se o deploy lógico passou.
 
 ## CD Production
 
@@ -94,9 +88,7 @@ Roda após merge/push na `main`.
 
 Fluxo:
 
-1. Quality gate.
-2. Publicação da imagem no GHCR.
-3. Deploy lógico em `production`.
+1. Deploy lógico em `production`.
 
 O PR para `main` deve exigir aprovação/reviewer antes do merge.
 
@@ -157,3 +149,5 @@ Configurar branch protection em `develop` e `main`:
 - exigir reviewer obrigatório antes do merge para `main`.
 
 Com isso, o fluxo fica coerente: ninguém commita direto nas branches protegidas, e o deploy entre estágios acontece por PR.
+
+> Observação: em repositório privado, branch protection pode depender do plano do GitHub. Se a proteção não estiver disponível, manter a regra operacional de não commitar direto em `develop` e `main`.

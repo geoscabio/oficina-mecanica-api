@@ -6,7 +6,7 @@ Esta pasta concentra os guias operacionais de CI/CD, Kubernetes, Terraform e AWS
 
 | Arquivo | Objetivo |
 | --- | --- |
-| `github-actions.md` | Explica a esteira Git Flow automatizada, artifacts, GHCR, deploy em development e PRs automáticos. |
+| `github-actions.md` | Explica a esteira Git Flow automatizada, artifacts, Docker, deploy em development e PRs automáticos. |
 | `deploy-aws.md` | Checklist de provisionamento, configuração dos environments e encerramento seguro. |
 | `aws-academy-guardrails.md` | Regras obrigatórias para evitar gasto indevido no Learner Lab. |
 

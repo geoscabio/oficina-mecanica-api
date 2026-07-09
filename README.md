@@ -134,7 +134,7 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 | Segurança | JWT Bearer, autorização por perfis e headers HTTP de segurança |
 | Validação e mapeamento | FluentValidation e AutoMapper |
 | Testes | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
-| DevOps | Docker, Docker Compose, Kubernetes, GitHub Actions e GHCR |
+| DevOps | Docker, Docker Compose, Kubernetes e GitHub Actions |
 | AWS | Terraform, ECR, EKS, RDS, VPC e Load Balancer |
 | Qualidade | `dotnet format`, cobertura mínima, SonarQube e OWASP ZAP |
 
@@ -300,11 +300,11 @@ Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separad
 
 | Evento | O que acontece |
 | --- | --- |
-| `CI` | `push` em branches de trabalho e `pull_request` para `develop`, `release` ou `main`. Valida build, format, testes, cobertura, Docker e Kubernetes. |
-| `CI` | Em `push` de branch de trabalho, abre PR automático para `develop` após a validação passar. |
-| `CD Development` | Em `push` na `develop`, valida qualidade, faz deploy em `development` e abre PR para `release`. |
-| `CD Release` | Em `push` na `release` ou `release/**`, valida qualidade, registra deploy lógico em `homologation` e abre PR para `main`. |
-| `CD Production` | Em `push` na `main`, valida qualidade e registra deploy lógico em `production`. |
+| `Auto PR to Develop` | Em `push` de branch de trabalho, abre ou mantém PR automático para `develop`. |
+| `CI` | Em `pull_request` para `develop`, `release` ou `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `CD Development` | Em `push` na `develop`, faz deploy em `development` e abre PR para `release`. |
+| `CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
+| `CD Production` | Em `push` na `main`, registra deploy lógico em `production`. |
 | `AWS Cleanup` | Execução manual para remover recursos Kubernetes do environment escolhido. |
 
 ### Bloqueios de qualidade
@@ -327,7 +327,7 @@ O merge continua manual via PR e revisão. A automação só abre o próximo PR 
 
 Para evitar automações acidentais, o deploy AWS real de `development` só executa com `AWS_DEPLOY_ENABLED=true`, e a abertura automática de PR só executa com `AUTO_PR_ENABLED=true`.
 
-Branches `develop` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks.
+Branches `develop` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks quando o plano do GitHub permitir.
 
 <a id="convencao-git-flow"></a>
 
