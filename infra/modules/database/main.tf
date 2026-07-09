@@ -20,7 +20,7 @@ resource "aws_security_group" "this" {
     from_port   = 1433
     to_port     = 1433
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = var.allowed_cidr_blocks
   }
 
   egress {
@@ -54,12 +54,12 @@ resource "aws_db_instance" "this" {
   vpc_security_group_ids = [aws_security_group.this.id]
 
   publicly_accessible = false
-  multi_az            = false
+  multi_az            = var.multi_az
 
-  backup_retention_period = 0
+  backup_retention_period = var.backup_retention_period
 
-  deletion_protection = false
-  skip_final_snapshot = true
+  deletion_protection = var.deletion_protection
+  skip_final_snapshot = var.skip_final_snapshot
 
   tags = merge(
     var.tags,

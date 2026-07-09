@@ -1,4 +1,5 @@
 ## Melhorias futuras
 
-- Implementar endpoint `/api/health`.
-- Substituir temporariamente as probes baseadas em `/swagger/index.html`.
+- Automatizar pipeline GitHub Actions com aprovacao manual para AWS Academy.
+- Evoluir secrets do Kubernetes para External Secrets ou AWS Secrets Manager quando houver ambiente persistente.
+- Criar roteiro de demonstracao com criacao e destruicao completa da infraestrutura.

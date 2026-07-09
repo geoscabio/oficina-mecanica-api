@@ -3,8 +3,8 @@
 - [x] Networking
 - [x] Registry (ECR)
 - [x] Database (RDS)
-- [ ] Kubernetes (EKS)
-- [ ] Service
+- [x] Kubernetes (EKS)
+- [x] Service
 - [ ] GitHub Actions
-- [ ] Health Check
-- [ ] Documentação Final
+- [x] Health Check
+- [ ] Documentacao Final

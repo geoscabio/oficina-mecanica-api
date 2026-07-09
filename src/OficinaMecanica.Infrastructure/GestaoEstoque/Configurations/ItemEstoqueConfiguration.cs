@@ -28,6 +28,9 @@ public sealed class ItemEstoqueConfiguration : IEntityTypeConfiguration<ItemEsto
         builder.Property(item => item.QuantidadeReservada)
             .IsRequired();
 
+        builder.Property<byte[]>("RowVersion")
+            .IsRowVersion();
+
         builder.HasIndex(item => item.PecaInsumoCatalogoId)
             .IsUnique();
 

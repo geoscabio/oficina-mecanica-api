@@ -114,7 +114,7 @@ public sealed class OrdensServicoController : ControllerBase
     [WebhookTokenAuthorize]
     public async Task<IActionResult> NotificarDecisaoOrcamento([FromServices] NotificarDecisaoOrcamentoUseCase useCase, Guid ordemServicoId, [FromBody] NotificarDecisaoOrcamentoRequest request, CancellationToken cancellationToken)
     {
-        var result = await useCase.ExecuteAsync(request is null ? request! : request with { OrdemServicoId = ordemServicoId }, cancellationToken);
+        var result = await useCase.ExecuteAsync(request with { OrdemServicoId = ordemServicoId }, cancellationToken);
 
         return this.ToActionResult(result);
     }

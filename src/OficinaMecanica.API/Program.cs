@@ -18,7 +18,7 @@ var startupLogger = app.Services
 
 startupLogger.LogInformation("Inicializando OficinaMecanica API...");
 await app.Services.InitializeDatabaseAsync(builder.Configuration);
-startupLogger.LogInformation("API pronta. Swagger disponivel em /swagger.");
+startupLogger.LogInformation("API pronta.");
 
 app.UseApiMiddlewares();
 app.MapApiEndpoints();

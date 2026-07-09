@@ -8,3 +8,13 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "eks_cluster_role_name" {
+  description = "Nome da IAM Role existente que sera usada pelo cluster EKS no AWS Academy."
+  type        = string
+}
+
+variable "eks_node_role_name" {
+  description = "Nome da IAM Role existente que sera usada pelo Managed Node Group no AWS Academy."
+  type        = string
+}

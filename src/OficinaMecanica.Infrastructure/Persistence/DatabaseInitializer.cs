@@ -33,6 +33,6 @@ public static class DatabaseInitializer
 
     private static bool IsEnabled(IConfiguration configuration, string key)
     {
-        return !bool.TryParse(configuration[key], out var enabled) || enabled;
+        return bool.TryParse(configuration[key], out var enabled) && enabled;
     }
 }

@@ -17,3 +17,13 @@ O deploy na AWS utilizará recursos específicos localizados em `infra/k8s/aws`.
 Motivo:
 
 Evitar impacto na execução local.
+
+---
+
+## AWS Academy
+
+Todo provisionamento AWS deve considerar o orçamento limitado do Learner Lab.
+
+Motivo:
+
+Evitar consumo indevido de créditos. Nenhum `terraform apply` deve ser executado sem aprovação explícita e sem plano de `terraform destroy` ao final da sessão.

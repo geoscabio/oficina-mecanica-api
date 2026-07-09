@@ -13,7 +13,7 @@ resource "aws_eks_node_group" "this" {
     max_size     = var.max_size
   }
 
-  capacity_type  = "ON_DEMAND"
+  capacity_type = "ON_DEMAND"
 
   update_config {
     max_unavailable = 1

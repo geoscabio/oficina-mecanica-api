@@ -1,7 +1,7 @@
 resource "aws_eks_cluster" "this" {
-  name = var.cluster_name
+  name    = var.cluster_name
   version = var.cluster_version
-  
+
   role_arn = data.aws_iam_role.eks_cluster.arn
 
   access_config {
@@ -14,8 +14,8 @@ resource "aws_eks_cluster" "this" {
 
     endpoint_private_access = true
     endpoint_public_access  = true
-    
-    public_access_cidrs = ["0.0.0.0/0"]
+
+    public_access_cidrs = var.cluster_endpoint_public_access_cidrs
   }
 
   tags = merge(
