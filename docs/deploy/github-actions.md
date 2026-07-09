@@ -7,7 +7,7 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 | Workflow | Arquivo | Quando roda | Objetivo |
 | --- | --- | --- | --- |
 | `CI` | `.github/workflows/ci.yml` | `pull_request` | Validar qualidade antes do merge. |
-| `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Fazer deploy em `development` e abrir PR para `release`. |
+| `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Executar Terraform apply, deploy em `development` e abrir PR para `release`. |
 | `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Registrar deploy lógico em `homologation` e abrir PR para `main`. |
 | `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Registrar deploy lógico em `production`. |
 
@@ -24,7 +24,7 @@ feature/*, bugfix/*, hotfix/* ...
   -> CI no pull request
   -> merge manual/revisado
   -> CD Development
-  -> deploy development na AWS
+  -> terraform apply + deploy development na AWS
   -> PR automático para release
   -> merge manual/revisado
   -> CD Release
@@ -68,9 +68,12 @@ Roda após merge/push na `develop`.
 
 Fluxo:
 
-1. Deploy real automático em `development`.
-2. Build e push da imagem para ECR durante o deploy AWS.
-3. PR automático de `develop` para `release`, somente se o deploy passou.
+1. Prepara backend S3 do Terraform state.
+2. Executa `terraform init`, `validate`, `plan` e `apply`.
+3. Provisiona VPC, ECR, RDS, EKS e recursos Kubernetes da API via Terraform.
+4. Faz build e push da imagem Docker para ECR.
+5. Reinicia o Deployment no EKS, aguarda rollout e imprime o endpoint do Load Balancer.
+6. Abre PR automático de `develop` para `release`, somente se o deploy passou.
 
 ## CD Release
 
@@ -93,12 +96,11 @@ O PR para `main` deve exigir aprovação/reviewer antes do merge.
 
 ## Encerramento AWS
 
-Cleanup e destroy não ficam na esteira. Eles são responsabilidade operacional dos desenvolvedores após a demonstração:
+Destroy não fica acoplado na esteira de CD. A esteira faz delivery/deploy; o encerramento do ambiente é uma operação explícita de Terraform feita pelos desenvolvedores após a demonstração.
 
-1. Alterar `infra/aws/lifecycle.yml` para `destroy: true`.
-2. Remover recursos Kubernetes publicados no EKS.
-3. Executar `terraform destroy` localmente usando o mesmo estado do `terraform apply`.
-4. Conferir no console AWS se não restaram EKS, RDS, ECR com imagens, Load Balancer, NAT Gateway ou EC2 ativos.
+1. Rodar `terraform init` apontando para o mesmo bucket/key de state usado pelo CD.
+2. Executar `terraform destroy` em `infra/terraform/environments/dev`.
+3. Conferir no console AWS se não restaram EKS, RDS, ECR, Load Balancer, NAT Gateway ou EC2 ativos.
 
 ## Repository variables
 
@@ -106,6 +108,11 @@ Cleanup e destroy não ficam na esteira. Eles são responsabilidade operacional 
 | --- | --- | --- |
 | `AUTO_PR_ENABLED` | Repository variable | Habilita PR automático após deploy: `develop -> release` e `release -> main`. |
 | `RELEASE_BRANCH` | Repository variable opcional | Nome da branch de release. Default: `release`. |
+| `AWS_REGION` | Repository ou environment variable opcional | Região AWS. Default: `us-east-1`. |
+| `TF_STATE_BUCKET` | Environment variable opcional | Bucket S3 do Terraform state. Se ausente, o CD usa `oficina-mecanica-terraform-state-<account-id>`. |
+| `TF_STATE_KEY` | Environment variable opcional | Caminho do state. Default: `oficina-mecanica/development/terraform.tfstate`. |
+| `EKS_CLUSTER_ROLE_NAME` | Environment variable opcional | Role IAM existente para o cluster EKS. Default: `LabRole`. |
+| `EKS_NODE_ROLE_NAME` | Environment variable opcional | Role IAM existente para o node group. Default: `LabRole`. |
 
 Para usar `AUTO_PR_ENABLED=true` nos workflows de CD, também é necessário habilitar no GitHub:
 
@@ -129,11 +136,9 @@ O environment `development` precisa conter:
 | `AWS_ACCESS_KEY_ID` | Secret | Access key do ambiente. |
 | `AWS_SECRET_ACCESS_KEY` | Secret | Secret key do ambiente. |
 | `AWS_SESSION_TOKEN` | Secret | Session token quando aplicável. |
+| `DB_PASSWORD` | Secret | Senha do usuário administrador do RDS usada pelo Terraform. |
 | `JWT_SECRET` | Secret | Chave JWT da API, com pelo menos 32 caracteres. |
 | `WEBHOOK_TOKEN` | Secret | Token do webhook de orçamento, com pelo menos 32 caracteres. |
-| `RDS_CONNECTION_STRING` | Secret | Connection string completa do banco. |
-| `ECR_REPOSITORY_URL` | Variable | Output `terraform output ecr_repository_url`. |
-| `EKS_CLUSTER_NAME` | Variable | Output `terraform output eks_cluster_name`. |
 
 ## Proteções obrigatórias recomendadas
 

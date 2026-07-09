@@ -26,4 +26,4 @@ Todo provisionamento AWS deve considerar o orçamento limitado do Learner Lab.
 
 Motivo:
 
-Evitar consumo indevido de créditos. Nenhum `terraform apply` deve ser executado sem aprovação explícita e sem plano de `terraform destroy` ao final da sessão.
+Evitar consumo indevido de créditos. Nenhum `terraform apply` manual ou via CD deve ocorrer sem aprovação explícita; no Git Flow, essa aprovação é o merge revisado para `develop`, sempre com plano de `terraform destroy` ao final da sessão.

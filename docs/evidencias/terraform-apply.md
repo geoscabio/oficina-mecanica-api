@@ -1,6 +1,6 @@
 # Evidencia: Terraform plan/apply/destroy
 
-Este arquivo documenta o procedimento seguro para AWS Academy. Nao executar `terraform apply` sem aprovacao explicita e sem janela reservada para `terraform destroy`.
+Este arquivo documenta o procedimento seguro para AWS Academy. Nao executar `terraform apply` manual ou via CD sem aprovacao explicita e sem janela reservada para `terraform destroy`.
 
 ## Guardrail obrigatorio
 
@@ -28,14 +28,27 @@ $env:TF_VAR_eks_node_role_name = "<LabEksNodeRole-...>"
 
 ```powershell
 terraform fmt -check -recursive infra
-terraform -chdir=infra/terraform/environments/dev init
+terraform -chdir=infra/terraform/environments/dev init -backend=false
 terraform -chdir=infra/terraform/environments/dev validate
+```
+
+## Planejamento com backend da esteira
+
+```powershell
+terraform -chdir=infra/terraform/environments/dev init `
+  -backend-config="bucket=<tf-state-bucket>" `
+  -backend-config="key=oficina-mecanica/development/terraform.tfstate" `
+  -backend-config="region=us-east-1" `
+  -backend-config="encrypt=true" `
+  -backend-config="use_lockfile=true" `
+  -reconfigure
+
 terraform -chdir=infra/terraform/environments/dev plan
 ```
 
 ## Aplicacao real
 
-> Executar somente com aprovacao explicita.
+> Executar somente com aprovacao explicita. No CD, a aprovacao e o merge revisado para `develop`.
 
 ```powershell
 terraform -chdir=infra/terraform/environments/dev apply
@@ -43,6 +56,8 @@ terraform -chdir=infra/terraform/environments/dev output
 ```
 
 ## Destroy obrigatorio
+
+Manter disponíveis as mesmas variáveis usadas no apply, principalmente `TF_VAR_db_password`, `TF_VAR_eks_cluster_role_name` e `TF_VAR_eks_node_role_name`.
 
 ```powershell
 terraform -chdir=infra/terraform/environments/dev destroy

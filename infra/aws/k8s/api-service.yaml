@@ -6,8 +6,8 @@ metadata:
   namespace: oficina
 
 spec:
-  # AWS Academy: LoadBalancer cria recurso cobrado. Aplicar somente durante demonstracao
-  # e remover com `kubectl delete -f infra/aws/k8s/api-service.yaml` ao finalizar.
+  # AWS Academy: LoadBalancer cria recurso cobrado. Remover com terraform destroy
+  # ao finalizar a demonstracao.
   type: LoadBalancer
 
   selector:

@@ -1,8 +1,8 @@
 # Secrets Kubernetes - AWS
 
-Os Secrets da API nao sao versionados neste repositorio. Crie-os diretamente no cluster EKS antes de aplicar o Deployment.
+Os Secrets da API nao sao versionados neste repositorio. No deploy AWS real, eles sao criados pelo Terraform a partir dos secrets do GitHub Environment.
 
-## Secret da API
+## Secret da API para teste manual
 
 ```powershell
 kubectl create secret generic oficina-api-secret `
@@ -15,6 +15,6 @@ kubectl create secret generic oficina-api-secret `
 ## Observacoes
 
 - Nao commitar valores reais de senha, token ou connection string.
-- A senha do RDS deve ser a mesma informada ao Terraform por `TF_VAR_db_password`.
+- A senha do RDS deve ser a mesma informada ao Terraform por `DB_PASSWORD` no GitHub Environment ou por variável local segura.
 - O endpoint do RDS pode ser obtido com `terraform output rds_address`.
-- Ao finalizar a demonstracao, remover os manifests com `kubectl delete -f infra/aws/k8s/`.
+- Ao finalizar a demonstracao, executar `terraform destroy` usando o mesmo backend/state da esteira.

@@ -12,7 +12,7 @@ Esta pasta concentra os guias operacionais de CI/CD, Kubernetes, Terraform e AWS
 
 ## Regras de segurança
 
-- Não executar `terraform apply` sem aprovação explícita.
+- Não executar `terraform apply` sem aprovação explícita; no CD, essa aprovação é o merge revisado para `develop`.
 - Planejar e executar `terraform destroy` ao final de qualquer teste AWS temporário.
 - Não versionar kubeconfig, tokens, senhas ou secrets reais.
 - Deploy em PR não executa: PR valida qualidade, build, imagem e manifests.

@@ -269,17 +269,16 @@ kubectl describe hpa oficina-api-hpa -n oficina
 
 A infraestrutura AWS real é provisionada por Terraform para o ambiente `development`. Os estágios `homologation` e `production` permanecem como deploys lógicos via Git Flow, mantendo rastreabilidade por PR mesmo sem ambientes físicos separados.
 
-> Regra operacional: qualquer recurso criado em ambiente temporário precisa ter cleanup Kubernetes e `terraform destroy` planejados após a demonstração.
+> Regra operacional: qualquer recurso criado em ambiente temporário precisa ter `terraform destroy` planejado após a demonstração.
 
 ### Fluxo operacional
 
-1. Provisionar a infraestrutura com Terraform em `infra/terraform/environments/dev`.
-2. Configurar secrets e variables nos GitHub Environments.
-3. Integrar feature em `develop`.
-4. A esteira faz deploy automático em `development` e abre PR automático para `release`.
+1. Configurar credenciais e secrets no GitHub Environment `development`.
+2. Integrar feature em `develop`.
+3. A esteira provisiona a infraestrutura com Terraform, publica a imagem no ECR, faz deploy no EKS e abre PR automático para `release`.
 5. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
 6. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
-7. Ao final da demonstração, executar cleanup Kubernetes e `terraform destroy`.
+7. Ao final da demonstração, executar `terraform destroy` usando o mesmo backend/state da esteira.
 
 Guias:
 
@@ -300,7 +299,7 @@ Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separad
 | Evento | O que acontece |
 | --- | --- |
 | `CI` | Em `pull_request` para `develop`, `release` ou `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
-| `CD Development` | Em `push` na `develop`, faz deploy em `development` e abre PR para `release`. |
+| `CD Development` | Em `push` na `develop`, executa Terraform apply, deploy em `development` e abre PR para `release`. |
 | `CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
 | `CD Production` | Em `push` na `main`, registra deploy lógico em `production`. |
 
@@ -465,7 +464,7 @@ Itens manuais restantes:
 
 - ⏳ Colar prints reais de SonarQube, OWASP ZAP, HPA e Terraform.
 - ⏳ Finalizar diagramas AWS, Kubernetes, Docker e CI/CD.
-- ⏳ Executar demonstração AWS com `destroy` ao final.
+- ⏳ Executar demonstração AWS com `terraform destroy` ao final.
 - ⏳ Gravar vídeo.
 - ⏳ Montar PDF final.
 

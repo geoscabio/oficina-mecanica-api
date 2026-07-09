@@ -9,8 +9,8 @@ on:
         type: string
 
 env:
-  AWS_REGION: us-east-1
-  AWS_K8S_PATH: infra/aws/k8s
+  TF_WORKING_DIRECTORY: infra/terraform/environments/dev
+  ECR_REPOSITORY_NAME: oficina-api
 
 jobs:
   deploy:
@@ -18,6 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment_name }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      TF_STATE_KEY: ${{ vars.TF_STATE_KEY || format('oficina-mecanica/{0}/terraform.tfstate', inputs.environment_name) }}
 
     steps:
       - name: Checkout code
@@ -31,72 +34,142 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Validate deployment configuration
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+        run: |
+          missing=""
+
+          for name in DB_PASSWORD JWT_SECRET WEBHOOK_TOKEN; do
+            if [ -z "${!name}" ]; then
+              missing="$missing $name"
+            fi
+          done
+
+          if [ -n "$missing" ]; then
+            echo "Missing required GitHub Environment secrets:$missing"
+            exit 1
+          fi
+
+      - name: Prepare Terraform backend
+        env:
+          TF_STATE_BUCKET_INPUT: ${{ vars.TF_STATE_BUCKET }}
+        run: |
+          account_id="$(aws sts get-caller-identity --query Account --output text)"
+          state_bucket="${TF_STATE_BUCKET_INPUT:-oficina-mecanica-terraform-state-$account_id}"
+
+          echo "TF_STATE_BUCKET=$state_bucket" >> "$GITHUB_ENV"
+          echo "AWS_ACCOUNT_ID=$account_id" >> "$GITHUB_ENV"
+          echo "ECR_IMAGE_URI=$account_id.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY_NAME:sha-$GITHUB_SHA" >> "$GITHUB_ENV"
+
+          if aws s3api head-bucket --bucket "$state_bucket" 2>/dev/null; then
+            echo "Terraform state bucket already exists: $state_bucket"
+          else
+            echo "Creating Terraform state bucket: $state_bucket"
+
+            if [ "$AWS_REGION" = "us-east-1" ]; then
+              aws s3api create-bucket --bucket "$state_bucket" --region "$AWS_REGION"
+            else
+              aws s3api create-bucket \
+                --bucket "$state_bucket" \
+                --region "$AWS_REGION" \
+                --create-bucket-configuration LocationConstraint="$AWS_REGION"
+            fi
+          fi
+
+          aws s3api put-bucket-versioning \
+            --bucket "$state_bucket" \
+            --versioning-configuration Status=Enabled
+
+          aws s3api put-bucket-encryption \
+            --bucket "$state_bucket" \
+            --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+
+      - name: Write Terraform variables
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+          EKS_CLUSTER_ROLE_NAME: ${{ vars.EKS_CLUSTER_ROLE_NAME || 'LabRole' }}
+          EKS_NODE_ROLE_NAME: ${{ vars.EKS_NODE_ROLE_NAME || 'LabRole' }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          values = {
+              "aws_region": os.environ["AWS_REGION"],
+              "db_password": os.environ["DB_PASSWORD"],
+              "eks_cluster_role_name": os.environ["EKS_CLUSTER_ROLE_NAME"],
+              "eks_node_role_name": os.environ["EKS_NODE_ROLE_NAME"],
+              "api_deploy_enabled": True,
+              "api_image_uri": os.environ["ECR_IMAGE_URI"],
+              "jwt_secret": os.environ["JWT_SECRET"],
+              "webhook_token": os.environ["WEBHOOK_TOKEN"],
+          }
+
+          target = Path(os.environ["TF_WORKING_DIRECTORY"]) / "zz_ci.auto.tfvars.json"
+          target.write_text(json.dumps(values), encoding="utf-8")
+          PY
+
+      - name: Terraform init
+        run: |
+          terraform -chdir="$TF_WORKING_DIRECTORY" init \
+            -backend-config="bucket=$TF_STATE_BUCKET" \
+            -backend-config="key=$TF_STATE_KEY" \
+            -backend-config="region=$AWS_REGION" \
+            -backend-config="encrypt=true" \
+            -backend-config="use_lockfile=true" \
+            -reconfigure \
+            -input=false
+
+      - name: Terraform validate
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" validate
+
+      - name: Terraform plan
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -input=false -out=tfplan
+
+      - name: Terraform apply
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve tfplan
+
+      - name: Read Terraform outputs
+        run: |
+          echo "EKS_CLUSTER_NAME=$(terraform -chdir="$TF_WORKING_DIRECTORY" output -raw eks_cluster_name)" >> "$GITHUB_ENV"
+
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push image to ECR
-        env:
-          ECR_REPOSITORY_URL: ${{ vars.ECR_REPOSITORY_URL }}
-          IMAGE_TAG: sha-${{ github.sha }}
         run: |
-          if [ -z "$ECR_REPOSITORY_URL" ]; then
-            echo "ECR_REPOSITORY_URL environment variable is required."
-            exit 1
+          image_tag="sha-$GITHUB_SHA"
+
+          if aws ecr describe-images --repository-name "$ECR_REPOSITORY_NAME" --image-ids imageTag="$image_tag" >/dev/null 2>&1; then
+            echo "Image $ECR_IMAGE_URI already exists. Skipping Docker push."
+            exit 0
           fi
 
-          docker build -t "$ECR_REPOSITORY_URL:$IMAGE_TAG" .
-          docker push "$ECR_REPOSITORY_URL:$IMAGE_TAG"
-          echo "ECR_IMAGE_URI=$ECR_REPOSITORY_URL:$IMAGE_TAG" >> "$GITHUB_ENV"
+          docker build -t "$ECR_IMAGE_URI" .
+          docker push "$ECR_IMAGE_URI"
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
 
       - name: Configure EKS kubeconfig
-        env:
-          EKS_CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME }}
         run: |
-          if [ -z "$EKS_CLUSTER_NAME" ]; then
-            echo "EKS_CLUSTER_NAME environment variable is required."
-            exit 1
-          fi
-
           aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
           kubectl config current-context
 
-      - name: Apply namespace and configuration
-        run: |
-          kubectl apply -f "$AWS_K8S_PATH/namespace.yaml"
-          kubectl apply -f "$AWS_K8S_PATH/configmap.yaml"
-
-      - name: Apply Kubernetes secrets
-        env:
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
-          RDS_CONNECTION_STRING: ${{ secrets.RDS_CONNECTION_STRING }}
-        run: |
-          if [ -z "$JWT_SECRET" ] || [ -z "$WEBHOOK_TOKEN" ] || [ -z "$RDS_CONNECTION_STRING" ]; then
-            echo "JWT_SECRET, WEBHOOK_TOKEN and RDS_CONNECTION_STRING secrets are required."
-            exit 1
-          fi
-
-          kubectl create secret generic oficina-api-secret \
-            -n oficina \
-            --from-literal=Jwt__Secret="$JWT_SECRET" \
-            --from-literal=Integracoes__Orcamento__WebhookToken="$WEBHOOK_TOKEN" \
-            --from-literal=ConnectionStrings__DefaultConnection="$RDS_CONNECTION_STRING" \
-            --dry-run=client \
-            -o yaml | kubectl apply -f -
-
-      - name: Deploy API to EKS
-        run: |
-          cp "$AWS_K8S_PATH/api-deployment.yaml" /tmp/api-deployment.yaml
-          sed -i "s|image: .*|image: $ECR_IMAGE_URI|g" /tmp/api-deployment.yaml
-
-          kubectl apply -f /tmp/api-deployment.yaml
-          kubectl apply -f "$AWS_K8S_PATH/api-service.yaml"
-
       - name: Wait for rollout
         run: |
+          kubectl rollout restart deployment/oficina-api -n oficina
           kubectl rollout status deployment/oficina-api -n oficina --timeout=300s
           kubectl get pods -n oficina -o wide
           kubectl get svc oficina-api -n oficina

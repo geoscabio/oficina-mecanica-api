@@ -18,3 +18,29 @@ variable "eks_node_role_name" {
   description = "Nome da IAM Role existente que sera usada pelo Managed Node Group no AWS Academy."
   type        = string
 }
+
+variable "api_deploy_enabled" {
+  description = "Habilita o deploy da API no EKS gerenciado pelo Terraform."
+  type        = bool
+  default     = false
+}
+
+variable "api_image_uri" {
+  description = "Imagem Docker completa da API publicada no ECR."
+  type        = string
+  default     = ""
+}
+
+variable "jwt_secret" {
+  description = "Chave JWT usada pela API."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "webhook_token" {
+  description = "Token do webhook de orcamento."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
