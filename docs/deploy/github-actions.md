@@ -54,14 +54,14 @@ Valida:
 4. testes com cobertura;
 5. zero testes ignorados;
 6. cobertura global mínima de `90%`;
-7. build da imagem Docker;
-8. dry-run dos manifests `k8s/` e `infra/aws/k8s/`.
+7. build local da imagem Docker, sem push para registry;
+8. dry-run client-side dos manifests `k8s/` e `infra/aws/k8s/`, sem subir cluster KinD no CI.
 
 Em `push` de branch de trabalho, a esteira não roda checks pesados. Ela apenas abre ou mantém o PR para `develop`; os checks completos rodam uma vez no próprio PR.
 
 O workflow usa `concurrency` por branch/PR para cancelar execuções antigas quando um novo commit chega na mesma branch. Isso evita fila duplicada e reduz custo de tempo no GitHub Actions.
 
-Para acelerar execuções repetidas, a esteira usa cache de pacotes NuGet e cache de camadas Docker via GitHub Actions cache.
+Para acelerar execuções repetidas, a esteira usa cache de pacotes NuGet e cache de camadas Docker via GitHub Actions cache. A validação Kubernetes fica leve no PR; a validação real contra cluster acontece no deploy AWS em EKS.
 
 ## CD Development
 
