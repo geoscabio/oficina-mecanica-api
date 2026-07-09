@@ -1,0 +1,178 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "feature/**"
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+
+jobs:
+  build-test:
+    name: Build, format and tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore OficinaMecanica.sln
+
+      - name: Build solution
+        run: dotnet build OficinaMecanica.sln --configuration Release --no-restore
+
+      - name: Verify formatting
+        run: dotnet format OficinaMecanica.sln --verify-no-changes --no-restore
+
+      - name: Run tests with coverage
+        run: >
+          dotnet test OficinaMecanica.sln
+          --configuration Release
+          --no-build
+          --collect:"XPlat Code Coverage"
+          --results-directory ./TestResults
+          --logger "trx;LogFileName=test-results.trx"
+
+      - name: Generate coverage report
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:"TestResults/CoverageReport" \
+            -reporttypes:"HtmlInline_AzurePipelines;Cobertura;MarkdownSummaryGithub"
+
+      - name: Upload test and coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-and-coverage-results
+          path: |
+            TestResults/**/*.trx
+            TestResults/**/coverage.cobertura.xml
+            TestResults/CoverageReport/**
+          if-no-files-found: error
+
+  docker-image:
+    name: Build and publish Docker image
+    runs-on: ubuntu-latest
+    needs: build-test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=ref,event=branch
+            type=ref,event=pr
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  kubernetes-dry-run:
+    name: Kubernetes manifest validation
+    runs-on: ubuntu-latest
+    needs: docker-image
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Create ephemeral KinD cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: ci-validation
+
+      - name: Validate local Kubernetes manifests
+        run: kubectl apply --dry-run=client -R -f k8s/
+
+      - name: Validate AWS Kubernetes manifests
+        run: kubectl apply --dry-run=client -R -f infra/k8s/aws/
+
+  deploy-kubernetes:
+    name: Manual Kubernetes deploy
+    runs-on: ubuntu-latest
+    needs: kubernetes-dry-run
+    if: github.event_name == 'workflow_dispatch'
+    environment:
+      name: local-kubernetes
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Validate manifests against target cluster
+        run: kubectl apply --dry-run=client -R -f k8s/
+
+      - name: Apply database manifests
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/sqlserver-secret.yaml
+          kubectl apply -f k8s/sqlserver-pvc.yaml
+          kubectl apply -f k8s/sqlserver-deployment.yaml
+          kubectl apply -f k8s/sqlserver-service.yaml
+
+      - name: Apply API manifests
+        run: |
+          kubectl apply -f k8s/api-configmap.yaml
+          kubectl apply -f k8s/api-secret.yaml
+          kubectl apply -f k8s/api-deployment.yaml
+          kubectl apply -f k8s/api-service.yaml
+          kubectl apply -f k8s/api-hpa.yaml
+          kubectl apply -f k8s/api-ingress.yaml
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
+          kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
