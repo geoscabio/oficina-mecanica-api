@@ -1,35 +1,46 @@
 # GitHub Actions CI/CD
 
-O workflow principal fica em `.github/workflows/ci-cd.yml` e implementa um Git Flow automatizado com validação contínua, entrega progressiva e promoção por PR.
+A esteira foi separada em workflows menores para deixar o Git Flow simples de visualizar e operar.
 
-## Fluxo
+## Workflows
+
+| Workflow | Arquivo | Quando roda | Objetivo |
+| --- | --- | --- | --- |
+| `CI` | `.github/workflows/ci.yml` | Branches de trabalho e PRs | Validar qualidade e abrir PR automático para `develop` quando aplicável. |
+| `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Validar, fazer deploy em `development` e abrir PR para `release`. |
+| `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Validar, fazer deploy em `homologation` e abrir PR para `main`. |
+| `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Validar e fazer deploy em `production`. |
+| `AWS Cleanup` | `.github/workflows/aws-cleanup.yml` | Manual | Remover recursos Kubernetes do environment escolhido. |
+
+Workflows reutilizáveis:
+
+- `.github/workflows/reusable-quality-gate.yml`
+- `.github/workflows/reusable-aws-deploy.yml`
+
+## Fluxo esperado
 
 ```text
 feature/*, bugfix/*, hotfix/* ...
   -> CI
   -> PR automático para develop
   -> merge manual/revisado
+  -> CD Development
   -> deploy development
   -> PR automático para release
   -> merge manual/revisado
+  -> CD Release
   -> deploy homologation
   -> PR automático para main
   -> aprovação obrigatória
+  -> CD Production
   -> deploy production
 ```
 
-## Gatilhos
+O deploy é o último passo operacional de cada CD. A abertura automática do próximo PR acontece apenas depois do deploy bem-sucedido.
 
-| Evento | Resultado |
-| --- | --- |
-| `push` em branches de trabalho | Valida build/testes/cobertura, build da imagem Docker, manifests Kubernetes e abre PR para `develop`. |
-| `pull_request` para `develop`, `release` ou `main` | Validação completa antes do merge. |
-| `push` em `develop` | Validação completa, deploy em `development` quando habilitado e PR automático para `release`. |
-| `push` em `release` ou `release/**` | Validação completa, deploy em `homologation` quando habilitado e PR automático para `main`. |
-| `push` em `main` | Validação completa e deploy em `production` protegido por regras do repositório/environment. |
-| `workflow_dispatch` | Execução complementar de CI ou cleanup Kubernetes. |
+## CI
 
-Branches de trabalho cobertas:
+Executa para:
 
 - `feature/**`
 - `bugfix/**`
@@ -40,107 +51,85 @@ Branches de trabalho cobertas:
 - `docs/**`
 - `test/**`
 - `ci/**`
+- `pull_request` para `develop`, `release`, `release/**` ou `main`
 
-## Jobs
+Valida:
 
-### `build-test`
+1. restore;
+2. build;
+3. format;
+4. testes com cobertura;
+5. zero testes ignorados;
+6. cobertura global mínima de `90%`;
+7. build da imagem Docker;
+8. dry-run dos manifests `k8s/` e `infra/aws/k8s/`.
 
-Executa:
+Em `push` de branch de trabalho, se tudo passar, abre PR automático para `develop`.
 
-1. `dotnet restore OficinaMecanica.sln`
-2. `dotnet build OficinaMecanica.sln --configuration Release --no-restore`
-3. `dotnet format OficinaMecanica.sln --verify-no-changes --no-restore`
-4. `dotnet test` com Coverlet collector
-5. validação de zero testes ignorados
-6. relatório com `ReportGenerator`
-7. bloqueio se cobertura global de linhas ficar abaixo de `90%`
-8. publicação do artifact `test-and-coverage-results`
+## CD Development
 
-### `docker-image`
+Roda após merge/push na `develop`.
 
-Constrói a imagem a partir do `Dockerfile` da raiz. Em branches de trabalho e PRs, apenas valida o build da imagem; em `develop`, `release`/`release/**` e `main`, também publica no GitHub Container Registry.
+Fluxo:
 
-Imagem padrão:
+1. Quality gate.
+2. Publicação da imagem no GHCR.
+3. Deploy em `development`, se `AWS_DEPLOY_ENABLED=true`.
+4. PR automático de `develop` para `release`, se o deploy passou.
 
-```text
-ghcr.io/geoscabio/oficina_mecanica_api
-```
+## CD Release
 
-### `kubernetes-dry-run`
+Roda após merge/push na `release` ou `release/**`.
 
-Valida manifests locais e AWS sem aplicar em cluster real:
+Fluxo:
 
-```powershell
-kubectl apply --dry-run=client -R -f k8s/
-kubectl apply --dry-run=client -R -f infra/aws/k8s/
-```
+1. Quality gate.
+2. Publicação da imagem no GHCR.
+3. Deploy em `homologation`, se `AWS_DEPLOY_ENABLED=true`.
+4. PR automático de `release` para `main`, se o deploy passou.
 
-O job cria um KinD efêmero apenas para validar os manifests no runner.
+## CD Production
 
-### `open-pr-to-develop`
+Roda após merge/push na `main`.
 
-Depois que uma branch de trabalho passa no CI, abre automaticamente um PR para `develop`, sem fazer merge automático.
+Fluxo:
 
-### `deploy-aws`
+1. Quality gate.
+2. Publicação da imagem no GHCR.
+3. Deploy em `production`, se `AWS_DEPLOY_ENABLED=true`.
 
-Executa deploy da aplicação no EKS conforme a branch:
+O environment `production` deve exigir aprovação/reviewer no GitHub.
 
-| Branch | Environment |
-| --- | --- |
-| `develop` | `development` |
-| `release` ou `release/**` | `homologation` |
-| `main` | `production` |
+## AWS Cleanup
 
-Esse job só roda quando a variável do repositório `AWS_DEPLOY_ENABLED=true` estiver configurada. Isso evita deploy acidental enquanto o ambiente AWS não estiver preparado.
+Workflow manual para remover recursos Kubernetes:
 
-O deploy:
+1. Abrir `Actions > AWS Cleanup`.
+2. Clicar em `Run workflow`.
+3. Escolher `target_environment`.
+4. Rodar o cleanup.
+5. Executar `terraform destroy` depois, quando a infraestrutura foi criada para demonstração.
 
-1. autentica na AWS;
-2. faz login no ECR;
-3. faz build/push da imagem Docker;
-4. configura kubeconfig do EKS;
-5. cria/atualiza o Secret da API;
-6. aplica manifests em `infra/aws/k8s/`;
-7. aguarda rollout;
-8. imprime o endpoint do Service `LoadBalancer`.
-
-### `open-pr-to-release`
-
-Depois do deploy bem-sucedido da `develop`, abre PR automático de `develop` para a branch definida em `RELEASE_BRANCH`, ou `release` por padrão.
-
-Se a branch `release` ainda não existir, o workflow cria a branch a partir da `main` antes de abrir o PR.
-
-### `open-pr-to-main`
-
-Depois do deploy bem-sucedido em homologação, abre PR automático de `release` para `main`.
-
-Esse PR deve ser protegido por branch protection com aprovação obrigatória antes do merge.
-
-### `cleanup-aws-kubernetes`
-
-Job manual via `workflow_dispatch` para remover recursos Kubernetes do ambiente escolhido.
-
-Inputs:
-
-| Input | Valor |
-| --- | --- |
-| `operation` | `cleanup-kubernetes` |
-| `target_environment` | `development`, `homologation` ou `production` |
-
-Esse cleanup remove Service, Deployment, Secret, ConfigMap e Namespace. Ele não substitui `terraform destroy`.
-
-## Secrets e variables
-
-### Repository variables
+## Repository variables
 
 | Nome | Tipo | Uso |
 | --- | --- | --- |
 | `AWS_DEPLOY_ENABLED` | Repository variable | Habilita deploy automático quando `true`. |
+| `AUTO_PR_ENABLED` | Repository variable | Habilita abertura automática de PR quando `true`. |
 | `RELEASE_BRANCH` | Repository variable opcional | Nome da branch de release. Default: `release`. |
 
-### Environments
+Para usar `AUTO_PR_ENABLED=true`, também é necessário habilitar no GitHub:
 
-Criar os environments:
+```text
+Settings > Actions > General > Workflow permissions >
+Allow GitHub Actions to create and approve pull requests
+```
+
+Sem essa permissão, o GitHub bloqueia a criação automática de PR por segurança.
+
+## Environments
+
+Criar:
 
 - `development`
 - `homologation`
@@ -150,8 +139,8 @@ Cada environment precisa conter:
 
 | Nome | Tipo | Uso |
 | --- | --- | --- |
-| `AWS_ACCESS_KEY_ID` | Secret | Access key temporária ou credencial do ambiente. |
-| `AWS_SECRET_ACCESS_KEY` | Secret | Secret key temporária ou credencial do ambiente. |
+| `AWS_ACCESS_KEY_ID` | Secret | Access key do ambiente. |
+| `AWS_SECRET_ACCESS_KEY` | Secret | Secret key do ambiente. |
 | `AWS_SESSION_TOKEN` | Secret | Session token quando aplicável. |
 | `JWT_SECRET` | Secret | Chave JWT da API, com pelo menos 32 caracteres. |
 | `WEBHOOK_TOKEN` | Secret | Token do webhook de orçamento, com pelo menos 32 caracteres. |
@@ -159,19 +148,14 @@ Cada environment precisa conter:
 | `ECR_REPOSITORY_URL` | Variable | Output `terraform output ecr_repository_url`. |
 | `EKS_CLUSTER_NAME` | Variable | Output `terraform output eks_cluster_name`. |
 
-Exemplo de `RDS_CONNECTION_STRING`:
+## Proteções obrigatórias recomendadas
 
-```text
-Server=<rds-address>,1433;Database=OficinaMecanicaDb;User Id=adminoficina;Password=<senha-rds>;TrustServerCertificate=True;
-```
+Configurar branch protection em `develop` e `main`:
 
-## Proteções recomendadas
+- bloquear push direto;
+- exigir PR antes de merge;
+- exigir status checks do `CI`;
+- exigir pelo menos um reviewer para `main`;
+- configurar reviewer obrigatório no environment `production`.
 
-Para a entrega final:
-
-1. proteger `develop`, `release` e `main`;
-2. exigir status check do workflow `CI/CD`;
-3. exigir pelo menos um reviewer em PR para `main`;
-4. configurar reviewer obrigatório no environment `production`;
-5. manter `AWS_DEPLOY_ENABLED=false` quando não houver janela de demonstração;
-6. após qualquer demonstração em AWS temporária, executar `cleanup-kubernetes` e `terraform destroy`.
+Com isso, o fluxo fica coerente: ninguém commita direto nas branches protegidas, e a promoção acontece por PR.

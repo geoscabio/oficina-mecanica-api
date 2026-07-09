@@ -21,7 +21,7 @@
 - Habilitar `AWS_DEPLOY_ENABLED=true` durante a janela de demonstração.
 - Validar o deploy automático a partir de `develop`, `release` e `main`.
 - Demonstrar `/api/health` e Swagger no endpoint publicado.
-- Rodar `workflow_dispatch` com `operation=cleanup-kubernetes`.
+- Rodar o workflow manual `AWS Cleanup`.
 - Executar `terraform destroy`.
 - Conferir que não restaram EKS, EC2, RDS, NAT Gateway ou Load Balancer ativos.
 

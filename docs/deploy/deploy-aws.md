@@ -59,6 +59,7 @@ Repository variables:
 | Nome | Valor |
 | --- | --- |
 | `AWS_DEPLOY_ENABLED` | `true` apenas durante a janela de deploy/demonstração. |
+| `AUTO_PR_ENABLED` | `true` apenas depois de habilitar o GitHub Actions a criar PRs. |
 | `RELEASE_BRANCH` | Opcional. Default: `release`. |
 
 ## Deploy pela esteira
@@ -81,9 +82,9 @@ O deploy aplica os manifests de `infra/aws/k8s/`, aguarda rollout e imprime o en
 
 ## Encerramento obrigatório
 
-1. Rodar `Actions > CI/CD > Run workflow`.
-2. Selecionar `operation=cleanup-kubernetes`.
-3. Selecionar o `target_environment` correto.
+1. Rodar `Actions > AWS Cleanup > Run workflow`.
+2. Selecionar o `target_environment` correto.
+3. Confirmar a execução.
 4. Confirmar que o Service `LoadBalancer` foi removido.
 5. Executar:
 

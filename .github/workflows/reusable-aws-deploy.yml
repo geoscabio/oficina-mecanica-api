@@ -1,0 +1,118 @@
+name: Reusable AWS Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        description: "GitHub Environment used by this deploy."
+        required: true
+        type: string
+
+env:
+  AWS_REGION: us-east-1
+  AWS_K8S_PATH: infra/aws/k8s
+
+jobs:
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment_name }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image to ECR
+        env:
+          ECR_REPOSITORY_URL: ${{ vars.ECR_REPOSITORY_URL }}
+          IMAGE_TAG: sha-${{ github.sha }}
+        run: |
+          if [ -z "$ECR_REPOSITORY_URL" ]; then
+            echo "ECR_REPOSITORY_URL environment variable is required."
+            exit 1
+          fi
+
+          docker build -t "$ECR_REPOSITORY_URL:$IMAGE_TAG" .
+          docker push "$ECR_REPOSITORY_URL:$IMAGE_TAG"
+          echo "ECR_IMAGE_URI=$ECR_REPOSITORY_URL:$IMAGE_TAG" >> "$GITHUB_ENV"
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure EKS kubeconfig
+        env:
+          EKS_CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME }}
+        run: |
+          if [ -z "$EKS_CLUSTER_NAME" ]; then
+            echo "EKS_CLUSTER_NAME environment variable is required."
+            exit 1
+          fi
+
+          aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
+          kubectl config current-context
+
+      - name: Apply namespace and configuration
+        run: |
+          kubectl apply -f "$AWS_K8S_PATH/namespace.yaml"
+          kubectl apply -f "$AWS_K8S_PATH/configmap.yaml"
+
+      - name: Apply Kubernetes secrets
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+          RDS_CONNECTION_STRING: ${{ secrets.RDS_CONNECTION_STRING }}
+        run: |
+          if [ -z "$JWT_SECRET" ] || [ -z "$WEBHOOK_TOKEN" ] || [ -z "$RDS_CONNECTION_STRING" ]; then
+            echo "JWT_SECRET, WEBHOOK_TOKEN and RDS_CONNECTION_STRING secrets are required."
+            exit 1
+          fi
+
+          kubectl create secret generic oficina-api-secret \
+            -n oficina \
+            --from-literal=Jwt__Secret="$JWT_SECRET" \
+            --from-literal=Integracoes__Orcamento__WebhookToken="$WEBHOOK_TOKEN" \
+            --from-literal=ConnectionStrings__DefaultConnection="$RDS_CONNECTION_STRING" \
+            --dry-run=client \
+            -o yaml | kubectl apply -f -
+
+      - name: Deploy API to EKS
+        run: |
+          cp "$AWS_K8S_PATH/api-deployment.yaml" /tmp/api-deployment.yaml
+          sed -i "s|image: .*|image: $ECR_IMAGE_URI|g" /tmp/api-deployment.yaml
+
+          kubectl apply -f /tmp/api-deployment.yaml
+          kubectl apply -f "$AWS_K8S_PATH/api-service.yaml"
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/oficina-api -n oficina --timeout=300s
+          kubectl get pods -n oficina -o wide
+          kubectl get svc oficina-api -n oficina
+
+      - name: Print LoadBalancer endpoint
+        run: |
+          for attempt in $(seq 1 30); do
+            endpoint="$(kubectl get svc oficina-api -n oficina -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+
+            if [ -n "$endpoint" ]; then
+              echo "API_URL=http://$endpoint"
+              exit 0
+            fi
+
+            echo "Waiting for AWS LoadBalancer endpoint... attempt $attempt/30"
+            sleep 10
+          done
+
+          echo "LoadBalancer endpoint was not ready yet. Check it later with: kubectl get svc oficina-api -n oficina"
