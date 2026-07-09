@@ -94,6 +94,16 @@ A ideia principal é manter o domínio protegido de detalhes externos, como HTTP
 | **JWT** | Autenticação e autorização por perfis |
 | **Testes automatizados** | Cobertura de domínio, aplicação e API integrada |
 
+### Diagramas versionados
+
+Os diagramas abaixo estão versionados no repositório em Mermaid, renderizáveis diretamente no GitHub:
+
+- [C4 Contexto](docs/arquitetura/c4-contexto.md)
+- [C4 Container](docs/arquitetura/c4-container.md)
+- [Deployment local, Kubernetes e AWS](docs/arquitetura/deployment.md)
+
+O link externo do Notion pode continuar como material complementar, mas os diagramas acima são a fonte versionada de entrega.
+
 ---
 
 ## 🧰 Tecnologias
@@ -501,6 +511,12 @@ Após executar o projeto localmente, toda a documentação dos endpoints poderá
 
 O Swagger é a fonte oficial da documentação da API deste projeto e atende ao requisito do Tech Challenge.
 
+### Collection versionada
+
+O contrato OpenAPI gerado pelo Swagger também está versionado no repositório e pode ser importado em ferramentas como Postman, Insomnia ou Bruno:
+
+[docs/openapi/oficina-mecanica-openapi.json](docs/openapi/oficina-mecanica-openapi.json)
+
 ## 🧪 Como testar a API
 
 O Swagger apresenta os contratos atualizados dos endpoints e deve ser usado para testes manuais rápidos.
@@ -535,7 +551,7 @@ O Swagger apresenta os contratos atualizados dos endpoints e deve ser usado para
 </details>
 <br>
 
-O Swagger é a referência principal para demonstração manual dos endpoints. Uma collection do Postman pode ser criada como melhoria complementar, mas não é necessária para executar o fluxo de entrega.
+O Swagger é a referência principal para demonstração manual dos endpoints. Para clientes externos, utilize o arquivo OpenAPI versionado em `docs/openapi/oficina-mecanica-openapi.json` como collection importável.
 
 ---
 
@@ -636,7 +652,7 @@ Este projeto foi desenvolvido para fins acadêmicos. Algumas decisões foram fei
 - A autenticação usa JWT com usuários demo, podendo evoluir para ASP.NET Identity ou provedor externo.
 - A solução é um monólito, mas foi organizada internamente por contextos, camadas e responsabilidades.
 - O Swagger documenta os contratos da API e auxilia na execução manual dos endpoints.
-- O Swagger é a documentação principal de execução manual; uma collection do Postman fica como melhoria complementar pós-MVP.
+- O arquivo `docs/openapi/oficina-mecanica-openapi.json` funciona como collection versionada importável em ferramentas de API.
 
 ### Decisões técnicas e evolução recomendada
 
