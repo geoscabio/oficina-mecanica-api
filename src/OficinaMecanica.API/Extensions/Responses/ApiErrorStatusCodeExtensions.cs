@@ -13,6 +13,7 @@ public static class ApiErrorStatusCodeExtensions
             TipoErro.RegraNegocio => StatusCodes.Status422UnprocessableEntity,
             TipoErro.NaoAutorizado => StatusCodes.Status401Unauthorized,
             TipoErro.AcessoProibido => StatusCodes.Status403Forbidden,
+            TipoErro.Conflito => StatusCodes.Status409Conflict,
             TipoErro.ErroInterno => StatusCodes.Status500InternalServerError,
             _ => StatusCodes.Status400BadRequest
         };

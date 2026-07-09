@@ -1,3 +1,5 @@
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using OficinaMecanica.API.Extensions.Responses;
 using OficinaMecanica.API.Responses;
 using OficinaMecanica.Application.Common;
@@ -29,6 +31,24 @@ public sealed class GlobalExceptionMiddleware
 
             await WriteErrorAsync(context, TipoErro.RegraNegocio.ToHttpStatusCode(), new ErrorResponse(exception.Message, TipoErro.RegraNegocio));
         }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (context.Response.HasStarted)
+            {
+                throw;
+            }
+
+            await WriteErrorAsync(context, TipoErro.Conflito.ToHttpStatusCode(), new ErrorResponse(ApiResponseMessages.ConflitoPersistencia, TipoErro.Conflito));
+        }
+        catch (DbUpdateException exception) when (IsUniqueConstraintViolation(exception))
+        {
+            if (context.Response.HasStarted)
+            {
+                throw;
+            }
+
+            await WriteErrorAsync(context, TipoErro.Conflito.ToHttpStatusCode(), new ErrorResponse(ApiResponseMessages.ConflitoPersistencia, TipoErro.Conflito));
+        }
         catch
         {
             if (context.Response.HasStarted)
@@ -45,5 +65,10 @@ public sealed class GlobalExceptionMiddleware
         context.Response.StatusCode = statusCode;
 
         await context.Response.WriteApiErrorResponseAsJsonAsync(error);
+    }
+
+    private static bool IsUniqueConstraintViolation(DbUpdateException exception)
+    {
+        return exception.InnerException is SqlException { Number: 2601 or 2627 };
     }
 }

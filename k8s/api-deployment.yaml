@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: oficina-api
-          image: gbsousadev/oficina-api:1.0
-          imagePullPolicy: Always
+          image: oficina_mecanica_api-api:latest
+          imagePullPolicy: IfNotPresent
 
           resources:
             requests:
@@ -39,14 +39,14 @@ spec:
 
           startupProbe:
             httpGet:
-              path: /swagger/index.html
+              path: /api/health
               port: 8080
             failureThreshold: 30
             periodSeconds: 10
 
           livenessProbe:
             httpGet:
-              path: /swagger/index.html
+              path: /api/health
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 15
@@ -55,7 +55,7 @@ spec:
 
           readinessProbe:
             httpGet:
-              path: /swagger/index.html
+              path: /api/health
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10

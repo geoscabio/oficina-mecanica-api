@@ -34,6 +34,36 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
+variable "allowed_cidr_blocks" {
+  description = "CIDRs autorizados a acessar a porta 1433 do RDS."
+  type        = list(string)
+  default     = ["10.0.0.0/16"]
+}
+
+variable "multi_az" {
+  description = "Habilita Multi-AZ para o RDS."
+  type        = bool
+  default     = false
+}
+
+variable "backup_retention_period" {
+  description = "Retencao de backups automatizados em dias."
+  type        = number
+  default     = 0
+}
+
+variable "deletion_protection" {
+  description = "Impede exclusao acidental da instancia RDS."
+  type        = bool
+  default     = false
+}
+
+variable "skip_final_snapshot" {
+  description = "Ignora snapshot final ao destruir a instancia."
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Tags aplicadas aos recursos."
   type        = map(string)

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using OficinaMecanica.API.Middlewares;
 using OficinaMecanica.API.Responses;
 using OficinaMecanica.Application.Common;
@@ -14,7 +15,7 @@ public sealed class GlobalExceptionMiddlewareTests
     public async Task Dado_DomainException_Quando_MiddlewareCapturar_Entao_DeveRetornarErroDeRegraNegocio()
     {
         // Arrange
-        const string mensagem = "Regra de domínio inválida.";
+        const string mensagem = "Regra de dominio invalida.";
         var context = CriarHttpContext();
         var middleware = new GlobalExceptionMiddleware(_ => throw new DomainException(mensagem));
 
@@ -27,6 +28,24 @@ public sealed class GlobalExceptionMiddlewareTests
         var erro = await LerErroAsync(context);
         erro.GetProperty("tipo").GetString().Should().Be(nameof(TipoErro.RegraNegocio));
         erro.GetProperty("mensagem").GetString().Should().Be(mensagem);
+    }
+
+    [Fact]
+    public async Task Dado_ConflitoConcorrencia_Quando_MiddlewareCapturar_Entao_DeveRetornarConflito()
+    {
+        // Arrange
+        var context = CriarHttpContext();
+        var middleware = new GlobalExceptionMiddleware(_ => throw new DbUpdateConcurrencyException("Conflito de concorrencia."));
+
+        // Act
+        await middleware.InvokeAsync(context);
+
+        // Assert
+        context.Response.StatusCode.Should().Be(StatusCodes.Status409Conflict);
+
+        var erro = await LerErroAsync(context);
+        erro.GetProperty("tipo").GetString().Should().Be(nameof(TipoErro.Conflito));
+        erro.GetProperty("mensagem").GetString().Should().Be(ApiResponseMessages.ConflitoPersistencia);
     }
 
     [Fact]

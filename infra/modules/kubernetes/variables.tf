@@ -18,6 +18,12 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
+variable "cluster_endpoint_public_access_cidrs" {
+  description = "CIDRs autorizados a acessar o endpoint publico do EKS."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
 variable "tags" {
   description = "Tags comuns aplicadas a todos os recursos."
   type        = map(string)

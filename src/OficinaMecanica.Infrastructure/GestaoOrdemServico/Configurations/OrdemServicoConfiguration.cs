@@ -41,6 +41,9 @@ public sealed class OrdemServicoConfiguration : IEntityTypeConfiguration<OrdemSe
         builder.Property(ordemServico => ordemServico.MecanicoId)
             .IsRequired();
 
+        builder.Property<byte[]>("RowVersion")
+            .IsRowVersion();
+
         builder.HasMany(ordemServico => ordemServico.Servicos)
             .WithOne()
             .HasForeignKey("OrdemServicoId")

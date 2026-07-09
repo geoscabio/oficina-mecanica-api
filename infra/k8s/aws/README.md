@@ -16,3 +16,5 @@ Os manifestos presentes neste diretório são exclusivos para o ambiente AWS e n
 
 - O Secret não é versionado no repositório.
 - O Secret é criado manualmente (ou futuramente via GitHub Actions) antes da implantação da aplicação.
+- AWS Academy possui orçamento limitado: aplicar estes manifestos somente durante testes/demonstração e remover com `kubectl delete -f infra/k8s/aws/` ao finalizar.
+- O Service `LoadBalancer` cria recurso cobrado na AWS; não deixar ativo após a demonstração.

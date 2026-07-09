@@ -227,7 +227,9 @@ Além da execução via Docker Compose, o projeto também pode ser executado uti
 - Docker Desktop com Kubernetes habilitado.
 - `kubectl` configurado para acessar o cluster local.
 - Metrics Server instalado.
-> **Observação:** as probes da aplicação utilizam o endpoint `/api/health`, responsável por informar ao Kubernetes quando a aplicação está inicializada, saudável e pronta para receber requisições. O endpoint será implementado pela aplicação antes do deploy em ambiente AWS.
+> **Observação:** as probes da aplicação utilizam o endpoint `/api/health`, responsável por informar ao Kubernetes quando a aplicação está inicializada, saudável e pronta para receber requisições.
+
+> **AWS Academy:** qualquer criação de recurso AWS deve ser aprovada explicitamente e acompanhada de `terraform destroy` ao fim da demonstração. Consulte `docs/deploy/aws-academy-guardrails.md`.
 
 ### Padronização das tags da infraestrutura
 
@@ -319,7 +321,7 @@ kubectl get pods -n oficina
 kubectl get svc -n oficina
 kubectl get pvc -n oficina
 kubectl get hpa -n oficina
-kubectl describe hpa api-hpa -n oficina
+kubectl describe hpa oficina-api-hpa -n oficina
 ```
 
 ### Acesso via Ingress
