@@ -1,0 +1,386 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "feature/**"
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: "Escolha o deploy manual. Use none para rodar apenas CI/CD."
+        required: true
+        default: "none"
+        type: choice
+        options:
+          - none
+          - local-kubernetes
+          - aws-academy-deploy
+          - aws-academy-destroy-k8s
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  AWS_REGION: us-east-1
+
+jobs:
+  build-test:
+    name: Build, format and tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore OficinaMecanica.sln
+
+      - name: Build solution
+        run: dotnet build OficinaMecanica.sln --configuration Release --no-restore
+
+      - name: Verify formatting
+        run: dotnet format OficinaMecanica.sln --verify-no-changes --no-restore
+
+      - name: Run tests with coverage
+        run: >
+          dotnet test OficinaMecanica.sln
+          --configuration Release
+          --no-build
+          --collect:"XPlat Code Coverage"
+          --settings tests/sonarqube.runsettings
+          --results-directory ./TestResults
+          --logger "trx"
+
+      - name: Validate test execution results
+        shell: pwsh
+        run: |
+          $trxFiles = Get-ChildItem -Path TestResults -Recurse -Filter *.trx
+
+          if (-not $trxFiles) {
+            throw "No TRX test result files were generated."
+          }
+
+          $total = 0
+          $passed = 0
+          $failed = 0
+          $skipped = 0
+
+          foreach ($trxFile in $trxFiles) {
+            [xml]$trx = Get-Content -LiteralPath $trxFile.FullName
+            $counters = $trx.TestRun.ResultSummary.Counters
+
+            $total += [int]$counters.total
+            $passed += [int]$counters.passed
+            $failed += [int]$counters.failed
+            $skipped += [int]$counters.notExecuted
+          }
+
+          Write-Host "Tests: total=$total passed=$passed failed=$failed skipped=$skipped"
+
+          if ($failed -gt 0) {
+            throw "There are failing tests."
+          }
+
+          if ($skipped -gt 0) {
+            throw "CI coverage requires zero skipped tests. Check Docker availability before collecting coverage."
+          }
+
+      - name: Generate coverage report
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:"TestResults/CoverageReport" \
+            -reporttypes:"HtmlInline_AzurePipelines;Cobertura;MarkdownSummaryGithub"
+
+      - name: Validate coverage threshold
+        shell: pwsh
+        run: |
+          [xml]$coverage = Get-Content -LiteralPath TestResults/CoverageReport/Cobertura.xml
+          $lineRate = [double]::Parse($coverage.coverage.'line-rate', [System.Globalization.CultureInfo]::InvariantCulture)
+          $lineCoverage = [math]::Round($lineRate * 100, 2)
+
+          Write-Host "Line coverage: $lineCoverage%"
+
+          if ($lineCoverage -lt 90) {
+            throw "Line coverage $lineCoverage% is below the required 90% threshold."
+          }
+
+      - name: Upload test and coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-and-coverage-results
+          path: |
+            TestResults/**/*.trx
+            TestResults/**/coverage.cobertura.xml
+            TestResults/CoverageReport/**
+          if-no-files-found: error
+
+  docker-image:
+    name: Build and publish Docker image
+    runs-on: ubuntu-latest
+    needs: build-test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=ref,event=branch
+            type=ref,event=pr
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  kubernetes-dry-run:
+    name: Kubernetes manifest validation
+    runs-on: ubuntu-latest
+    needs: docker-image
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Create ephemeral KinD cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: ci-validation
+
+      - name: Validate local Kubernetes manifests
+        run: kubectl apply --dry-run=client -R -f k8s/
+
+      - name: Validate AWS Kubernetes manifests
+        run: kubectl apply --dry-run=client -R -f infra/k8s/aws/
+
+  deploy-local-kubernetes:
+    name: Manual local Kubernetes deploy
+    runs-on: ubuntu-latest
+    needs: kubernetes-dry-run
+    if: github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'local-kubernetes'
+    environment:
+      name: local-kubernetes
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Validate manifests against target cluster
+        run: kubectl apply --dry-run=client -R -f k8s/
+
+      - name: Apply database manifests
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/sqlserver-secret.yaml
+          kubectl apply -f k8s/sqlserver-pvc.yaml
+          kubectl apply -f k8s/sqlserver-deployment.yaml
+          kubectl apply -f k8s/sqlserver-service.yaml
+
+      - name: Apply API manifests
+        run: |
+          kubectl apply -f k8s/api-configmap.yaml
+          kubectl apply -f k8s/api-secret.yaml
+          kubectl apply -f k8s/api-deployment.yaml
+          kubectl apply -f k8s/api-service.yaml
+          kubectl apply -f k8s/api-hpa.yaml
+          kubectl apply -f k8s/api-ingress.yaml
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
+          kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
+
+  deploy-aws-academy:
+    name: Manual AWS Academy deploy
+    runs-on: ubuntu-latest
+    needs: kubernetes-dry-run
+    if: github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'aws-academy-deploy'
+    environment:
+      name: aws-academy
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Academy credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image to ECR
+        env:
+          ECR_REPOSITORY_URL: ${{ vars.ECR_REPOSITORY_URL }}
+          IMAGE_TAG: sha-${{ github.sha }}
+        run: |
+          if [ -z "$ECR_REPOSITORY_URL" ]; then
+            echo "ECR_REPOSITORY_URL environment variable is required."
+            exit 1
+          fi
+
+          docker build -t "$ECR_REPOSITORY_URL:$IMAGE_TAG" .
+          docker push "$ECR_REPOSITORY_URL:$IMAGE_TAG"
+          echo "ECR_IMAGE_URI=$ECR_REPOSITORY_URL:$IMAGE_TAG" >> "$GITHUB_ENV"
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure EKS kubeconfig
+        env:
+          EKS_CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME }}
+        run: |
+          if [ -z "$EKS_CLUSTER_NAME" ]; then
+            echo "EKS_CLUSTER_NAME environment variable is required."
+            exit 1
+          fi
+
+          aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
+          kubectl config current-context
+
+      - name: Apply namespace and configuration
+        run: |
+          kubectl apply -f infra/k8s/aws/namespace.yaml
+          kubectl apply -f infra/k8s/aws/configmap.yaml
+
+      - name: Apply Kubernetes secrets
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+          RDS_CONNECTION_STRING: ${{ secrets.RDS_CONNECTION_STRING }}
+        run: |
+          if [ -z "$JWT_SECRET" ] || [ -z "$WEBHOOK_TOKEN" ] || [ -z "$RDS_CONNECTION_STRING" ]; then
+            echo "JWT_SECRET, WEBHOOK_TOKEN and RDS_CONNECTION_STRING secrets are required."
+            exit 1
+          fi
+
+          kubectl create secret generic oficina-api-secret \
+            -n oficina \
+            --from-literal=Jwt__Secret="$JWT_SECRET" \
+            --from-literal=Integracoes__Orcamento__WebhookToken="$WEBHOOK_TOKEN" \
+            --from-literal=ConnectionStrings__DefaultConnection="$RDS_CONNECTION_STRING" \
+            --dry-run=client \
+            -o yaml | kubectl apply -f -
+
+      - name: Deploy API to EKS
+        run: |
+          cp infra/k8s/aws/api-deployment.yaml /tmp/api-deployment.yaml
+          sed -i "s|image: .*|image: $ECR_IMAGE_URI|g" /tmp/api-deployment.yaml
+
+          kubectl apply -f /tmp/api-deployment.yaml
+          kubectl apply -f infra/k8s/aws/api-service.yaml
+
+      - name: Wait for AWS rollout
+        run: |
+          kubectl rollout status deployment/oficina-api -n oficina --timeout=300s
+          kubectl get pods -n oficina -o wide
+          kubectl get svc oficina-api -n oficina
+
+      - name: Print LoadBalancer endpoint
+        run: |
+          for attempt in $(seq 1 30); do
+            endpoint="$(kubectl get svc oficina-api -n oficina -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+
+            if [ -n "$endpoint" ]; then
+              echo "API_URL=http://$endpoint"
+              exit 0
+            fi
+
+            echo "Waiting for AWS LoadBalancer endpoint... attempt $attempt/30"
+            sleep 10
+          done
+
+          echo "LoadBalancer endpoint was not ready yet. Check it later with: kubectl get svc oficina-api -n oficina"
+
+  destroy-aws-academy-kubernetes:
+    name: Manual AWS Academy Kubernetes cleanup
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'aws-academy-destroy-k8s'
+    environment:
+      name: aws-academy
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Academy credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure EKS kubeconfig
+        env:
+          EKS_CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME }}
+        run: |
+          if [ -z "$EKS_CLUSTER_NAME" ]; then
+            echo "EKS_CLUSTER_NAME environment variable is required."
+            exit 1
+          fi
+
+          aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
+          kubectl config current-context
+
+      - name: Remove AWS Kubernetes resources
+        run: |
+          kubectl delete -f infra/k8s/aws/api-service.yaml --ignore-not-found=true
+          kubectl delete -f infra/k8s/aws/api-deployment.yaml --ignore-not-found=true
+          kubectl delete secret oficina-api-secret -n oficina --ignore-not-found=true
+          kubectl delete -f infra/k8s/aws/configmap.yaml --ignore-not-found=true
+          kubectl delete -f infra/k8s/aws/namespace.yaml --ignore-not-found=true

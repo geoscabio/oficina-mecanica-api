@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: oficina-api
-          image: 992306886751.dkr.ecr.us-east-1.amazonaws.com/oficina-api:1.0
+          image: oficina-api:aws-academy
           imagePullPolicy: Always
 
           resources:
