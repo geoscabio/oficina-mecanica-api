@@ -5,36 +5,60 @@ on:
     branches:
       - main
       - develop
+      - release
+      - "release/**"
       - "feature/**"
+      - "bugfix/**"
+      - "hotfix/**"
+      - "fix/**"
+      - "refactor/**"
+      - "chore/**"
+      - "docs/**"
+      - "test/**"
+      - "ci/**"
   pull_request:
     branches:
+      - main
       - develop
+      - release
+      - "release/**"
   workflow_dispatch:
     inputs:
-      deployment_target:
-        description: "Escolha o deploy manual. Use none para rodar apenas CI/CD."
+      operation:
+        description: "Operação manual complementar. Deploys são automáticos pelo Git Flow."
         required: true
-        default: "none"
+        default: "ci-only"
         type: choice
         options:
-          - none
-          - local-kubernetes
-          - aws-academy-deploy
-          - aws-academy-destroy-k8s
+          - ci-only
+          - cleanup-kubernetes
+      target_environment:
+        description: "Ambiente usado somente para cleanup-kubernetes."
+        required: true
+        default: "development"
+        type: choice
+        options:
+          - development
+          - homologation
+          - production
 
 permissions:
-  contents: read
+  contents: write
   packages: write
+  pull-requests: write
 
 env:
   DOTNET_VERSION: "10.0.x"
   IMAGE_NAME: ghcr.io/${{ github.repository }}
   AWS_REGION: us-east-1
+  AWS_K8S_PATH: infra/aws/k8s
+  RELEASE_BRANCH: ${{ vars.RELEASE_BRANCH || 'release' }}
 
 jobs:
   build-test:
     name: Build, format and tests
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || inputs.operation == 'ci-only'
 
     steps:
       - name: Checkout code
@@ -152,7 +176,14 @@ jobs:
             type=ref,event=pr
 
       - name: Login to GitHub Container Registry
-        if: github.event_name != 'pull_request'
+        if: >
+          github.event_name == 'push' &&
+          (
+            github.ref == 'refs/heads/develop' ||
+            github.ref == 'refs/heads/main' ||
+            github.ref == 'refs/heads/release' ||
+            startsWith(github.ref, 'refs/heads/release/')
+          )
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -164,7 +195,7 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/release/')) }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -189,67 +220,69 @@ jobs:
         run: kubectl apply --dry-run=client -R -f k8s/
 
       - name: Validate AWS Kubernetes manifests
-        run: kubectl apply --dry-run=client -R -f infra/k8s/aws/
+        run: kubectl apply --dry-run=client -R -f ${{ env.AWS_K8S_PATH }}/
 
-  deploy-local-kubernetes:
-    name: Manual local Kubernetes deploy
+  open-pr-to-develop:
+    name: Open PR to develop
     runs-on: ubuntu-latest
     needs: kubernetes-dry-run
-    if: github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'local-kubernetes'
-    environment:
-      name: local-kubernetes
+    if: >
+      github.event_name == 'push' &&
+      (
+        startsWith(github.ref, 'refs/heads/feature/') ||
+        startsWith(github.ref, 'refs/heads/bugfix/') ||
+        startsWith(github.ref, 'refs/heads/hotfix/') ||
+        startsWith(github.ref, 'refs/heads/fix/') ||
+        startsWith(github.ref, 'refs/heads/refactor/') ||
+        startsWith(github.ref, 'refs/heads/chore/') ||
+        startsWith(github.ref, 'refs/heads/docs/') ||
+        startsWith(github.ref, 'refs/heads/test/') ||
+        startsWith(github.ref, 'refs/heads/ci/')
+      )
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Configure kubeconfig
+      - name: Create or keep pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_BRANCH: ${{ github.ref_name }}
         run: |
-          mkdir -p "$HOME/.kube"
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > "$HOME/.kube/config"
-          chmod 600 "$HOME/.kube/config"
+          existing_pr="$(gh pr list --base develop --head "$SOURCE_BRANCH" --state open --json number --jq '.[0].number // empty')"
 
-      - name: Validate manifests against target cluster
-        run: kubectl apply --dry-run=client -R -f k8s/
+          if [ -n "$existing_pr" ]; then
+            echo "Pull request #$existing_pr already exists for $SOURCE_BRANCH -> develop."
+            exit 0
+          fi
 
-      - name: Apply database manifests
-        run: |
-          kubectl apply -f k8s/namespace.yaml
-          kubectl apply -f k8s/sqlserver-secret.yaml
-          kubectl apply -f k8s/sqlserver-pvc.yaml
-          kubectl apply -f k8s/sqlserver-deployment.yaml
-          kubectl apply -f k8s/sqlserver-service.yaml
+          gh pr create \
+            --base develop \
+            --head "$SOURCE_BRANCH" \
+            --title "ci(flow): promote $SOURCE_BRANCH to develop" \
+            --body "PR automático aberto após CI da branch \`$SOURCE_BRANCH\` passar. O merge continua manual, com revisão normal antes de integrar na \`develop\`."
 
-      - name: Apply API manifests
-        run: |
-          kubectl apply -f k8s/api-configmap.yaml
-          kubectl apply -f k8s/api-secret.yaml
-          kubectl apply -f k8s/api-deployment.yaml
-          kubectl apply -f k8s/api-service.yaml
-          kubectl apply -f k8s/api-hpa.yaml
-          kubectl apply -f k8s/api-ingress.yaml
-
-      - name: Wait for rollout
-        run: |
-          kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
-          kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
-
-  deploy-aws-academy:
-    name: Manual AWS Academy deploy
+  deploy-aws:
+    name: Deploy to AWS
     runs-on: ubuntu-latest
     needs: kubernetes-dry-run
-    if: github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'aws-academy-deploy'
+    if: >
+      github.event_name == 'push' &&
+      vars.AWS_DEPLOY_ENABLED == 'true' &&
+      (
+        github.ref == 'refs/heads/develop' ||
+        github.ref == 'refs/heads/main' ||
+        github.ref == 'refs/heads/release' ||
+        startsWith(github.ref, 'refs/heads/release/')
+      )
     environment:
-      name: aws-academy
+      name: ${{ github.ref == 'refs/heads/develop' && 'development' || github.ref == 'refs/heads/main' && 'production' || 'homologation' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Academy credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -291,8 +324,8 @@ jobs:
 
       - name: Apply namespace and configuration
         run: |
-          kubectl apply -f infra/k8s/aws/namespace.yaml
-          kubectl apply -f infra/k8s/aws/configmap.yaml
+          kubectl apply -f "$AWS_K8S_PATH/namespace.yaml"
+          kubectl apply -f "$AWS_K8S_PATH/configmap.yaml"
 
       - name: Apply Kubernetes secrets
         env:
@@ -315,11 +348,11 @@ jobs:
 
       - name: Deploy API to EKS
         run: |
-          cp infra/k8s/aws/api-deployment.yaml /tmp/api-deployment.yaml
+          cp "$AWS_K8S_PATH/api-deployment.yaml" /tmp/api-deployment.yaml
           sed -i "s|image: .*|image: $ECR_IMAGE_URI|g" /tmp/api-deployment.yaml
 
           kubectl apply -f /tmp/api-deployment.yaml
-          kubectl apply -f infra/k8s/aws/api-service.yaml
+          kubectl apply -f "$AWS_K8S_PATH/api-service.yaml"
 
       - name: Wait for AWS rollout
         run: |
@@ -343,18 +376,109 @@ jobs:
 
           echo "LoadBalancer endpoint was not ready yet. Check it later with: kubectl get svc oficina-api -n oficina"
 
-  destroy-aws-academy-kubernetes:
-    name: Manual AWS Academy Kubernetes cleanup
+  open-pr-to-release:
+    name: Open PR from develop to release
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'aws-academy-destroy-k8s'
-    environment:
-      name: aws-academy
+    needs: deploy-aws
+    if: github.ref == 'refs/heads/develop' && needs.deploy-aws.result == 'success'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create release branch when missing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git ls-remote --exit-code --heads origin "$RELEASE_BRANCH"; then
+            echo "Release branch $RELEASE_BRANCH already exists."
+            exit 0
+          fi
+
+          git fetch origin main
+          git switch --create "$RELEASE_BRANCH" origin/main
+          git push origin "$RELEASE_BRANCH"
+
+      - name: Create or keep release pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch origin develop "$RELEASE_BRANCH"
+
+          pending_commits="$(git rev-list --count "origin/$RELEASE_BRANCH..origin/develop")"
+          if [ "$pending_commits" -eq 0 ]; then
+            echo "No pending commits from develop to $RELEASE_BRANCH."
+            exit 0
+          fi
+
+          existing_pr="$(gh pr list --base "$RELEASE_BRANCH" --head develop --state open --json number --jq '.[0].number // empty')"
+
+          if [ -n "$existing_pr" ]; then
+            echo "Pull request #$existing_pr already exists for develop -> $RELEASE_BRANCH."
+            exit 0
+          fi
+
+          gh pr create \
+            --base "$RELEASE_BRANCH" \
+            --head develop \
+            --title "ci(release): promote develop to $RELEASE_BRANCH" \
+            --body "PR automático aberto após deploy bem-sucedido da \`develop\`. O merge para \`$RELEASE_BRANCH\` continua manual para manter revisão e rastreabilidade."
+
+  open-pr-to-main:
+    name: Open PR from release to main
+    runs-on: ubuntu-latest
+    needs: deploy-aws
+    if: >
+      needs.deploy-aws.result == 'success' &&
+      (
+        github.ref == 'refs/heads/release' ||
+        startsWith(github.ref, 'refs/heads/release/')
+      )
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Academy credentials
+      - name: Create or keep production pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_BRANCH: ${{ github.ref_name }}
+        run: |
+          git fetch origin main "$SOURCE_BRANCH"
+
+          pending_commits="$(git rev-list --count "origin/main..origin/$SOURCE_BRANCH")"
+          if [ "$pending_commits" -eq 0 ]; then
+            echo "No pending commits from $SOURCE_BRANCH to main."
+            exit 0
+          fi
+
+          existing_pr="$(gh pr list --base main --head "$SOURCE_BRANCH" --state open --json number --jq '.[0].number // empty')"
+
+          if [ -n "$existing_pr" ]; then
+            echo "Pull request #$existing_pr already exists for $SOURCE_BRANCH -> main."
+            exit 0
+          fi
+
+          gh pr create \
+            --base main \
+            --head "$SOURCE_BRANCH" \
+            --title "ci(production): promote $SOURCE_BRANCH to main" \
+            --body "PR automático aberto após deploy bem-sucedido em homologação. Este PR deve exigir aprovação manual e branch protection antes do merge para \`main\`."
+
+  cleanup-aws-kubernetes:
+    name: Cleanup AWS Kubernetes resources
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'cleanup-kubernetes'
+    environment:
+      name: ${{ inputs.target_environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -379,8 +503,8 @@ jobs:
 
       - name: Remove AWS Kubernetes resources
         run: |
-          kubectl delete -f infra/k8s/aws/api-service.yaml --ignore-not-found=true
-          kubectl delete -f infra/k8s/aws/api-deployment.yaml --ignore-not-found=true
+          kubectl delete -f "$AWS_K8S_PATH/api-service.yaml" --ignore-not-found=true
+          kubectl delete -f "$AWS_K8S_PATH/api-deployment.yaml" --ignore-not-found=true
           kubectl delete secret oficina-api-secret -n oficina --ignore-not-found=true
-          kubectl delete -f infra/k8s/aws/configmap.yaml --ignore-not-found=true
-          kubectl delete -f infra/k8s/aws/namespace.yaml --ignore-not-found=true
+          kubectl delete -f "$AWS_K8S_PATH/configmap.yaml" --ignore-not-found=true
+          kubectl delete -f "$AWS_K8S_PATH/namespace.yaml" --ignore-not-found=true

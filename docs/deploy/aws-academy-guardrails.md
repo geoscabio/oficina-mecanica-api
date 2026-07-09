@@ -34,8 +34,8 @@ $env:TF_VAR_eks_node_role_name = "<LabEksNodeRole-...>"
 
 ```powershell
 terraform fmt -check -recursive infra
-terraform -chdir=infra/environments/dev validate
-terraform -chdir=infra/environments/dev plan
+terraform -chdir=infra/terraform/environments/dev validate
+terraform -chdir=infra/terraform/environments/dev plan
 ```
 
 6. Conferir no plano se serao criados apenas os recursos esperados.
@@ -45,13 +45,13 @@ terraform -chdir=infra/environments/dev plan
 Remover a aplicacao Kubernetes:
 
 ```powershell
-kubectl delete -f infra/k8s/aws/
+kubectl delete -f infra/aws/k8s/
 ```
 
 Destruir a infraestrutura:
 
 ```powershell
-terraform -chdir=infra/environments/dev destroy
+terraform -chdir=infra/terraform/environments/dev destroy
 ```
 
 Conferir se nao restou recurso cobravel:

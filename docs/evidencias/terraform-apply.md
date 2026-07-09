@@ -28,9 +28,9 @@ $env:TF_VAR_eks_node_role_name = "<LabEksNodeRole-...>"
 
 ```powershell
 terraform fmt -check -recursive infra
-terraform -chdir=infra/environments/dev init
-terraform -chdir=infra/environments/dev validate
-terraform -chdir=infra/environments/dev plan
+terraform -chdir=infra/terraform/environments/dev init
+terraform -chdir=infra/terraform/environments/dev validate
+terraform -chdir=infra/terraform/environments/dev plan
 ```
 
 ## Aplicacao real
@@ -38,14 +38,14 @@ terraform -chdir=infra/environments/dev plan
 > Executar somente com aprovacao explicita.
 
 ```powershell
-terraform -chdir=infra/environments/dev apply
-terraform -chdir=infra/environments/dev output
+terraform -chdir=infra/terraform/environments/dev apply
+terraform -chdir=infra/terraform/environments/dev output
 ```
 
 ## Destroy obrigatorio
 
 ```powershell
-terraform -chdir=infra/environments/dev destroy
+terraform -chdir=infra/terraform/environments/dev destroy
 ```
 
 ## Conferencia pos-destroy

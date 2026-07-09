@@ -17,4 +17,4 @@ kubectl create secret generic oficina-api-secret `
 - Nao commitar valores reais de senha, token ou connection string.
 - A senha do RDS deve ser a mesma informada ao Terraform por `TF_VAR_db_password`.
 - O endpoint do RDS pode ser obtido com `terraform output rds_address`.
-- Ao finalizar a demonstracao, remover os manifests com `kubectl delete -f infra/k8s/aws/`.
+- Ao finalizar a demonstracao, remover os manifests com `kubectl delete -f infra/aws/k8s/`.

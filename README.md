@@ -2,7 +2,7 @@
 
 API REST para atendimento, execução e acompanhamento de ordens de serviço em uma oficina mecânica.
 
-Projeto desenvolvido para o **Tech Challenge - Fase 2 da Pós Tech FIAP em Arquitetura de Software**, com foco em Clean Architecture, modelagem de domínio, execução containerizada, Kubernetes, AWS Academy e rastreabilidade de qualidade via CI/CD.
+Projeto desenvolvido para o **Tech Challenge - Fase 2 da Pós Tech FIAP em Arquitetura de Software**, com foco em Clean Architecture, modelagem de domínio, execução containerizada, Kubernetes, AWS e rastreabilidade de qualidade via CI/CD.
 
 ---
 
@@ -16,7 +16,7 @@ Projeto desenvolvido para o **Tech Challenge - Fase 2 da Pós Tech FIAP em Arqui
 - [📁 Estrutura do repositório](#estrutura-do-repositorio)
 - [🚀 Execução local com Docker Compose](#execucao-local-docker-compose)
 - [☸️ Execução local com Kubernetes](#execucao-local-kubernetes)
-- [☁️ Deploy AWS Academy](#deploy-aws-academy)
+- [☁️ Deploy AWS](#deploy-aws)
 - [🔁 CI/CD](#cicd)
 - [🧪 Testes e qualidade](#testes-e-qualidade)
 - [🔐 Autenticação](#autenticacao)
@@ -134,7 +134,7 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 | Validação e mapeamento | FluentValidation e AutoMapper |
 | Testes | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
 | DevOps | Docker, Docker Compose, Kubernetes, GitHub Actions e GHCR |
-| AWS Academy | Terraform, ECR, EKS, RDS, VPC e Load Balancer |
+| AWS | Terraform, ECR, EKS, RDS, VPC e Load Balancer |
 | Qualidade | `dotnet format`, cobertura mínima, SonarQube e OWASP ZAP |
 
 ---
@@ -153,9 +153,9 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 │   ├── openapi/                     # OpenAPI JSON exportado
 │   └── projeto/                     # Backlog, decisões e pendências
 ├── infra/
-│   ├── environments/dev/            # Terraform do ambiente AWS Academy
-│   ├── k8s/aws/                     # Manifests Kubernetes para EKS
-│   └── modules/                     # Módulos Terraform
+│   ├── terraform/environments/dev/  # Terraform do ambiente AWS
+│   ├── aws/k8s/                     # Manifests Kubernetes para EKS
+│   └── terraform/modules/           # Módulos Terraform
 ├── k8s/                             # Manifests Kubernetes locais
 ├── src/                             # Código de produção
 ├── tests/                           # Testes unitários e integração
@@ -262,24 +262,24 @@ kubectl describe hpa oficina-api-hpa -n oficina
 
 ---
 
-<a id="deploy-aws-academy"></a>
+<a id="deploy-aws"></a>
 
-## ☁️ Deploy AWS Academy
+## ☁️ Deploy AWS
 
-> Regra obrigatória: **não executar `terraform apply` sem aprovação explícita e sem plano de `terraform destroy`**.
+A infraestrutura é provisionada por Terraform e a aplicação é entregue automaticamente pela esteira Git Flow quando o ambiente de deploy está habilitado.
 
-O ambiente AWS é o **AWS Academy Learner Lab**, com crédito limitado. O projeto deixa o caminho pronto, mas a criação real de recursos deve ser controlada.
+> Regra operacional: qualquer recurso criado em ambiente temporário precisa ter cleanup Kubernetes e `terraform destroy` planejados após a demonstração.
 
-### Fluxo seguro
+### Fluxo operacional
 
-1. Iniciar a sessão do AWS Academy.
-2. Configurar credenciais temporárias localmente ou no GitHub Environment `aws-academy`.
-3. Executar `terraform plan`.
-4. Executar `terraform apply` somente com aprovação explícita.
-5. Rodar deploy manual pelo GitHub Actions com approval.
-6. Demonstrar a API.
-7. Rodar cleanup Kubernetes.
-8. Executar `terraform destroy`.
+1. Provisionar a infraestrutura com Terraform em `infra/terraform/environments/dev`.
+2. Configurar secrets e variables nos GitHub Environments.
+3. Habilitar deploy com `AWS_DEPLOY_ENABLED=true`.
+4. Integrar feature em `develop`.
+5. A esteira faz deploy em `development` e abre PR automático para `release`.
+6. O merge em `release` faz deploy em `homologation` e abre PR automático para `main`.
+7. O merge em `main` exige revisão/proteção e dispara o deploy em `production`.
+8. Ao final da demonstração, executar cleanup Kubernetes e `terraform destroy`.
 
 Guias:
 
@@ -299,9 +299,12 @@ O workflow principal fica em [`/.github/workflows/ci-cd.yml`](.github/workflows/
 
 | Evento | O que acontece |
 | --- | --- |
-| `pull_request` para `develop` | Build, format, testes, cobertura, imagem Docker e dry-run Kubernetes. |
-| `push` em `main`, `develop` e `feature/**` | Mesmo fluxo, com push de imagem para GHCR quando aplicável. |
-| `workflow_dispatch` | Permite escolher deploy manual local ou AWS Academy. |
+| `push` em `feature/**`, `bugfix/**`, `hotfix/**`, `fix/**`, `refactor/**`, `chore/**`, `docs/**`, `test/**` ou `ci/**` | Build, format, testes, cobertura, build da imagem Docker, dry-run Kubernetes e abertura automática de PR para `develop`. |
+| `pull_request` para `develop`, `release` ou `main` | Validação completa antes do merge manual. |
+| `push` em `develop` | Validação completa, deploy automático em `development` quando habilitado e abertura automática de PR para `release`. |
+| `push` em `release` ou `release/**` | Validação completa, deploy automático em `homologation` quando habilitado e abertura automática de PR para `main`. |
+| `push` em `main` | Validação completa e deploy em `production`, protegido por environment/branch protection. |
+| `workflow_dispatch` | Execução manual complementar de CI ou cleanup Kubernetes. |
 
 ### Bloqueios de qualidade
 
@@ -313,26 +316,15 @@ A esteira falha se:
 - `dotnet format --verify-no-changes` detectar formatação pendente;
 - manifests Kubernetes não passarem no dry-run.
 
-### Deploy manual com aprovação
-
-O deploy real **não roda em PR**. Em PR ele aparece cinza/skipped, como esperado.
-
-Para aprovar deploy AWS:
-
-1. Abrir `Actions > CI/CD`.
-2. Clicar em `Run workflow`.
-3. Escolher a branch.
-4. Selecionar `deployment_target=aws-academy-deploy`.
-5. Abrir o run criado.
-6. Clicar em `Review deployments`.
-7. Selecionar `aws-academy`.
-8. Clicar em `Approve and deploy`.
-
-Para remover recursos Kubernetes da AWS:
+### Fluxo Git Flow automatizado
 
 ```text
-deployment_target=aws-academy-destroy-k8s
+feature/* -> PR develop -> deploy development -> PR release -> deploy homologation -> PR main -> deploy production
 ```
+
+O merge continua manual via PR e revisão. A automação só promove o próximo PR depois que a validação e o deploy do estágio anterior passam.
+
+Para evitar deploy acidental, os jobs AWS só executam quando `AWS_DEPLOY_ENABLED=true` estiver configurado no repositório. O cleanup Kubernetes fica disponível por `workflow_dispatch` com `operation=cleanup-kubernetes`.
 
 ---
 
@@ -453,7 +445,7 @@ Itens técnicos já estruturados:
 - ✅ API com fluxo principal da oficina.
 - ✅ Docker Compose local.
 - ✅ Kubernetes local.
-- ✅ Terraform para AWS Academy.
+- ✅ Terraform para AWS.
 - ✅ Healthcheck `/api/health`.
 - ✅ CI/CD com cobertura mínima de 90%.
 - ✅ Evidências versionadas.
@@ -475,6 +467,6 @@ Itens manuais restantes:
 ## 📝 Observações
 
 - Não versionar credenciais, tokens, kubeconfig, secrets ou outputs sensíveis.
-- AWS Academy tem orçamento limitado: criar recursos apenas para demonstração e destruir depois.
-- O deploy real via GitHub Actions exige approval no environment `aws-academy`.
+- Ambientes AWS temporários devem ser destruídos após a demonstração.
+- O deploy para `main` deve usar branch protection e environment `production` com aprovação obrigatória.
 - O projeto prioriza rastreabilidade e simplicidade operacional para a banca avaliar sem depender de contexto externo.

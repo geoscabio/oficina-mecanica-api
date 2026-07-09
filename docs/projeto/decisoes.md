@@ -12,7 +12,7 @@ A execução local utilizando Kubernetes é um dos entregáveis da Fase 2 do Tec
 
 ## Deploy AWS
 
-O deploy na AWS utilizará recursos específicos localizados em `infra/k8s/aws`.
+O deploy na AWS utilizará recursos específicos localizados em `infra/aws/k8s`.
 
 Motivo:
 
@@ -20,7 +20,7 @@ Evitar impacto na execução local.
 
 ---
 
-## AWS Academy
+## AWS temporária
 
 Todo provisionamento AWS deve considerar o orçamento limitado do Learner Lab.
 

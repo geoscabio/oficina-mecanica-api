@@ -11,7 +11,7 @@ Esta pasta reúne a documentação complementar do Tech Challenge Fase 2.
 | `architecture/diagrams/deployment/kubernetes/` | Espaço reservado para os diagramas de deployment Kubernetes. |
 | `architecture/diagrams/deployment/docker/` | Espaço reservado para os diagramas de deployment Docker. |
 | `architecture/diagrams/ci-cd/` | Espaço reservado para os diagramas da esteira CI/CD. |
-| `deploy/` | Guias de CI/CD, AWS Academy, Terraform e cleanup obrigatório. |
+| `deploy/` | Guias de CI/CD, AWS, Terraform e cleanup obrigatório. |
 | `evidencias/` | Evidências versionadas de build, testes, cobertura, segurança, HPA e Terraform. |
 | `openapi/` | Contrato OpenAPI exportado da API. |
 | `projeto/` | Backlog, decisões e pendências da entrega. |

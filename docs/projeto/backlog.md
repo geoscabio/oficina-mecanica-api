@@ -7,15 +7,16 @@
 - [x] Tratamento padronizado de erros e conflitos.
 - [x] Docker Compose local.
 - [x] Kubernetes local.
-- [x] Terraform para AWS Academy.
+- [x] Terraform para AWS.
 - [x] Networking AWS (VPC).
 - [x] Registry AWS (ECR).
 - [x] Database AWS (RDS).
 - [x] Kubernetes AWS (EKS).
 - [x] Manifests AWS para API.
 - [x] GitHub Actions CI/CD.
+- [x] Git Flow automatizado com PR para `develop`, `release` e `main`.
 - [x] Bloqueio de cobertura mínima de 90% na esteira.
-- [x] Deploy manual AWS Academy com approval de environment.
+- [x] Deploy automático por environment quando `AWS_DEPLOY_ENABLED=true`.
 - [x] Cleanup Kubernetes AWS via workflow manual.
 - [x] Evidências versionadas em `docs/evidencias`.
 - [x] OpenAPI JSON versionado.
@@ -32,6 +33,6 @@
 - [ ] Finalizar diagramas Kubernetes em `docs/architecture/diagrams/deployment/kubernetes`.
 - [ ] Finalizar diagramas Docker em `docs/architecture/diagrams/deployment/docker`.
 - [ ] Finalizar diagramas CI/CD em `docs/architecture/diagrams/ci-cd`.
-- [ ] Executar demonstração AWS Academy com cleanup obrigatório.
+- [ ] Executar demonstração AWS com cleanup obrigatório.
 - [ ] Gravar vídeo de demonstração.
 - [ ] Montar PDF final.

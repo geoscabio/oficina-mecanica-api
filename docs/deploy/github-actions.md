@@ -1,49 +1,66 @@
 # GitHub Actions CI/CD
 
-Este workflow fica em `.github/workflows/ci-cd.yml` e cobre build, testes, cobertura, imagem Docker, validacao de manifests Kubernetes e deploy manual protegido.
+O workflow principal fica em `.github/workflows/ci-cd.yml` e implementa um Git Flow automatizado com validação contínua, entrega progressiva e promoção por PR.
+
+## Fluxo
+
+```text
+feature/*, bugfix/*, hotfix/* ...
+  -> CI
+  -> PR automático para develop
+  -> merge manual/revisado
+  -> deploy development
+  -> PR automático para release
+  -> merge manual/revisado
+  -> deploy homologation
+  -> PR automático para main
+  -> aprovação obrigatória
+  -> deploy production
+```
 
 ## Gatilhos
 
-- `push` em `main`, `develop` e `feature/**`.
-- `pull_request` com destino `develop`.
-- `workflow_dispatch` para execucao manual, incluindo o job de deploy protegido.
+| Evento | Resultado |
+| --- | --- |
+| `push` em branches de trabalho | Valida build/testes/cobertura, build da imagem Docker, manifests Kubernetes e abre PR para `develop`. |
+| `pull_request` para `develop`, `release` ou `main` | Validação completa antes do merge. |
+| `push` em `develop` | Validação completa, deploy em `development` quando habilitado e PR automático para `release`. |
+| `push` em `release` ou `release/**` | Validação completa, deploy em `homologation` quando habilitado e PR automático para `main`. |
+| `push` em `main` | Validação completa e deploy em `production` protegido por regras do repositório/environment. |
+| `workflow_dispatch` | Execução complementar de CI ou cleanup Kubernetes. |
+
+Branches de trabalho cobertas:
+
+- `feature/**`
+- `bugfix/**`
+- `hotfix/**`
+- `fix/**`
+- `refactor/**`
+- `chore/**`
+- `docs/**`
+- `test/**`
+- `ci/**`
 
 ## Jobs
 
 ### `build-test`
 
-Executa a validacao principal do backend:
+Executa:
 
-1. Checkout do codigo.
-2. Setup do .NET SDK `10.0.x`.
-3. `dotnet restore OficinaMecanica.sln`.
-4. `dotnet build OficinaMecanica.sln --configuration Release --no-restore`.
-5. `dotnet format OficinaMecanica.sln --verify-no-changes --no-restore`.
-6. `dotnet test` com Coverlet collector (`XPlat Code Coverage`).
-7. Valida que nenhum teste foi ignorado antes de consolidar cobertura.
-8. Gera relatorio com `ReportGenerator`.
-9. Falha o pipeline se a cobertura global de linhas ficar abaixo de `90%`.
-10. Publica o artifact `test-and-coverage-results`.
-
-O artifact contem:
-
-- arquivos `.trx` dos testes;
-- `coverage.cobertura.xml`;
-- `coverage.opencover.xml`;
-- relatorio HTML e resumo Markdown da cobertura.
+1. `dotnet restore OficinaMecanica.sln`
+2. `dotnet build OficinaMecanica.sln --configuration Release --no-restore`
+3. `dotnet format OficinaMecanica.sln --verify-no-changes --no-restore`
+4. `dotnet test` com Coverlet collector
+5. validação de zero testes ignorados
+6. relatório com `ReportGenerator`
+7. bloqueio se cobertura global de linhas ficar abaixo de `90%`
+8. publicação do artifact `test-and-coverage-results`
 
 ### `docker-image`
 
-Executa apos `build-test`:
+Constrói a imagem a partir do `Dockerfile` da raiz. Em branches de trabalho e PRs, apenas valida o build da imagem; em `develop`, `release`/`release/**` e `main`, também publica no GitHub Container Registry.
 
-1. Checkout do codigo.
-2. Setup do Docker Buildx.
-3. Gera tags com `docker/metadata-action`.
-4. Faz login no GitHub Container Registry em eventos que nao sejam `pull_request`.
-5. Build da imagem usando o `Dockerfile` da raiz.
-6. Push para GHCR apenas em `push` ou `workflow_dispatch`.
-
-Imagem padrao:
+Imagem padrão:
 
 ```text
 ghcr.io/geoscabio/oficina_mecanica_api
@@ -51,104 +68,96 @@ ghcr.io/geoscabio/oficina_mecanica_api
 
 ### `kubernetes-dry-run`
 
-Executa apos `docker-image` e nao aplica nada em cluster real:
+Valida manifests locais e AWS sem aplicar em cluster real:
 
 ```powershell
 kubectl apply --dry-run=client -R -f k8s/
-kubectl apply --dry-run=client -R -f infra/k8s/aws/
+kubectl apply --dry-run=client -R -f infra/aws/k8s/
 ```
 
-Para evitar dependencia de um cluster externo, o job cria um cluster KinD efemero no runner. Esse cluster existe apenas durante o workflow e serve para o `kubectl` descobrir os tipos de API durante o dry-run.
+O job cria um KinD efêmero apenas para validar os manifests no runner.
 
-### `deploy-local-kubernetes`
+### `open-pr-to-develop`
 
-Job manual para cluster Kubernetes local.
+Depois que uma branch de trabalho passa no CI, abre automaticamente um PR para `develop`, sem fazer merge automático.
 
-Condicoes:
+### `deploy-aws`
 
-- roda apenas em `workflow_dispatch`;
-- exige selecionar `deployment_target=local-kubernetes`;
-- exige aprovacao no environment `local-kubernetes`;
-- precisa do secret `KUBE_CONFIG`.
+Executa deploy da aplicação no EKS conforme a branch:
 
-Depois da aprovacao:
+| Branch | Environment |
+| --- | --- |
+| `develop` | `development` |
+| `release` ou `release/**` | `homologation` |
+| `main` | `production` |
 
-1. configura o kubeconfig a partir do secret;
-2. executa dry-run contra os manifests locais;
-3. aplica namespace, banco SQL Server, API, service, HPA e ingress;
-4. aguarda rollout de `sqlserver` e `oficina-api`.
+Esse job só roda quando a variável do repositório `AWS_DEPLOY_ENABLED=true` estiver configurada. Isso evita deploy acidental enquanto o ambiente AWS não estiver preparado.
 
-### `deploy-aws-academy`
+O deploy:
 
-Job manual para demonstracao real no AWS Academy.
-
-Condicoes:
-
-- roda apenas em `workflow_dispatch`;
-- exige selecionar `deployment_target=aws-academy-deploy`;
-- exige aprovacao no environment `aws-academy`;
-- exige que a infraestrutura AWS ja exista via Terraform;
-- exige secrets temporarios da sessao AWS Academy atual.
-
-Depois da aprovacao:
-
-1. autentica na AWS Academy;
+1. autentica na AWS;
 2. faz login no ECR;
-3. faz build da imagem Docker;
-4. envia a imagem para o ECR criado pelo Terraform;
-5. configura o kubeconfig do EKS;
-6. cria ou atualiza o Secret da API no cluster;
-7. aplica os manifests de `infra/k8s/aws/`;
-8. aguarda rollout da API;
-9. imprime o endpoint do Service `LoadBalancer`.
+3. faz build/push da imagem Docker;
+4. configura kubeconfig do EKS;
+5. cria/atualiza o Secret da API;
+6. aplica manifests em `infra/aws/k8s/`;
+7. aguarda rollout;
+8. imprime o endpoint do Service `LoadBalancer`.
 
-### `destroy-aws-academy-kubernetes`
+### `open-pr-to-release`
 
-Job manual para remover somente os recursos Kubernetes da demonstracao AWS.
+Depois do deploy bem-sucedido da `develop`, abre PR automático de `develop` para a branch definida em `RELEASE_BRANCH`, ou `release` por padrão.
 
-Condicoes:
+Se a branch `release` ainda não existir, o workflow cria a branch a partir da `main` antes de abrir o PR.
 
-- roda apenas em `workflow_dispatch`;
-- exige selecionar `deployment_target=aws-academy-destroy-k8s`;
-- exige aprovacao no environment `aws-academy`;
-- precisa das mesmas credenciais AWS temporarias usadas no deploy.
+### `open-pr-to-main`
 
-Esse job remove Service, Deployment, Secret, ConfigMap e Namespace. Ele ajuda a apagar o Load Balancer criado pelo Kubernetes, mas nao substitui `terraform destroy`.
+Depois do deploy bem-sucedido em homologação, abre PR automático de `release` para `main`.
 
-## Secrets e variables esperados
+Esse PR deve ser protegido por branch protection com aprovação obrigatória antes do merge.
 
-### Obrigatorios para deploy local
+### `cleanup-aws-kubernetes`
 
-| Nome | Tipo | Uso |
-| --- | --- | --- |
-| `KUBE_CONFIG` | Environment secret | Kubeconfig em Base64 do cluster alvo. |
+Job manual via `workflow_dispatch` para remover recursos Kubernetes do ambiente escolhido.
 
-Para gerar o valor em Base64 no PowerShell:
+Inputs:
 
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\.kube\config"))
-```
+| Input | Valor |
+| --- | --- |
+| `operation` | `cleanup-kubernetes` |
+| `target_environment` | `development`, `homologation` ou `production` |
 
-### Usados automaticamente
+Esse cleanup remove Service, Deployment, Secret, ConfigMap e Namespace. Ele não substitui `terraform destroy`.
 
-| Nome | Tipo | Uso |
-| --- | --- | --- |
-| `GITHUB_TOKEN` | Secret automatico | Publicacao no GitHub Container Registry. |
+## Secrets e variables
 
-### Obrigatorios para deploy AWS Academy
-
-Environment `aws-academy`:
+### Repository variables
 
 | Nome | Tipo | Uso |
 | --- | --- | --- |
-| `AWS_ACCESS_KEY_ID` | Environment secret | Access key temporaria da sessao AWS Academy. |
-| `AWS_SECRET_ACCESS_KEY` | Environment secret | Secret key temporaria da sessao AWS Academy. |
-| `AWS_SESSION_TOKEN` | Environment secret | Session token temporario da sessao AWS Academy. |
-| `JWT_SECRET` | Environment secret | Chave JWT da API, com pelo menos 32 caracteres. |
-| `WEBHOOK_TOKEN` | Environment secret | Token do webhook de orcamento, com pelo menos 32 caracteres. |
-| `RDS_CONNECTION_STRING` | Environment secret | Connection string completa do RDS. |
-| `ECR_REPOSITORY_URL` | Environment variable | Output `terraform output ecr_repository_url`. |
-| `EKS_CLUSTER_NAME` | Environment variable | Output `terraform output eks_cluster_name`. |
+| `AWS_DEPLOY_ENABLED` | Repository variable | Habilita deploy automático quando `true`. |
+| `RELEASE_BRANCH` | Repository variable opcional | Nome da branch de release. Default: `release`. |
+
+### Environments
+
+Criar os environments:
+
+- `development`
+- `homologation`
+- `production`
+
+Cada environment precisa conter:
+
+| Nome | Tipo | Uso |
+| --- | --- | --- |
+| `AWS_ACCESS_KEY_ID` | Secret | Access key temporária ou credencial do ambiente. |
+| `AWS_SECRET_ACCESS_KEY` | Secret | Secret key temporária ou credencial do ambiente. |
+| `AWS_SESSION_TOKEN` | Secret | Session token quando aplicável. |
+| `JWT_SECRET` | Secret | Chave JWT da API, com pelo menos 32 caracteres. |
+| `WEBHOOK_TOKEN` | Secret | Token do webhook de orçamento, com pelo menos 32 caracteres. |
+| `RDS_CONNECTION_STRING` | Secret | Connection string completa do banco. |
+| `ECR_REPOSITORY_URL` | Variable | Output `terraform output ecr_repository_url`. |
+| `EKS_CLUSTER_NAME` | Variable | Output `terraform output eks_cluster_name`. |
 
 Exemplo de `RDS_CONNECTION_STRING`:
 
@@ -156,96 +165,13 @@ Exemplo de `RDS_CONNECTION_STRING`:
 Server=<rds-address>,1433;Database=OficinaMecanicaDb;User Id=adminoficina;Password=<senha-rds>;TrustServerCertificate=True;
 ```
 
-Os secrets da AWS Academy expiram quando a sessao do lab expira. Atualize os secrets do environment antes de rodar o deploy real.
+## Proteções recomendadas
 
-### Opcionais para registry externo
+Para a entrega final:
 
-| Nome | Tipo | Uso |
-| --- | --- | --- |
-| `REGISTRY_USERNAME` | Repository secret | Usuario de registry externo. |
-| `REGISTRY_TOKEN` | Repository secret | Token de registry externo. |
-
-## Como aprovar o deploy AWS Academy
-
-O botao de aprovacao nao aparece em runs de `pull_request`. Em PR, o job de deploy fica cinza/skipped porque deploy real nao deve rodar em validacao de PR.
-
-Para abrir a aprovacao:
-
-1. Abra `Actions > CI/CD`.
-2. Clique em `Run workflow`.
-3. Escolha a branch do PR, por exemplo `feature/fase2-ci-cd`.
-4. Em `deployment_target`, selecione `aws-academy-deploy`.
-5. Clique em `Run workflow`.
-6. Abra o run criado.
-7. O job `Manual AWS Academy deploy` ficara aguardando aprovacao no environment `aws-academy`.
-8. Clique em `Review deployments`.
-9. Selecione `aws-academy`.
-10. Clique em `Approve and deploy`.
-
-Depois da aprovacao, o job faz build/push no ECR, aplica os manifests no EKS e imprime o endpoint da API.
-
-Nao executar `terraform apply` apenas para testar CI/CD sem aprovacao explicita e sem plano de `terraform destroy`.
-
-## Pre-requisitos antes do deploy AWS Academy
-
-1. Iniciar a sessao do AWS Academy Learner Lab.
-2. Configurar credenciais temporarias no environment `aws-academy`.
-3. Rodar Terraform localmente com aprovacao explicita:
-
-```powershell
-terraform -chdir=infra/environments/dev init
-terraform -chdir=infra/environments/dev plan
-terraform -chdir=infra/environments/dev apply
-```
-
-4. Copiar os outputs para as variables/secrets do environment:
-
-```powershell
-terraform -chdir=infra/environments/dev output ecr_repository_url
-terraform -chdir=infra/environments/dev output eks_cluster_name
-terraform -chdir=infra/environments/dev output rds_address
-```
-
-5. Rodar o workflow manual com `deployment_target=aws-academy-deploy`.
-
-## Cleanup obrigatorio AWS Academy
-
-Depois da demonstracao:
-
-1. Rode o workflow manual com `deployment_target=aws-academy-destroy-k8s`.
-2. Aguarde a remocao do Service `LoadBalancer`.
-3. Rode localmente:
-
-```powershell
-terraform -chdir=infra/environments/dev destroy
-```
-
-Nao deixar recursos ativos no AWS Academy apos a demonstracao.
-
-## Execucao manual sem acesso ao cluster
-
-Se o runner nao tiver kubeconfig do cluster de avaliacao:
-
-1. rode normalmente o workflow em `push` ou `pull_request`;
-2. use o artifact `test-and-coverage-results` como evidencia de build/testes/cobertura;
-3. use o job `kubernetes-dry-run` como evidencia de validacao sintatica dos manifests;
-4. execute localmente o deploy em Docker Desktop:
-
-```powershell
-docker compose up -d --build
-kubectl apply -R -f k8s/
-kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
-```
-
-## Protecao do environment
-
-No GitHub:
-
-1. abrir `Settings > Environments`;
-2. criar o environment `local-kubernetes`, se for usar deploy local remoto;
-3. criar o environment `aws-academy`, se for usar deploy real na AWS Academy;
-4. adicionar reviewer obrigatorio nos environments;
-5. adicionar os secrets e variables descritos nesta documentacao;
-6. executar o workflow via `workflow_dispatch`.
-
-Sem aprovacao no environment, o deploy real nao e executado.
+1. proteger `develop`, `release` e `main`;
+2. exigir status check do workflow `CI/CD`;
+3. exigir pelo menos um reviewer em PR para `main`;
+4. configurar reviewer obrigatório no environment `production`;
+5. manter `AWS_DEPLOY_ENABLED=false` quando não houver janela de demonstração;
+6. após qualquer demonstração em AWS temporária, executar `cleanup-kubernetes` e `terraform destroy`.

@@ -7,7 +7,7 @@ metadata:
 
 spec:
   # AWS Academy: LoadBalancer cria recurso cobrado. Aplicar somente durante demonstracao
-  # e remover com `kubectl delete -f infra/k8s/aws/api-service.yaml` ao finalizar.
+  # e remover com `kubectl delete -f infra/aws/k8s/api-service.yaml` ao finalizar.
   type: LoadBalancer
 
   selector:
