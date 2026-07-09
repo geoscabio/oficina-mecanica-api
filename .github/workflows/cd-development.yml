@@ -1,0 +1,73 @@
+name: CD Development
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+
+env:
+  RELEASE_BRANCH: ${{ vars.RELEASE_BRANCH || 'release' }}
+
+jobs:
+  quality-gate:
+    name: Quality gate
+    uses: ./.github/workflows/reusable-quality-gate.yml
+    with:
+      publish_image: true
+    secrets: inherit
+
+  deploy-development:
+    name: Deploy development
+    needs: quality-gate
+    if: vars.AWS_DEPLOY_ENABLED == 'true'
+    uses: ./.github/workflows/reusable-aws-deploy.yml
+    with:
+      environment_name: development
+    secrets: inherit
+
+  open-pr-to-release:
+    name: Open PR to release
+    runs-on: ubuntu-latest
+    needs: deploy-development
+    if: needs.deploy-development.result == 'success'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create or keep release pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! git ls-remote --exit-code --heads origin "$RELEASE_BRANCH"; then
+            echo "::warning::Release branch '$RELEASE_BRANCH' does not exist yet. Create it once from main before enabling promotion."
+            exit 0
+          fi
+
+          git fetch origin develop "$RELEASE_BRANCH"
+
+          pending_commits="$(git rev-list --count "origin/$RELEASE_BRANCH..origin/develop")"
+          if [ "$pending_commits" -eq 0 ]; then
+            echo "No pending commits from develop to $RELEASE_BRANCH."
+            exit 0
+          fi
+
+          existing_pr="$(gh pr list --base "$RELEASE_BRANCH" --head develop --state open --json number --jq '.[0].number // empty')"
+
+          if [ -n "$existing_pr" ]; then
+            echo "Pull request #$existing_pr already exists for develop -> $RELEASE_BRANCH."
+            exit 0
+          fi
+
+          gh pr create \
+            --base "$RELEASE_BRANCH" \
+            --head develop \
+            --title "ci(release): promote develop to $RELEASE_BRANCH" \
+            --body "PR automático aberto após deploy bem-sucedido em development. O merge para \`$RELEASE_BRANCH\` continua manual para manter revisão e rastreabilidade."

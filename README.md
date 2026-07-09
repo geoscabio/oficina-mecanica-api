@@ -293,18 +293,18 @@ Guias:
 
 ## 🔁 CI/CD
 
-O workflow principal fica em [`/.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
+Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separados por etapa para deixar o fluxo claro.
 
 ### Quando roda automaticamente
 
 | Evento | O que acontece |
 | --- | --- |
-| `push` em `feature/**`, `bugfix/**`, `hotfix/**`, `fix/**`, `refactor/**`, `chore/**`, `docs/**`, `test/**` ou `ci/**` | Build, format, testes, cobertura, build da imagem Docker, dry-run Kubernetes e abertura automática de PR para `develop`. |
-| `pull_request` para `develop`, `release` ou `main` | Validação completa antes do merge manual. |
-| `push` em `develop` | Validação completa, deploy automático em `development` quando habilitado e abertura automática de PR para `release`. |
-| `push` em `release` ou `release/**` | Validação completa, deploy automático em `homologation` quando habilitado e abertura automática de PR para `main`. |
-| `push` em `main` | Validação completa e deploy em `production`, protegido por environment/branch protection. |
-| `workflow_dispatch` | Execução manual complementar de CI ou cleanup Kubernetes. |
+| `CI` | `push` em branches de trabalho e `pull_request` para `develop`, `release` ou `main`. Valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `CI` | Em `push` de branch de trabalho, abre PR automático para `develop` após a validação passar. |
+| `CD Development` | Em `push` na `develop`, valida qualidade, faz deploy em `development` e abre PR para `release`. |
+| `CD Release` | Em `push` na `release` ou `release/**`, valida qualidade, faz deploy em `homologation` e abre PR para `main`. |
+| `CD Production` | Em `push` na `main`, valida qualidade e faz deploy em `production`. |
+| `AWS Cleanup` | Execução manual para remover recursos Kubernetes do environment escolhido. |
 
 ### Bloqueios de qualidade
 
@@ -324,7 +324,9 @@ feature/* -> PR develop -> deploy development -> PR release -> deploy homologati
 
 O merge continua manual via PR e revisão. A automação só promove o próximo PR depois que a validação e o deploy do estágio anterior passam.
 
-Para evitar deploy acidental, os jobs AWS só executam quando `AWS_DEPLOY_ENABLED=true` estiver configurado no repositório. O cleanup Kubernetes fica disponível por `workflow_dispatch` com `operation=cleanup-kubernetes`.
+Para evitar deploy acidental, os jobs AWS só executam quando `AWS_DEPLOY_ENABLED=true` estiver configurado no repositório. O cleanup Kubernetes fica no workflow `AWS Cleanup`.
+
+Branches `develop` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks.
 
 ---
 

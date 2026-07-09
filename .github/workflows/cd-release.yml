@@ -1,0 +1,67 @@
+name: CD Release
+
+on:
+  push:
+    branches:
+      - release
+      - "release/**"
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+
+jobs:
+  quality-gate:
+    name: Quality gate
+    uses: ./.github/workflows/reusable-quality-gate.yml
+    with:
+      publish_image: true
+    secrets: inherit
+
+  deploy-homologation:
+    name: Deploy homologation
+    needs: quality-gate
+    if: vars.AWS_DEPLOY_ENABLED == 'true'
+    uses: ./.github/workflows/reusable-aws-deploy.yml
+    with:
+      environment_name: homologation
+    secrets: inherit
+
+  open-pr-to-main:
+    name: Open PR to main
+    runs-on: ubuntu-latest
+    needs: deploy-homologation
+    if: needs.deploy-homologation.result == 'success'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create or keep production pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_BRANCH: ${{ github.ref_name }}
+        run: |
+          git fetch origin main "$SOURCE_BRANCH"
+
+          pending_commits="$(git rev-list --count "origin/main..origin/$SOURCE_BRANCH")"
+          if [ "$pending_commits" -eq 0 ]; then
+            echo "No pending commits from $SOURCE_BRANCH to main."
+            exit 0
+          fi
+
+          existing_pr="$(gh pr list --base main --head "$SOURCE_BRANCH" --state open --json number --jq '.[0].number // empty')"
+
+          if [ -n "$existing_pr" ]; then
+            echo "Pull request #$existing_pr already exists for $SOURCE_BRANCH -> main."
+            exit 0
+          fi
+
+          gh pr create \
+            --base main \
+            --head "$SOURCE_BRANCH" \
+            --title "ci(production): promote $SOURCE_BRANCH to main" \
+            --body "PR automático aberto após deploy bem-sucedido em homologation. Este PR deve exigir aprovação manual e branch protection antes do merge para \`main\`."

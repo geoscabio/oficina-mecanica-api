@@ -1,0 +1,27 @@
+name: CD Production
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  quality-gate:
+    name: Quality gate
+    uses: ./.github/workflows/reusable-quality-gate.yml
+    with:
+      publish_image: true
+    secrets: inherit
+
+  deploy-production:
+    name: Deploy production
+    needs: quality-gate
+    if: vars.AWS_DEPLOY_ENABLED == 'true'
+    uses: ./.github/workflows/reusable-aws-deploy.yml
+    with:
+      environment_name: production
+    secrets: inherit

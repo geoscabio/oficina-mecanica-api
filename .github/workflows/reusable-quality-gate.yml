@@ -1,0 +1,175 @@
+name: Reusable Quality Gate
+
+on:
+  workflow_call:
+    inputs:
+      publish_image:
+        description: "Publish image to GHCR after build."
+        required: false
+        default: false
+        type: boolean
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  AWS_K8S_PATH: infra/aws/k8s
+
+jobs:
+  build-test:
+    name: Build, format and tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore OficinaMecanica.sln
+
+      - name: Build solution
+        run: dotnet build OficinaMecanica.sln --configuration Release --no-restore
+
+      - name: Verify formatting
+        run: dotnet format OficinaMecanica.sln --verify-no-changes --no-restore
+
+      - name: Run tests with coverage
+        run: >
+          dotnet test OficinaMecanica.sln
+          --configuration Release
+          --no-build
+          --collect:"XPlat Code Coverage"
+          --settings tests/sonarqube.runsettings
+          --results-directory ./TestResults
+          --logger "trx"
+
+      - name: Validate test execution results
+        shell: pwsh
+        run: |
+          $trxFiles = Get-ChildItem -Path TestResults -Recurse -Filter *.trx
+
+          if (-not $trxFiles) {
+            throw "No TRX test result files were generated."
+          }
+
+          $total = 0
+          $passed = 0
+          $failed = 0
+          $skipped = 0
+
+          foreach ($trxFile in $trxFiles) {
+            [xml]$trx = Get-Content -LiteralPath $trxFile.FullName
+            $counters = $trx.TestRun.ResultSummary.Counters
+
+            $total += [int]$counters.total
+            $passed += [int]$counters.passed
+            $failed += [int]$counters.failed
+            $skipped += [int]$counters.notExecuted
+          }
+
+          Write-Host "Tests: total=$total passed=$passed failed=$failed skipped=$skipped"
+
+          if ($failed -gt 0) {
+            throw "There are failing tests."
+          }
+
+          if ($skipped -gt 0) {
+            throw "CI coverage requires zero skipped tests. Check Docker availability before collecting coverage."
+          }
+
+      - name: Generate coverage report
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:"TestResults/CoverageReport" \
+            -reporttypes:"HtmlInline_AzurePipelines;Cobertura;MarkdownSummaryGithub"
+
+      - name: Validate coverage threshold
+        shell: pwsh
+        run: |
+          [xml]$coverage = Get-Content -LiteralPath TestResults/CoverageReport/Cobertura.xml
+          $lineRate = [double]::Parse($coverage.coverage.'line-rate', [System.Globalization.CultureInfo]::InvariantCulture)
+          $lineCoverage = [math]::Round($lineRate * 100, 2)
+
+          Write-Host "Line coverage: $lineCoverage%"
+
+          if ($lineCoverage -lt 90) {
+            throw "Line coverage $lineCoverage% is below the required 90% threshold."
+          }
+
+      - name: Upload test and coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-and-coverage-results
+          path: |
+            TestResults/**/*.trx
+            TestResults/**/coverage.cobertura.xml
+            TestResults/CoverageReport/**
+          if-no-files-found: error
+
+  docker-image:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    needs: build-test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=ref,event=branch
+            type=ref,event=pr
+
+      - name: Login to GitHub Container Registry
+        if: inputs.publish_image
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: ${{ inputs.publish_image }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  kubernetes-dry-run:
+    name: Kubernetes manifest validation
+    runs-on: ubuntu-latest
+    needs: docker-image
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Create ephemeral KinD cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: ci-validation
+
+      - name: Validate local Kubernetes manifests
+        run: kubectl apply --dry-run=client -R -f k8s/
+
+      - name: Validate AWS Kubernetes manifests
+        run: kubectl apply --dry-run=client -R -f ${{ env.AWS_K8S_PATH }}/
