@@ -581,17 +581,17 @@ unset OFICINA_SKIP_DOCKER_TESTS
 
 ## Qualidade e evidências
 
-Além dos testes automatizados, o projeto foi validado com evidências de cobertura, qualidade estática e análise dinâmica de segurança.
+Além dos testes automatizados, o projeto mantém evidências versionadas de cobertura, qualidade estática, análise dinâmica de segurança, HPA e execução Terraform.
 
 | Evidência | Ferramenta | Resultado validado |
 | --- | --- | --- |
-| Build e testes | `dotnet build`, `dotnet test` e Coverlet | Compilação sem erros e suíte automatizada aprovada |
-| Qualidade estática | SonarQube | Quality Gate aprovado, sem bugs, vulnerabilidades, security hotspots ou code smells abertos |
-| Segurança dinâmica | OWASP ZAP Baseline | Nenhuma falha crítica bloqueante; warnings residuais documentados como limitação do MVP |
+| [Build, testes e cobertura](docs/evidencias/build-test.md) | `dotnet build`, `dotnet test`, Coverlet e ReportGenerator | Compilação sem erros, suíte automatizada aprovada e cobertura real registrada |
+| [Qualidade estática](docs/evidencias/sonarqube.md) | SonarQube | Espaço reservado para Quality Gate e print real |
+| [Segurança dinâmica](docs/evidencias/owasp-zap.md) | OWASP ZAP Baseline | Passo a passo e espaço reservado para resultado real |
+| [Kubernetes HPA](docs/evidencias/kubernetes-hpa.md) | Metrics Server e HPA | Passo a passo e espaço reservado para print de escalonamento |
+| [Terraform AWS Academy](docs/evidencias/terraform-apply.md) | Terraform CLI e AWS CLI | Procedimento seguro com `plan`, `apply` aprovado e `destroy` obrigatório |
 
-Os relatórios gerados serão enviados junto ao PDF de entrega exigido no Tech Challenge.
-
-Também foi validado o funcionamento do Horizontal Pod Autoscaler (HPA), comprovando o escalonamento automático da API durante testes de carga em ambiente Kubernetes local.
+Os arquivos acima indicam quais evidências já foram geradas e quais prints reais ainda precisam ser colados antes da montagem final do PDF de entrega.
 
 ---
 
