@@ -14,7 +14,7 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 Workflows reutilizáveis:
 
 - `.github/workflows/reusable-quality-gate.yml`
-- `.github/workflows/reusable-aws-deploy.yml`
+- `.github/workflows/aws-deploy.yml`
 
 ## Fluxo esperado
 

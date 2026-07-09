@@ -19,7 +19,7 @@ env:
 jobs:
   deploy-development:
     name: Deploy development
-    uses: ./.github/workflows/reusable-aws-deploy.yml
+    uses: ./.github/workflows/aws-deploy.yml
     with:
       environment_name: development
     secrets: inherit
