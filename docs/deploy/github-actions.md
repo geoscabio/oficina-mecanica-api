@@ -69,7 +69,7 @@ Roda após merge/push na `develop`.
 
 Fluxo:
 
-1. Deploy real em `development`, se `AWS_DEPLOY_ENABLED=true`.
+1. Deploy real automático em `development`.
 2. Build e push da imagem para ECR durante o deploy AWS.
 3. PR automático de `develop` para `release`, somente se o deploy passou.
 
@@ -106,7 +106,6 @@ Workflow manual para remover recursos Kubernetes:
 
 | Nome | Tipo | Uso |
 | --- | --- | --- |
-| `AWS_DEPLOY_ENABLED` | Repository variable | Habilita deploy automático real em `development` quando `true`. |
 | `AUTO_PR_ENABLED` | Repository variable | Habilita PR automático após deploy: `develop -> release` e `release -> main`. |
 | `RELEASE_BRANCH` | Repository variable opcional | Nome da branch de release. Default: `release`. |
 

@@ -275,12 +275,11 @@ A infraestrutura AWS real é provisionada por Terraform para o ambiente `develop
 
 1. Provisionar a infraestrutura com Terraform em `infra/terraform/environments/dev`.
 2. Configurar secrets e variables nos GitHub Environments.
-3. Habilitar deploy com `AWS_DEPLOY_ENABLED=true` para o ambiente `development`.
-4. Integrar feature em `develop`.
-5. A esteira faz deploy em `development` e abre PR automático para `release`.
-6. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
-7. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
-8. Ao final da demonstração, executar cleanup Kubernetes e `terraform destroy`.
+3. Integrar feature em `develop`.
+4. A esteira faz deploy automático em `development` e abre PR automático para `release`.
+5. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
+6. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
+7. Ao final da demonstração, executar cleanup Kubernetes e `terraform destroy`.
 
 Guias:
 
@@ -324,7 +323,7 @@ feature/* -> PR develop -> deploy development -> PR release -> deploy homologati
 
 O PR de branch de trabalho para `develop` é manual para economizar GitHub Actions no plano gratuito. Depois do merge em `develop`, a automação abre o próximo PR somente após o deploy do estágio anterior passar.
 
-Para evitar automações acidentais, o deploy AWS real de `development` só executa com `AWS_DEPLOY_ENABLED=true`, e os PRs automáticos de `develop -> release` e `release -> main` só executam com `AUTO_PR_ENABLED=true`.
+O deploy AWS real de `development` executa automaticamente após merge/push na `develop`. Os PRs automáticos de `develop -> release` e `release -> main` só executam com `AUTO_PR_ENABLED=true`.
 
 Branches `develop` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks quando o plano do GitHub permitir.
 

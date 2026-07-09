@@ -18,7 +18,6 @@
 
 - Rodar `terraform plan` com credenciais temporárias válidas.
 - Executar `terraform apply` somente com aprovação explícita.
-- Habilitar `AWS_DEPLOY_ENABLED=true` durante a janela de demonstração.
 - Validar o deploy automático real a partir de `develop` e os deploys lógicos em `release` e `main`.
 - Demonstrar `/api/health` e Swagger no endpoint publicado.
 - Rodar o workflow manual `AWS Cleanup`.

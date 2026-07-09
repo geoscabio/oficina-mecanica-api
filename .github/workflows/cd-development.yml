@@ -19,7 +19,6 @@ env:
 jobs:
   deploy-development:
     name: Deploy development
-    if: vars.AWS_DEPLOY_ENABLED == 'true'
     uses: ./.github/workflows/reusable-aws-deploy.yml
     with:
       environment_name: development
