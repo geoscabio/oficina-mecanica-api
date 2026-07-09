@@ -79,14 +79,23 @@ O deploy AWS real aplica os manifests de `infra/aws/k8s/`, aguarda rollout e imp
 
 ## Encerramento obrigatório
 
-1. Rodar `Actions > AWS Cleanup > Run workflow`.
-2. Selecionar o `target_environment` correto.
-3. Confirmar a execução.
-4. Confirmar que o Service `LoadBalancer` foi removido.
-5. Executar:
+Cleanup e destroy não ficam em workflow. Ao final da demonstração, alterar `infra/aws/lifecycle.yml` para `destroy: true` como sinal operacional do time e remover manualmente os recursos Kubernetes:
+
+```powershell
+aws eks update-kubeconfig --region us-east-1 --name <eks-cluster-name>
+kubectl delete -f infra/aws/k8s/api-service.yaml --ignore-not-found=true
+kubectl delete -f infra/aws/k8s/api-deployment.yaml --ignore-not-found=true
+kubectl delete secret oficina-api-secret -n oficina --ignore-not-found=true
+kubectl delete -f infra/aws/k8s/configmap.yaml --ignore-not-found=true
+kubectl delete -f infra/aws/k8s/namespace.yaml --ignore-not-found=true
+```
+
+Depois executar o destroy explícito:
 
 ```powershell
 terraform -chdir=infra/terraform/environments/dev destroy
 ```
 
-6. Conferir que não restaram EKS, EC2, RDS, NAT Gateway, ECR com imagens ou Load Balancer ativos.
+O `destroy: true` em `infra/aws/lifecycle.yml` não executa nada sozinho. Ele existe para deixar clara a intenção operacional; o encerramento continua explícito com `terraform destroy`.
+
+Por fim, conferir que não restaram EKS, EC2, RDS, NAT Gateway, ECR com imagens ou Load Balancer ativos.

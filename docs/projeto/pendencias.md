@@ -20,7 +20,7 @@
 - Executar `terraform apply` somente com aprovação explícita.
 - Validar o deploy automático real a partir de `develop` e os deploys lógicos em `release` e `main`.
 - Demonstrar `/api/health` e Swagger no endpoint publicado.
-- Rodar o workflow manual `AWS Cleanup`.
+- Alterar `infra/aws/lifecycle.yml` para `destroy: true` antes do encerramento.
 - Executar `terraform destroy`.
 - Conferir que não restaram EKS, EC2, RDS, NAT Gateway ou Load Balancer ativos.
 

@@ -303,7 +303,6 @@ Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separad
 | `CD Development` | Em `push` na `develop`, faz deploy em `development` e abre PR para `release`. |
 | `CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
 | `CD Production` | Em `push` na `main`, registra deploy lógico em `production`. |
-| `AWS Cleanup` | Execução manual para remover recursos Kubernetes do environment escolhido. |
 
 ### Bloqueios de qualidade
 

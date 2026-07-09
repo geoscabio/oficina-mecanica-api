@@ -1,0 +1,15 @@
+environment: development
+
+destroy: false
+
+terraform:
+  working_directory: infra/terraform/environments/dev
+
+kubernetes:
+  manifests_directory: infra/aws/k8s
+  namespace: oficina
+
+notes:
+  - Set destroy to true only when the team is ready to remove AWS Academy resources.
+  - This file is an operational flag and does not execute cleanup or terraform destroy automatically.
+  - Cleanup and terraform destroy must be executed manually by the developers.

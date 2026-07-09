@@ -10,7 +10,6 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 | `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Fazer deploy em `development` e abrir PR para `release`. |
 | `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Registrar deploy lógico em `homologation` e abrir PR para `main`. |
 | `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Registrar deploy lógico em `production`. |
-| `AWS Cleanup` | `.github/workflows/aws-cleanup.yml` | Manual | Remover recursos Kubernetes do environment escolhido. |
 
 Workflows reutilizáveis:
 
@@ -92,15 +91,14 @@ Fluxo:
 
 O PR para `main` deve exigir aprovação/reviewer antes do merge.
 
-## AWS Cleanup
+## Encerramento AWS
 
-Workflow manual para remover recursos Kubernetes:
+Cleanup e destroy não ficam na esteira. Eles são responsabilidade operacional dos desenvolvedores após a demonstração:
 
-1. Abrir `Actions > AWS Cleanup`.
-2. Clicar em `Run workflow`.
-3. Escolher `target_environment`.
-4. Rodar o cleanup.
-5. Executar `terraform destroy` depois, quando a infraestrutura foi criada para demonstração.
+1. Alterar `infra/aws/lifecycle.yml` para `destroy: true`.
+2. Remover recursos Kubernetes publicados no EKS.
+3. Executar `terraform destroy` localmente usando o mesmo estado do `terraform apply`.
+4. Conferir no console AWS se não restaram EKS, RDS, ECR com imagens, Load Balancer, NAT Gateway ou EC2 ativos.
 
 ## Repository variables
 

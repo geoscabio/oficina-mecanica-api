@@ -14,11 +14,9 @@ Os manifests deste diretório são exclusivos para AWS e não substituem os mani
 
 ## Deploy via GitHub Actions
 
-Os workflows de CD aplicam estes manifests automaticamente quando:
+O workflow `CD Development` aplica estes manifests automaticamente quando:
 
-- a branch é `develop`, `release`/`release/**` ou `main`;
-- a validação de build, testes, cobertura, imagem Docker e manifests passa;
-- a variável `AWS_DEPLOY_ENABLED=true` está configurada no repositório;
+- a branch é `develop`;
 - o GitHub Environment correspondente possui secrets e variables configurados.
 
 Mapeamento:
@@ -26,18 +24,16 @@ Mapeamento:
 | Branch | Environment |
 | --- | --- |
 | `develop` | `development` |
-| `release` ou `release/**` | `homologation` |
-| `main` | `production` |
 
 O campo `image` de `api-deployment.yaml` usa um placeholder. No deploy pelo GitHub Actions ele é substituído dinamicamente pela imagem enviada ao ECR.
 
 ## Cleanup
 
-Para remover os recursos Kubernetes da demonstração, rode `Actions > AWS Cleanup > Run workflow` com:
+Cleanup e destroy não ficam na esteira. Antes de encerrar a demonstração, alterar `infra/aws/lifecycle.yml` para `destroy: true` como sinal operacional do time.
 
-- `target_environment` apontando para o ambiente correto
+Depois, use `kubectl delete` localmente com as credenciais AWS ativas e execute `terraform destroy` usando o mesmo estado criado pelo `terraform apply`.
 
-Depois disso, execute `terraform destroy` localmente usando o mesmo estado criado pelo `terraform apply`. Não deixe EKS, RDS, ECR, Load Balancer ou NAT ativos após a demonstração.
+Não deixe EKS, RDS, ECR, Load Balancer ou NAT ativos após a demonstração.
 
 ## Observações
 
