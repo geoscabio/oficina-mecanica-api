@@ -129,8 +129,13 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
 
+      - name: Create ephemeral KinD cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: ci-validation
+
       - name: Validate local Kubernetes manifests
-        run: kubectl apply --dry-run=client --validate=false -R -f k8s/
+        run: kubectl apply --dry-run=client -R -f k8s/
 
       - name: Validate AWS Kubernetes manifests
-        run: kubectl apply --dry-run=client --validate=false -R -f ${{ env.AWS_K8S_PATH }}/
+        run: kubectl apply --dry-run=client -R -f ${{ env.AWS_K8S_PATH }}/
