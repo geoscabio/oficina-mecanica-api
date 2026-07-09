@@ -2,109 +2,125 @@
 
 API REST para atendimento, execução e acompanhamento de ordens de serviço em uma oficina mecânica.
 
-Projeto desenvolvido para o **Tech Challenge da Pós Tech FIAP - Arquitetura de Software**, com foco em modelagem de domínio, Clean Architecture, execução local simples e validação de um fluxo completo via API.
+Projeto desenvolvido para o **Tech Challenge - Fase 2 da Pós Tech FIAP em Arquitetura de Software**, com foco em Clean Architecture, modelagem de domínio, execução containerizada, Kubernetes, AWS Academy e rastreabilidade de qualidade via CI/CD.
 
 ---
 
-## 📚 Sumário
+## 📌 Índice
 
-- [Sobre o projeto](#-sobre-o-projeto)
-- [Funcionalidades](#-funcionalidades)
-- [Arquitetura](#-arquitetura)
-- [Tecnologias](#-tecnologias)
-- [Estrutura do repositório](#-estrutura-do-repositório)
-- [Como executar localmente](#-como-executar-localmente)
-- [Como acessar o banco local](#-como-acessar-o-banco-local)
-- [Autenticação](#-autenticação)
-- [Como testar a API](#-como-testar-a-api)
-- [Testes automatizados](#-testes-automatizados)
-- [Qualidade e evidências](#qualidade-e-evidências)
-- [Banco de dados e seed](#-banco-de-dados-e-seed)
-- [Documentação complementar](#-documentação-complementar)
-- [Observações acadêmicas](#-observações-acadêmicas)
-- [Licença](#-licença)
+- [✨ Visão geral](#visao-geral)
+- [✅ Funcionalidades](#funcionalidades)
+- [🏗️ Arquitetura](#arquitetura)
+- [🧭 Documentação e diagramas](#documentacao-e-diagramas)
+- [🧰 Tecnologias](#tecnologias)
+- [📁 Estrutura do repositório](#estrutura-do-repositorio)
+- [🚀 Execução local com Docker Compose](#execucao-local-docker-compose)
+- [☸️ Execução local com Kubernetes](#execucao-local-kubernetes)
+- [☁️ Deploy AWS Academy](#deploy-aws-academy)
+- [🔁 CI/CD](#cicd)
+- [🧪 Testes e qualidade](#testes-e-qualidade)
+- [🔐 Autenticação](#autenticacao)
+- [📚 Swagger, OpenAPI e collection](#swagger-openapi-collection)
+- [🗄️ Banco de dados e seed](#banco-de-dados-e-seed)
+- [🎬 Entrega final](#entrega-final)
+- [📝 Observações](#observacoes)
 
 ---
 
-## 🎯 Sobre o projeto
+<a id="visao-geral"></a>
 
-A solução simula um sistema integrado para uma oficina mecânica, cobrindo o processo desde o atendimento inicial até a entrega do veículo ao cliente.
+## ✨ Visão geral
 
-O sistema permite que diferentes perfis interajam com o fluxo da oficina:
+A solução simula um sistema integrado para uma oficina mecânica, cobrindo o fluxo desde o atendimento inicial até a entrega do veículo ao cliente.
 
-| Perfil | O que faz no sistema |
+| Perfil | O que faz |
 | --- | --- |
-| **Atendente** | Cadastra clientes e veículos, abre ordens de serviço, acompanha aprovações e registra entrega do veículo |
-| **Mecânico** | Inicia diagnóstico, define serviços, reserva peças, executa e finaliza serviços |
-| **Cliente** | Consulta o status da ordem de serviço via API |
-| **Administrador** | Acessa os cadastros administrativos e apoia a operação do sistema |
+| 👩‍💼 **Atendente** | Cadastra clientes e veículos, abre ordens de serviço, acompanha orçamento e registra entrega. |
+| 👨‍🔧 **Mecânico** | Inicia diagnóstico, define serviços, reserva peças, executa e finaliza serviços. |
+| 👤 **Cliente** | Consulta publicamente o status da ordem de serviço. |
+| 🛠️ **Administrador** | Opera cadastros administrativos e apoia a gestão da oficina. |
 
 ---
+
+<a id="funcionalidades"></a>
 
 ## ✅ Funcionalidades
 
 | Área | Funcionalidades principais |
 | --- | --- |
-| **Identidade** | Login, geração de token JWT e autorização por perfil |
-| **Atendimento** | Cadastro e consulta de clientes e veículos |
-| **Administrativo** | Cadastro de mecânicos, serviços do catálogo e peças/insumos |
-| **Gestão de Estoque** | Entrada, consulta, reserva, baixa e estorno de itens |
-| **Gestão de Ordem de Serviço** | Abertura, diagnóstico, orçamento, aprovação, execução, finalização, entrega, cancelamento, acompanhamento de status e consulta de tempo médio de execução dos serviços |
+| 🔐 **Identidade** | Login, geração de JWT e autorização por perfil. |
+| 🤝 **Atendimento** | Cadastro e consulta de clientes e veículos. |
+| 🧾 **Administrativo** | Cadastro de mecânicos, serviços de catálogo e peças/insumos. |
+| 📦 **Estoque** | Entrada, consulta, reserva, baixa e estorno de itens. |
+| 🧰 **Ordem de Serviço** | Abertura, diagnóstico, orçamento, aprovação, execução, finalização, entrega, cancelamento e status. |
+| 📊 **Indicadores** | Consulta de tempo médio de execução de serviços. |
+| ❤️ **Healthcheck** | Endpoint `/api/health` usado por Docker, Kubernetes e infraestrutura. |
 
-### Fluxo principal atendido
+### Fluxo principal
 
 1. Cliente solicita atendimento.
 2. Atendente identifica ou cadastra cliente e veículo.
 3. Atendente abre a ordem de serviço.
-4. Mecânico inicia o diagnóstico.
+4. Mecânico inicia diagnóstico.
 5. Mecânico define serviços e reserva peças/insumos.
-6. Sistema calcula o orçamento.
-7. Atendente envia o orçamento ao cliente por canal externo.
-8. Atendente registra a aprovação e inicia a execução.
-9. Mecânico executa e finaliza os serviços.
-10. Sistema baixa o estoque reservado.
-11. Atendente registra a entrega do veículo.
+6. Sistema calcula orçamento.
+7. Atendente envia orçamento por canal externo.
+8. Cliente aprova ou recusa.
+9. Mecânico executa e finaliza serviços.
+10. Sistema baixa estoque reservado.
+11. Atendente entrega o veículo.
 
-Fluxos alternativos, como estoque insuficiente, reprovação de orçamento e cancelamento com estorno de estoque, também foram considerados nas regras de negócio.
+Fluxos alternativos como estoque insuficiente, reprovação de orçamento, cancelamento com estorno e conflito de atualização também foram tratados.
 
 ---
 
+<a id="arquitetura"></a>
+
 ## 🏗️ Arquitetura
 
-O projeto adota **Clean Architecture** em uma estrutura de **monólito modular**.
-
-A ideia principal é manter o domínio protegido de detalhes externos, como HTTP, Swagger, banco de dados e autenticação.
+O projeto adota **Clean Architecture** em um **monólito modular**, preservando o domínio de detalhes externos como HTTP, Swagger, banco de dados e infraestrutura.
 
 | Camada | Projeto | Responsabilidade |
 | --- | --- | --- |
-| **API** | `OficinaMecanica.API` | Controllers, Swagger, autenticação JWT, autorização e middlewares |
-| **Application** | `OficinaMecanica.Application` | Use Cases, DTOs, validações, mapeamentos e orquestração dos fluxos |
-| **Domain** | `OficinaMecanica.Domain` | Agregados, entidades, value objects, enums, regras de negócio e contratos de repositories |
-| **Infrastructure** | `OficinaMecanica.Infrastructure` | EF Core, SQL Server, repositories, migrations, seed e JWT services |
+| 🌐 **API** | `OficinaMecanica.API` | Controllers, Swagger, autenticação, autorização, middlewares e healthcheck. |
+| 🧠 **Application** | `OficinaMecanica.Application` | Use cases, DTOs, validações, mapeamentos e orquestração dos fluxos. |
+| 💎 **Domain** | `OficinaMecanica.Domain` | Agregados, entidades, value objects, enums, regras de negócio e contratos. |
+| 🧱 **Infrastructure** | `OficinaMecanica.Infrastructure` | EF Core, SQL Server, repositories, migrations, seed e serviços JWT. |
 
 ### Decisões aplicadas
 
 | Decisão | Aplicação prática |
 | --- | --- |
-| **Monólito modular** | Deploy único, organizado internamente pelos contextos delimitados: **Administrativo, Atendimento, Gestão de Estoque e Gestão de Ordem de Serviço** |
-| **Clean Architecture** | Separação entre domínio, aplicação, infraestrutura e API |
-| **DDD tático** | Uso de contexto delimitado, agregados, entidades, value objects e regras no domínio |
-| **Use Cases** | Casos de uso da aplicação centralizados na camada Application |
-| **Repository Pattern** | Contratos separados das implementações de persistência |
-| **JWT** | Autenticação e autorização por perfis |
-| **Testes automatizados** | Cobertura de domínio, aplicação e API integrada |
-
-### Diagramas versionados
-
-Os diagramas abaixo estão versionados no repositório em Mermaid, renderizáveis diretamente no GitHub:
-
-- [C4 Contexto](docs/arquitetura/c4-contexto.md)
-- [C4 Container](docs/arquitetura/c4-container.md)
-- [Deployment local, Kubernetes e AWS](docs/arquitetura/deployment.md)
-
-O link externo do Notion pode continuar como material complementar, mas os diagramas acima são a fonte versionada de entrega.
+| **Monólito modular** | Deploy único com organização por contextos: Administrativo, Atendimento, Estoque e Ordem de Serviço. |
+| **Clean Architecture** | Dependências apontam para dentro; domínio não depende de API ou Infrastructure. |
+| **DDD tático** | Uso de agregados, entidades, value objects, enums e regras no domínio. |
+| **Use Cases** | Regras de aplicação centralizadas na camada Application. |
+| **Repository Pattern** | Contratos no domínio e implementação na infraestrutura. |
+| **JWT + perfis** | Segurança baseada em autenticação Bearer e autorização por papel. |
+| **Resiliência de dados** | RowVersion/concurrency tokens para evitar sobrescrita silenciosa. |
 
 ---
+
+<a id="documentacao-e-diagramas"></a>
+
+## 🧭 Documentação e diagramas
+
+| Item | Caminho |
+| --- | --- |
+| 🧩 C4 Model oficial validado | [`docs/architecture/diagrams/c4-model`](docs/architecture/diagrams/c4-model) |
+| ☁️ Diagramas AWS | [`docs/architecture/diagrams/aws`](docs/architecture/diagrams/aws) |
+| ☸️ Diagramas Kubernetes | [`docs/architecture/diagrams/deployment/kubernetes`](docs/architecture/diagrams/deployment/kubernetes) |
+| 🐳 Diagramas Docker | [`docs/architecture/diagrams/deployment/docker`](docs/architecture/diagrams/deployment/docker) |
+| 🔁 Diagramas CI/CD | [`docs/architecture/diagrams/ci-cd`](docs/architecture/diagrams/ci-cd) |
+| 📄 Evidências de qualidade | [`docs/evidencias`](docs/evidencias) |
+| 🚀 Guias de deploy | [`docs/deploy`](docs/deploy) |
+| 📌 Gestão do projeto | [`docs/projeto`](docs/projeto) |
+
+> Os diagramas C4 já estão finalizados e validados. Os diretórios AWS, Kubernetes, Docker e CI/CD foram reservados para receber os arquivos finais da entrega.
+
+---
+
+<a id="tecnologias"></a>
 
 ## 🧰 Tecnologias
 
@@ -113,566 +129,352 @@ O link externo do Notion pode continuar como material complementar, mas os diagr
 | Linguagem e plataforma | C#, .NET 10, ASP.NET Core Web API |
 | Banco de dados | SQL Server 2022 |
 | ORM | Entity Framework Core |
-| Documentacao da API | Swagger/OpenAPI com Swashbuckle |
-| Seguranca | JWT Bearer, autorizacao por perfis e headers HTTP de seguranca |
-| Validacao e mapeamento | FluentValidation e AutoMapper |
-| Testes automatizados | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
-| Qualidade e evidencias | SonarQube, OWASP ZAP e `dotnet format` |
-| Execucao local | Docker, Docker Compose, Kubernetes (Docker Desktop), NGINX Ingress Controller, Metrics Server, Horizontal Pod Autoscaler (HPA) e .NET SDK |
+| API docs | Swagger/OpenAPI com Swashbuckle |
+| Segurança | JWT Bearer, autorização por perfis e headers HTTP de segurança |
+| Validação e mapeamento | FluentValidation e AutoMapper |
+| Testes | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
+| DevOps | Docker, Docker Compose, Kubernetes, GitHub Actions e GHCR |
+| AWS Academy | Terraform, ECR, EKS, RDS, VPC e Load Balancer |
+| Qualidade | `dotnet format`, cobertura mínima, SonarQube e OWASP ZAP |
 
 ---
+
+<a id="estrutura-do-repositorio"></a>
 
 ## 📁 Estrutura do repositório
 
 ```text
 .
-├── Dockerfile
+├── .github/workflows/              # Esteira CI/CD
+├── docs/
+│   ├── architecture/diagrams/       # Diagramas versionados
+│   ├── deploy/                      # Guias operacionais de deploy
+│   ├── evidencias/                  # Evidências de build, testes, segurança e infra
+│   ├── openapi/                     # OpenAPI JSON exportado
+│   └── projeto/                     # Backlog, decisões e pendências
+├── infra/
+│   ├── environments/dev/            # Terraform do ambiente AWS Academy
+│   ├── k8s/aws/                     # Manifests Kubernetes para EKS
+│   └── modules/                     # Módulos Terraform
+├── k8s/                             # Manifests Kubernetes locais
+├── src/                             # Código de produção
+├── tests/                           # Testes unitários e integração
 ├── docker-compose.yml
-├── OficinaMecanica.sln
-├── README.md
-├── k8s
-│   ├── api-configmap.yaml
-│   ├── api-deployment.yaml
-│   ├── api-hpa.yaml
-│   ├── api-secret.yaml
-│   ├── namespace.yaml
-│   ├── sqlserver-deployment.yaml
-│   ├── sqlserver-pvc.yaml
-│   ├── sqlserver-secret.yaml
-│   ├── sqlserver-service.yaml
-└── src
-│   ├── OficinaMecanica.API
-│   ├── OficinaMecanica.Application
-│   ├── OficinaMecanica.Domain
-│   └── OficinaMecanica.Infrastructure
-└── tests
-    ├── OficinaMecanica.Domain.UnitTests
-    ├── OficinaMecanica.Application.UnitTests
-    └── OficinaMecanica.API.IntegrationTests
+├── Dockerfile
+└── OficinaMecanica.sln
 ```
 
 ---
 
-## 🚀 Como executar localmente
+<a id="execucao-local-docker-compose"></a>
 
-O fluxo recomendado para avaliação é executar a API e o banco de dados com **Docker Compose**.
+## 🚀 Execução local com Docker Compose
 
 ### Pré-requisitos
 
-| Item | Obrigatório para Docker Compose? | Obrigatório para build/testes locais? | Observação |
-| --- | --- | --- | --- |
-| Docker Desktop | Sim | Sim, para testes integrados | Necessário para subir API, SQL Server e containers de teste |
-| .NET SDK 10 | Não | Sim | Necessário para `dotnet build`, `dotnet test`, EF Core e SonarScanner |
-| Cliente SQL | Opcional | Opcional | SSMS no Windows, ou Azure Data Studio, DBeaver e `sqlcmd` no Linux/macOS |
-| Porta `5093` livre | Sim | Não | Porta da API |
-| Porta `14333` livre | Sim | Não | Porta local do SQL Server |
+- Docker Desktop em execução.
+- .NET SDK 10 instalado para comandos locais fora do container.
 
-### 1. Subir API e banco
-
-Na raiz do repositório, execute um dos comandos abaixo conforme seu sistema operacional. O comando cria o arquivo `.env` para você a partir do `.env.example`; não é necessário criar o arquivo manualmente.
-
-Windows PowerShell:
+### Subir ambiente local
 
 ```powershell
 Copy-Item .env.example .env
+docker compose up -d --build
 ```
 
-Bash, macOS ou Linux:
+O Docker Compose sobe:
 
-```bash
-cp .env.example .env
+- SQL Server em `localhost,14333`;
+- API em `http://localhost:5093`;
+- migrations e seed demo automaticamente.
+
+### Validar API
+
+```powershell
+curl.exe http://localhost:5093/api/health
 ```
 
-O Docker Compose lê o arquivo `.env` automaticamente. Não é necessário criar o arquivo na mão. Se quiser trocar a senha do SQL Server, o segredo JWT ou o token do webhook de orçamento, edite os valores do `.env` antes de subir os containers.
+Resposta esperada:
 
-Depois execute. Este comando é igual no Windows, macOS e Linux:
-
-```bash
-docker compose up --build
+```text
+Healthy
 ```
 
-Ao iniciar, a aplicação:
+### Acessos locais
 
-- sobe o SQL Server em container;
-- sobe a API em container;
-- aguarda o banco ficar saudável;
-- aplica as migrations automaticamente;
-- carrega dados de demonstração;
-- disponibiliza o Swagger.
-
-### 2. Acessar a API
-
-| Recurso | Endereço |
+| Recurso | URL |
 | --- | --- |
 | Swagger | `http://localhost:5093/swagger` |
-| API | `http://localhost:5093` |
+| Healthcheck | `http://localhost:5093/api/health` |
+| OpenAPI JSON | `http://localhost:5093/swagger/v1/swagger.json` |
 
-### 3. Parar ou recriar o ambiente
+### Parar ambiente
 
-| Objetivo | Comando |
-| --- | --- |
-| Parar containers sem apagar o banco | `docker compose down` |
-| Parar containers e apagar o volume do banco | `docker compose down -v` |
-| Subir novamente do zero | repetir o comando de subida |
+```powershell
+docker compose down
+```
+
+Para recriar banco/volume do zero:
+
+```powershell
+docker compose down -v
+docker compose up -d --build
+```
 
 ---
 
-## ☸️ Execução com Kubernetes
+<a id="execucao-local-kubernetes"></a>
 
-Além da execução via Docker Compose, o projeto também pode ser executado utilizando o Kubernetes do Docker Desktop por meio dos manifestos disponíveis na pasta `k8s`.
-
-### Recursos implementados
-
-- Namespace dedicado para a aplicação.
-- Deployment da API com Startup Probe, Liveness Probe e Readiness Probe.
-- Deployment do SQL Server.
-- Services para comunicação entre os Pods.
-- ConfigMap para configurações da aplicação.
-- Secrets para informações sensíveis.
-- PersistentVolumeClaim para persistência dos dados do SQL Server.
-- Horizontal Pod Autoscaler (HPA) baseado em utilização de CPU e memória.
+## ☸️ Execução local com Kubernetes
 
 ### Pré-requisitos
 
 - Docker Desktop com Kubernetes habilitado.
-- `kubectl` configurado para acessar o cluster local.
-- Metrics Server instalado.
-> **Observação:** as probes da aplicação utilizam o endpoint `/api/health`, responsável por informar ao Kubernetes quando a aplicação está inicializada, saudável e pronta para receber requisições.
+- `kubectl` apontando para o contexto local.
 
-> **AWS Academy:** qualquer criação de recurso AWS deve ser aprovada explicitamente e acompanhada de `terraform destroy` ao fim da demonstração. Consulte `docs/deploy/aws-academy-guardrails.md`.
+### Aplicar manifests
 
-### Padronização das tags da infraestrutura
+```powershell
+kubectl apply -R -f k8s/
+kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
+kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
+```
 
-Os módulos Terraform utilizam um conjunto de tags compartilhadas, centralizadas no arquivo:
+### Acessar API por port-forward
+
+```powershell
+kubectl port-forward service/oficina-api 5093:8080 -n oficina
+```
+
+Depois acesse:
 
 ```text
-infra/environments/dev/locals.tf
+http://localhost:5093/swagger
+http://localhost:5093/api/health
 ```
 
-Essas tags são repassadas para todos os módulos por meio da variável `tags`, garantindo padronização na identificação dos recursos provisionados e evitando duplicação de configuração entre os módulos de infraestrutura.
+### Validar recursos
 
-
-
-### Rede privada (Amazon VPC)
-
-A infraestrutura Terraform provisiona uma Virtual Private Cloud (VPC) composta por sub-redes públicas e privadas distribuídas em múltiplas Availability Zones.
-
-Além da conectividade pública por meio do Internet Gateway, a infraestrutura utiliza um NAT Gateway associado a um Elastic IP para fornecer acesso de saída à Internet aos recursos implantados nas sub-redes privadas.
-
-A configuração implementada contempla:
-
-- Virtual Private Cloud (VPC);
-- Internet Gateway para acesso das sub-redes públicas;
-- Duas sub-redes públicas;
-- Duas sub-redes privadas;
-- NAT Gateway associado a um Elastic IP;
-- Route Table pública com rota para o Internet Gateway;
-- Route Table privada com rota padrão (`0.0.0.0/0`) apontando para o NAT Gateway;
-- Aplicação das tags compartilhadas da infraestrutura para padronização dos recursos provisionados.
-
-A utilização do NAT Gateway permite que recursos executados nas sub-redes privadas, como os nós do Amazon EKS e a instância do Amazon RDS, realizem conexões de saída para serviços da AWS e para a Internet sem exposição direta por endereço IP público.
-
-A infraestrutura de rede é provisionada pelo módulo Terraform localizado em:
-
-```text
-infra/modules/networking
-```
-
-### Registro de imagens (Amazon ECR)
-
-A infraestrutura Terraform cria automaticamente um repositório privado no Amazon Elastic Container Registry (ECR), responsável por armazenar as imagens Docker da aplicação que serão utilizadas durante o provisionamento do ambiente na AWS.
-
-A configuração do repositório contempla:
-
-- Tags de imagem imutáveis (`IMMUTABLE`), evitando a sobrescrita de versões já publicadas;
-- Verificação automática de vulnerabilidades (`scan_on_push`) a cada envio de imagem;
-- Criptografia padrão da AWS (`AES-256`);
-- Aplicação das tags compartilhadas da infraestrutura para padronização dos recursos provisionados.
-
-O repositório é provisionado pelo módulo Terraform `registry`, localizado em:
-
-```text
-infra/modules/registry
-```
-
-Sua utilização será integrada ao pipeline de CI/CD e ao provisionamento do cluster Amazon EKS nas próximas etapas do projeto.
-
-### Banco de dados gerenciado (Amazon RDS)
-
-A infraestrutura Terraform também provisiona uma instância gerenciada do Amazon Relational Database Service (RDS), utilizada como banco de dados da aplicação em ambiente AWS.
-
-A configuração implementada contempla:
-
-- Engine **Amazon RDS for SQL Server Express**;
-- Implantação em sub-redes privadas da VPC por meio de um **DB Subnet Group**;
-- Security Group dedicado permitindo acesso somente pela porta **1433** dentro da rede privada da aplicação;
-- Banco não exposto à Internet (`publicly_accessible = false`);
-- Configuração preparada para ambientes de desenvolvimento e laboratório, com `skip_final_snapshot = true` e `backup_retention_period = 0`;
-- Aplicação das tags compartilhadas da infraestrutura para padronização dos recursos provisionados.
-
-O banco é provisionado pelo módulo Terraform `database`, localizado em:
-
-```text
-infra/modules/database
-```
-
-A aplicação utilizará o endpoint gerado pelo Amazon RDS para estabelecer a conexão com o banco de dados durante a execução no cluster Amazon EKS.
-
-### Aplicação dos manifestos
-
-```bash
-kubectl apply -f k8s/
-```
-
-### Validação
-
-```bash
-kubectl get pods -n oficina
-kubectl get svc -n oficina
-kubectl get pvc -n oficina
-kubectl get hpa -n oficina
+```powershell
+kubectl get all,hpa,ingress -n oficina
 kubectl describe hpa oficina-api-hpa -n oficina
 ```
 
-### Acesso via Ingress
+---
 
-Após aplicar os manifestos Kubernetes, a API também pode ser acessada através do NGINX Ingress Controller.
+<a id="deploy-aws-academy"></a>
 
-Aplicação do manifesto:
+## ☁️ Deploy AWS Academy
 
-```bash
-kubectl apply -f k8s/api-ingress.yaml
-```
+> Regra obrigatória: **não executar `terraform apply` sem aprovação explícita e sem plano de `terraform destroy`**.
 
-Validação em ambiente local:
+O ambiente AWS é o **AWS Academy Learner Lab**, com crédito limitado. O projeto deixa o caminho pronto, mas a criação real de recursos deve ser controlada.
 
-```bash
-kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8081:80
-```
+### Fluxo seguro
 
-Em outro terminal:
+1. Iniciar a sessão do AWS Academy.
+2. Configurar credenciais temporárias localmente ou no GitHub Environment `aws-academy`.
+3. Executar `terraform plan`.
+4. Executar `terraform apply` somente com aprovação explícita.
+5. Rodar deploy manual pelo GitHub Actions com approval.
+6. Demonstrar a API.
+7. Rodar cleanup Kubernetes.
+8. Executar `terraform destroy`.
 
-```powershell
-Invoke-WebRequest -Headers @{Host="oficina.local"} http://localhost:8081
-```
+Guias:
 
-Resultado esperado:
+- [`docs/deploy/aws-academy-guardrails.md`](docs/deploy/aws-academy-guardrails.md)
+- [`docs/deploy/deploy-aws.md`](docs/deploy/deploy-aws.md)
+- [`docs/deploy/github-actions.md`](docs/deploy/github-actions.md)
+
+---
+
+<a id="cicd"></a>
+
+## 🔁 CI/CD
+
+O workflow principal fica em [`/.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
+
+### Quando roda automaticamente
+
+| Evento | O que acontece |
+| --- | --- |
+| `pull_request` para `develop` | Build, format, testes, cobertura, imagem Docker e dry-run Kubernetes. |
+| `push` em `main`, `develop` e `feature/**` | Mesmo fluxo, com push de imagem para GHCR quando aplicável. |
+| `workflow_dispatch` | Permite escolher deploy manual local ou AWS Academy. |
+
+### Bloqueios de qualidade
+
+A esteira falha se:
+
+- algum teste falhar;
+- algum teste for ignorado durante a coleta de cobertura;
+- a cobertura global de linhas ficar abaixo de **90%**;
+- `dotnet format --verify-no-changes` detectar formatação pendente;
+- manifests Kubernetes não passarem no dry-run.
+
+### Deploy manual com aprovação
+
+O deploy real **não roda em PR**. Em PR ele aparece cinza/skipped, como esperado.
+
+Para aprovar deploy AWS:
+
+1. Abrir `Actions > CI/CD`.
+2. Clicar em `Run workflow`.
+3. Escolher a branch.
+4. Selecionar `deployment_target=aws-academy-deploy`.
+5. Abrir o run criado.
+6. Clicar em `Review deployments`.
+7. Selecionar `aws-academy`.
+8. Clicar em `Approve and deploy`.
+
+Para remover recursos Kubernetes da AWS:
 
 ```text
-StatusCode : 200
-```
-
-Esse procedimento confirma que o NGINX Ingress Controller está roteando corretamente as requisições para a API.
-
-> **Observação:** durante o desenvolvimento com Docker Desktop pode ser necessário configurar o Metrics Server com o parâmetro `--kubelet-insecure-tls`, devido às características dos certificados TLS do ambiente local.
-
----
-
-## 🗄️ Como acessar o banco local
-
-### Windows com SSMS
-
-Com os containers em execução, abra o **SQL Server Management Studio** e preencha a janela **Connect to Server** assim:
-
-| Campo no SSMS | Valor |
-| --- | --- |
-| Server type | `Database Engine` |
-| Server name | `localhost,14333` |
-| Authentication | `SQL Server Authentication` |
-| Login | `sa` |
-| Password | Valor definido em `OFICINA_SQL_SA_PASSWORD` no arquivo `.env` |
-| Trust server certificate | Marcado |
-
-Depois de conectar:
-
-1. Abra o painel **Object Explorer**.
-2. Expanda **Databases**.
-3. Selecione o banco **OficinaMecanicaDb**.
-4. Expanda **Tables** para visualizar as tabelas criadas pelas migrations.
-
-### Linux, macOS ou alternativa ao SSMS
-
-Se não estiver no Windows, pode usar **Azure Data Studio**, **DBeaver** ou `sqlcmd` com os mesmos dados de conexão:
-
-| Campo | Valor |
-| --- | --- |
-| Host | `localhost` |
-| Porta | `14333` |
-| Usuario | `sa` |
-| Senha | Valor definido em `OFICINA_SQL_SA_PASSWORD` no arquivo `.env` |
-| Banco | `OficinaMecanicaDb` |
-
-Exemplo com `sqlcmd`:
-
-```bash
-sqlcmd -S localhost,14333 -U sa -P "<valor-de-OFICINA_SQL_SA_PASSWORD-no-.env>" -C -Q "SELECT name FROM sys.databases"
+deployment_target=aws-academy-destroy-k8s
 ```
 
 ---
+
+<a id="testes-e-qualidade"></a>
+
+## 🧪 Testes e qualidade
+
+### Comandos principais
+
+```powershell
+dotnet build OficinaMecanica.sln --no-restore
+dotnet format OficinaMecanica.sln --verify-no-changes --no-restore
+dotnet test OficinaMecanica.sln --no-build
+```
+
+### Cobertura
+
+```powershell
+dotnet test OficinaMecanica.sln `
+  --configuration Release `
+  --no-build `
+  --collect:"XPlat Code Coverage" `
+  --settings tests/sonarqube.runsettings `
+  --results-directory TestResults `
+  --logger "trx"
+```
+
+Evidência atual:
+
+- **424 testes aprovados**
+- **0 testes ignorados**
+- **91.2% de cobertura global de linhas**
+- CI configurado para bloquear cobertura abaixo de **90%**
+
+Arquivos de evidência:
+
+| Evidência | Caminho |
+| --- | --- |
+| Build, testes e cobertura | [`docs/evidencias/build-test.md`](docs/evidencias/build-test.md) |
+| SonarQube | [`docs/evidencias/sonarqube.md`](docs/evidencias/sonarqube.md) |
+| OWASP ZAP | [`docs/evidencias/owasp-zap.md`](docs/evidencias/owasp-zap.md) |
+| Kubernetes HPA | [`docs/evidencias/kubernetes-hpa.md`](docs/evidencias/kubernetes-hpa.md) |
+| Terraform apply/destroy | [`docs/evidencias/terraform-apply.md`](docs/evidencias/terraform-apply.md) |
+
+---
+
+<a id="autenticacao"></a>
 
 ## 🔐 Autenticação
 
-A autenticação é feita pelo endpoint:
+Endpoint:
 
 ```http
 POST /api/v1/identidade/autenticacao/login
 ```
 
-Use um dos usuários de demonstração abaixo para obter um token JWT.
+Usuários demo:
 
-| Perfil | Login | Senha | Uso principal |
-| --- | --- | --- | --- |
-| Administrador | `admin` | `admin123` | Acesso completo aos fluxos protegidos |
-| Atendente | `atendente` | `atendente123` | Atendimento, clientes, veículos, abertura/andamento da OS e estoque |
-| Mecânico | `mecanico` | `mecanico123` | Diagnóstico, definição de serviços, reserva, execução e finalização |
-| Cliente | `cliente` | `cliente123` | Usuário demo mantido para avaliação local; a consulta de status da OS é pública por ID |
-
-### Autorizar no Swagger
-
-1. Acesse `http://localhost:5093/swagger`.
-2. Execute o endpoint de login.
-3. Copie o valor retornado no campo `token`.
-4. Clique em **Authorize**.
-5. Cole apenas o token JWT, sem escrever `Bearer` manualmente.
-6. Confirme em **Authorize**.
-
-### Endpoint externo de orçamento
-
-O recebimento da aprovacao ou reprovacao do orcamento do cliente e feito por endpoint externo dedicado:
-
-`POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/orcamento/notificacoes`
-
-Esse endpoint nao usa JWT de perfis internos. Para simular a integracao externa com seguranca simples, envie o header `X-Webhook-Token` com o mesmo valor configurado em `Integracoes:Orcamento:WebhookToken`.
-
-O segredo nao fica em `appsettings.json`: no Docker Compose ele vem da variavel `OFICINA_ORCAMENTO_WEBHOOK_TOKEN` do arquivo `.env`, mapeada para `Integracoes__Orcamento__WebhookToken`; no Kubernetes ele vem do Secret `oficina-api-secret`.
-
-Assim como o `Jwt__Secret`, a API valida essa configuracao na inicializacao e nao sobe se o token estiver ausente ou tiver menos de 32 caracteres. Para uso local sem Docker, configure a variavel de ambiente `Integracoes__Orcamento__WebhookToken` antes de executar a aplicacao.
-
-### Consulta pública de status
-
-A consulta de status da OS e publica por ID para representar o acompanhamento do cliente sem login obrigatorio:
-
-`GET /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/consultar-status`
-
-### Contrato oficial de abertura da OS
-
-O endpoint oficial da Fase 2 para abrir Ordem de Servico permanece:
-
-`POST /api/v1/gestao-ordem-servico/ordens-servico/cadastrar`
-
-O fluxo completo da aplicação prevê que cliente e veículo sejam previamente identificados ou cadastrados por meio dos endpoints específicos de Atendimento. Dessa forma, a abertura da Ordem de Serviço referencia cliente, veículo e mecânico por seus identificadores (ou documento do cliente, quando aplicável), preservando a consistência transacional e evitando duplicidade de cadastros.
-
-Os serviços e peças/insumos podem ser enviados já na abertura da Ordem de Serviço, quando conhecidos, ou definidos posteriormente durante a etapa de diagnóstico pelo mecânico, conforme o fluxo de negócio modelado no Domain Storytelling e Event Storming do projeto.
-
-Quando servicos ou pecas/insumos ainda nao se aplicarem na abertura, as listas devem ser enviadas vazias (`[]`). Quando forem enviadas, a OS ja registra esses itens, calcula o orcamento inicial e reserva estoque para pecas/insumos.
-
-Exemplo:
-
-```json
-{
-  "clienteId": "00000000-0000-0000-0000-000000000000",
-  "documentoCliente": null,
-  "veiculoId": "00000000-0000-0000-0000-000000000000",
-  "mecanicoId": "00000000-0000-0000-0000-000000000000",
-  "servicosCatalogoIds": [],
-  "pecasInsumos": []
-}
-```
-
-Exemplo com orcamento inicial:
-
-```json
-{
-  "clienteId": "00000000-0000-0000-0000-000000000000",
-  "documentoCliente": null,
-  "veiculoId": "00000000-0000-0000-0000-000000000000",
-  "mecanicoId": "00000000-0000-0000-0000-000000000000",
-  "servicosCatalogoIds": [
-    "00000000-0000-0000-0000-000000000000"
-  ],
-  "pecasInsumos": [
-    {
-      "pecaInsumoCatalogoId": "00000000-0000-0000-0000-000000000000",
-      "quantidade": 1
-    }
-  ]
-}
-```
-
----
-
-## 📚 Documentação da API (Swagger/OpenAPI)
-
-A documentação oficial da API é disponibilizada através do Swagger/OpenAPI da própria aplicação.
-
-Após executar o projeto localmente, toda a documentação dos endpoints poderá ser acessada em:
-
-`http://localhost:5093/swagger`
-
-O Swagger é a fonte oficial da documentação da API deste projeto e atende ao requisito do Tech Challenge.
-
-### Collection versionada
-
-O contrato OpenAPI gerado pelo Swagger também está versionado no repositório e pode ser importado em ferramentas como Postman, Insomnia ou Bruno:
-
-[docs/openapi/oficina-mecanica-openapi.json](docs/openapi/oficina-mecanica-openapi.json)
-
-## 🧪 Como testar a API
-
-O Swagger apresenta os contratos atualizados dos endpoints e deve ser usado para testes manuais rápidos.
-
-### Fluxo feliz principal
-
-<details>
-<summary>Ver sequência completa de uso da API</summary>
-
-| Ordem | Ação | Endpoint |
+| Perfil | Login | Senha |
 | --- | --- | --- |
-| 1 | Autenticar usuário | `POST /api/v1/identidade/autenticacao/login` |
-| 2 | Cadastrar cliente | `POST /api/v1/atendimento/clientes/cadastrar` |
-| 3 | Cadastrar veículo | `POST /api/v1/atendimento/veiculos/cadastrar` |
-| 4 | Cadastrar mecânico | `POST /api/v1/administrativo/mecanicos/cadastrar` |
-| 5 | Cadastrar serviço do catálogo | `POST /api/v1/administrativo/servicos-catalogo/cadastrar` |
-| 6 | Cadastrar peça/insumo do catálogo | `POST /api/v1/administrativo/pecas-insumos-catalogo/cadastrar` |
-| 7 | Registrar entrada no estoque | `POST /api/v1/gestao-estoque/estoque/registrar-entrada` |
-| 8 | Abrir ordem de serviço | `POST /api/v1/gestao-ordem-servico/ordens-servico/cadastrar` |
-| 9 | Consultar status da OS | `GET /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/consultar-status` |
-| 10 | Iniciar diagnóstico | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/iniciar-diagnostico` |
-| 11 | Definir serviços | `PUT /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/definir-servicos` |
-| 12 | Reservar peças e insumos | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/reservar-pecas-insumos` |
-| 13 | Aguardar aprovação | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/aguardar-aprovacao` |
-| 14 | Notificar aprovação do orçamento externo | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/orcamento/notificacoes` |
-| 15 | Iniciar execução do serviço | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/servicos/{servicoId}/iniciar-execucao` |
-| 16 | Finalizar serviço | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/servicos/{servicoId}/finalizar` |
-| 17 | Finalizar OS | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/finalizar` |
-| 18 | Entregar veículo | `POST /api/v1/gestao-ordem-servico/ordens-servico/{ordemServicoId}/entregar` |
-| 19 | Consultar tempo médio | `GET /api/v1/gestao-ordem-servico/tempo-medio-servicos/consultar/{servicoCatalogoId}` |
+| Administrador | `admin` | `admin123` |
+| Atendente | `atendente` | `atendente123` |
+| Mecânico | `mecanico` | `mecanico123` |
 
-</details>
-<br>
+No Swagger, clique em **Authorize** e informe:
 
-O Swagger é a referência principal para demonstração manual dos endpoints. Para clientes externos, utilize o arquivo OpenAPI versionado em `docs/openapi/oficina-mecanica-openapi.json` como collection importável.
+```text
+Bearer <token>
+```
+
+Consulta pública de status não exige autenticação.
 
 ---
 
-## ✅ Testes automatizados
+<a id="swagger-openapi-collection"></a>
 
-O projeto possui testes para domínio, aplicação e API integrada.
+## 📚 Swagger, OpenAPI e collection
 
-| Projeto de teste | Escopo |
+| Item | Caminho |
 | --- | --- |
-| `OficinaMecanica.Domain.UnitTests` | Regras de domínio, agregados, entidades e objetos de valor |
-| `OficinaMecanica.Application.UnitTests` | Casos de uso, validações, fluxos de sucesso e erro |
-| `OficinaMecanica.API.IntegrationTests` | Endpoints, autenticação, autorização, persistência e cenários integrados |
+| Swagger local | `http://localhost:5093/swagger` |
+| OpenAPI local | `http://localhost:5093/swagger/v1/swagger.json` |
+| OpenAPI versionado | [`docs/openapi/oficina-mecanica-openapi.json`](docs/openapi/oficina-mecanica-openapi.json) |
 
-Para rodar todos os testes:
-
-```bash
-dotnet test
-```
-
-Os testes integrados usam **Testcontainers** para subir um SQL Server temporário. Quando o Docker Desktop está em execução, eles rodam normalmente com `dotnet test`.
-
-Se o Docker não estiver acessível no ambiente local, os testes integrados que dependem de container são marcados como `Skipped` em vez de quebrar a suíte inteira. Isso não altera a execução da API com Docker Compose; afeta apenas a experiência ao rodar testes automatizados.
-
-Para pular intencionalmente os testes que dependem de Docker em uma execução local:
-
-Windows PowerShell:
-
-```powershell
-$env:OFICINA_SKIP_DOCKER_TESTS = "true"
-dotnet test
-Remove-Item Env:OFICINA_SKIP_DOCKER_TESTS
-```
-
-Bash, macOS ou Linux:
-
-```bash
-export OFICINA_SKIP_DOCKER_TESTS=true
-dotnet test
-unset OFICINA_SKIP_DOCKER_TESTS
-```
+O arquivo OpenAPI versionado pode ser importado como collection no Postman, Insomnia ou Bruno.
 
 ---
 
-## Qualidade e evidências
+<a id="banco-de-dados-e-seed"></a>
 
-Além dos testes automatizados, o projeto mantém evidências versionadas de cobertura, qualidade estática, análise dinâmica de segurança, HPA e execução Terraform.
+## 🗄️ Banco de dados e seed
 
-| Evidência | Ferramenta | Resultado validado |
-| --- | --- | --- |
-| [Build, testes e cobertura](docs/evidencias/build-test.md) | `dotnet build`, `dotnet test`, Coverlet e ReportGenerator | Compilação sem erros, suíte automatizada aprovada e cobertura real registrada |
-| [Qualidade estática](docs/evidencias/sonarqube.md) | SonarQube | Espaço reservado para Quality Gate e print real |
-| [Segurança dinâmica](docs/evidencias/owasp-zap.md) | OWASP ZAP Baseline | Passo a passo e espaço reservado para resultado real |
-| [Kubernetes HPA](docs/evidencias/kubernetes-hpa.md) | Metrics Server e HPA | Passo a passo e espaço reservado para print de escalonamento |
-| [Terraform AWS Academy](docs/evidencias/terraform-apply.md) | Terraform CLI e AWS CLI | Procedimento seguro com `plan`, `apply` aprovado e `destroy` obrigatório |
+O projeto usa SQL Server com Entity Framework Core.
 
-Os arquivos acima indicam quais evidências já foram geradas e quais prints reais ainda precisam ser colados antes da montagem final do PDF de entrega.
-
----
-
-## 🧱 Banco de dados e seed
-
-A aplicação usa **EF Core** com **SQL Server 2022**.
-
-### Justificativa da escolha do SQL Server
-
-O SQL Server foi escolhido por sua aderência ao domínio relacional da aplicação, que exige integridade transacional entre Ordens de Serviço, estoque, clientes, veículos e serviços. A solução possui integração nativa com o Entity Framework Core, funciona de forma consistente tanto no Docker Compose quanto nos Testcontainers utilizados pelos testes automatizados e simplifica a execução e avaliação local durante o Tech Challenge.
-
-Esta é uma decisão arquitetural voltada ao contexto acadêmico do projeto e poderá evoluir conforme necessidades futuras da solução. A versão validada no Docker Compose e nos Testcontainers é `mcr.microsoft.com/mssql/server:2022-latest`.
+Configurações relevantes:
 
 | Configuração | Função |
 | --- | --- |
-| `ConnectionStrings:DefaultConnection` | String de conexão principal |
-| `Database:ApplyMigrationsOnStartup` | Aplica migrations automaticamente ao iniciar a API |
-| `Database:SeedDemoData` | Carrega dados de demonstração |
+| `Database:ApplyMigrationsOnStartup` | Aplica migrations ao iniciar a API. |
+| `Database:SeedDemoData` | Carrega dados demo para avaliação local. |
 
-Quando `Database:SeedDemoData` está habilitado, a aplicação carrega dados de demonstração para facilitar a avaliação local.
+No Docker Compose local, o SQL Server fica disponível em:
 
-Na execução via Kubernetes, o SQL Server utiliza um `PersistentVolumeClaim` para garantir a persistência dos dados. Em um volume novo, a aplicação aplica automaticamente as migrations e cria o banco `OficinaMecanicaDb` durante a inicialização.
+```text
+localhost,14333
+```
+
+Credenciais locais ficam no arquivo `.env`, criado a partir de `.env.example`.
+
+---
+
+<a id="entrega-final"></a>
+
+## 🎬 Entrega final
+
+Itens técnicos já estruturados:
+
+- ✅ API com fluxo principal da oficina.
+- ✅ Docker Compose local.
+- ✅ Kubernetes local.
+- ✅ Terraform para AWS Academy.
+- ✅ Healthcheck `/api/health`.
+- ✅ CI/CD com cobertura mínima de 90%.
+- ✅ Evidências versionadas.
+- ✅ OpenAPI versionado.
+- ✅ C4 Model oficial versionado.
+
+Itens manuais restantes:
+
+- ⏳ Colar prints reais de SonarQube, OWASP ZAP, HPA e Terraform.
+- ⏳ Finalizar diagramas AWS, Kubernetes, Docker e CI/CD.
+- ⏳ Executar demonstração AWS com `destroy` ao final.
+- ⏳ Gravar vídeo.
+- ⏳ Montar PDF final.
 
 ---
 
-## 📖 Documentação complementar
-
-A documentação arquitetural, decisões, diagramas, backlog técnico e acompanhamento do projeto estão centralizados na wiki do projeto no Notion:
-
-[Sistema Integrado de Atendimento e Execução de Serviços em Oficina Mecânica - Wiki do Projeto](https://turquoise-syzygy-614.notion.site/Sistema-Integrado-de-Atendimento-e-Execu-o-de-Servi-os-em-Oficina-Mec-nica-Wiki-do-Projeto-329f64869829801cb424d26f19cf224f?source=copy_link)
-
----
+<a id="observacoes"></a>
 
 ## 📝 Observações
 
-Este projeto foi desenvolvido para fins acadêmicos. Algumas decisões foram feitas para equilibrar prazo, escopo e clareza da entrega:
-
-- Os usuários demo existem apenas para facilitar a avaliação local.
-- O envio do orçamento ao cliente é representado como uma etapa externa ao sistema.
-- A aprovação ou reprovação do cliente é recebida por endpoint externo de notificação de orçamento, protegido por `X-Webhook-Token`.
-- A consulta de status da OS é pública por ID para representar o acompanhamento do cliente sem login obrigatório.
-- A autenticação usa JWT com usuários demo, podendo evoluir para ASP.NET Identity ou provedor externo.
-- A solução é um monólito, mas foi organizada internamente por contextos, camadas e responsabilidades.
-- O Swagger documenta os contratos da API e auxilia na execução manual dos endpoints.
-- O arquivo `docs/openapi/oficina-mecanica-openapi.json` funciona como collection versionada importável em ferramentas de API.
-
-### Decisões técnicas e evolução recomendada
-
-| Item | Decisão para o MVP | Evolução recomendada |
-| --- | --- | --- |
-| Webhook de orçamento | A decisão externa usa endpoint dedicado com header `X-Webhook-Token`; o segredo vem de `.env`/Secret e deve ter pelo menos 32 caracteres | Evoluir para assinatura HMAC, idempotência e trilha de auditoria |
-| Estoque insuficiente | A reserva retorna erro e bloqueia a operação | Avaliar cancelamento automático da OS quando essa regra for obrigatória |
-| Consulta pública de status | O cliente acompanha a OS por ID sem login, conforme rota de acompanhamento prevista no desafio | Evoluir para código público de acompanhamento quando houver portal real |
-| Numeração da OS | O número é gerado com base no maior número existente | Usar sequence/identity transacional para alta concorrência |
-| Persistência | Repositórios simples ainda salvam diretamente; fluxos transacionais usam `IUnitOfWork` | Padronizar toda persistência em torno do Unit of Work |
-| Login demo | Usuários e senhas existem para facilitar avaliação local | Evoluir para hash de senha, ASP.NET Identity ou provedor externo |
-| Resposta de autenticação | Retorna token, login e perfil para deixar o demo mais explícito | Simplificar contrato conforme necessidade dos consumidores |
-| Estoque global | O estoque é tratado como agregado único no MVP | Reavaliar modelagem por filial/localidade quando houver escala |
-| Logging | Logs atuais cobrem startup, migrations e seed | Adicionar correlação por request e logging estruturado |
-| OWASP ZAP | Baseline executado com `0` falhas e warnings residuais ligados principalmente ao Swagger UI | Endurecer CSP sem `unsafe-inline` e acompanhar atualização do Swagger UI/DOMPurify |
-
----
-
-## 📄 Licença
-
-Projeto desenvolvido para fins acadêmicos no contexto da **Pós Tech FIAP - Arquitetura de Software**.
-
-Caso o repositório seja publicado como open source futuramente, recomenda-se adicionar um arquivo `LICENSE` com a licença escolhida.
+- Não versionar credenciais, tokens, kubeconfig, secrets ou outputs sensíveis.
+- AWS Academy tem orçamento limitado: criar recursos apenas para demonstração e destruir depois.
+- O deploy real via GitHub Actions exige approval no environment `aws-academy`.
+- O projeto prioriza rastreabilidade e simplicidade operacional para a banca avaliar sem depender de contexto externo.
