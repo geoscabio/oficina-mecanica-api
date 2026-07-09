@@ -48,6 +48,11 @@ public static class ApiApplicationBuilderExtensions
 
     public static WebApplication MapApiEndpoints(this WebApplication app)
     {
+        app.MapHealthChecks("/api/health")
+            .AllowAnonymous()
+            .WithName("HealthCheck")
+            .WithTags("Health");
+
         app.MapControllers();
         app.MapGet("/", () => Results.Redirect("/swagger"))
             .ExcludeFromDescription();
