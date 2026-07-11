@@ -13,6 +13,11 @@ output "private_subnet_ids" {
   value       = aws_subnet.private[*].id
 }
 
+output "private_subnet_cidrs" {
+  description = "CIDR blocks das subnets privadas."
+  value       = var.private_subnet_cidrs
+}
+
 output "nat_gateway_id" {
   description = "ID do NAT Gateway."
   value       = aws_nat_gateway.this.id

@@ -3,7 +3,7 @@ locals {
     app = "oficina-api"
   }
 
-  api_rds_connection_string = "Server=tcp:${module.database.db_instance_address},1433;Database=OficinaMecanicaDb;User Id=adminoficina;Password=${var.db_password};TrustServerCertificate=True;"
+  api_rds_connection_string = "Server=tcp:${module.rds.db_instance_address},1433;Database=OficinaMecanicaDb;User Id=adminoficina;Password=${var.db_password};TrustServerCertificate=True;"
 }
 
 resource "kubernetes_namespace_v1" "oficina" {
@@ -14,7 +14,7 @@ resource "kubernetes_namespace_v1" "oficina" {
   }
 
   depends_on = [
-    module.kubernetes
+    module.eks
   ]
 }
 
@@ -27,7 +27,7 @@ resource "kubernetes_config_map_v1" "oficina_api" {
   }
 
   data = {
-    ASPNETCORE_ENVIRONMENT             = "Development"
+    ASPNETCORE_ENVIRONMENT             = "Staging"
     ASPNETCORE_URLS                    = "http://+:8080"
     Database__ApplyMigrationsOnStartup = "true"
     Database__SeedDemoData             = "true"
@@ -173,8 +173,8 @@ resource "kubernetes_deployment_v1" "oficina_api" {
   }
 
   depends_on = [
-    module.database,
-    module.registry,
+    module.rds,
+    module.ecr,
     kubernetes_config_map_v1.oficina_api,
     kubernetes_secret_v1.oficina_api
   ]
@@ -189,6 +189,8 @@ resource "kubernetes_service_v1" "oficina_api" {
   }
 
   spec {
+    # EKS/AWS cria o Load Balancer externo automaticamente a partir deste Service.
+    # O recurso AWS não aparece como aws_lb porque é gerenciado pelo controller cloud-provider do Kubernetes.
     type     = "LoadBalancer"
     selector = local.api_labels
 

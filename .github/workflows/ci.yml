@@ -17,7 +17,6 @@ concurrency:
 
 env:
   DOTNET_VERSION: "10.0.x"
-  AWS_K8S_PATH: infra/aws/k8s
 
 jobs:
   build_application:
@@ -207,9 +206,6 @@ jobs:
 
       - name: Validate local Kubernetes manifests
         run: kubectl apply --dry-run=client -R -f k8s/
-
-      - name: Validate AWS Kubernetes manifests
-        run: kubectl apply --dry-run=client -R -f ${{ env.AWS_K8S_PATH }}/
 
   quality_gate:
     name: Quality gate

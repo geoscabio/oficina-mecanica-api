@@ -13,10 +13,14 @@ O provisionamento do ambiente `development` acontece no workflow `CD Development
 O CD executa:
 
 1. cria ou reutiliza o bucket S3 do Terraform state;
-2. executa `terraform init`, `validate`, `plan` e `apply`;
-3. cria VPC, ECR, RDS, EKS e recursos Kubernetes da API;
-4. publica a imagem Docker no ECR;
-5. reinicia o Deployment no EKS e valida o rollout.
+2. executa `terraform init` e `validate`;
+3. garante o repositório ECR antes do build;
+4. publica a imagem Docker no ECR antes do workload apontar para a nova tag;
+5. executa `terraform plan` e `apply`;
+6. cria ou atualiza VPC, RDS, EKS e recursos Kubernetes da API;
+7. valida o rollout do Deployment no EKS e imprime o endpoint do Load Balancer.
+
+O ambiente publicado na AWS roda com `ASPNETCORE_ENVIRONMENT=Staging`. Swagger e usuários demo são habilitados explicitamente via `appsettings.Staging.json` para permitir a avaliação do Tech Challenge; nunca replicar este padrão, com credenciais fixas e Swagger público, em um ambiente de produção real.
 
 Execução local equivalente para diagnóstico:
 
@@ -101,11 +105,29 @@ Nesse modelo futuro, a aplicação ou o cluster buscariam os valores em runtime 
 
 | Branch | Ambiente | Próximo passo automático |
 | --- | --- | --- |
-| `develop` | `development` | Executa Terraform apply, faz deploy AWS real e abre PR para `release`. |
+| `develop` | `development` | Executa Terraform apply/deploy AWS real quando houver mudança deployable e abre PR para `release`. |
 | `release` ou `release/**` | `homologation` | Registra deploy lógico e abre PR para `main`. |
 | `main` | `production` | Registra deploy lógico final após PR aprovado. |
 
 O deploy AWS real gerencia os recursos Kubernetes da API pelo Terraform, aguarda rollout e imprime o endpoint do Load Balancer. Os estágios `homologation` e `production` não provisionam AWS enquanto não existirem ambientes físicos separados.
+
+## Onde o Load Balancer é criado
+
+Não existe um recurso `aws_lb` explícito no Terraform porque o Load Balancer da API é criado pelo cloud provider da AWS quando o Kubernetes Service da API é criado com `type = "LoadBalancer"`.
+
+Fonte de verdade:
+
+```text
+infra/terraform/environments/dev/api-workload.tf
+```
+
+Recurso responsável:
+
+```text
+kubernetes_service_v1.oficina_api
+```
+
+O Terraform mantém o Service no state; por consequência, o `terraform destroy` remove o Service Kubernetes e a AWS remove o Load Balancer associado.
 
 ## Validação
 

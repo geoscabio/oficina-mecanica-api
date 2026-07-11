@@ -1,5 +1,5 @@
-module "database" {
-  source = "../../modules/database"
+module "rds" {
+  source = "../../modules/rds"
 
   identifier = "oficina-db-dev"
 
@@ -16,8 +16,9 @@ module "database" {
   deletion_protection     = false
   skip_final_snapshot     = true
 
-  vpc_id     = module.networking.vpc_id
-  subnet_ids = module.networking.private_subnet_ids
+  vpc_id              = module.vpc.vpc_id
+  subnet_ids          = module.vpc.private_subnet_ids
+  allowed_cidr_blocks = module.vpc.private_subnet_cidrs
 
   tags = local.common_tags
 }

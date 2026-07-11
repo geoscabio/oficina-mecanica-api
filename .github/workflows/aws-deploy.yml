@@ -206,6 +206,27 @@ jobs:
       - name: Terraform validate
         run: terraform -chdir="$TF_WORKING_DIRECTORY" validate
 
+      - name: Ensure ECR repository exists
+        if: env.TERRAFORM_ACTION == 'apply'
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve -target=module.ecr
+
+      - name: Login to Amazon ECR
+        if: env.TERRAFORM_ACTION == 'apply'
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image to ECR
+        if: env.TERRAFORM_ACTION == 'apply'
+        run: |
+          image_tag="sha-$GITHUB_SHA"
+
+          if aws ecr describe-images --repository-name "$ECR_REPOSITORY_NAME" --image-ids imageTag="$image_tag" >/dev/null 2>&1; then
+            echo "Image $ECR_IMAGE_URI already exists. Skipping Docker push."
+            exit 0
+          fi
+
+          docker build -t "$ECR_IMAGE_URI" .
+          docker push "$ECR_IMAGE_URI"
+
       - name: Terraform plan
         if: env.TERRAFORM_ACTION == 'apply'
         run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -input=false -out=tfplan
@@ -227,23 +248,6 @@ jobs:
         run: |
           echo "EKS_CLUSTER_NAME=$(terraform -chdir="$TF_WORKING_DIRECTORY" output -raw eks_cluster_name)" >> "$GITHUB_ENV"
 
-      - name: Login to Amazon ECR
-        if: env.TERRAFORM_ACTION == 'apply'
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build and push image to ECR
-        if: env.TERRAFORM_ACTION == 'apply'
-        run: |
-          image_tag="sha-$GITHUB_SHA"
-
-          if aws ecr describe-images --repository-name "$ECR_REPOSITORY_NAME" --image-ids imageTag="$image_tag" >/dev/null 2>&1; then
-            echo "Image $ECR_IMAGE_URI already exists. Skipping Docker push."
-            exit 0
-          fi
-
-          docker build -t "$ECR_IMAGE_URI" .
-          docker push "$ECR_IMAGE_URI"
-
       - name: Setup kubectl
         if: env.TERRAFORM_ACTION == 'apply'
         uses: azure/setup-kubectl@v4
@@ -263,11 +267,22 @@ jobs:
       - name: Wait for rollout
         if: env.TERRAFORM_ACTION == 'apply'
         run: |
-          kubectl rollout restart deployment/oficina-api -n oficina
-          kubectl rollout status deployment/oficina-api -n oficina --timeout=300s
+          set +e
+          kubectl rollout status deployment/oficina-api -n oficina --timeout=600s
+          rollout_status=$?
+
           kubectl get pods -n oficina -o wide
           kubectl get svc oficina-api -n oficina
           kubectl get hpa oficina-api-hpa -n oficina
+
+          if [ "$rollout_status" -ne 0 ]; then
+            echo "::group::Deployment diagnostics"
+            kubectl describe deployment oficina-api -n oficina || true
+            kubectl describe pods -n oficina -l app=oficina-api || true
+            kubectl logs deployment/oficina-api -n oficina --all-containers --tail=200 || true
+            echo "::endgroup::"
+            exit "$rollout_status"
+          fi
 
       - name: Print LoadBalancer endpoint
         if: env.TERRAFORM_ACTION == 'apply'

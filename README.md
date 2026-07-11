@@ -108,11 +108,14 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 
 | Item | Caminho |
 | --- | --- |
+| 🧭 Índice mestre de documentação | [`docs/README.md`](docs/README.md) |
 | 🧩 C4 Model oficial validado | [`docs/architecture/diagrams/c4-model`](docs/architecture/diagrams/c4-model) |
 | ☁️ Diagramas AWS | [`docs/architecture/diagrams/aws`](docs/architecture/diagrams/aws) |
 | ☸️ Diagramas Kubernetes | [`docs/architecture/diagrams/deployment/kubernetes`](docs/architecture/diagrams/deployment/kubernetes) |
 | 🐳 Diagramas Docker | [`docs/architecture/diagrams/deployment/docker`](docs/architecture/diagrams/deployment/docker) |
 | 🔁 Diagramas CI/CD | [`docs/architecture/diagrams/ci-cd`](docs/architecture/diagrams/ci-cd) |
+| 🐳 Docker Compose local | [`docker-compose.yml`](docker-compose.yml) |
+| ☸️ Manifests Kubernetes | [`k8s`](k8s) |
 | 📄 Evidências de qualidade | [`docs/evidencias`](docs/evidencias) |
 | 🚀 Guias de deploy | [`docs/deploy`](docs/deploy) |
 | 📌 Gestão do projeto | [`docs/projeto`](docs/projeto) |
@@ -146,23 +149,17 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 
 ```text
 .
-├── .github/workflows/              # Esteira CI/CD
-├── docs/
-│   ├── architecture/diagrams/       # Diagramas versionados
-│   ├── deploy/                      # Guias operacionais de deploy
-│   ├── evidencias/                  # Evidências de build, testes, segurança e infra
-│   ├── openapi/                     # OpenAPI JSON exportado
-│   └── projeto/                     # Backlog, decisões e pendências
-├── infra/
-│   ├── terraform/environments/dev/  # Terraform do ambiente AWS
-│   ├── aws/k8s/                     # Manifests Kubernetes para EKS
-│   └── terraform/modules/           # Módulos Terraform
-├── k8s/                             # Manifests Kubernetes locais
-├── src/                             # Código de produção
-├── tests/                           # Testes unitários e integração
-├── docker-compose.yml
-├── Dockerfile
-└── OficinaMecanica.sln
+??? .github/workflows/              # Esteira CI/CD
+??? docs/                           # ?ndice, guias, evid?ncias e diagramas
+??? infra/terraform/                # Infraestrutura AWS real
+?   ??? environments/dev/           # Ambiente development
+?   ??? modules/                    # M?dulos AWS: VPC, ECR, RDS e EKS
+??? k8s/                            # Manifests Kubernetes
+??? src/                            # C?digo de produ??o
+??? tests/                          # Testes unit?rios e integra??o
+??? Dockerfile                      # Build da imagem da API
+??? docker-compose.yml              # Docker Compose local
+??? OficinaMecanica.sln
 ```
 
 ---
@@ -180,7 +177,7 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 
 ```powershell
 Copy-Item .env.example .env
-docker compose up -d --build
+docker compose --env-file .env -f docker-compose.yml up -d --build
 ```
 
 O Docker Compose sobe:
@@ -212,14 +209,14 @@ Healthy
 ### Parar ambiente
 
 ```powershell
-docker compose down
+docker compose --env-file .env -f docker-compose.yml down
 ```
 
 Para recriar banco/volume do zero:
 
 ```powershell
-docker compose down -v
-docker compose up -d --build
+docker compose --env-file .env -f docker-compose.yml down -v
+docker compose --env-file .env -f docker-compose.yml up -d --build
 ```
 
 ---
@@ -276,10 +273,11 @@ A infraestrutura AWS real é provisionada por Terraform para o ambiente `develop
 1. Configurar credenciais e secrets no GitHub Environment `development`.
 2. Conferir o arquivo `infra/terraform/environments/dev/terraform-action.env`.
 3. Integrar feature em `develop`.
-4. Se `TERRAFORM_ACTION=apply`, a esteira provisiona a infraestrutura com Terraform, publica a imagem no ECR, faz deploy no EKS e abre PR automático para `release`.
-5. Se `TERRAFORM_ACTION=destroy`, a esteira executa `terraform destroy` usando o mesmo backend/state e não promove PR para `release`.
-6. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
-7. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
+4. Se a alteração for somente documentação Markdown, a esteira pula o deploy AWS e pode abrir PR para `release`.
+5. Se `TERRAFORM_ACTION=apply`, a esteira garante o ECR, publica a imagem, aplica Terraform, faz deploy no EKS e abre PR automático para `release`.
+6. Se `TERRAFORM_ACTION=destroy`, a esteira executa `terraform destroy` usando o mesmo backend/state e não promove PR para `release`.
+7. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
+8. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
 
 ### Controle apply/destroy pela esteira
 

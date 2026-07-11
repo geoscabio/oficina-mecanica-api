@@ -1,4 +1,4 @@
-# Networking
+# VPC Module
 
 ## Objetivo
 
@@ -45,7 +45,7 @@ Private Subnet A     Private Subnet B
 ## Estrutura do módulo
 
 ```text
-networking/
+networking/vpc/
 ├── internet-gateway.tf
 ├── locals.tf
 ├── nat-gateway.tf
@@ -77,4 +77,4 @@ Essa arquitetura atende aos requisitos de isolamento de rede definidos para a se
 
 Este módulo representa apenas a camada de rede da infraestrutura.
 
-Os recursos de banco de dados, registro de imagens, Kubernetes e identidade serão implementados em módulos independentes.
+Os recursos de banco de dados, registro de imagens e EKS são implementados em módulos independentes e consomem os outputs de VPC, subnets e CIDRs privados.

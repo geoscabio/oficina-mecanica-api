@@ -7,7 +7,7 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 | Workflow | Arquivo | Quando roda | Objetivo |
 | --- | --- | --- | --- |
 | `CI` | `.github/workflows/ci.yml` | `pull_request` | Validar qualidade antes do merge. |
-| `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Executar Terraform apply, deploy em `development` e abrir PR para `release`. |
+| `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Detectar escopo, executar deploy AWS quando necessário e abrir PR para `release`. |
 | `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Registrar deploy lógico em `homologation` e abrir PR para `main`. |
 | `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Registrar deploy lógico em `production`. |
 
@@ -23,7 +23,7 @@ feature/*, bugfix/*, hotfix/* ...
   -> CI no pull request
   -> merge manual/revisado
   -> CD Development
-  -> terraform apply + deploy development na AWS
+  -> terraform apply + deploy development na AWS quando houver mudança deployable
   -> PR automático para release
   -> merge manual/revisado
   -> CD Release
@@ -34,7 +34,7 @@ feature/*, bugfix/*, hotfix/* ...
   -> deploy lógico em production
 ```
 
-No estágio `development`, o deploy AWS é o último passo antes da abertura do PR para `release`. Como `homologation` e `production` não existem como ambientes físicos neste projeto, esses estágios registram deploys lógicos para manter o Git Flow completo e auditável.
+No estágio `development`, o deploy AWS é o último passo antes da abertura do PR para `release` quando o merge altera código, infraestrutura, Docker, workflows ou manifests. Merges somente de Markdown/`docs/` pulam o deploy AWS para evitar rebuild desnecessário e rollout sem mudança funcional. Como `homologation` e `production` não existem como ambientes físicos neste projeto, esses estágios registram deploys lógicos para manter o Git Flow completo e auditável.
 
 ## CI
 
@@ -52,8 +52,8 @@ Valida:
 4. testes com cobertura;
 5. zero testes ignorados;
 6. cobertura global mínima de `90%`;
-7. build local da imagem Docker, sem push para registry;
-8. dry-run client-side dos manifests `k8s/` e `infra/aws/k8s/` em cluster KinD efemero no CI.
+7. build local da imagem Docker, sem push para ECR;
+8. dry-run client-side dos manifests `k8s/` em cluster KinD efemero no CI.
 
 Em `push` de branch de trabalho, a esteira não roda checks pesados nem abre PR automático. Os checks completos rodam uma vez no próprio PR.
 
@@ -71,7 +71,7 @@ O workflow `CI` usa jobs separados para deixar claro o principio de separacao de
 | `verify_code_style` | Validar formatacao com `dotnet format`. |
 | `test_application` | Executar testes automatizados, cobertura e artefatos. |
 | `build_container_image` | Validar o build da imagem Docker sem publicar. |
-| `validate_kubernetes_manifests` | Validar manifests locais e AWS em cluster KinD efemero. |
+| `validate_kubernetes_manifests` | Validar manifests locais em cluster KinD efemero. |
 | `quality_gate` | Consolidar o resultado dos jobs anteriores para branch protection. |
 
 Os nomes tecnicos dos jobs usam `snake_case` porque sao identificadores estaveis no YAML. Os nomes exibidos no GitHub Actions usam texto legivel, como `Build application`, `Test application` e `Quality gate`.
@@ -82,12 +82,14 @@ Roda após merge/push na `develop`.
 
 Fluxo:
 
-1. Lê `infra/terraform/environments/dev/terraform-action.env`.
-2. Prepara backend S3 do Terraform state.
-3. Executa `terraform init` e `validate`.
-4. Se `TERRAFORM_ACTION=apply`, executa `plan`/`apply`, provisiona VPC, ECR, RDS, EKS e recursos Kubernetes, publica a imagem no ECR, aguarda rollout e imprime o endpoint do Load Balancer.
-5. Se `TERRAFORM_ACTION=destroy`, executa `plan -destroy`/`apply` e encerra os recursos AWS gerenciados pelo Terraform.
-6. Abre PR automático de `develop` para `release` somente quando `TERRAFORM_ACTION=apply` e o deploy passou.
+1. Detecta se o merge tem mudança deployable ou apenas documentação Markdown.
+2. Se for somente documentação, pula o deploy AWS e pode abrir PR para `release` quando `AUTO_PR_ENABLED=true`.
+3. Lê `infra/terraform/environments/dev/terraform-action.env`.
+4. Prepara backend S3 do Terraform state.
+5. Executa `terraform init` e `validate`.
+6. Se `TERRAFORM_ACTION=apply`, garante o ECR, publica a imagem Docker no ECR, executa `plan`/`apply`, provisiona VPC, RDS, EKS e o workload Kubernetes da API, aguarda rollout e imprime o endpoint do Load Balancer.
+7. Se `TERRAFORM_ACTION=destroy`, executa `plan -destroy`/`apply` e encerra os recursos AWS gerenciados pelo Terraform.
+8. Abre PR automático de `develop` para `release` quando o deploy `apply` passou ou quando a alteração era somente documentação.
 
 ## CD Release
 
