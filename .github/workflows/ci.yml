@@ -205,7 +205,7 @@ jobs:
           cluster_name: ci-validation
 
       - name: Validate local Kubernetes manifests
-        run: kubectl apply --dry-run=client -R -f local/kubernetes/
+        run: kubectl apply --dry-run=client -R -f k8s/
 
   quality_gate:
     name: Quality gate

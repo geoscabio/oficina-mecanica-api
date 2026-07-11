@@ -34,7 +34,7 @@ Este é o índice mestre da documentação do projeto. Use este arquivo para nav
 | --- | --- | --- |
 | Runtime local | [`../local/README.md`](../local/README.md) | Explica Docker Compose e Kubernetes locais. |
 | Docker local | [`../local/docker/README.md`](../local/docker/README.md) | Comandos do Docker Compose local. |
-| Kubernetes local | [`../local/kubernetes/README.md`](../local/kubernetes/README.md) | Manifests locais para Docker Desktop Kubernetes. |
+| Kubernetes | [`../k8s/README.md`](../k8s/README.md) | Manifests Kubernetes (local e base para EKS). |
 | Terraform EKS | [`../infra/terraform/modules/eks/README.md`](../infra/terraform/modules/eks/README.md) | Módulo do cluster EKS e node group. |
 | Terraform RDS | [`../infra/terraform/modules/rds/README.md`](../infra/terraform/modules/rds/README.md) | M?dulo RDS SQL Server e security group. |
 | Terraform VPC | [`../infra/terraform/modules/networking/vpc/README.md`](../infra/terraform/modules/networking/vpc/README.md) | M?dulo VPC, subnets, rotas e NAT Gateway. |

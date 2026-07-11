@@ -6,14 +6,14 @@ Este arquivo reserva o registro do teste de escalonamento horizontal em Kubernet
 
 - Docker Desktop com Kubernetes habilitado.
 - Metrics Server instalado.
-- Manifests aplicados em `local/kubernetes/`.
+- Manifests aplicados em `k8s/`.
 
 ## Comandos sugeridos
 
 Aplicar ambiente:
 
 ```powershell
-kubectl apply -R -f local/kubernetes/
+kubectl apply -R -f k8s/
 kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
 kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
 ```

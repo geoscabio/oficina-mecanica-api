@@ -115,7 +115,7 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 | 🐳 Diagramas Docker | [`docs/architecture/diagrams/deployment/docker`](docs/architecture/diagrams/deployment/docker) |
 | 🔁 Diagramas CI/CD | [`docs/architecture/diagrams/ci-cd`](docs/architecture/diagrams/ci-cd) |
 | ?? Runtime local | [`local`](local) |
-| ?? Manifests Kubernetes locais | [`local/kubernetes`](local/kubernetes) |
+| ☸️ Manifests Kubernetes | [`k8s`](k8s) |
 | 📄 Evidências de qualidade | [`docs/evidencias`](docs/evidencias) |
 | 🚀 Guias de deploy | [`docs/deploy`](docs/deploy) |
 | 📌 Gestão do projeto | [`docs/projeto`](docs/projeto) |
@@ -234,7 +234,7 @@ docker compose --env-file .env -f local/docker/docker-compose.yml up -d --build
 ### Aplicar manifests
 
 ```powershell
-kubectl apply -R -f local/kubernetes/
+kubectl apply -R -f k8s/
 kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
 kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
 ```

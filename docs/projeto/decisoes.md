@@ -2,7 +2,7 @@
 
 ## Kubernetes local
 
-A pasta `local/kubernetes/` permanecer? dedicada exclusivamente ? execu??o local do projeto.
+A pasta `k8s/` permanece dedicada exclusivamente à execução local do projeto.
 
 Motivo:
 

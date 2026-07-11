@@ -53,7 +53,7 @@ Valida:
 5. zero testes ignorados;
 6. cobertura global mínima de `90%`;
 7. build local da imagem Docker, sem push para ECR;
-8. dry-run client-side dos manifests `local/kubernetes/` em cluster KinD efemero no CI.
+8. dry-run client-side dos manifests `k8s/` em cluster KinD efemero no CI.
 
 Em `push` de branch de trabalho, a esteira não roda checks pesados nem abre PR automático. Os checks completos rodam uma vez no próprio PR.
 

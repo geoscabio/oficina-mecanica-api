@@ -7,7 +7,7 @@ Este diretório contém somente manifests para execução local com Docker Deskt
 Execute a partir da raiz do repositório:
 
 ```powershell
-kubectl apply -R -f local/kubernetes/
+kubectl apply -R -f k8s/
 kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
 kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
 ```
