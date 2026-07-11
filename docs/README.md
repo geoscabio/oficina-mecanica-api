@@ -32,7 +32,7 @@ Este é o índice mestre da documentação do projeto. Use este arquivo para nav
 
 | Área | Caminho | Papel |
 | --- | --- | --- |
-| Docker local | [`../docker/README.md`](../docker/README.md) | Comandos do Docker Compose local. |
+| Docker local | [`../README.md#execucao-local-docker-compose`](../README.md#execucao-local-docker-compose) | Comandos do Docker Compose local. |
 | Kubernetes | [`../k8s/README.md`](../k8s/README.md) | Manifests Kubernetes (local e base para EKS). |
 | Terraform EKS | [`../infra/terraform/modules/eks/README.md`](../infra/terraform/modules/eks/README.md) | Módulo do cluster EKS e node group. |
 | Terraform RDS | [`../infra/terraform/modules/rds/README.md`](../infra/terraform/modules/rds/README.md) | M?dulo RDS SQL Server e security group. |
