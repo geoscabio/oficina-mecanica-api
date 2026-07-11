@@ -118,7 +118,7 @@ Não existe um recurso `aws_lb` explícito no Terraform porque o Load Balancer d
 Fonte de verdade:
 
 ```text
-infra/terraform/environments/dev/api-workload.tf
+infra/terraform/environments/dev/api-service.tf
 ```
 
 Recurso responsável:
