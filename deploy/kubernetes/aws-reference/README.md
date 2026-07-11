@@ -2,7 +2,7 @@
 
 Esta pasta contém os manifests Kubernetes de referência para implantar a API no Amazon EKS.
 
-Os manifests deste diretório são exclusivos para AWS e não substituem os manifests da pasta `k8s/`, usados na execução local com Docker Desktop.
+Os manifests deste diretório são exclusivos para AWS e não substituem os manifests da pasta `deploy/kubernetes/local/`, usados na execução local com Docker Desktop.
 
 ## Ordem de implantação
 

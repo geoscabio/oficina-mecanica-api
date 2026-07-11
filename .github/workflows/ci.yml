@@ -17,7 +17,7 @@ concurrency:
 
 env:
   DOTNET_VERSION: "10.0.x"
-  AWS_K8S_PATH: infra/aws/k8s
+  AWS_K8S_PATH: deploy/kubernetes/aws-reference
 
 jobs:
   build_application:
@@ -206,7 +206,7 @@ jobs:
           cluster_name: ci-validation
 
       - name: Validate local Kubernetes manifests
-        run: kubectl apply --dry-run=client -R -f k8s/
+        run: kubectl apply --dry-run=client -R -f deploy/kubernetes/local/
 
       - name: Validate AWS Kubernetes manifests
         run: kubectl apply --dry-run=client -R -f ${{ env.AWS_K8S_PATH }}/

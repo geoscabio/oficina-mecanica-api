@@ -155,9 +155,10 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 │   └── projeto/                     # Backlog, decisões e pendências
 ├── infra/
 │   ├── terraform/environments/dev/  # Terraform do ambiente AWS
-│   ├── aws/k8s/                     # Manifests Kubernetes para EKS
 │   └── terraform/modules/           # Módulos Terraform
-├── k8s/                             # Manifests Kubernetes locais
+├── deploy/kubernetes/
+│   ├── local/                       # Manifests Kubernetes locais
+│   └── aws-reference/               # Manifests Kubernetes de referência para EKS
 ├── src/                             # Código de produção
 ├── tests/                           # Testes unitários e integração
 ├── docker-compose.yml
@@ -236,7 +237,7 @@ docker compose up -d --build
 ### Aplicar manifests
 
 ```powershell
-kubectl apply -R -f k8s/
+kubectl apply -R -f deploy/kubernetes/local/
 kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
 kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
 ```

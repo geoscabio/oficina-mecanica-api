@@ -1,4 +1,4 @@
-# Kubernetes Module
+# EKS Module
 
 ## Objetivo
 

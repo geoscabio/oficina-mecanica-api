@@ -1,8 +1,8 @@
 # Decisões
 
-## Kubernetes Local
+## Kubernetes local
 
-A pasta `k8s/` permanecerá dedicada exclusivamente à execução local do projeto.
+A pasta `deploy/kubernetes/local/` permanecerá dedicada exclusivamente à execução local do projeto.
 
 Motivo:
 
@@ -12,7 +12,7 @@ A execução local utilizando Kubernetes é um dos entregáveis da Fase 2 do Tec
 
 ## Deploy AWS
 
-O deploy na AWS utilizará recursos específicos localizados em `infra/aws/k8s`.
+O deploy na AWS utilizará recursos específicos gerenciados pelo Terraform. A pasta `deploy/kubernetes/aws-reference/` mantém manifests de referência operacional e validação client-side no CI.
 
 Motivo:
 

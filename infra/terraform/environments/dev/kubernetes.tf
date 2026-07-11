@@ -1,5 +1,5 @@
 module "kubernetes" {
-  source = "../../modules/kubernetes"
+  source = "../../modules/eks"
 
   cluster_name    = "oficina-mecanica-eks-dev"
   cluster_version = "1.33"
