@@ -12,7 +12,7 @@ A execução local utilizando Kubernetes é um dos entregáveis da Fase 2 do Tec
 
 ## Deploy AWS
 
-O deploy na AWS utilizar? recursos espec?ficos gerenciados pelo Terraform em `infra/terraform/environments/dev/`. N?o h? manifests YAML AWS duplicados no reposit?rio: o workload Kubernetes da API na AWS fica em `api-workload.tf`.
+O deploy na AWS utiliza recursos específicos gerenciados pelo Terraform em `infra/terraform/environments/dev/`. Não há manifests YAML AWS duplicados no repositório: o workload Kubernetes da API na AWS fica em arquivos Terraform separados por responsabilidade (`namespace.tf`, `api-configmap.tf`, `api-secret.tf`, `api-deployment.tf`, `api-service.tf`, `api-hpa.tf`), no mesmo padrão adotado em `k8s/`.
 
 Motivo:
 
