@@ -27,7 +27,7 @@ resource "kubernetes_config_map_v1" "oficina_api" {
   }
 
   data = {
-    ASPNETCORE_ENVIRONMENT             = "Development"
+    ASPNETCORE_ENVIRONMENT             = "Staging"
     ASPNETCORE_URLS                    = "http://+:8080"
     Database__ApplyMigrationsOnStartup = "true"
     Database__SeedDemoData             = "true"

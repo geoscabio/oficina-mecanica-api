@@ -18,6 +18,8 @@ O CD executa:
 4. publica a imagem Docker no ECR;
 5. reinicia o Deployment no EKS e valida o rollout.
 
+O ambiente publicado na AWS roda com `ASPNETCORE_ENVIRONMENT=Staging`. Swagger e usuários demo são habilitados explicitamente via `appsettings.Staging.json` para permitir a avaliação do Tech Challenge; nunca replicar este padrão, com credenciais fixas e Swagger público, em um ambiente de produção real.
+
 Execução local equivalente para diagnóstico:
 
 ```powershell

@@ -29,7 +29,31 @@ spec:
                 secretKeyRef:
                   name: sqlserver-secret
                   key: MSSQL_SA_PASSWORD
-                  
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+
+          readinessProbe:
+            tcpSocket:
+              port: 1433
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          livenessProbe:
+            tcpSocket:
+              port: 1433
+            initialDelaySeconds: 40
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+
           volumeMounts:
             - name: sqlserver-storage
               mountPath: /var/opt/mssql

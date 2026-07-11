@@ -19,6 +19,8 @@ O workflow `CD Development` gerencia os mesmos recursos Kubernetes via Terraform
 
 Estes arquivos continuam versionados como referência operacional e para validação client-side no CI.
 
+O ambiente publicado na AWS roda com `ASPNETCORE_ENVIRONMENT=Staging`. Swagger e usuários demo são habilitados explicitamente via `appsettings.Staging.json` para permitir a avaliação do Tech Challenge; nunca replicar este padrão, com credenciais fixas e Swagger público, em um ambiente de produção real.
+
 Mapeamento:
 
 | Branch | Environment |

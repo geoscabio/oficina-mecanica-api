@@ -4,7 +4,7 @@ metadata:
   name: oficina-api-config
   namespace: oficina
 data:
-  ASPNETCORE_ENVIRONMENT: "Development"
+  ASPNETCORE_ENVIRONMENT: "Staging"
   ASPNETCORE_URLS: "http://+:8080"
   Database__ApplyMigrationsOnStartup: "true"
   Database__SeedDemoData: "true"

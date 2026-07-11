@@ -16,8 +16,9 @@ module "database" {
   deletion_protection     = false
   skip_final_snapshot     = true
 
-  vpc_id     = module.networking.vpc_id
-  subnet_ids = module.networking.private_subnet_ids
+  vpc_id              = module.networking.vpc_id
+  subnet_ids          = module.networking.private_subnet_ids
+  allowed_cidr_blocks = module.networking.private_subnet_cidrs
 
   tags = local.common_tags
 }
