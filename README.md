@@ -108,11 +108,13 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 
 | Item | Caminho |
 | --- | --- |
+| 🧭 Índice mestre de documentação | [`docs/README.md`](docs/README.md) |
 | 🧩 C4 Model oficial validado | [`docs/architecture/diagrams/c4-model`](docs/architecture/diagrams/c4-model) |
 | ☁️ Diagramas AWS | [`docs/architecture/diagrams/aws`](docs/architecture/diagrams/aws) |
 | ☸️ Diagramas Kubernetes | [`docs/architecture/diagrams/deployment/kubernetes`](docs/architecture/diagrams/deployment/kubernetes) |
 | 🐳 Diagramas Docker | [`docs/architecture/diagrams/deployment/docker`](docs/architecture/diagrams/deployment/docker) |
 | 🔁 Diagramas CI/CD | [`docs/architecture/diagrams/ci-cd`](docs/architecture/diagrams/ci-cd) |
+| ☸️ Manifests Kubernetes | [`deploy/kubernetes`](deploy/kubernetes) |
 | 📄 Evidências de qualidade | [`docs/evidencias`](docs/evidencias) |
 | 🚀 Guias de deploy | [`docs/deploy`](docs/deploy) |
 | 📌 Gestão do projeto | [`docs/projeto`](docs/projeto) |
@@ -277,10 +279,11 @@ A infraestrutura AWS real é provisionada por Terraform para o ambiente `develop
 1. Configurar credenciais e secrets no GitHub Environment `development`.
 2. Conferir o arquivo `infra/terraform/environments/dev/terraform-action.env`.
 3. Integrar feature em `develop`.
-4. Se `TERRAFORM_ACTION=apply`, a esteira provisiona a infraestrutura com Terraform, publica a imagem no ECR, faz deploy no EKS e abre PR automático para `release`.
-5. Se `TERRAFORM_ACTION=destroy`, a esteira executa `terraform destroy` usando o mesmo backend/state e não promove PR para `release`.
-6. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
-7. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
+4. Se a alteração for somente documentação Markdown, a esteira pula o deploy AWS e pode abrir PR para `release`.
+5. Se `TERRAFORM_ACTION=apply`, a esteira garante o ECR, publica a imagem, aplica Terraform, faz deploy no EKS e abre PR automático para `release`.
+6. Se `TERRAFORM_ACTION=destroy`, a esteira executa `terraform destroy` usando o mesmo backend/state e não promove PR para `release`.
+7. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
+8. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
 
 ### Controle apply/destroy pela esteira
 

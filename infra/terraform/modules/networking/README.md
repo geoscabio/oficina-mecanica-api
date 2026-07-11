@@ -77,4 +77,4 @@ Essa arquitetura atende aos requisitos de isolamento de rede definidos para a se
 
 Este módulo representa apenas a camada de rede da infraestrutura.
 
-Os recursos de banco de dados, registro de imagens, Kubernetes e identidade serão implementados em módulos independentes.
+Os recursos de banco de dados, registro de imagens e EKS são implementados em módulos independentes e consomem os outputs de VPC, subnets e CIDRs privados.

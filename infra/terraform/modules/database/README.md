@@ -15,7 +15,7 @@ Este módulo é responsável por provisionar a infraestrutura de banco de dados 
 - Criação de DB Subnet Group utilizando as subnets privadas da VPC;
 - Provisionamento de instância Amazon RDS SQL Server Express;
 - Criação de Security Group específico para acesso ao banco;
-- Restrição de acesso à porta **1433** apenas dentro da VPC;
+- Restrição de acesso à porta **1433** aos CIDRs privados informados pelo ambiente;
 - Banco configurado como privado (`publicly_accessible = false`);
 - Aplicação das tags compartilhadas da infraestrutura.
 
@@ -31,6 +31,10 @@ Este módulo é responsável por provisionar a infraestrutura de banco de dados 
 | `engine_version` | `string` | Versão do SQL Server utilizada pela instância. |
 | `vpc_id` | `string` | ID da VPC onde o banco será provisionado. |
 | `subnet_ids` | `list(string)` | Lista de subnets privadas utilizadas pelo DB Subnet Group. |
+| `allowed_cidr_blocks` | `list(string)` | CIDRs autorizados a acessar a porta 1433 do RDS. |
+| `multi_az` | `bool` | Habilita Multi-AZ. No AWS Academy permanece `false` para reduzir custo. |
+| `backup_retention_period` | `number` | Retenção de backups automáticos. No AWS Academy permanece `0`. |
+| `skip_final_snapshot` | `bool` | Define se o snapshot final será ignorado no destroy. No AWS Academy permanece `true`. |
 | `tags` | `map(string)` | Tags aplicadas aos recursos. |
 
 ## Outputs
