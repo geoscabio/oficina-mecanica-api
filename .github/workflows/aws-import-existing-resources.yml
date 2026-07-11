@@ -2,6 +2,11 @@ name: AWS Import Existing Resources
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - develop
+    paths:
+      - ".github/workflows/aws-import-existing-resources.yml"
 
 env:
   TF_WORKING_DIRECTORY: infra/terraform/environments/dev
