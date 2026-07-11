@@ -17,7 +17,8 @@
 - [x] Git Flow automatizado com PR para `develop`, `release` e `main`.
 - [x] Bloqueio de cobertura mínima de 90% na esteira.
 - [x] Deploy real em `development` e deploy lógico em `homologation`/`production`.
-- [x] Cleanup Kubernetes AWS via workflow manual.
+- [x] Cleanup AWS controlado por `TERRAFORM_ACTION=destroy` na esteira.
+- [x] Trade-offs AWS Academy documentados.
 - [x] Evidências versionadas em `docs/evidencias`.
 - [x] OpenAPI JSON versionado.
 - [x] C4 Model oficial versionado em `docs/architecture/diagrams/c4-model`.

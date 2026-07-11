@@ -22,6 +22,12 @@
 - Executar `terraform destroy` com o mesmo backend/state da esteira.
 - Conferir que não restaram EKS, EC2, RDS, NAT Gateway ou Load Balancer ativos.
 
+## Evolução pós-entrega
+
+- Mover migrations e seed inicial do startup da API para um Kubernetes Job versionado.
+- Como alternativa intermediária, proteger migrations concorrentes com lock distribuído no SQL Server, por exemplo `sp_getapplock`.
+- Evoluir o ambiente AWS para Multi-AZ, backups, snapshot final e rotação formal de segredos quando sair do contexto AWS Academy.
+
 ## Entrega
 
 - Montar roteiro do vídeo.
