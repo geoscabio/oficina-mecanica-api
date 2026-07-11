@@ -299,7 +299,7 @@ Environment variables:
 
 | Nome | Valor esperado |
 | --- | --- |
-| `TF_STATE_BUCKET` | Nome de um bucket S3 já existente para o Terraform state. |
+| `TF_STATE_BUCKET` | Opcional. Se não informado, a esteira cria/reutiliza `oficina-mecanica-tfstate-<account-id>-<region>`. |
 | `AWS_REGION` | `us-east-1` |
 | `EKS_CLUSTER_ROLE_NAME` | `LabRole`, salvo se o AWS Academy informar outro nome. |
 | `EKS_NODE_ROLE_NAME` | `LabRole`, salvo se o AWS Academy informar outro nome. |

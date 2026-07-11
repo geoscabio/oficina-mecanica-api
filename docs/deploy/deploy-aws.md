@@ -60,7 +60,7 @@ Repository variables:
 | `AUTO_PR_ENABLED` | `true` ou `false` | `true` abre PR automático após deploy: `develop -> release` e `release -> main`. |
 | `RELEASE_BRANCH` | `release` | Opcional. Default: `release`. |
 | `AWS_REGION` | `us-east-1` | Opcional. Default: `us-east-1`. |
-| `TF_STATE_BUCKET` | Nome de bucket S3 existente, por exemplo `oficina-mecanica-tfstate-<account-id>`. | Obrigatório para CD com Terraform. A esteira não cria o bucket automaticamente. |
+| `TF_STATE_BUCKET` | Opcional. Exemplo: `oficina-mecanica-tfstate-<account-id>-us-east-1`. | Se não informado, a esteira cria/reutiliza `oficina-mecanica-tfstate-<account-id>-<region>`. |
 | `TF_STATE_KEY` | `oficina-mecanica/development/terraform.tfstate` | Opcional. Caminho do arquivo de state dentro do bucket. |
 | `EKS_CLUSTER_ROLE_NAME` | `LabRole` | Opcional se o AWS Academy usar `LabRole`. Ajustar se o lab informar outro nome. |
 | `EKS_NODE_ROLE_NAME` | `LabRole` | Opcional se o AWS Academy usar `LabRole`. Ajustar se o lab informar outro nome. |
@@ -71,24 +71,18 @@ Exemplos de valores criados pelo grupo:
 DB_PASSWORD=<senha forte, não colar no repositório>
 JWT_SECRET=<string aleatória com pelo menos 32 caracteres>
 WEBHOOK_TOKEN=<string aleatória com pelo menos 32 caracteres>
-TF_STATE_BUCKET=oficina-mecanica-tfstate-<account-id>
+TF_STATE_BUCKET=oficina-mecanica-tfstate-<account-id>-us-east-1
 ```
 
 Os valores reais devem ser cadastrados somente no GitHub ou no ambiente local seguro. Não adicionar esses valores em `.env`, YAML, Terraform ou Markdown.
 
-## Criação do bucket de state
+## Bucket de state do Terraform
 
 O bucket de state é um detalhe operacional do Terraform para permitir que o GitHub Actions lembre quais recursos foram criados entre uma execução e outra. Ele não faz parte da arquitetura da aplicação.
 
-Criar uma vez no AWS Academy antes do primeiro deploy:
+Não é necessário criar esse bucket manualmente. No `CD Development`, a própria esteira consulta a conta AWS e cria/reutiliza automaticamente o bucket `oficina-mecanica-tfstate-<account-id>-<region>` antes do `terraform init`.
 
-```powershell
-aws s3api create-bucket `
-  --bucket oficina-mecanica-tfstate-<account-id> `
-  --region us-east-1
-```
-
-Depois, usar exatamente esse nome em `TF_STATE_BUCKET`.
+A variável `TF_STATE_BUCKET` só precisa ser preenchida se o grupo quiser usar um nome específico de bucket.
 
 ## Evolução futura: Secrets Manager e Parameter Store
 
