@@ -118,15 +118,15 @@ Destroy não fica acoplado na esteira de CD. A esteira faz delivery/deploy; o en
 
 ## Repository variables
 
-| Nome | Tipo | Uso |
-| --- | --- | --- |
-| `AUTO_PR_ENABLED` | Repository variable | Habilita PR automático após deploy: `develop -> release` e `release -> main`. |
-| `RELEASE_BRANCH` | Repository variable opcional | Nome da branch de release. Default: `release`. |
-| `AWS_REGION` | Repository ou environment variable opcional | Região AWS. Default: `us-east-1`. |
-| `TF_STATE_BUCKET` | Environment variable obrigatória | Bucket S3 preexistente do Terraform state. A esteira não cria bucket automaticamente. |
-| `TF_STATE_KEY` | Environment variable opcional | Caminho do state. Default: `oficina-mecanica/development/terraform.tfstate`. |
-| `EKS_CLUSTER_ROLE_NAME` | Environment variable opcional | Role IAM existente para o cluster EKS. Default: `LabRole`. |
-| `EKS_NODE_ROLE_NAME` | Environment variable opcional | Role IAM existente para o node group. Default: `LabRole`. |
+| Nome | Tipo | Valor esperado | Uso |
+| --- | --- | --- | --- |
+| `AUTO_PR_ENABLED` | Repository variable | `true` ou `false` | Habilita PR automático após deploy: `develop -> release` e `release -> main`. |
+| `RELEASE_BRANCH` | Repository variable opcional | `release` | Nome da branch de release. Default: `release`. |
+| `AWS_REGION` | Environment variable opcional | `us-east-1` | Região AWS. Default: `us-east-1`. |
+| `TF_STATE_BUCKET` | Environment variable opcional | Exemplo: `oficina-mecanica-tfstate-<account-id>-us-east-1`. | Bucket do Terraform state. Se não informado, a esteira cria/reutiliza `oficina-mecanica-tfstate-<account-id>-<region>`. |
+| `TF_STATE_KEY` | Environment variable opcional | `oficina-mecanica/development/terraform.tfstate` | Caminho do state. Default: `oficina-mecanica/development/terraform.tfstate`. |
+| `EKS_CLUSTER_ROLE_NAME` | Environment variable opcional | `LabRole` | Role IAM existente para o cluster EKS. |
+| `EKS_NODE_ROLE_NAME` | Environment variable opcional | `LabRole` | Role IAM existente para o node group. |
 
 Para usar `AUTO_PR_ENABLED=true` nos workflows de CD, também é necessário habilitar no GitHub:
 
@@ -145,14 +145,18 @@ Obrigatório para o deploy real:
 
 O environment `development` precisa conter:
 
-| Nome | Tipo | Uso |
-| --- | --- | --- |
-| `AWS_ACCESS_KEY_ID` | Secret | Access key do ambiente. |
-| `AWS_SECRET_ACCESS_KEY` | Secret | Secret key do ambiente. |
-| `AWS_SESSION_TOKEN` | Secret | Session token quando aplicável. |
-| `DB_PASSWORD` | Secret | Senha do usuário administrador do RDS usada pelo Terraform. |
-| `JWT_SECRET` | Secret | Chave JWT da API, com pelo menos 32 caracteres. |
-| `WEBHOOK_TOKEN` | Secret | Token do webhook de orçamento, com pelo menos 32 caracteres. |
+| Nome | Tipo | Origem do valor | Uso |
+| --- | --- | --- | --- |
+| `AWS_ACCESS_KEY_ID` | Environment secret | AWS Academy > AWS Details > credenciais CLI. | Access key temporária do ambiente. |
+| `AWS_SECRET_ACCESS_KEY` | Environment secret | AWS Academy > AWS Details > credenciais CLI. | Secret key temporária do ambiente. |
+| `AWS_SESSION_TOKEN` | Environment secret | AWS Academy > AWS Details > credenciais CLI. | Session token temporário. Obrigatório no Learner Lab. |
+| `DB_PASSWORD` | Environment secret | Valor criado pelo grupo. | Senha do usuário administrador do RDS usada pelo Terraform. |
+| `JWT_SECRET` | Environment secret | Valor criado pelo grupo. | Chave JWT com pelo menos 32 caracteres. |
+| `WEBHOOK_TOKEN` | Environment secret | Valor criado pelo grupo. | Token do webhook de orçamento com pelo menos 32 caracteres. |
+
+Os secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` e `AWS_SESSION_TOKEN` expiram quando a sessão do AWS Academy expira. Atualizar esses três valores antes de reexecutar o CD em uma nova sessão.
+
+Nenhum valor sensível deve ser escrito nos arquivos `.yml`, `.tf`, `.md` ou `.env` versionados. Os workflows referenciam apenas os nomes dos secrets e variables.
 
 ## Proteções obrigatórias recomendadas
 
