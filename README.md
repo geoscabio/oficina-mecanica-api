@@ -381,7 +381,9 @@ O PR de branch de trabalho para `develop` é manual para economizar GitHub Actio
 
 O deploy AWS real de `development` executa automaticamente após merge/push na `develop`. Os PRs automáticos de `develop -> release` e `release -> main` só executam com `AUTO_PR_ENABLED=true`.
 
-Branches `develop` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks quando o plano do GitHub permitir.
+Branches `develop`, `release` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks quando o plano do GitHub permitir.
+
+> Observação: o repositório utiliza rulesets/branch protection configurados para `develop`, `release`, `release/*` e `main`. Em função das limitações do GitHub Free para repositórios privados, essas regras ficam documentadas e configuradas, mas a aplicação automática requer GitHub Team/Enterprise ou repositório público.
 
 <a id="convencao-git-flow"></a>
 
