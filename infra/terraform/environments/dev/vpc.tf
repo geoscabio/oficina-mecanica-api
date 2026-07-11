@@ -1,5 +1,5 @@
-module "networking" {
-  source = "../../modules/networking"
+module "vpc" {
+  source = "../../modules/networking/vpc"
 
   name       = "oficina-vpc-dev"
   cidr_block = "10.0.0.0/16"

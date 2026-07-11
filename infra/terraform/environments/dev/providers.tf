@@ -11,18 +11,18 @@ provider "aws" {
 }
 
 data "aws_eks_cluster" "this" {
-  name = module.kubernetes.cluster_name
+  name = module.eks.cluster_name
 
   depends_on = [
-    module.kubernetes
+    module.eks
   ]
 }
 
 data "aws_eks_cluster_auth" "this" {
-  name = module.kubernetes.cluster_name
+  name = module.eks.cluster_name
 
   depends_on = [
-    module.kubernetes
+    module.eks
   ]
 }
 

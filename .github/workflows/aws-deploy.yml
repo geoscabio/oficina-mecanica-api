@@ -208,7 +208,7 @@ jobs:
 
       - name: Ensure ECR repository exists
         if: env.TERRAFORM_ACTION == 'apply'
-        run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve -target=module.registry
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve -target=module.ecr
 
       - name: Login to Amazon ECR
         if: env.TERRAFORM_ACTION == 'apply'

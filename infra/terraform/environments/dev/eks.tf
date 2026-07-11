@@ -1,4 +1,4 @@
-module "kubernetes" {
+module "eks" {
   source = "../../modules/eks"
 
   cluster_name    = "oficina-mecanica-eks-dev"
@@ -7,8 +7,8 @@ module "kubernetes" {
   eks_cluster_role_name = var.eks_cluster_role_name
   eks_node_role_name    = var.eks_node_role_name
 
-  vpc_id             = module.networking.vpc_id
-  private_subnet_ids = module.networking.private_subnet_ids
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnet_ids
 
   # AWS Academy: restringir para o IP publico autorizado quando possivel.
   cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]

@@ -1,4 +1,4 @@
-# Database Module
+# RDS Module
 
 ## Objetivo
 

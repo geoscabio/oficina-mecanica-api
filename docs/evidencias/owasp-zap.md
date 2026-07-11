@@ -7,7 +7,7 @@ Este arquivo reserva o registro versionado da analise dinamica de seguranca.
 A API precisa estar executando localmente:
 
 ```powershell
-docker compose up -d --build
+docker compose --env-file .env -f local/docker/docker-compose.yml up -d --build
 curl http://localhost:5093/api/health
 ```
 

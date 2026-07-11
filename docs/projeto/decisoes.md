@@ -2,7 +2,7 @@
 
 ## Kubernetes local
 
-A pasta `deploy/kubernetes/local/` permanecerá dedicada exclusivamente à execução local do projeto.
+A pasta `local/kubernetes/` permanecer? dedicada exclusivamente ? execu??o local do projeto.
 
 Motivo:
 
@@ -12,7 +12,7 @@ A execução local utilizando Kubernetes é um dos entregáveis da Fase 2 do Tec
 
 ## Deploy AWS
 
-O deploy na AWS utilizará recursos específicos gerenciados pelo Terraform. A pasta `deploy/kubernetes/aws-reference/` mantém manifests de referência operacional e validação client-side no CI.
+O deploy na AWS utilizar? recursos espec?ficos gerenciados pelo Terraform em `infra/terraform/environments/dev/`. N?o h? manifests YAML AWS duplicados no reposit?rio: o workload Kubernetes da API na AWS fica em `api-workload.tf`.
 
 Motivo:
 

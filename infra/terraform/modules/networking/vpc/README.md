@@ -1,4 +1,4 @@
-# Networking
+# VPC Module
 
 ## Objetivo
 
@@ -45,7 +45,7 @@ Private Subnet A     Private Subnet B
 ## Estrutura do módulo
 
 ```text
-networking/
+networking/vpc/
 ├── internet-gateway.tf
 ├── locals.tf
 ├── nat-gateway.tf

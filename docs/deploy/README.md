@@ -2,7 +2,7 @@
 
 Esta pasta concentra os guias operacionais de CI/CD, Kubernetes, Terraform e AWS.
 
-Os manifests executáveis ficam fora de `docs/`, em [`../../deploy/kubernetes/README.md`](../../deploy/kubernetes/README.md). Esta pasta mantém apenas guias e checklists.
+Os recursos execut?veis ficam fora de `docs/`: runtime local em [`../../local/README.md`](../../local/README.md) e AWS real em [`../../infra/terraform/environments/dev/`](../../infra/terraform/environments/dev/). Esta pasta mant?m apenas guias e checklists.
 
 ## Arquivos
 

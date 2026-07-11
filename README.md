@@ -114,7 +114,8 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 | ☸️ Diagramas Kubernetes | [`docs/architecture/diagrams/deployment/kubernetes`](docs/architecture/diagrams/deployment/kubernetes) |
 | 🐳 Diagramas Docker | [`docs/architecture/diagrams/deployment/docker`](docs/architecture/diagrams/deployment/docker) |
 | 🔁 Diagramas CI/CD | [`docs/architecture/diagrams/ci-cd`](docs/architecture/diagrams/ci-cd) |
-| ☸️ Manifests Kubernetes | [`deploy/kubernetes`](deploy/kubernetes) |
+| ?? Runtime local | [`local`](local) |
+| ?? Manifests Kubernetes locais | [`local/kubernetes`](local/kubernetes) |
 | 📄 Evidências de qualidade | [`docs/evidencias`](docs/evidencias) |
 | 🚀 Guias de deploy | [`docs/deploy`](docs/deploy) |
 | 📌 Gestão do projeto | [`docs/projeto`](docs/projeto) |
@@ -148,24 +149,18 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 
 ```text
 .
-├── .github/workflows/              # Esteira CI/CD
-├── docs/
-│   ├── architecture/diagrams/       # Diagramas versionados
-│   ├── deploy/                      # Guias operacionais de deploy
-│   ├── evidencias/                  # Evidências de build, testes, segurança e infra
-│   ├── openapi/                     # OpenAPI JSON exportado
-│   └── projeto/                     # Backlog, decisões e pendências
-├── infra/
-│   ├── terraform/environments/dev/  # Terraform do ambiente AWS
-│   └── terraform/modules/           # Módulos Terraform
-├── deploy/kubernetes/
-│   ├── local/                       # Manifests Kubernetes locais
-│   └── aws-reference/               # Manifests Kubernetes de referência para EKS
-├── src/                             # Código de produção
-├── tests/                           # Testes unitários e integração
-├── docker-compose.yml
-├── Dockerfile
-└── OficinaMecanica.sln
+??? .github/workflows/              # Esteira CI/CD
+??? docs/                           # ?ndice, guias, evid?ncias e diagramas
+??? infra/terraform/                # Infraestrutura AWS real
+?   ??? environments/dev/           # Ambiente development
+?   ??? modules/                    # M?dulos AWS: VPC, ECR, RDS e EKS
+??? local/                          # Runtime local
+?   ??? docker/                     # Docker Compose local
+?   ??? kubernetes/                 # Manifests Kubernetes locais
+??? src/                            # C?digo de produ??o
+??? tests/                          # Testes unit?rios e integra??o
+??? Dockerfile                      # Build da imagem da API
+??? OficinaMecanica.sln
 ```
 
 ---
@@ -183,7 +178,7 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 
 ```powershell
 Copy-Item .env.example .env
-docker compose up -d --build
+docker compose --env-file .env -f local/docker/docker-compose.yml up -d --build
 ```
 
 O Docker Compose sobe:
@@ -215,14 +210,14 @@ Healthy
 ### Parar ambiente
 
 ```powershell
-docker compose down
+docker compose --env-file .env -f local/docker/docker-compose.yml down
 ```
 
 Para recriar banco/volume do zero:
 
 ```powershell
-docker compose down -v
-docker compose up -d --build
+docker compose --env-file .env -f local/docker/docker-compose.yml down -v
+docker compose --env-file .env -f local/docker/docker-compose.yml up -d --build
 ```
 
 ---
@@ -239,7 +234,7 @@ docker compose up -d --build
 ### Aplicar manifests
 
 ```powershell
-kubectl apply -R -f deploy/kubernetes/local/
+kubectl apply -R -f local/kubernetes/
 kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
 kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
 ```

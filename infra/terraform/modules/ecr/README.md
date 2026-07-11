@@ -1,4 +1,4 @@
-# Registry Module
+# ECR Module
 
 ## Objetivo
 

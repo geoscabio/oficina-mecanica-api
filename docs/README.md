@@ -32,13 +32,13 @@ Este é o índice mestre da documentação do projeto. Use este arquivo para nav
 
 | Área | Caminho | Papel |
 | --- | --- | --- |
-| Manifests Kubernetes | [`../deploy/kubernetes/README.md`](../deploy/kubernetes/README.md) | Explica a separação entre local e referência AWS. |
-| Kubernetes AWS reference | [`../deploy/kubernetes/aws-reference/README.md`](../deploy/kubernetes/aws-reference/README.md) | Referência operacional para EKS e validação client-side. |
-| Secrets Kubernetes AWS | [`../deploy/kubernetes/aws-reference/secrets/README.md`](../deploy/kubernetes/aws-reference/secrets/README.md) | Regras para não versionar secrets reais. |
+| Runtime local | [`../local/README.md`](../local/README.md) | Explica Docker Compose e Kubernetes locais. |
+| Docker local | [`../local/docker/README.md`](../local/docker/README.md) | Comandos do Docker Compose local. |
+| Kubernetes local | [`../local/kubernetes/README.md`](../local/kubernetes/README.md) | Manifests locais para Docker Desktop Kubernetes. |
 | Terraform EKS | [`../infra/terraform/modules/eks/README.md`](../infra/terraform/modules/eks/README.md) | Módulo do cluster EKS e node group. |
-| Terraform database | [`../infra/terraform/modules/database/README.md`](../infra/terraform/modules/database/README.md) | Módulo RDS SQL Server e security group. |
-| Terraform networking | [`../infra/terraform/modules/networking/README.md`](../infra/terraform/modules/networking/README.md) | Módulo VPC, subnets, rotas e NAT Gateway. |
-| Terraform registry | [`../infra/terraform/modules/registry/README.md`](../infra/terraform/modules/registry/README.md) | Módulo ECR usado pela imagem Docker da API. |
+| Terraform RDS | [`../infra/terraform/modules/rds/README.md`](../infra/terraform/modules/rds/README.md) | M?dulo RDS SQL Server e security group. |
+| Terraform VPC | [`../infra/terraform/modules/networking/vpc/README.md`](../infra/terraform/modules/networking/vpc/README.md) | M?dulo VPC, subnets, rotas e NAT Gateway. |
+| Terraform ECR | [`../infra/terraform/modules/ecr/README.md`](../infra/terraform/modules/ecr/README.md) | M?dulo ECR usado pela imagem Docker da API. |
 
 ## Regras
 

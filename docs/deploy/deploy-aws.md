@@ -111,6 +111,24 @@ Nesse modelo futuro, a aplicação ou o cluster buscariam os valores em runtime 
 
 O deploy AWS real gerencia os recursos Kubernetes da API pelo Terraform, aguarda rollout e imprime o endpoint do Load Balancer. Os estágios `homologation` e `production` não provisionam AWS enquanto não existirem ambientes físicos separados.
 
+## Onde o Load Balancer é criado
+
+Não existe um recurso `aws_lb` explícito no Terraform porque o Load Balancer da API é criado pelo cloud provider da AWS quando o Kubernetes Service da API é criado com `type = "LoadBalancer"`.
+
+Fonte de verdade:
+
+```text
+infra/terraform/environments/dev/api-workload.tf
+```
+
+Recurso responsável:
+
+```text
+kubernetes_service_v1.oficina_api
+```
+
+O Terraform mantém o Service no state; por consequência, o `terraform destroy` remove o Service Kubernetes e a AWS remove o Load Balancer associado.
+
 ## Validação
 
 - [ ] Validar rollout da API.
