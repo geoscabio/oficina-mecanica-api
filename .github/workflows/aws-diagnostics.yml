@@ -2,6 +2,11 @@ name: AWS Diagnostics
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - develop
+    paths:
+      - ".github/workflows/aws-diagnostics.yml"
 
 jobs:
   inspect:
