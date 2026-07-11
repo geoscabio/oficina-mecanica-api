@@ -8,20 +8,20 @@ Execute a partir da raiz do repositório:
 
 ```powershell
 Copy-Item .env.example .env
-docker compose --env-file .env -f local/docker/docker-compose.yml up -d --build
+docker compose --env-file .env -f docker/docker-compose.yml up -d --build
 ```
 
 ## Parar ambiente
 
 ```powershell
-docker compose --env-file .env -f local/docker/docker-compose.yml down
+docker compose --env-file .env -f docker/docker-compose.yml down
 ```
 
 Para recriar o volume do SQL Server:
 
 ```powershell
-docker compose --env-file .env -f local/docker/docker-compose.yml down -v
-docker compose --env-file .env -f local/docker/docker-compose.yml up -d --build
+docker compose --env-file .env -f docker/docker-compose.yml down -v
+docker compose --env-file .env -f docker/docker-compose.yml up -d --build
 ```
 
 ## Observação

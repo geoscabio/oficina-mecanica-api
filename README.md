@@ -114,7 +114,7 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 | ☸️ Diagramas Kubernetes | [`docs/architecture/diagrams/deployment/kubernetes`](docs/architecture/diagrams/deployment/kubernetes) |
 | 🐳 Diagramas Docker | [`docs/architecture/diagrams/deployment/docker`](docs/architecture/diagrams/deployment/docker) |
 | 🔁 Diagramas CI/CD | [`docs/architecture/diagrams/ci-cd`](docs/architecture/diagrams/ci-cd) |
-| ?? Runtime local | [`local`](local) |
+| 🐳 Docker Compose local | [`docker`](docker) |
 | ☸️ Manifests Kubernetes | [`k8s`](k8s) |
 | 📄 Evidências de qualidade | [`docs/evidencias`](docs/evidencias) |
 | 🚀 Guias de deploy | [`docs/deploy`](docs/deploy) |
@@ -150,13 +150,12 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 ```text
 .
 ??? .github/workflows/              # Esteira CI/CD
+??? docker/                         # Docker Compose local
 ??? docs/                           # ?ndice, guias, evid?ncias e diagramas
 ??? infra/terraform/                # Infraestrutura AWS real
 ?   ??? environments/dev/           # Ambiente development
 ?   ??? modules/                    # M?dulos AWS: VPC, ECR, RDS e EKS
-??? local/                          # Runtime local
-?   ??? docker/                     # Docker Compose local
-?   ??? kubernetes/                 # Manifests Kubernetes locais
+??? k8s/                            # Manifests Kubernetes
 ??? src/                            # C?digo de produ??o
 ??? tests/                          # Testes unit?rios e integra??o
 ??? Dockerfile                      # Build da imagem da API
@@ -178,7 +177,7 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 
 ```powershell
 Copy-Item .env.example .env
-docker compose --env-file .env -f local/docker/docker-compose.yml up -d --build
+docker compose --env-file .env -f docker/docker-compose.yml up -d --build
 ```
 
 O Docker Compose sobe:
@@ -210,14 +209,14 @@ Healthy
 ### Parar ambiente
 
 ```powershell
-docker compose --env-file .env -f local/docker/docker-compose.yml down
+docker compose --env-file .env -f docker/docker-compose.yml down
 ```
 
 Para recriar banco/volume do zero:
 
 ```powershell
-docker compose --env-file .env -f local/docker/docker-compose.yml down -v
-docker compose --env-file .env -f local/docker/docker-compose.yml up -d --build
+docker compose --env-file .env -f docker/docker-compose.yml down -v
+docker compose --env-file .env -f docker/docker-compose.yml up -d --build
 ```
 
 ---
