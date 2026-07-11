@@ -32,17 +32,10 @@ terraform -chdir=infra/terraform/environments/dev init -backend=false
 terraform -chdir=infra/terraform/environments/dev validate
 ```
 
-## Planejamento com backend da esteira
+## Planejamento
 
 ```powershell
-terraform -chdir=infra/terraform/environments/dev init `
-  -backend-config="bucket=<tf-state-bucket>" `
-  -backend-config="key=oficina-mecanica/development/terraform.tfstate" `
-  -backend-config="region=us-east-1" `
-  -backend-config="encrypt=true" `
-  -backend-config="use_lockfile=true" `
-  -reconfigure
-
+terraform -chdir=infra/terraform/environments/dev init
 terraform -chdir=infra/terraform/environments/dev plan
 ```
 

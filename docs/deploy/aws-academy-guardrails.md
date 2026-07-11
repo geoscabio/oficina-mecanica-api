@@ -38,17 +38,10 @@ terraform -chdir=infra/terraform/environments/dev init -backend=false
 terraform -chdir=infra/terraform/environments/dev validate
 ```
 
-6. Para planejar/aplicar, inicializar com o mesmo backend S3 da esteira:
+6. Para planejar/aplicar, inicializar normalmente (backend `local`, mesmo state file `terraform.tfstate` usado pela esteira via cache do GitHub Actions):
 
 ```powershell
-terraform -chdir=infra/terraform/environments/dev init `
-  -backend-config="bucket=<tf-state-bucket>" `
-  -backend-config="key=oficina-mecanica/development/terraform.tfstate" `
-  -backend-config="region=us-east-1" `
-  -backend-config="encrypt=true" `
-  -backend-config="use_lockfile=true" `
-  -reconfigure
-
+terraform -chdir=infra/terraform/environments/dev init
 terraform -chdir=infra/terraform/environments/dev plan
 ```
 

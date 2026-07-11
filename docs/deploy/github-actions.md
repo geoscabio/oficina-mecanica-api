@@ -85,9 +85,10 @@ Fluxo:
 1. Detecta se o merge tem mudança deployable ou apenas documentação Markdown.
 2. Se for somente documentação, pula o deploy AWS e pode abrir PR para `release` quando `AUTO_PR_ENABLED=true`.
 3. Lê `infra/terraform/environments/dev/terraform-action.env`.
-4. Prepara backend S3 do Terraform state.
+4. Restaura o cache do Terraform state (GitHub Actions cache, chave `tfstate-development-*`).
 5. Executa `terraform init` e `validate`.
 6. Se `TERRAFORM_ACTION=apply`, garante o ECR, publica a imagem Docker no ECR, executa `plan`/`apply`, provisiona VPC, RDS, EKS e o workload Kubernetes da API, aguarda rollout e imprime o endpoint do Load Balancer.
+7. Salva o Terraform state atualizado de volta no cache do GitHub Actions (sempre, mesmo se um passo posterior falhar).
 7. Se `TERRAFORM_ACTION=destroy`, executa `plan -destroy`/`apply` e encerra os recursos AWS gerenciados pelo Terraform.
 8. Abre PR automático de `develop` para `release` quando o deploy `apply` passou ou quando a alteração era somente documentação.
 
@@ -143,8 +144,6 @@ Uso operacional:
 | `AUTO_PR_ENABLED` | Repository variable | `true` ou `false` | Habilita PR automático após deploy: `develop -> release` e `release -> main`. |
 | `RELEASE_BRANCH` | Repository variable opcional | `release` | Nome da branch de release. Default: `release`. |
 | `AWS_REGION` | Environment variable opcional | `us-east-1` | Região AWS. Default: `us-east-1`. |
-| `TF_STATE_BUCKET` | Environment variable opcional | Exemplo: `oficina-mecanica-tfstate-<account-id>-us-east-1`. | Bucket do Terraform state. Se não informado, a esteira cria/reutiliza `oficina-mecanica-tfstate-<account-id>-<region>`. |
-| `TF_STATE_KEY` | Environment variable opcional | `oficina-mecanica/development/terraform.tfstate` | Caminho do state. Default: `oficina-mecanica/development/terraform.tfstate`. |
 | `EKS_CLUSTER_ROLE_NAME` | Environment variable opcional | `LabRole` | Role IAM existente para o cluster EKS. |
 | `EKS_NODE_ROLE_NAME` | Environment variable opcional | `LabRole` | Role IAM existente para o node group. |
 

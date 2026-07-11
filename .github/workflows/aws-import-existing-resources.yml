@@ -14,7 +14,6 @@ jobs:
       name: development
     env:
       AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
-      TF_STATE_KEY: ${{ vars.TF_STATE_KEY || 'oficina-mecanica/development/terraform.tfstate' }}
 
     steps:
       - name: Checkout code
@@ -40,11 +39,9 @@ jobs:
           WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
           EKS_CLUSTER_ROLE_NAME: ${{ vars.EKS_CLUSTER_ROLE_NAME || 'LabRole' }}
           EKS_NODE_ROLE_NAME: ${{ vars.EKS_NODE_ROLE_NAME || 'LabRole' }}
-          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
         run: |
           account_id="$(aws sts get-caller-identity --query Account --output text)"
-          state_bucket="${TF_STATE_BUCKET:-oficina-mecanica-tfstate-$account_id-$AWS_REGION}"
-          echo "TF_STATE_BUCKET=$state_bucket" >> "$GITHUB_ENV"
+          echo "AWS_ACCOUNT_ID=$account_id" >> "$GITHUB_ENV"
 
           python - <<'PY'
           import json
@@ -66,16 +63,18 @@ jobs:
           target.write_text(json.dumps(values), encoding="utf-8")
           PY
 
+      - name: Restore Terraform state cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate.backup
+          key: tfstate-development-${{ github.run_id }}
+          restore-keys: |
+            tfstate-development-
+
       - name: Terraform init
-        run: |
-          terraform -chdir="$TF_WORKING_DIRECTORY" init \
-            -backend-config="bucket=$TF_STATE_BUCKET" \
-            -backend-config="key=$TF_STATE_KEY" \
-            -backend-config="region=$AWS_REGION" \
-            -backend-config="encrypt=true" \
-            -backend-config="use_lockfile=true" \
-            -reconfigure \
-            -input=false
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" init -input=false
 
       - name: Current state (before)
         run: terraform -chdir="$TF_WORKING_DIRECTORY" state list || echo "(empty state)"
@@ -163,5 +162,14 @@ jobs:
       - name: State after import
         run: terraform -chdir="$TF_WORKING_DIRECTORY" state list
 
+      - name: Save Terraform state cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate.backup
+          key: tfstate-development-${{ github.run_id }}
+
       - name: Terraform plan (review only, no apply)
-        run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -input=false -lock=false
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -input=false

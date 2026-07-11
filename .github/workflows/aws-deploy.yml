@@ -26,7 +26,6 @@ jobs:
       terraform_action: ${{ steps.resolve_terraform_action.outputs.terraform_action }}
     env:
       AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
-      TF_STATE_KEY: ${{ vars.TF_STATE_KEY || format('oficina-mecanica/{0}/terraform.tfstate', inputs.environment_name) }}
 
     steps:
       - name: Checkout code
@@ -118,40 +117,21 @@ jobs:
           fi
 
       - name: Prepare deployment variables
-        env:
-          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
         run: |
           account_id="$(aws sts get-caller-identity --query Account --output text)"
-          state_bucket="${TF_STATE_BUCKET:-oficina-mecanica-tfstate-$account_id-$AWS_REGION}"
 
           echo "AWS_ACCOUNT_ID=$account_id" >> "$GITHUB_ENV"
           echo "ECR_IMAGE_URI=$account_id.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY_NAME:sha-$GITHUB_SHA" >> "$GITHUB_ENV"
-          echo "TF_STATE_BUCKET=$state_bucket" >> "$GITHUB_ENV"
 
-          if ! aws s3api head-bucket --bucket "$state_bucket" 2>/dev/null; then
-            echo "Creating Terraform state bucket: $state_bucket"
-
-            if [ "$AWS_REGION" = "us-east-1" ]; then
-              aws s3api create-bucket \
-                --bucket "$state_bucket" \
-                --region "$AWS_REGION"
-            else
-              aws s3api create-bucket \
-                --bucket "$state_bucket" \
-                --region "$AWS_REGION" \
-                --create-bucket-configuration LocationConstraint="$AWS_REGION"
-            fi
-
-            aws s3api put-bucket-encryption \
-              --bucket "$state_bucket" \
-              --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
-
-            aws s3api put-public-access-block \
-              --bucket "$state_bucket" \
-              --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
-          fi
-
-          echo "Terraform state bucket confirmed: $state_bucket"
+      - name: Restore Terraform state cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate.backup
+          key: tfstate-${{ inputs.environment_name }}-${{ github.run_id }}
+          restore-keys: |
+            tfstate-${{ inputs.environment_name }}-
 
       - name: Write Terraform variables
         env:
@@ -193,15 +173,7 @@ jobs:
           PY
 
       - name: Terraform init
-        run: |
-          terraform -chdir="$TF_WORKING_DIRECTORY" init \
-            -backend-config="bucket=$TF_STATE_BUCKET" \
-            -backend-config="key=$TF_STATE_KEY" \
-            -backend-config="region=$AWS_REGION" \
-            -backend-config="encrypt=true" \
-            -backend-config="use_lockfile=true" \
-            -reconfigure \
-            -input=false
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" init -input=false
 
       - name: Terraform validate
         run: terraform -chdir="$TF_WORKING_DIRECTORY" validate
@@ -242,6 +214,15 @@ jobs:
       - name: Terraform destroy
         if: env.TERRAFORM_ACTION == 'destroy'
         run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve tfdestroy
+
+      - name: Save Terraform state cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate.backup
+          key: tfstate-${{ inputs.environment_name }}-${{ github.run_id }}
 
       - name: Read Terraform outputs
         if: env.TERRAFORM_ACTION == 'apply'

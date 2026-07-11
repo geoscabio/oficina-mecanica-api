@@ -12,27 +12,21 @@ O provisionamento do ambiente `development` acontece no workflow `CD Development
 
 O CD executa:
 
-1. cria ou reutiliza o bucket S3 do Terraform state;
+1. restaura o Terraform state do cache do GitHub Actions (chave `tfstate-development-*`);
 2. executa `terraform init` e `validate`;
 3. garante o repositório ECR antes do build;
 4. publica a imagem Docker no ECR antes do workload apontar para a nova tag;
 5. executa `terraform plan` e `apply`;
 6. cria ou atualiza VPC, RDS, EKS e recursos Kubernetes da API;
-7. valida o rollout do Deployment no EKS e imprime o endpoint do Load Balancer.
+7. valida o rollout do Deployment no EKS e imprime o endpoint do Load Balancer;
+8. salva o Terraform state atualizado de volta no cache do GitHub Actions, mesmo se algum passo posterior falhar.
 
 O ambiente publicado na AWS roda com `ASPNETCORE_ENVIRONMENT=Staging`. Swagger e usuários demo são habilitados explicitamente via `appsettings.Staging.json` para permitir a avaliação do Tech Challenge; nunca replicar este padrão, com credenciais fixas e Swagger público, em um ambiente de produção real.
 
-Execução local equivalente para diagnóstico:
+Execução local equivalente para diagnóstico (usa o state local em `infra/terraform/environments/dev/terraform.tfstate` — não é o mesmo state da esteira, que fica no cache do GitHub Actions):
 
 ```powershell
-terraform -chdir=infra/terraform/environments/dev init `
-  -backend-config="bucket=<tf-state-bucket>" `
-  -backend-config="key=oficina-mecanica/development/terraform.tfstate" `
-  -backend-config="region=us-east-1" `
-  -backend-config="encrypt=true" `
-  -backend-config="use_lockfile=true" `
-  -reconfigure
-
+terraform -chdir=infra/terraform/environments/dev init
 terraform -chdir=infra/terraform/environments/dev validate
 terraform -chdir=infra/terraform/environments/dev plan
 terraform -chdir=infra/terraform/environments/dev apply
@@ -64,8 +58,6 @@ Repository variables:
 | `AUTO_PR_ENABLED` | `true` ou `false` | `true` abre PR automático após deploy: `develop -> release` e `release -> main`. |
 | `RELEASE_BRANCH` | `release` | Opcional. Default: `release`. |
 | `AWS_REGION` | `us-east-1` | Opcional. Default: `us-east-1`. |
-| `TF_STATE_BUCKET` | Opcional. Exemplo: `oficina-mecanica-tfstate-<account-id>-us-east-1`. | Se não informado, a esteira cria/reutiliza `oficina-mecanica-tfstate-<account-id>-<region>`. |
-| `TF_STATE_KEY` | `oficina-mecanica/development/terraform.tfstate` | Opcional. Caminho do arquivo de state dentro do bucket. |
 | `EKS_CLUSTER_ROLE_NAME` | `LabRole` | Opcional se o AWS Academy usar `LabRole`. Ajustar se o lab informar outro nome. |
 | `EKS_NODE_ROLE_NAME` | `LabRole` | Opcional se o AWS Academy usar `LabRole`. Ajustar se o lab informar outro nome. |
 
@@ -75,18 +67,17 @@ Exemplos de valores criados pelo grupo:
 DB_PASSWORD=<senha forte, não colar no repositório>
 JWT_SECRET=<string aleatória com pelo menos 32 caracteres>
 WEBHOOK_TOKEN=<string aleatória com pelo menos 32 caracteres>
-TF_STATE_BUCKET=oficina-mecanica-tfstate-<account-id>-us-east-1
 ```
 
 Os valores reais devem ser cadastrados somente no GitHub ou no ambiente local seguro. Não adicionar esses valores em `.env`, YAML, Terraform ou Markdown.
 
-## Bucket de state do Terraform
+## Terraform state entre execuções
 
-O bucket de state é um detalhe operacional do Terraform para permitir que o GitHub Actions lembre quais recursos foram criados entre uma execução e outra. Ele não faz parte da arquitetura da aplicação.
+O Terraform usa backend `local` (arquivo `terraform.tfstate` dentro de `infra/terraform/environments/dev/`). Esse arquivo não é versionado no repositório; para lembrar o que foi criado entre uma execução e outra da esteira, o `CD Development` guarda e recupera o state usando o cache do GitHub Actions (`actions/cache`, chave `tfstate-development-*`).
 
-Não é necessário criar esse bucket manualmente. No `CD Development`, a própria esteira consulta a conta AWS e cria/reutiliza automaticamente o bucket `oficina-mecanica-tfstate-<account-id>-<region>` antes do `terraform init`.
+Motivo da escolha: um bucket S3 dedicado ao state não é exigido pelo enunciado da Fase 2, e o AWS Academy Learner Lab às vezes nega `s3:CreateBucket` por política de conta (`voc-cancel-cred`), o que travava a esteira sem necessidade real de S3.
 
-A variável `TF_STATE_BUCKET` só precisa ser preenchida se o grupo quiser usar um nome específico de bucket.
+Se o cache expirar (7 dias sem uso) ou for limpo manualmente no GitHub, a esteira perde a referência dos recursos já criados — nesse caso, use o workflow `AWS Import Existing Resources` (`.github/workflows/aws-import-existing-resources.yml`) para reconciliar o state com o que já existe na AWS antes de rodar `apply`/`destroy` de novo.
 
 ## Evolução futura: Secrets Manager e Parameter Store
 
@@ -165,4 +156,4 @@ Passo a passo:
 
 Como os recursos Kubernetes da API também estão no state, o `terraform destroy` remove Service/Load Balancer, Deployment, Secret, ConfigMap, Namespace, EKS, RDS, ECR, NAT Gateway e VPC.
 
-Por fim, conferir que não restaram EKS, EC2, RDS, NAT Gateway, ECR ou Load Balancer ativos. Se o bucket de state foi criado apenas para a demonstração, remover também após confirmar que o destroy terminou com sucesso.
+Por fim, conferir que não restaram EKS, EC2, RDS, NAT Gateway, ECR ou Load Balancer ativos.

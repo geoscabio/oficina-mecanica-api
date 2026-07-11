@@ -328,11 +328,9 @@ Environment variables:
 
 | Nome | Valor esperado |
 | --- | --- |
-| `TF_STATE_BUCKET` | Opcional. Se não informado, a esteira cria/reutiliza `oficina-mecanica-tfstate-<account-id>-<region>`. |
 | `AWS_REGION` | `us-east-1` |
 | `EKS_CLUSTER_ROLE_NAME` | `LabRole`, salvo se o AWS Academy informar outro nome. |
 | `EKS_NODE_ROLE_NAME` | `LabRole`, salvo se o AWS Academy informar outro nome. |
-| `TF_STATE_KEY` | Opcional. Default: `oficina-mecanica/development/terraform.tfstate`. |
 
 > Nunca versionar esses valores em `.env`, YAML, Terraform ou README. O repositório documenta os nomes, mas os valores ficam somente no GitHub Environment.
 
