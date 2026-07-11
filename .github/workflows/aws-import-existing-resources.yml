@@ -81,6 +81,40 @@ jobs:
       - name: Terraform init
         run: terraform -chdir="$TF_WORKING_DIRECTORY" init -input=false
 
+      - name: Neutralize kubernetes provider for import phase
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path(os.environ["TF_WORKING_DIRECTORY"]) / "providers.tf"
+          content = path.read_text(encoding="utf-8")
+
+          static_provider = (
+              'provider "kubernetes" {\n'
+              '  host                   = "https://localhost"\n'
+              '  cluster_ca_certificate = base64encode("dummy")\n'
+              '  token                  = "dummy"\n'
+              "}\n"
+          )
+
+          new_content = re.sub(
+              r'provider "kubernetes" \{.*?\n\}\n',
+              static_provider,
+              content,
+              flags=re.S,
+          )
+
+          if new_content == content:
+              raise SystemExit("Could not find kubernetes provider block to neutralize")
+
+          path.write_text(new_content, encoding="utf-8")
+          PY
+
+          echo "providers.tf (execucao deste workflow apenas, nao commitado):"
+          cat "$TF_WORKING_DIRECTORY/providers.tf"
+
       - name: Current state (before)
         run: terraform -chdir="$TF_WORKING_DIRECTORY" state list || echo "(empty state)"
 
