@@ -274,11 +274,42 @@ A infraestrutura AWS real é provisionada por Terraform para o ambiente `develop
 ### Fluxo operacional
 
 1. Configurar credenciais e secrets no GitHub Environment `development`.
-2. Integrar feature em `develop`.
-3. A esteira provisiona a infraestrutura com Terraform, publica a imagem no ECR, faz deploy no EKS e abre PR automático para `release`.
-4. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
-5. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
-6. Ao final da demonstração, executar `terraform destroy` usando o mesmo backend/state da esteira.
+2. Conferir o arquivo `infra/terraform/environments/dev/terraform-action.env`.
+3. Integrar feature em `develop`.
+4. Se `TERRAFORM_ACTION=apply`, a esteira provisiona a infraestrutura com Terraform, publica a imagem no ECR, faz deploy no EKS e abre PR automático para `release`.
+5. Se `TERRAFORM_ACTION=destroy`, a esteira executa `terraform destroy` usando o mesmo backend/state e não promove PR para `release`.
+6. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
+7. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
+
+### Controle apply/destroy pela esteira
+
+O CD da AWS é controlado pelo arquivo:
+
+```text
+infra/terraform/environments/dev/terraform-action.env
+```
+
+Para subir ou atualizar a AWS:
+
+```env
+TERRAFORM_ACTION=apply
+```
+
+Para destruir a AWS criada pelo Terraform:
+
+```env
+TERRAFORM_ACTION=destroy
+```
+
+Como usar:
+
+1. Abrir uma branch a partir da `develop`.
+2. Alterar somente `infra/terraform/environments/dev/terraform-action.env`.
+3. Abrir PR para `develop`.
+4. Após o merge, o workflow `CD Development` roda automaticamente.
+5. Ao finalizar o destroy, abrir outro PR voltando para `TERRAFORM_ACTION=apply`.
+
+> Segurança: `TERRAFORM_ACTION=destroy` só é aceito quando o arquivo `terraform-action.env` foi alterado no próprio merge. Isso evita destruir recursos por acidente em pushes futuros.
 
 ### Configuração obrigatória para CD AWS
 
