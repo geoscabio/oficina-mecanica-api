@@ -1,18 +1,13 @@
-name: AWS State Reconcile
+name: AWS Import Existing Resources
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - develop
-    paths:
-      - ".github/workflows/aws-state-reconcile.yml"
 
 env:
   TF_WORKING_DIRECTORY: infra/terraform/environments/dev
 
 jobs:
-  reconcile:
+  import_existing_resources:
     name: Import existing AWS resources into Terraform state
     runs-on: ubuntu-latest
     environment:
