@@ -115,23 +115,31 @@ O deploy AWS real gerencia os recursos Kubernetes da API pelo Terraform, aguarda
 - [ ] Validar `/api/health`.
 - [ ] Validar Swagger.
 
-## Encerramento obrigatório
+## Encerramento obrigatório pela esteira
 
-Ao final da demonstração, executar o destroy explícito do Terraform usando o mesmo backend/state da esteira:
+Ao final da demonstração, executar o destroy explícito pela própria esteira de CD, usando o mesmo backend/state do deploy.
 
-Antes do comando, manter disponíveis as mesmas variáveis usadas no apply, principalmente `TF_VAR_db_password`, `TF_VAR_eks_cluster_role_name` e `TF_VAR_eks_node_role_name`.
+Arquivo de controle:
 
-```powershell
-terraform -chdir=infra/terraform/environments/dev init `
-  -backend-config="bucket=<tf-state-bucket>" `
-  -backend-config="key=oficina-mecanica/development/terraform.tfstate" `
-  -backend-config="region=us-east-1" `
-  -backend-config="encrypt=true" `
-  -backend-config="use_lockfile=true" `
-  -reconfigure
-
-terraform -chdir=infra/terraform/environments/dev destroy
+```text
+infra/terraform/environments/dev/terraform-action.env
 ```
+
+Para destruir os recursos AWS:
+
+```env
+TERRAFORM_ACTION=destroy
+```
+
+Passo a passo:
+
+1. Criar uma branch a partir da `develop`.
+2. Alterar `infra/terraform/environments/dev/terraform-action.env` para `TERRAFORM_ACTION=destroy`.
+3. Abrir PR para `develop`.
+4. Fazer merge do PR.
+5. Acompanhar o workflow `CD Development` no GitHub Actions.
+6. Confirmar que a etapa `Terraform destroy` terminou com sucesso.
+7. Abrir novo PR voltando o arquivo para `TERRAFORM_ACTION=apply` antes do próximo deploy.
 
 Como os recursos Kubernetes da API também estão no state, o `terraform destroy` remove Service/Load Balancer, Deployment, Secret, ConfigMap, Namespace, EKS, RDS, ECR, NAT Gateway e VPC.
 

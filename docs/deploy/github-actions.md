@@ -82,12 +82,12 @@ Roda após merge/push na `develop`.
 
 Fluxo:
 
-1. Prepara backend S3 do Terraform state.
-2. Executa `terraform init`, `validate`, `plan` e `apply`.
-3. Provisiona VPC, ECR, RDS, EKS e recursos Kubernetes da API via Terraform.
-4. Faz build e push da imagem Docker para ECR.
-5. Reinicia o Deployment no EKS, aguarda rollout e imprime o endpoint do Load Balancer.
-6. Abre PR automático de `develop` para `release`, somente se o deploy passou.
+1. Lê `infra/terraform/environments/dev/terraform-action.env`.
+2. Prepara backend S3 do Terraform state.
+3. Executa `terraform init` e `validate`.
+4. Se `TERRAFORM_ACTION=apply`, executa `plan`/`apply`, provisiona VPC, ECR, RDS, EKS e recursos Kubernetes, publica a imagem no ECR, aguarda rollout e imprime o endpoint do Load Balancer.
+5. Se `TERRAFORM_ACTION=destroy`, executa `plan -destroy`/`apply` e encerra os recursos AWS gerenciados pelo Terraform.
+6. Abre PR automático de `develop` para `release` somente quando `TERRAFORM_ACTION=apply` e o deploy passou.
 
 ## CD Release
 
@@ -110,11 +110,29 @@ O PR para `main` deve exigir aprovação/reviewer antes do merge.
 
 ## Encerramento AWS
 
-Destroy não fica acoplado na esteira de CD. A esteira faz delivery/deploy; o encerramento do ambiente é uma operação explícita de Terraform feita pelos desenvolvedores após a demonstração.
+O destroy é acionado por PR para `develop`, alterando o arquivo versionado:
 
-1. Rodar `terraform init` apontando para o mesmo bucket/key de state usado pelo CD.
-2. Executar `terraform destroy` em `infra/terraform/environments/dev`.
-3. Conferir no console AWS se não restaram EKS, RDS, ECR, Load Balancer, NAT Gateway ou EC2 ativos.
+```text
+infra/terraform/environments/dev/terraform-action.env
+```
+
+Valores aceitos:
+
+```env
+TERRAFORM_ACTION=apply
+TERRAFORM_ACTION=destroy
+```
+
+Uso operacional:
+
+1. Manter `TERRAFORM_ACTION=apply` para deploy normal.
+2. Alterar para `TERRAFORM_ACTION=destroy` em uma branch dedicada quando quiser encerrar a AWS.
+3. Abrir PR para `develop`.
+4. Fazer merge e acompanhar `CD Development`.
+5. Conferir no console AWS se não restaram EKS, RDS, ECR, Load Balancer, NAT Gateway ou EC2 ativos.
+6. Abrir novo PR voltando para `TERRAFORM_ACTION=apply` antes do próximo deploy.
+
+`TERRAFORM_ACTION=destroy` só é aceito quando o arquivo `terraform-action.env` foi alterado no próprio merge. Isso evita que pushes futuros destruam recursos sem intenção.
 
 ## Repository variables
 

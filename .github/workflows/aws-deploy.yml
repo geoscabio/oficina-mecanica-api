@@ -7,6 +7,10 @@ on:
         description: "GitHub Environment used by this deploy."
         required: true
         type: string
+    outputs:
+      terraform_action:
+        description: "Resolved Terraform action: apply or destroy."
+        value: ${{ jobs.deploy.outputs.terraform_action }}
 
 env:
   TF_WORKING_DIRECTORY: infra/terraform/environments/dev
@@ -18,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment_name }}
+    outputs:
+      terraform_action: ${{ steps.resolve_terraform_action.outputs.terraform_action }}
     env:
       AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
       TF_STATE_KEY: ${{ vars.TF_STATE_KEY || format('oficina-mecanica/{0}/terraform.tfstate', inputs.environment_name) }}
@@ -25,6 +31,54 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve Terraform action
+        id: resolve_terraform_action
+        env:
+          GITHUB_BEFORE: ${{ github.event.before }}
+          GITHUB_AFTER: ${{ github.sha }}
+        run: |
+          control_file="$TF_WORKING_DIRECTORY/terraform-action.env"
+          terraform_action="apply"
+
+          if [ -f "$control_file" ]; then
+            configured_action="$(grep -E '^[[:space:]]*TERRAFORM_ACTION[[:space:]]*=' "$control_file" | tail -n 1 | cut -d '=' -f 2- | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' || true)"
+
+            if [ -n "$configured_action" ]; then
+              terraform_action="$configured_action"
+            fi
+          fi
+
+          case "$terraform_action" in
+            apply|destroy)
+              ;;
+            *)
+              echo "::error::Invalid TERRAFORM_ACTION '$terraform_action'. Use 'apply' or 'destroy'."
+              exit 1
+              ;;
+          esac
+
+          if [ "$terraform_action" = "destroy" ]; then
+            destroy_control_changed="false"
+
+            if [ -z "$GITHUB_BEFORE" ] || [ "$GITHUB_BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              destroy_control_changed="true"
+            elif git diff --name-only "$GITHUB_BEFORE" "$GITHUB_AFTER" -- "$control_file" | grep -qx "$control_file"; then
+              destroy_control_changed="true"
+            fi
+
+            if [ "$destroy_control_changed" != "true" ]; then
+              echo "::error::TERRAFORM_ACTION=destroy is present but terraform-action.env was not changed in this push. Change it back to apply or open a dedicated destroy PR."
+              exit 1
+            fi
+
+            echo "::warning::TERRAFORM_ACTION=destroy detected. This run will destroy AWS resources managed by Terraform."
+          fi
+
+          echo "TERRAFORM_ACTION=$terraform_action" >> "$GITHUB_ENV"
+          echo "terraform_action=$terraform_action" >> "$GITHUB_OUTPUT"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -45,6 +99,11 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
         run: |
+          if [ "$TERRAFORM_ACTION" = "destroy" ]; then
+            echo "Skipping application secret validation because this run will destroy the environment."
+            exit 0
+          fi
+
           missing=""
 
           for name in DB_PASSWORD JWT_SECRET WEBHOOK_TOKEN; do
@@ -107,15 +166,26 @@ jobs:
           import os
           from pathlib import Path
 
+          terraform_action = os.environ["TERRAFORM_ACTION"]
+
+          if terraform_action == "destroy":
+              db_password = "DestroyOnly-2026!"
+              jwt_secret = "destroy-only-placeholder"
+              webhook_token = "destroy-only-placeholder"
+          else:
+              db_password = os.environ["DB_PASSWORD"]
+              jwt_secret = os.environ["JWT_SECRET"]
+              webhook_token = os.environ["WEBHOOK_TOKEN"]
+
           values = {
               "aws_region": os.environ["AWS_REGION"],
-              "db_password": os.environ["DB_PASSWORD"],
+              "db_password": db_password,
               "eks_cluster_role_name": os.environ["EKS_CLUSTER_ROLE_NAME"],
               "eks_node_role_name": os.environ["EKS_NODE_ROLE_NAME"],
               "api_deploy_enabled": True,
               "api_image_uri": os.environ["ECR_IMAGE_URI"],
-              "jwt_secret": os.environ["JWT_SECRET"],
-              "webhook_token": os.environ["WEBHOOK_TOKEN"],
+              "jwt_secret": jwt_secret,
+              "webhook_token": webhook_token,
           }
 
           target = Path(os.environ["TF_WORKING_DIRECTORY"]) / "zz_ci.auto.tfvars.json"
@@ -137,19 +207,32 @@ jobs:
         run: terraform -chdir="$TF_WORKING_DIRECTORY" validate
 
       - name: Terraform plan
+        if: env.TERRAFORM_ACTION == 'apply'
         run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -input=false -out=tfplan
 
       - name: Terraform apply
+        if: env.TERRAFORM_ACTION == 'apply'
         run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve tfplan
 
+      - name: Terraform destroy plan
+        if: env.TERRAFORM_ACTION == 'destroy'
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -destroy -input=false -out=tfdestroy
+
+      - name: Terraform destroy
+        if: env.TERRAFORM_ACTION == 'destroy'
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve tfdestroy
+
       - name: Read Terraform outputs
+        if: env.TERRAFORM_ACTION == 'apply'
         run: |
           echo "EKS_CLUSTER_NAME=$(terraform -chdir="$TF_WORKING_DIRECTORY" output -raw eks_cluster_name)" >> "$GITHUB_ENV"
 
       - name: Login to Amazon ECR
+        if: env.TERRAFORM_ACTION == 'apply'
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push image to ECR
+        if: env.TERRAFORM_ACTION == 'apply'
         run: |
           image_tag="sha-$GITHUB_SHA"
 
@@ -162,19 +245,23 @@ jobs:
           docker push "$ECR_IMAGE_URI"
 
       - name: Setup kubectl
+        if: env.TERRAFORM_ACTION == 'apply'
         uses: azure/setup-kubectl@v4
 
       - name: Configure EKS kubeconfig
+        if: env.TERRAFORM_ACTION == 'apply'
         run: |
           aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
           kubectl config current-context
 
       - name: Install metrics server
+        if: env.TERRAFORM_ACTION == 'apply'
         run: |
           kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
           kubectl rollout status deployment/metrics-server -n kube-system --timeout=180s
 
       - name: Wait for rollout
+        if: env.TERRAFORM_ACTION == 'apply'
         run: |
           kubectl rollout restart deployment/oficina-api -n oficina
           kubectl rollout status deployment/oficina-api -n oficina --timeout=300s
@@ -183,6 +270,7 @@ jobs:
           kubectl get hpa oficina-api-hpa -n oficina
 
       - name: Print LoadBalancer endpoint
+        if: env.TERRAFORM_ACTION == 'apply'
         run: |
           for attempt in $(seq 1 30); do
             endpoint="$(kubectl get svc oficina-api -n oficina -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"

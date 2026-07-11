@@ -56,13 +56,14 @@ terraform -chdir=infra/terraform/environments/dev plan
 
 ## Depois de testar
 
-Destruir a infraestrutura e os recursos Kubernetes gerenciados pelo Terraform:
+Destruir a infraestrutura e os recursos Kubernetes gerenciados pelo Terraform pela esteira:
 
-Manter disponíveis as mesmas variáveis usadas no apply, principalmente `TF_VAR_db_password`, `TF_VAR_eks_cluster_role_name` e `TF_VAR_eks_node_role_name`.
-
-```powershell
-terraform -chdir=infra/terraform/environments/dev destroy
-```
+1. Criar uma branch a partir da `develop`.
+2. Alterar `infra/terraform/environments/dev/terraform-action.env` para `TERRAFORM_ACTION=destroy`.
+3. Abrir PR para `develop`.
+4. Fazer merge do PR.
+5. Acompanhar o workflow `CD Development` ate a etapa `Terraform destroy`.
+6. Depois do destroy, abrir outro PR voltando para `TERRAFORM_ACTION=apply`.
 
 Conferir se nao restou recurso cobravel:
 
@@ -75,4 +76,4 @@ aws ec2 describe-nat-gateways --region us-east-1
 
 ## Observacao importante
 
-O fim da sessao do Learner Lab pode encerrar instancias EC2, mas outros recursos como RDS, Load Balancer e NAT Gateway podem continuar existindo e consumindo credito. Por isso, o destroy manual e obrigatorio.
+O fim da sessao do Learner Lab pode encerrar instancias EC2, mas outros recursos como RDS, Load Balancer e NAT Gateway podem continuar existindo e consumindo credito. Por isso, o destroy via esteira e obrigatorio.
