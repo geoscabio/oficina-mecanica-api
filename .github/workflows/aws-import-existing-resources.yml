@@ -1,4 +1,4 @@
-name: AWS Import Existing Resources
+name: "🆘 AWS Import Existing Resources"
 
 # USO EXCLUSIVO DE EMERGENCIA - nao faz parte do fluxo normal de CI/CD.
 #
@@ -30,7 +30,7 @@ env:
 
 jobs:
   import_existing_resources:
-    name: Import existing AWS resources into Terraform state
+    name: "🆘 01 · Importar recursos AWS existentes para o state"
     runs-on: ubuntu-latest
     environment:
       name: development
@@ -38,10 +38,10 @@ jobs:
       AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
 
     steps:
-      - name: Checkout code
+      - name: "📥 01 · Baixar código do repositório"
         uses: actions/checkout@v7
 
-      - name: Configure AWS credentials
+      - name: "🔑 02 · Configurar credenciais AWS"
         uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -49,12 +49,12 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Setup Terraform
+      - name: "🛠️ 03 · Instalar Terraform"
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
 
-      - name: Prepare deployment variables
+      - name: "📝 04 · Preparar variáveis do Terraform"
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -85,7 +85,7 @@ jobs:
           target.write_text(json.dumps(values), encoding="utf-8")
           PY
 
-      - name: Restore Terraform state cache
+      - name: "📦 05 · Restaurar cache do state do Terraform"
         uses: actions/cache/restore@v6
         with:
           path: |
@@ -95,10 +95,10 @@ jobs:
           restore-keys: |
             tfstate-development-
 
-      - name: Terraform init
+      - name: "🚀 06 · Inicializar Terraform"
         run: terraform -chdir="$TF_WORKING_DIRECTORY" init -input=false
 
-      - name: Neutralize kubernetes provider for import phase
+      - name: "🧯 07 · Neutralizar provider kubernetes durante o import"
         run: |
           python - <<'PY'
           import os
@@ -132,10 +132,10 @@ jobs:
           echo "providers.tf (execucao deste workflow apenas, nao commitado):"
           cat "$TF_WORKING_DIRECTORY/providers.tf"
 
-      - name: Current state (before)
+      - name: "📋 08 · Listar state atual (antes do import)"
         run: terraform -chdir="$TF_WORKING_DIRECTORY" state list || echo "(empty state)"
 
-      - name: Discover resource IDs
+      - name: "🔍 09 · Descobrir IDs dos recursos reais na AWS"
         run: |
           vpc_id="$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=oficina-mecanica-vpc-dev" --query "Vpcs[0].VpcId" --output text)"
           echo "VPC_ID=$vpc_id" >> "$GITHUB_ENV"
@@ -171,7 +171,7 @@ jobs:
           echo "IGW=$igw_id NAT=$nat_id EIP_ALLOC=$eip_alloc"
           echo "PUB_RT=$pub_rt PRIV_RT=$priv_rt RDS_SG=$rds_sg"
 
-      - name: Import VPC networking
+      - name: "📥 10 · Importar rede da VPC"
         run: |
           cd "$TF_WORKING_DIRECTORY"
           import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
@@ -191,7 +191,7 @@ jobs:
           import "module.vpc.aws_route_table_association.private[0]" "${PRIV1}/${PRIV_RT}"
           import "module.vpc.aws_route_table_association.private[1]" "${PRIV2}/${PRIV_RT}"
 
-      - name: Import EKS
+      - name: "📥 11 · Importar cluster EKS"
         run: |
           cd "$TF_WORKING_DIRECTORY"
           import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
@@ -199,7 +199,7 @@ jobs:
           import module.eks.aws_eks_cluster.this "oficina-mecanica-eks-dev"
           import module.eks.aws_eks_node_group.this "oficina-mecanica-eks-dev:oficina-mecanica-node-group-dev"
 
-      - name: Import RDS
+      - name: "📥 12 · Importar instância RDS"
         run: |
           cd "$TF_WORKING_DIRECTORY"
           import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
@@ -208,17 +208,17 @@ jobs:
           import module.rds.aws_security_group.this "$RDS_SG"
           import module.rds.aws_db_instance.this "oficina-mecanica-db-dev"
 
-      - name: Import ECR
+      - name: "📥 13 · Importar repositório ECR"
         run: |
           cd "$TF_WORKING_DIRECTORY"
           import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
 
           import module.ecr.aws_ecr_repository.this "oficina-mecanica-api"
 
-      - name: State after import
+      - name: "📋 14 · Listar state depois do import"
         run: terraform -chdir="$TF_WORKING_DIRECTORY" state list
 
-      - name: Save Terraform state cache
+      - name: "💾 15 · Salvar cache do state do Terraform"
         if: always()
         uses: actions/cache/save@v6
         with:
@@ -227,5 +227,5 @@ jobs:
             ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate.backup
           key: tfstate-development-${{ github.run_id }}
 
-      - name: Terraform plan (review only, no apply)
+      - name: "🔍 16 · Gerar plano do Terraform (só revisão, sem aplicar)"
         run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -input=false
