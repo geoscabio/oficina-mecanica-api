@@ -1,4 +1,4 @@
-name: CD Development
+name: "🚀 CD Development"
 
 on:
   push:
@@ -18,18 +18,18 @@ env:
 
 jobs:
   detect-deploy-scope:
-    name: Detect deploy scope
+    name: "🔎 01 · Detectar necessidade de deploy"
     runs-on: ubuntu-latest
     outputs:
       deploy_required: ${{ steps.detect.outputs.deploy_required }}
 
     steps:
-      - name: Checkout code
+      - name: "📥 01 · Baixar código do repositório"
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Detect deployable changes
+      - name: "🔍 02 · Analisar arquivos alterados"
         id: detect
         env:
           GITHUB_BEFORE: ${{ github.event.before }}
@@ -63,7 +63,7 @@ jobs:
           echo "Deploy required: $deploy_required"
 
   deploy-development:
-    name: Deploy development
+    name: "☁️ 02 · Deploy em development"
     needs: detect-deploy-scope
     if: needs.detect-deploy-scope.outputs.deploy_required == 'true'
     uses: ./.github/workflows/aws-deploy.yml
@@ -72,7 +72,7 @@ jobs:
     secrets: inherit
 
   open-pr-to-release:
-    name: Open PR to release
+    name: "🔀 03 · Abrir PR para release"
     runs-on: ubuntu-latest
     needs:
       - detect-deploy-scope
@@ -80,12 +80,12 @@ jobs:
     if: always() && vars.AUTO_PR_ENABLED == 'true' && (needs.detect-deploy-scope.outputs.deploy_required == 'false' || (needs.deploy-development.result == 'success' && needs.deploy-development.outputs.terraform_action == 'apply'))
 
     steps:
-      - name: Checkout code
+      - name: "📥 01 · Baixar código do repositório"
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Create or keep release pull request
+      - name: "🔀 02 · Criar ou manter PR para release"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
