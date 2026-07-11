@@ -77,7 +77,25 @@ O Terraform usa backend `local` (arquivo `terraform.tfstate` dentro de `infra/te
 
 Motivo da escolha: um bucket S3 dedicado ao state não é exigido pelo enunciado da Fase 2, e o AWS Academy Learner Lab às vezes nega `s3:CreateBucket` por política de conta (`voc-cancel-cred`), o que travava a esteira sem necessidade real de S3.
 
-Se o cache expirar (7 dias sem uso) ou for limpo manualmente no GitHub, a esteira perde a referência dos recursos já criados — nesse caso, use o workflow `AWS Import Existing Resources` (`.github/workflows/aws-import-existing-resources.yml`) para reconciliar o state com o que já existe na AWS antes de rodar `apply`/`destroy` de novo.
+Se o cache expirar (7 dias sem uso) ou for limpo manualmente no GitHub, a esteira perde a referência dos recursos já criados — nesse caso, use o workflow `AWS Import Existing Resources` (ver seção abaixo) para reconciliar o state com o que já existe na AWS antes de rodar `apply`/`destroy` de novo.
+
+## Workflow de emergência: AWS Import Existing Resources
+
+`.github/workflows/aws-import-existing-resources.yml` **não faz parte do fluxo normal de CI/CD**. É uma rede de segurança, não um passo do dia a dia.
+
+**Quando usar:** só nestes dois sintomas:
+
+- `terraform apply` falha com erro de recurso "já existe" (`RepositoryAlreadyExistsException`, cluster/instância já existe, etc.);
+- `terraform destroy` termina com sucesso mas não destruiu nada de verdade (sinal de state vazio).
+
+Os dois sintomas indicam a mesma causa: o state (cache do GitHub Actions) não sabe que um recurso real existe na AWS. Isso só acontece se:
+
+1. Alguém rodou Terraform manualmente, fora da esteira (não faça isso — é a causa mais comum e mais fácil de evitar); ou
+2. O cache do state expirou (7+ dias sem nenhuma execução da esteira).
+
+**Como usar:** GitHub → Actions → `AWS Import Existing Resources` → *Run workflow*. Ele descobre os IDs reais via AWS CLI, roda `terraform import` para VPC, subnets, EKS, RDS e ECR, e termina com um `terraform plan` (revisão apenas, não aplica nada). Revisar esse plano antes de rodar `apply`/`destroy` normalmente de novo.
+
+**Por que não roda automaticamente:** se a esteira (`CD Development`) for sempre o único lugar que executa `terraform apply`/`destroy`, o state nunca desalinha, e este workflow nunca precisa ser usado. Ele existe só para o caso de a disciplina falhar ou o cache expirar — não é uma etapa a mais do pipeline normal.
 
 ## Evolução futura: Secrets Manager e Parameter Store
 

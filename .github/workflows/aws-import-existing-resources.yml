@@ -1,13 +1,29 @@
 name: AWS Import Existing Resources
 
-# Re-run apos fix/vpc-route-table-count (PR #139).
+# USO EXCLUSIVO DE EMERGENCIA - nao faz parte do fluxo normal de CI/CD.
+#
+# Para que serve:
+# Reconcilia o Terraform state com recursos AWS que ja existem de verdade
+# mas que o state (cache do GitHub Actions, ver aws-deploy.yml) nao conhece.
+# Roda "terraform import" para VPC, subnets, EKS, RDS e ECR.
+#
+# Quando usar:
+# So se "terraform apply" falhar com erro de recurso "ja existe"
+# (ex: RepositoryAlreadyExistsException, cluster ja existe) OU se
+# "terraform destroy" completar sem realmente destruir nada (state vazio).
+# Isso so acontece se alguem rodou Terraform manualmente, fora da esteira
+# (nunca faca isso), ou se o cache do state expirou por 7+ dias sem uso.
+#
+# Como usar:
+# Actions -> AWS Import Existing Resources -> Run workflow (workflow_dispatch).
+# Revisar o "terraform plan" no final antes de rodar apply/destroy de novo.
+#
+# Por que nao esta no fluxo automatico:
+# Se a esteira (CD Development) sempre for o unico lugar que roda
+# terraform apply/destroy, o state nunca desalinha e este workflow nunca
+# precisa rodar. Ele existe soh como rede de seguranca.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - develop
-    paths:
-      - ".github/workflows/aws-import-existing-resources.yml"
 
 env:
   TF_WORKING_DIRECTORY: infra/terraform/environments/dev
