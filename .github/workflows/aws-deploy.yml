@@ -207,6 +207,18 @@ jobs:
         if: env.TERRAFORM_ACTION == 'apply'
         run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve tfplan
 
+      - name: Empty ECR repository before destroy
+        if: env.TERRAFORM_ACTION == 'destroy'
+        run: |
+          image_ids="$(aws ecr list-images --repository-name "$ECR_REPOSITORY_NAME" --query 'imageIds[*]' --output json 2>/dev/null || echo '[]')"
+
+          if [ "$image_ids" != "[]" ] && [ -n "$image_ids" ]; then
+            echo "Removendo imagens de $ECR_REPOSITORY_NAME antes do destroy (terraform destroy nao aplica force_delete em recursos importados)."
+            aws ecr batch-delete-image --repository-name "$ECR_REPOSITORY_NAME" --image-ids "$image_ids" || true
+          else
+            echo "Repositorio $ECR_REPOSITORY_NAME vazio ou inexistente, nada a fazer."
+          fi
+
       - name: Terraform destroy plan
         if: env.TERRAFORM_ACTION == 'destroy'
         run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -destroy -input=false -out=tfdestroy
