@@ -1,4 +1,4 @@
-name: CI
+name: "✅ CI"
 
 on:
   pull_request:
@@ -20,19 +20,19 @@ env:
 
 jobs:
   build_application:
-    name: Build application
+    name: "🏗️ 01 · Build da aplicação"
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: "📥 01 · Baixar código do repositório"
         uses: actions/checkout@v7
 
-      - name: Setup .NET SDK
+      - name: "🛠️ 02 · Instalar SDK do .NET"
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Cache NuGet packages
+      - name: "📦 03 · Restaurar cache de pacotes NuGet"
         uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
@@ -40,45 +40,45 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Restore dependencies
+      - name: "📚 04 · Restaurar dependências do projeto"
         run: dotnet restore OficinaMecanica.sln
 
-      - name: Build solution
+      - name: "🔨 05 · Compilar a solução"
         run: dotnet build OficinaMecanica.sln --configuration Release --no-restore
 
   verify_code_style:
-    name: Verify code style
+    name: "🎨 02 · Verificar padrão de código"
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: "📥 01 · Baixar código do repositório"
         uses: actions/checkout@v7
 
-      - name: Setup .NET SDK
+      - name: "🛠️ 02 · Instalar SDK do .NET"
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
+      - name: "📚 03 · Restaurar dependências do projeto"
         run: dotnet restore OficinaMecanica.sln
 
-      - name: Verify formatting
+      - name: "✅ 04 · Verificar formatação do código"
         run: dotnet format OficinaMecanica.sln --verify-no-changes --no-restore
 
   test_application:
-    name: Test application
+    name: "🧪 03 · Testar aplicação"
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: "📥 01 · Baixar código do repositório"
         uses: actions/checkout@v7
 
-      - name: Setup .NET SDK
+      - name: "🛠️ 02 · Instalar SDK do .NET"
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Cache NuGet packages
+      - name: "📦 03 · Restaurar cache de pacotes NuGet"
         uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
@@ -86,13 +86,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Restore dependencies
+      - name: "📚 04 · Restaurar dependências do projeto"
         run: dotnet restore OficinaMecanica.sln
 
-      - name: Build solution
+      - name: "🔨 05 · Compilar a solução"
         run: dotnet build OficinaMecanica.sln --configuration Release --no-restore
 
-      - name: Run tests with coverage
+      - name: "🧪 06 · Executar testes com cobertura"
         run: >
           dotnet test OficinaMecanica.sln
           --configuration Release
@@ -102,7 +102,7 @@ jobs:
           --results-directory ./TestResults
           --logger "trx"
 
-      - name: Validate test execution results
+      - name: "🔍 07 · Validar resultados dos testes"
         shell: pwsh
         run: |
           $trxFiles = Get-ChildItem -Path TestResults -Recurse -Filter *.trx
@@ -136,7 +136,7 @@ jobs:
             throw "CI coverage requires zero skipped tests. Check Docker availability before collecting coverage."
           }
 
-      - name: Generate coverage report
+      - name: "📊 08 · Gerar relatório de cobertura"
         run: |
           dotnet tool install --global dotnet-reportgenerator-globaltool
           reportgenerator \
@@ -144,7 +144,7 @@ jobs:
             -targetdir:"TestResults/CoverageReport" \
             -reporttypes:"HtmlInline_AzurePipelines;Cobertura;MarkdownSummaryGithub"
 
-      - name: Validate coverage threshold
+      - name: "📈 09 · Validar limite mínimo de cobertura"
         shell: pwsh
         run: |
           [xml]$coverage = Get-Content -LiteralPath TestResults/CoverageReport/Cobertura.xml
@@ -157,7 +157,7 @@ jobs:
             throw "Line coverage $lineCoverage% is below the required 90% threshold."
           }
 
-      - name: Upload test and coverage artifacts
+      - name: "⬆️ 10 · Publicar artefatos de teste e cobertura"
         uses: actions/upload-artifact@v7
         with:
           name: test-and-coverage-results
@@ -168,17 +168,17 @@ jobs:
           if-no-files-found: error
 
   build_container_image:
-    name: Build Docker image
+    name: "🐳 04 · Build da imagem Docker"
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: "📥 01 · Baixar código do repositório"
         uses: actions/checkout@v7
 
-      - name: Setup Docker Buildx
+      - name: "🛠️ 02 · Configurar Docker Buildx"
         uses: docker/setup-buildx-action@v4
 
-      - name: Build Docker image
+      - name: "🔨 03 · Compilar imagem Docker"
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -189,26 +189,26 @@ jobs:
           cache-to: type=gha,mode=max
 
   validate_kubernetes_manifests:
-    name: Validate Kubernetes manifests
+    name: "☸️ 05 · Validar manifests Kubernetes"
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: "📥 01 · Baixar código do repositório"
         uses: actions/checkout@v7
 
-      - name: Setup kubectl
+      - name: "🛠️ 02 · Instalar kubectl"
         uses: azure/setup-kubectl@v5
 
-      - name: Create ephemeral KinD cluster
+      - name: "🌀 03 · Criar cluster Kind efêmero"
         uses: helm/kind-action@v1
         with:
           cluster_name: ci-validation
 
-      - name: Validate local Kubernetes manifests
+      - name: "🔍 04 · Validar manifests com dry-run"
         run: kubectl apply --dry-run=client -R -f k8s/
 
   quality_gate:
-    name: Quality gate
+    name: "🚦 06 · Quality gate"
     runs-on: ubuntu-latest
     needs:
       - build_application
@@ -219,7 +219,7 @@ jobs:
     if: always()
 
     steps:
-      - name: Validate CI responsibilities
+      - name: "🚦 01 · Conferir status de todos os jobs do CI"
         run: |
           results=(
             "${{ needs.build_application.result }}"
