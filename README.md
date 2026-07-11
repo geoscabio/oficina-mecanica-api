@@ -276,9 +276,36 @@ A infraestrutura AWS real é provisionada por Terraform para o ambiente `develop
 1. Configurar credenciais e secrets no GitHub Environment `development`.
 2. Integrar feature em `develop`.
 3. A esteira provisiona a infraestrutura com Terraform, publica a imagem no ECR, faz deploy no EKS e abre PR automático para `release`.
-5. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
-6. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
-7. Ao final da demonstração, executar `terraform destroy` usando o mesmo backend/state da esteira.
+4. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
+5. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
+6. Ao final da demonstração, executar `terraform destroy` usando o mesmo backend/state da esteira.
+
+### Configuração obrigatória para CD AWS
+
+Antes de mergear em `develop`, configurar no GitHub em `Settings > Environments > development`.
+
+Environment secrets:
+
+| Nome | Valor esperado |
+| --- | --- |
+| `AWS_ACCESS_KEY_ID` | Copiar de `AWS Details` / credenciais CLI do AWS Academy. |
+| `AWS_SECRET_ACCESS_KEY` | Copiar de `AWS Details` / credenciais CLI do AWS Academy. |
+| `AWS_SESSION_TOKEN` | Copiar de `AWS Details` / credenciais CLI do AWS Academy. Expira a cada sessão. |
+| `DB_PASSWORD` | Criar uma senha forte para o RDS SQL Server. |
+| `JWT_SECRET` | Criar uma string aleatória com pelo menos 32 caracteres. |
+| `WEBHOOK_TOKEN` | Criar uma string aleatória com pelo menos 32 caracteres. |
+
+Environment variables:
+
+| Nome | Valor esperado |
+| --- | --- |
+| `TF_STATE_BUCKET` | Nome de um bucket S3 já existente para o Terraform state. |
+| `AWS_REGION` | `us-east-1` |
+| `EKS_CLUSTER_ROLE_NAME` | `LabRole`, salvo se o AWS Academy informar outro nome. |
+| `EKS_NODE_ROLE_NAME` | `LabRole`, salvo se o AWS Academy informar outro nome. |
+| `TF_STATE_KEY` | Opcional. Default: `oficina-mecanica/development/terraform.tfstate`. |
+
+> Nunca versionar esses valores em `.env`, YAML, Terraform ou README. O repositório documenta os nomes, mas os valores ficam somente no GitHub Environment.
 
 Guias:
 
