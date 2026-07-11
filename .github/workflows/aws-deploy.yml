@@ -1,4 +1,4 @@
-name: AWS Deploy
+name: "☁️ AWS Deploy"
 
 on:
   workflow_call:
@@ -10,30 +10,28 @@ on:
     outputs:
       terraform_action:
         description: "Resolved Terraform action: apply or destroy."
-        value: ${{ jobs.deploy.outputs.terraform_action }}
+        value: ${{ jobs.resolve_action.outputs.terraform_action }}
 
 env:
   TF_WORKING_DIRECTORY: infra/terraform/environments/dev
   ECR_REPOSITORY_NAME: oficina-mecanica-api
 
 jobs:
-  deploy:
-    name: Deploy to AWS
+  resolve_action:
+    name: "🔎 01 · Resolver ação do Terraform"
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment_name }}
     outputs:
       terraform_action: ${{ steps.resolve_terraform_action.outputs.terraform_action }}
-    env:
-      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
 
     steps:
-      - name: Checkout code
+      - name: "📥 01 · Baixar código do repositório"
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Resolve Terraform action
+      - name: "🚦 02 · Ler terraform-action.env e validar troca segura de destroy"
         id: resolve_terraform_action
         env:
           GITHUB_BEFORE: ${{ github.event.before }}
@@ -76,10 +74,26 @@ jobs:
             echo "::warning::TERRAFORM_ACTION=destroy detected. This run will destroy AWS resources managed by Terraform."
           fi
 
-          echo "TERRAFORM_ACTION=$terraform_action" >> "$GITHUB_ENV"
           echo "terraform_action=$terraform_action" >> "$GITHUB_OUTPUT"
 
-      - name: Configure AWS credentials
+  prepare_and_plan:
+    name: "📋 02 · Preparar variáveis e gerar plano do Terraform"
+    needs: resolve_action
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment_name }}
+    outputs:
+      account_id: ${{ steps.prepare_vars.outputs.account_id }}
+      ecr_image_uri: ${{ steps.prepare_vars.outputs.ecr_image_uri }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      TERRAFORM_ACTION: ${{ needs.resolve_action.outputs.terraform_action }}
+
+    steps:
+      - name: "📥 01 · Baixar código do repositório"
+        uses: actions/checkout@v7
+
+      - name: "🔑 02 · Configurar credenciais AWS"
         uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -87,12 +101,12 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Setup Terraform
+      - name: "🛠️ 03 · Instalar Terraform"
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
 
-      - name: Validate deployment configuration
+      - name: "✅ 04 · Validar segredos necessários para o deploy"
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -116,14 +130,18 @@ jobs:
             exit 1
           fi
 
-      - name: Prepare deployment variables
+      - name: "🧮 05 · Calcular conta AWS e URI da imagem ECR"
+        id: prepare_vars
         run: |
           account_id="$(aws sts get-caller-identity --query Account --output text)"
+          ecr_image_uri="$account_id.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY_NAME:sha-$GITHUB_SHA"
 
           echo "AWS_ACCOUNT_ID=$account_id" >> "$GITHUB_ENV"
-          echo "ECR_IMAGE_URI=$account_id.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY_NAME:sha-$GITHUB_SHA" >> "$GITHUB_ENV"
+          echo "ECR_IMAGE_URI=$ecr_image_uri" >> "$GITHUB_ENV"
+          echo "account_id=$account_id" >> "$GITHUB_OUTPUT"
+          echo "ecr_image_uri=$ecr_image_uri" >> "$GITHUB_OUTPUT"
 
-      - name: Restore Terraform state cache
+      - name: "📦 06 · Restaurar cache do state do Terraform"
         uses: actions/cache/restore@v6
         with:
           path: |
@@ -133,7 +151,7 @@ jobs:
           restore-keys: |
             tfstate-${{ inputs.environment_name }}-
 
-      - name: Write Terraform variables
+      - name: "📝 07 · Escrever variáveis do Terraform"
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -172,42 +190,17 @@ jobs:
           target.write_text(json.dumps(values), encoding="utf-8")
           PY
 
-      - name: Terraform init
+      - name: "🚀 08 · Inicializar Terraform"
         run: terraform -chdir="$TF_WORKING_DIRECTORY" init -input=false
 
-      - name: Terraform validate
+      - name: "🔍 09 · Validar configuração do Terraform"
         run: terraform -chdir="$TF_WORKING_DIRECTORY" validate
 
-      - name: Ensure ECR repository exists
+      - name: "📤 10 · Garantir que o repositório ECR existe"
         if: env.TERRAFORM_ACTION == 'apply'
         run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve -target=module.ecr
 
-      - name: Login to Amazon ECR
-        if: env.TERRAFORM_ACTION == 'apply'
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build and push image to ECR
-        if: env.TERRAFORM_ACTION == 'apply'
-        run: |
-          image_tag="sha-$GITHUB_SHA"
-
-          if aws ecr describe-images --repository-name "$ECR_REPOSITORY_NAME" --image-ids imageTag="$image_tag" >/dev/null 2>&1; then
-            echo "Image $ECR_IMAGE_URI already exists. Skipping Docker push."
-            exit 0
-          fi
-
-          docker build -t "$ECR_IMAGE_URI" .
-          docker push "$ECR_IMAGE_URI"
-
-      - name: Terraform plan
-        if: env.TERRAFORM_ACTION == 'apply'
-        run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -input=false -out=tfplan
-
-      - name: Terraform apply
-        if: env.TERRAFORM_ACTION == 'apply'
-        run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve tfplan
-
-      - name: Empty ECR repository before destroy
+      - name: "🧹 11 · Esvaziar repositório ECR antes do destroy"
         if: env.TERRAFORM_ACTION == 'destroy'
         run: |
           image_ids="$(aws ecr list-images --repository-name "$ECR_REPOSITORY_NAME" --query 'imageIds[*]' --output json 2>/dev/null || echo '[]')"
@@ -219,15 +212,124 @@ jobs:
             echo "Repositorio $ECR_REPOSITORY_NAME vazio ou inexistente, nada a fazer."
           fi
 
-      - name: Terraform destroy plan
-        if: env.TERRAFORM_ACTION == 'destroy'
-        run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -destroy -input=false -out=tfdestroy
+      - name: "💾 12 · Salvar cache intermediário do state do Terraform"
+        if: always()
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate.backup
+          key: tfstate-${{ inputs.environment_name }}-${{ github.run_id }}-prepared
 
-      - name: Terraform destroy
-        if: env.TERRAFORM_ACTION == 'destroy'
-        run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve tfdestroy
+      - name: "📐 13 · Gerar plano do Terraform (apply)"
+        if: env.TERRAFORM_ACTION == 'apply'
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -input=false -out=tfplan
 
-      - name: Save Terraform state cache
+      - name: "📐 13 · Gerar plano do Terraform (destroy)"
+        if: env.TERRAFORM_ACTION == 'destroy'
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -destroy -input=false -out=tfplan
+
+      - name: "⬆️ 14 · Publicar plano do Terraform como artefato"
+        uses: actions/upload-artifact@v7
+        with:
+          name: tfplan-${{ github.run_id }}
+          path: ${{ env.TF_WORKING_DIRECTORY }}/tfplan
+          retention-days: 1
+          if-no-files-found: error
+
+  build_and_push_image:
+    name: "🐳 03 · Build e push da imagem Docker"
+    needs:
+      - resolve_action
+      - prepare_and_plan
+    if: needs.resolve_action.outputs.terraform_action == 'apply'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment_name }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      ECR_IMAGE_URI: ${{ needs.prepare_and_plan.outputs.ecr_image_uri }}
+
+    steps:
+      - name: "📥 01 · Baixar código do repositório"
+        uses: actions/checkout@v7
+
+      - name: "🔑 02 · Configurar credenciais AWS"
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: "🔓 03 · Login no Amazon ECR"
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: "🔨 04 · Compilar e publicar imagem no ECR"
+        run: |
+          image_tag="sha-$GITHUB_SHA"
+
+          if aws ecr describe-images --repository-name "$ECR_REPOSITORY_NAME" --image-ids imageTag="$image_tag" >/dev/null 2>&1; then
+            echo "Image $ECR_IMAGE_URI already exists. Skipping Docker push."
+            exit 0
+          fi
+
+          docker build -t "$ECR_IMAGE_URI" .
+          docker push "$ECR_IMAGE_URI"
+
+  apply_or_destroy:
+    name: "☁️ 04 · Aplicar ou destruir infraestrutura"
+    needs:
+      - resolve_action
+      - prepare_and_plan
+      - build_and_push_image
+    if: always() && needs.resolve_action.result == 'success' && needs.prepare_and_plan.result == 'success' && (needs.resolve_action.outputs.terraform_action == 'destroy' || needs.build_and_push_image.result == 'success')
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment_name }}
+    outputs:
+      eks_cluster_name: ${{ steps.read_outputs.outputs.eks_cluster_name }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      TERRAFORM_ACTION: ${{ needs.resolve_action.outputs.terraform_action }}
+
+    steps:
+      - name: "📥 01 · Baixar código do repositório"
+        uses: actions/checkout@v7
+
+      - name: "🔑 02 · Configurar credenciais AWS"
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: "🛠️ 03 · Instalar Terraform"
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: "📦 04 · Restaurar cache do state do Terraform"
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate
+            ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate.backup
+          key: tfstate-${{ inputs.environment_name }}-${{ github.run_id }}-prepared
+          restore-keys: |
+            tfstate-${{ inputs.environment_name }}-
+
+      - name: "⬇️ 05 · Baixar plano do Terraform publicado"
+        uses: actions/download-artifact@v8
+        with:
+          name: tfplan-${{ github.run_id }}
+          path: ${{ env.TF_WORKING_DIRECTORY }}
+
+      - name: "✅ 06 · Aplicar plano do Terraform (apply ou destroy)"
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve tfplan
+
+      - name: "💾 07 · Salvar cache final do state do Terraform"
         if: always()
         uses: actions/cache/save@v6
         with:
@@ -236,29 +338,49 @@ jobs:
             ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate.backup
           key: tfstate-${{ inputs.environment_name }}-${{ github.run_id }}
 
-      - name: Read Terraform outputs
+      - name: "📖 08 · Ler nome do cluster EKS"
+        id: read_outputs
         if: env.TERRAFORM_ACTION == 'apply'
         run: |
-          echo "EKS_CLUSTER_NAME=$(terraform -chdir="$TF_WORKING_DIRECTORY" output -raw eks_cluster_name)" >> "$GITHUB_ENV"
+          eks_cluster_name="$(terraform -chdir="$TF_WORKING_DIRECTORY" output -raw eks_cluster_name)"
+          echo "eks_cluster_name=$eks_cluster_name" >> "$GITHUB_OUTPUT"
 
-      - name: Setup kubectl
-        if: env.TERRAFORM_ACTION == 'apply'
+  rollout_check:
+    name: "☸️ 05 · Validar rollout da aplicação no EKS"
+    needs:
+      - resolve_action
+      - apply_or_destroy
+    if: needs.resolve_action.outputs.terraform_action == 'apply' && needs.apply_or_destroy.result == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment_name }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      EKS_CLUSTER_NAME: ${{ needs.apply_or_destroy.outputs.eks_cluster_name }}
+
+    steps:
+      - name: "🔑 01 · Configurar credenciais AWS"
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: "🛠️ 02 · Instalar kubectl"
         uses: azure/setup-kubectl@v5
 
-      - name: Configure EKS kubeconfig
-        if: env.TERRAFORM_ACTION == 'apply'
+      - name: "🔗 03 · Configurar kubeconfig do EKS"
         run: |
           aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
           kubectl config current-context
 
-      - name: Install metrics server
-        if: env.TERRAFORM_ACTION == 'apply'
+      - name: "📊 04 · Instalar metrics server"
         run: |
           kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
           kubectl rollout status deployment/metrics-server -n kube-system --timeout=180s
 
-      - name: Wait for rollout
-        if: env.TERRAFORM_ACTION == 'apply'
+      - name: "⏳ 05 · Aguardar rollout da aplicação"
         run: |
           set +e
           kubectl rollout status deployment/oficina-mecanica-api -n oficina-mecanica --timeout=600s
@@ -277,8 +399,7 @@ jobs:
             exit "$rollout_status"
           fi
 
-      - name: Print LoadBalancer endpoint
-        if: env.TERRAFORM_ACTION == 'apply'
+      - name: "🌐 06 · Exibir endpoint do Load Balancer"
         run: |
           for attempt in $(seq 1 30); do
             endpoint="$(kubectl get svc oficina-mecanica-api -n oficina-mecanica -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
