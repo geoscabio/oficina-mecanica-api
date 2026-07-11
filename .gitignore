@@ -18,6 +18,8 @@ _contexto_para_ia_extracted/
 **/.terraform/*
 *.tfstate
 *.tfstate.*
+*.auto.tfvars
+*.auto.tfvars.json
 crash.log
 override.tf
 override.tf.json

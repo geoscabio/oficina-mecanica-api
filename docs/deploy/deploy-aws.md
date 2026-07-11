@@ -4,34 +4,35 @@ Este guia descreve como preparar a infraestrutura AWS real do environment `devel
 
 ## Regra de ouro
 
-Ambientes temporários devem ser destruídos após a demonstração. Antes de qualquer criação de recurso, tenha um plano claro de cleanup Kubernetes e `terraform destroy`.
+Ambientes temporários devem ser destruídos após a demonstração. Antes de qualquer criação de recurso, tenha um plano claro de `terraform destroy`.
 
 ## Provisionamento da infraestrutura
 
-- [ ] Configurar credenciais AWS fora do repositório.
-- [ ] Configurar `TF_VAR_db_password` fora do repositório.
-- [ ] Configurar `TF_VAR_eks_cluster_role_name` e `TF_VAR_eks_node_role_name` quando o ambiente exigir roles existentes.
-- [ ] Executar `terraform plan`.
-- [ ] Executar `terraform apply` somente com aprovação explícita.
+O provisionamento do ambiente `development` acontece no workflow `CD Development`, após merge/push na branch `develop`.
+
+O CD executa:
+
+1. cria ou reutiliza o bucket S3 do Terraform state;
+2. executa `terraform init`, `validate`, `plan` e `apply`;
+3. cria VPC, ECR, RDS, EKS e recursos Kubernetes da API;
+4. publica a imagem Docker no ECR;
+5. reinicia o Deployment no EKS e valida o rollout.
+
+Execução local equivalente para diagnóstico:
 
 ```powershell
-terraform -chdir=infra/terraform/environments/dev init
+terraform -chdir=infra/terraform/environments/dev init `
+  -backend-config="bucket=<tf-state-bucket>" `
+  -backend-config="key=oficina-mecanica/development/terraform.tfstate" `
+  -backend-config="region=us-east-1" `
+  -backend-config="encrypt=true" `
+  -backend-config="use_lockfile=true" `
+  -reconfigure
+
 terraform -chdir=infra/terraform/environments/dev validate
 terraform -chdir=infra/terraform/environments/dev plan
 terraform -chdir=infra/terraform/environments/dev apply
 ```
-
-## Outputs necessários
-
-Após o `terraform apply`, copie estes outputs:
-
-```powershell
-terraform -chdir=infra/terraform/environments/dev output ecr_repository_url
-terraform -chdir=infra/terraform/environments/dev output eks_cluster_name
-terraform -chdir=infra/terraform/environments/dev output rds_address
-```
-
-Use os valores nos GitHub Environments correspondentes.
 
 ## GitHub Environments
 
@@ -46,29 +47,31 @@ O environment `development` precisa conter:
 | `AWS_ACCESS_KEY_ID` | Secret | Access key do ambiente. |
 | `AWS_SECRET_ACCESS_KEY` | Secret | Secret key do ambiente. |
 | `AWS_SESSION_TOKEN` | Secret | Session token quando aplicável. |
+| `DB_PASSWORD` | Secret | Senha do usuário administrador do RDS. |
 | `JWT_SECRET` | Secret | Chave JWT da API. |
 | `WEBHOOK_TOKEN` | Secret | Token do webhook de orçamento. |
-| `RDS_CONNECTION_STRING` | Secret | Connection string completa do RDS. |
-| `ECR_REPOSITORY_URL` | Variable | URL do ECR gerado pelo Terraform. |
-| `EKS_CLUSTER_NAME` | Variable | Nome do EKS gerado pelo Terraform. |
 
 Repository variables:
 
 | Nome | Valor |
 | --- | --- |
-| `AWS_DEPLOY_ENABLED` | `true` apenas durante a janela de deploy/demonstração em `development`. |
-| `AUTO_PR_ENABLED` | `true` apenas depois de habilitar o GitHub Actions a criar PRs. |
+| `AUTO_PR_ENABLED` | `true` para abrir PR automático após deploy: `develop -> release` e `release -> main`. |
 | `RELEASE_BRANCH` | Opcional. Default: `release`. |
+| `AWS_REGION` | Opcional. Default: `us-east-1`. |
+| `TF_STATE_BUCKET` | Obrigatório para CD com Terraform. Deve apontar para um bucket S3 preexistente; a esteira não cria bucket automaticamente. |
+| `TF_STATE_KEY` | Opcional. Default: `oficina-mecanica/development/terraform.tfstate`. |
+| `EKS_CLUSTER_ROLE_NAME` | Opcional. Default: `LabRole`. |
+| `EKS_NODE_ROLE_NAME` | Opcional. Default: `LabRole`. |
 
 ## Deploy pela esteira
 
 | Branch | Ambiente | Próximo passo automático |
 | --- | --- | --- |
-| `develop` | `development` | Faz deploy AWS real e abre PR para `release`. |
+| `develop` | `development` | Executa Terraform apply, faz deploy AWS real e abre PR para `release`. |
 | `release` ou `release/**` | `homologation` | Registra deploy lógico e abre PR para `main`. |
 | `main` | `production` | Registra deploy lógico final após PR aprovado. |
 
-O deploy AWS real aplica os manifests de `infra/aws/k8s/`, aguarda rollout e imprime o endpoint do Load Balancer. Os estágios `homologation` e `production` não provisionam AWS enquanto não existirem ambientes físicos separados.
+O deploy AWS real gerencia os recursos Kubernetes da API pelo Terraform, aguarda rollout e imprime o endpoint do Load Balancer. Os estágios `homologation` e `production` não provisionam AWS enquanto não existirem ambientes físicos separados.
 
 ## Validação
 
@@ -80,14 +83,22 @@ O deploy AWS real aplica os manifests de `infra/aws/k8s/`, aguarda rollout e imp
 
 ## Encerramento obrigatório
 
-1. Rodar `Actions > AWS Cleanup > Run workflow`.
-2. Selecionar o `target_environment` correto.
-3. Confirmar a execução.
-4. Confirmar que o Service `LoadBalancer` foi removido.
-5. Executar:
+Ao final da demonstração, executar o destroy explícito do Terraform usando o mesmo backend/state da esteira:
+
+Antes do comando, manter disponíveis as mesmas variáveis usadas no apply, principalmente `TF_VAR_db_password`, `TF_VAR_eks_cluster_role_name` e `TF_VAR_eks_node_role_name`.
 
 ```powershell
+terraform -chdir=infra/terraform/environments/dev init `
+  -backend-config="bucket=<tf-state-bucket>" `
+  -backend-config="key=oficina-mecanica/development/terraform.tfstate" `
+  -backend-config="region=us-east-1" `
+  -backend-config="encrypt=true" `
+  -backend-config="use_lockfile=true" `
+  -reconfigure
+
 terraform -chdir=infra/terraform/environments/dev destroy
 ```
 
-6. Conferir que não restaram EKS, EC2, RDS, NAT Gateway, ECR com imagens ou Load Balancer ativos.
+Como os recursos Kubernetes da API também estão no state, o `terraform destroy` remove Service/Load Balancer, Deployment, Secret, ConfigMap, Namespace, EKS, RDS, ECR, NAT Gateway e VPC.
+
+Por fim, conferir que não restaram EKS, EC2, RDS, NAT Gateway, ECR ou Load Balancer ativos. Se o bucket de state foi criado apenas para a demonstração, remover também após confirmar que o destroy terminou com sucesso.

@@ -1,0 +1,187 @@
+name: AWS Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        description: "GitHub Environment used by this deploy."
+        required: true
+        type: string
+
+env:
+  TF_WORKING_DIRECTORY: infra/terraform/environments/dev
+  ECR_REPOSITORY_NAME: oficina-api
+
+jobs:
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment_name }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      TF_STATE_KEY: ${{ vars.TF_STATE_KEY || format('oficina-mecanica/{0}/terraform.tfstate', inputs.environment_name) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Validate deployment configuration
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+        run: |
+          missing=""
+
+          for name in DB_PASSWORD JWT_SECRET WEBHOOK_TOKEN; do
+            if [ -z "${!name}" ]; then
+              missing="$missing $name"
+            fi
+          done
+
+          if [ -n "$missing" ]; then
+            echo "Missing required GitHub Environment secrets:$missing"
+            exit 1
+          fi
+
+      - name: Prepare deployment variables
+        env:
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+        run: |
+          if [ -z "$TF_STATE_BUCKET" ]; then
+            echo "TF_STATE_BUCKET environment variable is required."
+            echo "Create or choose the Terraform state bucket explicitly before enabling AWS deploy."
+            echo "The CD pipeline does not create Terraform backend resources automatically."
+            exit 1
+          fi
+
+          account_id="$(aws sts get-caller-identity --query Account --output text)"
+
+          echo "AWS_ACCOUNT_ID=$account_id" >> "$GITHUB_ENV"
+          echo "ECR_IMAGE_URI=$account_id.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY_NAME:sha-$GITHUB_SHA" >> "$GITHUB_ENV"
+
+          if ! aws s3api head-bucket --bucket "$TF_STATE_BUCKET" 2>/dev/null; then
+            echo "Terraform state bucket '$TF_STATE_BUCKET' does not exist or is not accessible."
+            echo "The CD pipeline will not create AWS resources implicitly."
+            exit 1
+          fi
+
+          echo "Terraform state bucket confirmed: $TF_STATE_BUCKET"
+
+      - name: Write Terraform variables
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+          EKS_CLUSTER_ROLE_NAME: ${{ vars.EKS_CLUSTER_ROLE_NAME || 'LabRole' }}
+          EKS_NODE_ROLE_NAME: ${{ vars.EKS_NODE_ROLE_NAME || 'LabRole' }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          values = {
+              "aws_region": os.environ["AWS_REGION"],
+              "db_password": os.environ["DB_PASSWORD"],
+              "eks_cluster_role_name": os.environ["EKS_CLUSTER_ROLE_NAME"],
+              "eks_node_role_name": os.environ["EKS_NODE_ROLE_NAME"],
+              "api_deploy_enabled": True,
+              "api_image_uri": os.environ["ECR_IMAGE_URI"],
+              "jwt_secret": os.environ["JWT_SECRET"],
+              "webhook_token": os.environ["WEBHOOK_TOKEN"],
+          }
+
+          target = Path(os.environ["TF_WORKING_DIRECTORY"]) / "zz_ci.auto.tfvars.json"
+          target.write_text(json.dumps(values), encoding="utf-8")
+          PY
+
+      - name: Terraform init
+        run: |
+          terraform -chdir="$TF_WORKING_DIRECTORY" init \
+            -backend-config="bucket=$TF_STATE_BUCKET" \
+            -backend-config="key=$TF_STATE_KEY" \
+            -backend-config="region=$AWS_REGION" \
+            -backend-config="encrypt=true" \
+            -backend-config="use_lockfile=true" \
+            -reconfigure \
+            -input=false
+
+      - name: Terraform validate
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" validate
+
+      - name: Terraform plan
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -input=false -out=tfplan
+
+      - name: Terraform apply
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve tfplan
+
+      - name: Read Terraform outputs
+        run: |
+          echo "EKS_CLUSTER_NAME=$(terraform -chdir="$TF_WORKING_DIRECTORY" output -raw eks_cluster_name)" >> "$GITHUB_ENV"
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image to ECR
+        run: |
+          image_tag="sha-$GITHUB_SHA"
+
+          if aws ecr describe-images --repository-name "$ECR_REPOSITORY_NAME" --image-ids imageTag="$image_tag" >/dev/null 2>&1; then
+            echo "Image $ECR_IMAGE_URI already exists. Skipping Docker push."
+            exit 0
+          fi
+
+          docker build -t "$ECR_IMAGE_URI" .
+          docker push "$ECR_IMAGE_URI"
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure EKS kubeconfig
+        run: |
+          aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
+          kubectl config current-context
+
+      - name: Install metrics server
+        run: |
+          kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+          kubectl rollout status deployment/metrics-server -n kube-system --timeout=180s
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout restart deployment/oficina-api -n oficina
+          kubectl rollout status deployment/oficina-api -n oficina --timeout=300s
+          kubectl get pods -n oficina -o wide
+          kubectl get svc oficina-api -n oficina
+          kubectl get hpa oficina-api-hpa -n oficina
+
+      - name: Print LoadBalancer endpoint
+        run: |
+          for attempt in $(seq 1 30); do
+            endpoint="$(kubectl get svc oficina-api -n oficina -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+
+            if [ -n "$endpoint" ]; then
+              echo "API_URL=http://$endpoint"
+              exit 0
+            fi
+
+            echo "Waiting for AWS LoadBalancer endpoint... attempt $attempt/30"
+            sleep 10
+          done
+
+          echo "LoadBalancer endpoint was not ready yet. Check it later with: kubectl get svc oficina-api -n oficina"

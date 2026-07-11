@@ -7,25 +7,19 @@ on:
 
 permissions:
   contents: write
-  packages: write
   pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
 
 env:
   RELEASE_BRANCH: ${{ vars.RELEASE_BRANCH || 'release' }}
 
 jobs:
-  quality-gate:
-    name: Quality gate
-    uses: ./.github/workflows/reusable-quality-gate.yml
-    with:
-      publish_image: true
-    secrets: inherit
-
   deploy-development:
     name: Deploy development
-    needs: quality-gate
-    if: vars.AWS_DEPLOY_ENABLED == 'true'
-    uses: ./.github/workflows/reusable-aws-deploy.yml
+    uses: ./.github/workflows/aws-deploy.yml
     with:
       environment_name: development
     secrets: inherit

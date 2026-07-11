@@ -6,26 +6,24 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 
 | Workflow | Arquivo | Quando roda | Objetivo |
 | --- | --- | --- | --- |
-| `CI` | `.github/workflows/ci.yml` | Branches de trabalho e PRs | Validar qualidade e abrir PR automático para `develop` quando aplicável. |
-| `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Validar, fazer deploy em `development` e abrir PR para `release`. |
-| `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Validar, registrar deploy lógico em `homologation` e abrir PR para `main`. |
-| `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Validar e registrar deploy lógico em `production`. |
-| `AWS Cleanup` | `.github/workflows/aws-cleanup.yml` | Manual | Remover recursos Kubernetes do environment escolhido. |
+| `CI` | `.github/workflows/ci.yml` | `pull_request` | Validar qualidade antes do merge. |
+| `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Executar Terraform apply, deploy em `development` e abrir PR para `release`. |
+| `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Registrar deploy lógico em `homologation` e abrir PR para `main`. |
+| `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Registrar deploy lógico em `production`. |
 
 Workflows reutilizáveis:
 
-- `.github/workflows/reusable-quality-gate.yml`
-- `.github/workflows/reusable-aws-deploy.yml`
+- `.github/workflows/aws-deploy.yml`
 
 ## Fluxo esperado
 
 ```text
 feature/*, bugfix/*, hotfix/* ...
-  -> CI
-  -> PR automático para develop
+  -> PR manual para develop
+  -> CI no pull request
   -> merge manual/revisado
   -> CD Development
-  -> deploy development na AWS
+  -> terraform apply + deploy development na AWS
   -> PR automático para release
   -> merge manual/revisado
   -> CD Release
@@ -40,18 +38,11 @@ No estágio `development`, o deploy AWS é o último passo antes da abertura do 
 
 ## CI
 
-Executa para:
+O fluxo de integração economiza GitHub Actions no plano gratuito:
 
-- `feature/**`
-- `bugfix/**`
-- `hotfix/**`
-- `fix/**`
-- `refactor/**`
-- `chore/**`
-- `docs/**`
-- `test/**`
-- `ci/**`
-- `pull_request` para `develop`, `release`, `release/**` ou `main`
+- O PR de branch de trabalho para `develop` é aberto manualmente.
+- `.github/workflows/ci.yml` roda em `pull_request` para `develop`, `release`, `release/**` ou `main`.
+- PR automático fica reservado para os CDs: `develop -> release` e `release -> main`.
 
 Valida:
 
@@ -61,10 +52,29 @@ Valida:
 4. testes com cobertura;
 5. zero testes ignorados;
 6. cobertura global mínima de `90%`;
-7. build da imagem Docker;
-8. dry-run dos manifests `k8s/` e `infra/aws/k8s/`.
+7. build local da imagem Docker, sem push para registry;
+8. dry-run client-side dos manifests `k8s/` e `infra/aws/k8s/` em cluster KinD efemero no CI.
 
-Em `push` de branch de trabalho, se tudo passar, abre PR automático para `develop`.
+Em `push` de branch de trabalho, a esteira não roda checks pesados nem abre PR automático. Os checks completos rodam uma vez no próprio PR.
+
+O workflow usa `concurrency` por branch/PR para cancelar execuções antigas quando um novo commit chega na mesma branch. Isso evita fila duplicada e reduz custo de tempo no GitHub Actions.
+
+Para acelerar execuções repetidas, a esteira usa cache de pacotes NuGet e cache de camadas Docker via GitHub Actions cache. A validação Kubernetes fica leve no PR; a validação real contra cluster acontece no deploy AWS em EKS.
+
+### Separacao por responsabilidade
+
+O workflow `CI` usa jobs separados para deixar claro o principio de separacao de responsabilidades:
+
+| Job | Responsabilidade |
+| --- | --- |
+| `build_application` | Restaurar dependencias e compilar a solution. |
+| `verify_code_style` | Validar formatacao com `dotnet format`. |
+| `test_application` | Executar testes automatizados, cobertura e artefatos. |
+| `build_container_image` | Validar o build da imagem Docker sem publicar. |
+| `validate_kubernetes_manifests` | Validar manifests locais e AWS em cluster KinD efemero. |
+| `quality_gate` | Consolidar o resultado dos jobs anteriores para branch protection. |
+
+Os nomes tecnicos dos jobs usam `snake_case` porque sao identificadores estaveis no YAML. Os nomes exibidos no GitHub Actions usam texto legivel, como `Build application`, `Test application` e `Quality gate`.
 
 ## CD Development
 
@@ -72,10 +82,12 @@ Roda após merge/push na `develop`.
 
 Fluxo:
 
-1. Quality gate.
-2. Publicação da imagem no GHCR.
-3. Deploy real em `development`, se `AWS_DEPLOY_ENABLED=true`.
-4. PR automático de `develop` para `release`, somente se o deploy passou.
+1. Prepara backend S3 do Terraform state.
+2. Executa `terraform init`, `validate`, `plan` e `apply`.
+3. Provisiona VPC, ECR, RDS, EKS e recursos Kubernetes da API via Terraform.
+4. Faz build e push da imagem Docker para ECR.
+5. Reinicia o Deployment no EKS, aguarda rollout e imprime o endpoint do Load Balancer.
+6. Abre PR automático de `develop` para `release`, somente se o deploy passou.
 
 ## CD Release
 
@@ -83,10 +95,8 @@ Roda após merge/push na `release` ou `release/**`.
 
 Fluxo:
 
-1. Quality gate.
-2. Publicação da imagem no GHCR.
-3. Deploy lógico em `homologation`.
-4. PR automático de `release` para `main`, se o deploy lógico passou.
+1. Deploy lógico em `homologation`.
+2. PR automático de `release` para `main`, se o deploy lógico passou.
 
 ## CD Production
 
@@ -94,31 +104,31 @@ Roda após merge/push na `main`.
 
 Fluxo:
 
-1. Quality gate.
-2. Publicação da imagem no GHCR.
-3. Deploy lógico em `production`.
+1. Deploy lógico em `production`.
 
 O PR para `main` deve exigir aprovação/reviewer antes do merge.
 
-## AWS Cleanup
+## Encerramento AWS
 
-Workflow manual para remover recursos Kubernetes:
+Destroy não fica acoplado na esteira de CD. A esteira faz delivery/deploy; o encerramento do ambiente é uma operação explícita de Terraform feita pelos desenvolvedores após a demonstração.
 
-1. Abrir `Actions > AWS Cleanup`.
-2. Clicar em `Run workflow`.
-3. Escolher `target_environment`.
-4. Rodar o cleanup.
-5. Executar `terraform destroy` depois, quando a infraestrutura foi criada para demonstração.
+1. Rodar `terraform init` apontando para o mesmo bucket/key de state usado pelo CD.
+2. Executar `terraform destroy` em `infra/terraform/environments/dev`.
+3. Conferir no console AWS se não restaram EKS, RDS, ECR, Load Balancer, NAT Gateway ou EC2 ativos.
 
 ## Repository variables
 
 | Nome | Tipo | Uso |
 | --- | --- | --- |
-| `AWS_DEPLOY_ENABLED` | Repository variable | Habilita deploy automático real em `development` quando `true`. |
-| `AUTO_PR_ENABLED` | Repository variable | Habilita abertura automática de PR quando `true`. |
+| `AUTO_PR_ENABLED` | Repository variable | Habilita PR automático após deploy: `develop -> release` e `release -> main`. |
 | `RELEASE_BRANCH` | Repository variable opcional | Nome da branch de release. Default: `release`. |
+| `AWS_REGION` | Repository ou environment variable opcional | Região AWS. Default: `us-east-1`. |
+| `TF_STATE_BUCKET` | Environment variable obrigatória | Bucket S3 preexistente do Terraform state. A esteira não cria bucket automaticamente. |
+| `TF_STATE_KEY` | Environment variable opcional | Caminho do state. Default: `oficina-mecanica/development/terraform.tfstate`. |
+| `EKS_CLUSTER_ROLE_NAME` | Environment variable opcional | Role IAM existente para o cluster EKS. Default: `LabRole`. |
+| `EKS_NODE_ROLE_NAME` | Environment variable opcional | Role IAM existente para o node group. Default: `LabRole`. |
 
-Para usar `AUTO_PR_ENABLED=true`, também é necessário habilitar no GitHub:
+Para usar `AUTO_PR_ENABLED=true` nos workflows de CD, também é necessário habilitar no GitHub:
 
 ```text
 Settings > Actions > General > Workflow permissions >
@@ -140,20 +150,21 @@ O environment `development` precisa conter:
 | `AWS_ACCESS_KEY_ID` | Secret | Access key do ambiente. |
 | `AWS_SECRET_ACCESS_KEY` | Secret | Secret key do ambiente. |
 | `AWS_SESSION_TOKEN` | Secret | Session token quando aplicável. |
+| `DB_PASSWORD` | Secret | Senha do usuário administrador do RDS usada pelo Terraform. |
 | `JWT_SECRET` | Secret | Chave JWT da API, com pelo menos 32 caracteres. |
 | `WEBHOOK_TOKEN` | Secret | Token do webhook de orçamento, com pelo menos 32 caracteres. |
-| `RDS_CONNECTION_STRING` | Secret | Connection string completa do banco. |
-| `ECR_REPOSITORY_URL` | Variable | Output `terraform output ecr_repository_url`. |
-| `EKS_CLUSTER_NAME` | Variable | Output `terraform output eks_cluster_name`. |
 
 ## Proteções obrigatórias recomendadas
 
-Configurar branch protection em `develop` e `main`:
+Configurar branch protection em `develop` e `main`. Quando a branch `release` existir, aplicar a mesma protecao nela.
 
 - bloquear push direto;
 - exigir PR antes de merge;
-- exigir status checks do `CI`;
-- exigir pelo menos um reviewer para `main`;
-- exigir reviewer obrigatório antes do merge para `main`.
+- exigir status check `Quality gate`;
+- exigir pelo menos um reviewer;
+- descartar aprovacoes antigas quando novos commits forem enviados;
+- bloquear force push e delecao da branch.
 
 Com isso, o fluxo fica coerente: ninguém commita direto nas branches protegidas, e o deploy entre estágios acontece por PR.
+
+> Observação: em repositório privado, branch protection pode depender do plano do GitHub. Se a proteção não estiver disponível, manter a regra operacional de não commitar direto em `develop` e `main`.

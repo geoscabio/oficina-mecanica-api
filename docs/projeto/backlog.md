@@ -33,6 +33,6 @@
 - [ ] Finalizar diagramas Kubernetes em `docs/architecture/diagrams/deployment/kubernetes`.
 - [ ] Finalizar diagramas Docker em `docs/architecture/diagrams/deployment/docker`.
 - [ ] Finalizar diagramas CI/CD em `docs/architecture/diagrams/ci-cd`.
-- [ ] Executar demonstração AWS com cleanup obrigatório.
+- [ ] Executar demonstração AWS com `terraform destroy` obrigatório.
 - [ ] Gravar vídeo de demonstração.
 - [ ] Montar PDF final.

@@ -2,7 +2,7 @@
 
 ## Regra obrigatoria
 
-O ambiente AWS Academy possui orcamento limitado. Nenhum recurso AWS deve ser criado sem aprovacao explicita antes do comando, e todo `terraform apply` deve ter um `terraform destroy` planejado para o fim da sessao.
+O ambiente AWS Academy possui orcamento limitado. Nenhum recurso AWS deve ser criado sem aprovacao explicita antes do comando ou merge que dispara CD, e todo `terraform apply` deve ter um `terraform destroy` planejado para o fim da sessao.
 
 ## Recursos com maior risco de custo
 
@@ -34,21 +34,31 @@ $env:TF_VAR_eks_node_role_name = "<LabEksNodeRole-...>"
 
 ```powershell
 terraform fmt -check -recursive infra
+terraform -chdir=infra/terraform/environments/dev init -backend=false
 terraform -chdir=infra/terraform/environments/dev validate
+```
+
+6. Para planejar/aplicar, inicializar com o mesmo backend S3 da esteira:
+
+```powershell
+terraform -chdir=infra/terraform/environments/dev init `
+  -backend-config="bucket=<tf-state-bucket>" `
+  -backend-config="key=oficina-mecanica/development/terraform.tfstate" `
+  -backend-config="region=us-east-1" `
+  -backend-config="encrypt=true" `
+  -backend-config="use_lockfile=true" `
+  -reconfigure
+
 terraform -chdir=infra/terraform/environments/dev plan
 ```
 
-6. Conferir no plano se serao criados apenas os recursos esperados.
+7. Conferir no plano se serao criados apenas os recursos esperados.
 
 ## Depois de testar
 
-Remover a aplicacao Kubernetes:
+Destruir a infraestrutura e os recursos Kubernetes gerenciados pelo Terraform:
 
-```powershell
-kubectl delete -f infra/aws/k8s/
-```
-
-Destruir a infraestrutura:
+Manter disponíveis as mesmas variáveis usadas no apply, principalmente `TF_VAR_db_password`, `TF_VAR_eks_cluster_role_name` e `TF_VAR_eks_node_role_name`.
 
 ```powershell
 terraform -chdir=infra/terraform/environments/dev destroy

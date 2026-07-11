@@ -1,6 +1,6 @@
 # Kubernetes - Ambiente AWS
 
-Esta pasta contém os manifests Kubernetes usados para implantar a API no Amazon EKS.
+Esta pasta contém os manifests Kubernetes de referência para implantar a API no Amazon EKS.
 
 Os manifests deste diretório são exclusivos para AWS e não substituem os manifests da pasta `k8s/`, usados na execução local com Docker Desktop.
 
@@ -11,36 +11,33 @@ Os manifests deste diretório são exclusivos para AWS e não substituem os mani
 3. Secret
 4. Deployment
 5. Service
+6. HorizontalPodAutoscaler
 
 ## Deploy via GitHub Actions
 
-Os workflows de CD aplicam estes manifests automaticamente quando:
+O workflow `CD Development` gerencia os mesmos recursos Kubernetes via Terraform, para que `terraform destroy` remova também Service/Load Balancer, Deployment, ConfigMap, Secret e Namespace.
 
-- a branch é `develop`, `release`/`release/**` ou `main`;
-- a validação de build, testes, cobertura, imagem Docker e manifests passa;
-- a variável `AWS_DEPLOY_ENABLED=true` está configurada no repositório;
-- o GitHub Environment correspondente possui secrets e variables configurados.
+Estes arquivos continuam versionados como referência operacional e para validação client-side no CI.
 
 Mapeamento:
 
 | Branch | Environment |
 | --- | --- |
 | `develop` | `development` |
-| `release` ou `release/**` | `homologation` |
-| `main` | `production` |
 
-O campo `image` de `api-deployment.yaml` usa um placeholder. No deploy pelo GitHub Actions ele é substituído dinamicamente pela imagem enviada ao ECR.
+O campo `image` de `api-deployment.yaml` usa um placeholder porque o deploy real recebe a imagem gerada no ECR pela esteira.
 
-## Cleanup
+O HPA da API tambem e gerenciado pelo Terraform no deploy real e depende do Metrics Server instalado no EKS para coletar metricas de CPU e memoria.
 
-Para remover os recursos Kubernetes da demonstração, rode `Actions > AWS Cleanup > Run workflow` com:
+## Destroy
 
-- `target_environment` apontando para o ambiente correto
+Ao encerrar a demonstração, executar `terraform destroy` usando o mesmo backend/state da esteira.
 
-Depois disso, execute `terraform destroy` localmente usando o mesmo estado criado pelo `terraform apply`. Não deixe EKS, RDS, ECR, Load Balancer ou NAT ativos após a demonstração.
+Não deixe EKS, RDS, ECR, Load Balancer, NAT Gateway ou EC2 ativos após a demonstração.
 
 ## Observações
 
 - O Secret não é versionado no repositório.
-- O Secret pode ser criado pelo GitHub Actions a partir dos secrets do environment.
-- O Service `LoadBalancer` cria recurso cobrado na AWS; não deixar ativo após a demonstração.
+- O Secret é criado pelo Terraform a partir dos secrets do GitHub Environment.
+- O Service `LoadBalancer` cria recurso cobrado na AWS; remover com `terraform destroy` ao finalizar.
+- O HPA escala somente a aplicacao `oficina-api`; o banco permanece no Amazon RDS.

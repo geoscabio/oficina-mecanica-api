@@ -134,7 +134,7 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 | Segurança | JWT Bearer, autorização por perfis e headers HTTP de segurança |
 | Validação e mapeamento | FluentValidation e AutoMapper |
 | Testes | xUnit, FluentAssertions, Moq, Testcontainers, Respawn e Coverlet |
-| DevOps | Docker, Docker Compose, Kubernetes, GitHub Actions e GHCR |
+| DevOps | Docker, Docker Compose, Kubernetes e GitHub Actions |
 | AWS | Terraform, ECR, EKS, RDS, VPC e Load Balancer |
 | Qualidade | `dotnet format`, cobertura mínima, SonarQube e OWASP ZAP |
 
@@ -269,18 +269,16 @@ kubectl describe hpa oficina-api-hpa -n oficina
 
 A infraestrutura AWS real é provisionada por Terraform para o ambiente `development`. Os estágios `homologation` e `production` permanecem como deploys lógicos via Git Flow, mantendo rastreabilidade por PR mesmo sem ambientes físicos separados.
 
-> Regra operacional: qualquer recurso criado em ambiente temporário precisa ter cleanup Kubernetes e `terraform destroy` planejados após a demonstração.
+> Regra operacional: qualquer recurso criado em ambiente temporário precisa ter `terraform destroy` planejado após a demonstração.
 
 ### Fluxo operacional
 
-1. Provisionar a infraestrutura com Terraform em `infra/terraform/environments/dev`.
-2. Configurar secrets e variables nos GitHub Environments.
-3. Habilitar deploy com `AWS_DEPLOY_ENABLED=true` para o ambiente `development`.
-4. Integrar feature em `develop`.
-5. A esteira faz deploy em `development` e abre PR automático para `release`.
-6. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
-7. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
-8. Ao final da demonstração, executar cleanup Kubernetes e `terraform destroy`.
+1. Configurar credenciais e secrets no GitHub Environment `development`.
+2. Integrar feature em `develop`.
+3. A esteira provisiona a infraestrutura com Terraform, publica a imagem no ECR, faz deploy no EKS e abre PR automático para `release`.
+5. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
+6. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
+7. Ao final da demonstração, executar `terraform destroy` usando o mesmo backend/state da esteira.
 
 Guias:
 
@@ -300,12 +298,10 @@ Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separad
 
 | Evento | O que acontece |
 | --- | --- |
-| `CI` | `push` em branches de trabalho e `pull_request` para `develop`, `release` ou `main`. Valida build, format, testes, cobertura, Docker e Kubernetes. |
-| `CI` | Em `push` de branch de trabalho, abre PR automático para `develop` após a validação passar. |
-| `CD Development` | Em `push` na `develop`, valida qualidade, faz deploy em `development` e abre PR para `release`. |
-| `CD Release` | Em `push` na `release` ou `release/**`, valida qualidade, registra deploy lógico em `homologation` e abre PR para `main`. |
-| `CD Production` | Em `push` na `main`, valida qualidade e registra deploy lógico em `production`. |
-| `AWS Cleanup` | Execução manual para remover recursos Kubernetes do environment escolhido. |
+| `CI` | Em `pull_request` para `develop`, `release` ou `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `CD Development` | Em `push` na `develop`, executa Terraform apply, deploy em `development` e abre PR para `release`. |
+| `CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
+| `CD Production` | Em `push` na `main`, registra deploy lógico em `production`. |
 
 ### Bloqueios de qualidade
 
@@ -323,11 +319,11 @@ A esteira falha se:
 feature/* -> PR develop -> deploy development -> PR release -> deploy homologation -> PR main -> deploy production
 ```
 
-O merge continua manual via PR e revisão. A automação só abre o próximo PR depois que a validação e a etapa operacional do estágio anterior passam.
+O PR de branch de trabalho para `develop` é manual para economizar GitHub Actions no plano gratuito. Depois do merge em `develop`, a automação abre o próximo PR somente após o deploy do estágio anterior passar.
 
-Para evitar automações acidentais, o deploy AWS real de `development` só executa com `AWS_DEPLOY_ENABLED=true`, e a abertura automática de PR só executa com `AUTO_PR_ENABLED=true`.
+O deploy AWS real de `development` executa automaticamente após merge/push na `develop`. Os PRs automáticos de `develop -> release` e `release -> main` só executam com `AUTO_PR_ENABLED=true`.
 
-Branches `develop` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks.
+Branches `develop` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks quando o plano do GitHub permitir.
 
 <a id="convencao-git-flow"></a>
 
@@ -468,7 +464,7 @@ Itens manuais restantes:
 
 - ⏳ Colar prints reais de SonarQube, OWASP ZAP, HPA e Terraform.
 - ⏳ Finalizar diagramas AWS, Kubernetes, Docker e CI/CD.
-- ⏳ Executar demonstração AWS com `destroy` ao final.
+- ⏳ Executar demonstração AWS com `terraform destroy` ao final.
 - ⏳ Gravar vídeo.
 - ⏳ Montar PDF final.
 

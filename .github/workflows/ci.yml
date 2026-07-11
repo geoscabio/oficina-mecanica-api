@@ -1,17 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - "feature/**"
-      - "bugfix/**"
-      - "hotfix/**"
-      - "fix/**"
-      - "refactor/**"
-      - "chore/**"
-      - "docs/**"
-      - "test/**"
-      - "ci/**"
   pull_request:
     branches:
       - develop
@@ -21,41 +10,234 @@ on:
 
 permissions:
   contents: read
-  packages: write
-  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  AWS_K8S_PATH: infra/aws/k8s
 
 jobs:
-  quality-gate:
-    name: Quality gate
-    uses: ./.github/workflows/reusable-quality-gate.yml
-    with:
-      publish_image: false
-    secrets: inherit
-
-  open-pr-to-develop:
-    name: Open PR to develop
+  build_application:
+    name: Build application
     runs-on: ubuntu-latest
-    needs: quality-gate
-    if: github.event_name == 'push' && vars.AUTO_PR_ENABLED == 'true'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create or keep pull request
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SOURCE_BRANCH: ${{ github.ref_name }}
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.sln', '**/*.csproj', '**/*.props', '**/*.targets') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore OficinaMecanica.sln
+
+      - name: Build solution
+        run: dotnet build OficinaMecanica.sln --configuration Release --no-restore
+
+  verify_code_style:
+    name: Verify code style
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore OficinaMecanica.sln
+
+      - name: Verify formatting
+        run: dotnet format OficinaMecanica.sln --verify-no-changes --no-restore
+
+  test_application:
+    name: Test application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.sln', '**/*.csproj', '**/*.props', '**/*.targets') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore OficinaMecanica.sln
+
+      - name: Build solution
+        run: dotnet build OficinaMecanica.sln --configuration Release --no-restore
+
+      - name: Run tests with coverage
+        run: >
+          dotnet test OficinaMecanica.sln
+          --configuration Release
+          --no-build
+          --collect:"XPlat Code Coverage"
+          --settings tests/sonarqube.runsettings
+          --results-directory ./TestResults
+          --logger "trx"
+
+      - name: Validate test execution results
+        shell: pwsh
         run: |
-          existing_pr="$(gh pr list --base develop --head "$SOURCE_BRANCH" --state open --json number --jq '.[0].number // empty')"
+          $trxFiles = Get-ChildItem -Path TestResults -Recurse -Filter *.trx
 
-          if [ -n "$existing_pr" ]; then
-            echo "Pull request #$existing_pr already exists for $SOURCE_BRANCH -> develop."
-            exit 0
-          fi
+          if (-not $trxFiles) {
+            throw "No TRX test result files were generated."
+          }
 
-          gh pr create \
-            --base develop \
-            --head "$SOURCE_BRANCH" \
-            --title "ci(flow): integrate $SOURCE_BRANCH into develop" \
-            --body "PR automático aberto após a branch \`$SOURCE_BRANCH\` passar no CI. O merge continua manual, com revisão normal antes de integrar na \`develop\`."
+          $total = 0
+          $passed = 0
+          $failed = 0
+          $skipped = 0
+
+          foreach ($trxFile in $trxFiles) {
+            [xml]$trx = Get-Content -LiteralPath $trxFile.FullName
+            $counters = $trx.TestRun.ResultSummary.Counters
+
+            $total += [int]$counters.total
+            $passed += [int]$counters.passed
+            $failed += [int]$counters.failed
+            $skipped += [int]$counters.notExecuted
+          }
+
+          Write-Host "Tests: total=$total passed=$passed failed=$failed skipped=$skipped"
+
+          if ($failed -gt 0) {
+            throw "There are failing tests."
+          }
+
+          if ($skipped -gt 0) {
+            throw "CI coverage requires zero skipped tests. Check Docker availability before collecting coverage."
+          }
+
+      - name: Generate coverage report
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:"TestResults/CoverageReport" \
+            -reporttypes:"HtmlInline_AzurePipelines;Cobertura;MarkdownSummaryGithub"
+
+      - name: Validate coverage threshold
+        shell: pwsh
+        run: |
+          [xml]$coverage = Get-Content -LiteralPath TestResults/CoverageReport/Cobertura.xml
+          $lineRate = [double]::Parse($coverage.coverage.'line-rate', [System.Globalization.CultureInfo]::InvariantCulture)
+          $lineCoverage = [math]::Round($lineRate * 100, 2)
+
+          Write-Host "Line coverage: $lineCoverage%"
+
+          if ($lineCoverage -lt 90) {
+            throw "Line coverage $lineCoverage% is below the required 90% threshold."
+          }
+
+      - name: Upload test and coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-and-coverage-results
+          path: |
+            TestResults/**/*.trx
+            TestResults/**/coverage.cobertura.xml
+            TestResults/CoverageReport/**
+          if-no-files-found: error
+
+  build_container_image:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          tags: oficina-mecanica-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  validate_kubernetes_manifests:
+    name: Validate Kubernetes manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Create ephemeral KinD cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: ci-validation
+
+      - name: Validate local Kubernetes manifests
+        run: kubectl apply --dry-run=client -R -f k8s/
+
+      - name: Validate AWS Kubernetes manifests
+        run: kubectl apply --dry-run=client -R -f ${{ env.AWS_K8S_PATH }}/
+
+  quality_gate:
+    name: Quality gate
+    runs-on: ubuntu-latest
+    needs:
+      - build_application
+      - verify_code_style
+      - test_application
+      - build_container_image
+      - validate_kubernetes_manifests
+    if: always()
+
+    steps:
+      - name: Validate CI responsibilities
+        run: |
+          results=(
+            "${{ needs.build_application.result }}"
+            "${{ needs.verify_code_style.result }}"
+            "${{ needs.test_application.result }}"
+            "${{ needs.build_container_image.result }}"
+            "${{ needs.validate_kubernetes_manifests.result }}"
+          )
+
+          for result in "${results[@]}"; do
+            if [ "$result" != "success" ]; then
+              echo "One or more CI responsibilities failed."
+              exit 1
+            fi
+          done
+
+          echo "All CI responsibilities passed."
