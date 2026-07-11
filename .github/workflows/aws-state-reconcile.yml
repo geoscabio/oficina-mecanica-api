@@ -1,0 +1,172 @@
+name: AWS State Reconcile
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+    paths:
+      - ".github/workflows/aws-state-reconcile.yml"
+
+env:
+  TF_WORKING_DIRECTORY: infra/terraform/environments/dev
+
+jobs:
+  reconcile:
+    name: Import existing AWS resources into Terraform state
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      TF_STATE_KEY: ${{ vars.TF_STATE_KEY || 'oficina-mecanica/development/terraform.tfstate' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Prepare deployment variables
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+          EKS_CLUSTER_ROLE_NAME: ${{ vars.EKS_CLUSTER_ROLE_NAME || 'LabRole' }}
+          EKS_NODE_ROLE_NAME: ${{ vars.EKS_NODE_ROLE_NAME || 'LabRole' }}
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+        run: |
+          account_id="$(aws sts get-caller-identity --query Account --output text)"
+          state_bucket="${TF_STATE_BUCKET:-oficina-mecanica-tfstate-$account_id-$AWS_REGION}"
+          echo "TF_STATE_BUCKET=$state_bucket" >> "$GITHUB_ENV"
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          values = {
+              "aws_region": os.environ["AWS_REGION"],
+              "db_password": os.environ["DB_PASSWORD"],
+              "eks_cluster_role_name": os.environ["EKS_CLUSTER_ROLE_NAME"],
+              "eks_node_role_name": os.environ["EKS_NODE_ROLE_NAME"],
+              "api_deploy_enabled": True,
+              "api_image_uri": "334556710613.dkr.ecr.us-east-1.amazonaws.com/oficina-api:placeholder",
+              "jwt_secret": os.environ["JWT_SECRET"],
+              "webhook_token": os.environ["WEBHOOK_TOKEN"],
+          }
+
+          target = Path(os.environ["TF_WORKING_DIRECTORY"]) / "zz_ci.auto.tfvars.json"
+          target.write_text(json.dumps(values), encoding="utf-8")
+          PY
+
+      - name: Terraform init
+        run: |
+          terraform -chdir="$TF_WORKING_DIRECTORY" init \
+            -backend-config="bucket=$TF_STATE_BUCKET" \
+            -backend-config="key=$TF_STATE_KEY" \
+            -backend-config="region=$AWS_REGION" \
+            -backend-config="encrypt=true" \
+            -backend-config="use_lockfile=true" \
+            -reconfigure \
+            -input=false
+
+      - name: Current state (before)
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" state list || echo "(empty state)"
+
+      - name: Discover resource IDs
+        run: |
+          vpc_id="$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=oficina-vpc-dev" --query "Vpcs[0].VpcId" --output text)"
+          echo "VPC_ID=$vpc_id" >> "$GITHUB_ENV"
+
+          pub1="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-vpc-dev-public-1" --query "Subnets[0].SubnetId" --output text)"
+          pub2="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-vpc-dev-public-2" --query "Subnets[0].SubnetId" --output text)"
+          priv1="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-vpc-dev-private-1" --query "Subnets[0].SubnetId" --output text)"
+          priv2="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-vpc-dev-private-2" --query "Subnets[0].SubnetId" --output text)"
+          echo "PUB1=$pub1" >> "$GITHUB_ENV"
+          echo "PUB2=$pub2" >> "$GITHUB_ENV"
+          echo "PRIV1=$priv1" >> "$GITHUB_ENV"
+          echo "PRIV2=$priv2" >> "$GITHUB_ENV"
+
+          igw_id="$(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$vpc_id" --query "InternetGateways[0].InternetGatewayId" --output text)"
+          echo "IGW_ID=$igw_id" >> "$GITHUB_ENV"
+
+          nat_id="$(aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=$vpc_id" "Name=state,Values=available,pending" --query "NatGateways[0].NatGatewayId" --output text)"
+          echo "NAT_ID=$nat_id" >> "$GITHUB_ENV"
+
+          eip_alloc="$(aws ec2 describe-nat-gateways --nat-gateway-ids "$nat_id" --query "NatGateways[0].NatGatewayAddresses[0].AllocationId" --output text)"
+          echo "EIP_ALLOC=$eip_alloc" >> "$GITHUB_ENV"
+
+          pub_rt="$(aws ec2 describe-route-tables --filters "Name=tag:Name,Values=oficina-vpc-dev-public-rt" --query "RouteTables[0].RouteTableId" --output text)"
+          priv_rt="$(aws ec2 describe-route-tables --filters "Name=tag:Name,Values=oficina-vpc-dev-private-rt" --query "RouteTables[0].RouteTableId" --output text)"
+          echo "PUB_RT=$pub_rt" >> "$GITHUB_ENV"
+          echo "PRIV_RT=$priv_rt" >> "$GITHUB_ENV"
+
+          rds_sg="$(aws ec2 describe-security-groups --filters "Name=group-name,Values=oficina-db-dev-sg" --query "SecurityGroups[0].GroupId" --output text)"
+          echo "RDS_SG=$rds_sg" >> "$GITHUB_ENV"
+
+          echo "--- discovered ---"
+          echo "VPC=$vpc_id PUB1=$pub1 PUB2=$pub2 PRIV1=$priv1 PRIV2=$priv2"
+          echo "IGW=$igw_id NAT=$nat_id EIP_ALLOC=$eip_alloc"
+          echo "PUB_RT=$pub_rt PRIV_RT=$priv_rt RDS_SG=$rds_sg"
+
+      - name: Import VPC networking
+        run: |
+          cd "$TF_WORKING_DIRECTORY"
+          import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
+
+          import module.vpc.aws_vpc.this "$VPC_ID"
+          import "module.vpc.aws_subnet.public[0]" "$PUB1"
+          import "module.vpc.aws_subnet.public[1]" "$PUB2"
+          import "module.vpc.aws_subnet.private[0]" "$PRIV1"
+          import "module.vpc.aws_subnet.private[1]" "$PRIV2"
+          import module.vpc.aws_internet_gateway.this "$IGW_ID"
+          import module.vpc.aws_eip.nat "$EIP_ALLOC"
+          import module.vpc.aws_nat_gateway.this "$NAT_ID"
+          import module.vpc.aws_route_table.public "$PUB_RT"
+          import module.vpc.aws_route_table.private "$PRIV_RT"
+          import "module.vpc.aws_route_table_association.public[0]" "${PUB1}/${PUB_RT}"
+          import "module.vpc.aws_route_table_association.public[1]" "${PUB2}/${PUB_RT}"
+          import "module.vpc.aws_route_table_association.private[0]" "${PRIV1}/${PRIV_RT}"
+          import "module.vpc.aws_route_table_association.private[1]" "${PRIV2}/${PRIV_RT}"
+
+      - name: Import EKS
+        run: |
+          cd "$TF_WORKING_DIRECTORY"
+          import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
+
+          import module.eks.aws_eks_cluster.this "oficina-mecanica-eks-dev"
+          import module.eks.aws_eks_node_group.this "oficina-mecanica-eks-dev:oficina-node-group-dev"
+
+      - name: Import RDS
+        run: |
+          cd "$TF_WORKING_DIRECTORY"
+          import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
+
+          import module.rds.aws_db_subnet_group.this "oficina-db-dev-subnet-group"
+          import module.rds.aws_security_group.this "$RDS_SG"
+          import module.rds.aws_db_instance.this "oficina-db-dev"
+
+      - name: Import ECR
+        run: |
+          cd "$TF_WORKING_DIRECTORY"
+          import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
+
+          import module.ecr.aws_ecr_repository.this "oficina-api"
+
+      - name: State after import
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" state list
+
+      - name: Terraform plan (review only, no apply)
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -input=false -lock=false
