@@ -133,7 +133,7 @@ infra/terraform/environments/dev/api-service.tf
 Recurso responsável:
 
 ```text
-kubernetes_service_v1.oficina_api
+kubernetes_service_v1.oficina_mecanica_api
 ```
 
 O Terraform mantém o Service no state; por consequência, o `terraform destroy` remove o Service Kubernetes e a AWS remove o Load Balancer associado.
@@ -141,8 +141,8 @@ O Terraform mantém o Service no state; por consequência, o `terraform destroy`
 ## Validação
 
 - [ ] Validar rollout da API.
-- [ ] Validar `kubectl get pods -n oficina`.
-- [ ] Validar `kubectl get svc oficina-api -n oficina`.
+- [ ] Validar `kubectl get pods -n oficina-mecanica`.
+- [ ] Validar `kubectl get svc oficina-mecanica-api -n oficina-mecanica`.
 - [ ] Validar `/api/health`.
 - [ ] Validar Swagger.
 

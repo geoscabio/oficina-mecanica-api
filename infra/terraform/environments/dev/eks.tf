@@ -13,7 +13,7 @@ module "eks" {
   # AWS Academy: restringir para o IP publico autorizado quando possivel.
   cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
 
-  node_group_name = "oficina-node-group-dev"
+  node_group_name = "oficina-mecanica-node-group-dev"
 
   instance_types = ["t3.small"]
 

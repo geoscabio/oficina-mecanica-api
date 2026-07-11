@@ -234,14 +234,14 @@ docker compose --env-file .env -f docker-compose.yml up -d --build
 
 ```powershell
 kubectl apply -R -f k8s/
-kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
-kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
+kubectl rollout status deployment/sqlserver -n oficina-mecanica --timeout=180s
+kubectl rollout status deployment/oficina-mecanica-api -n oficina-mecanica --timeout=180s
 ```
 
 ### Acessar API por port-forward
 
 ```powershell
-kubectl port-forward service/oficina-api 5093:8080 -n oficina
+kubectl port-forward service/oficina-mecanica-api 5093:8080 -n oficina-mecanica
 ```
 
 Depois acesse:
@@ -254,8 +254,8 @@ http://localhost:5093/api/health
 ### Validar recursos
 
 ```powershell
-kubectl get all,hpa,ingress -n oficina
-kubectl describe hpa oficina-api-hpa -n oficina
+kubectl get all,hpa,ingress -n oficina-mecanica
+kubectl describe hpa oficina-mecanica-api-hpa -n oficina-mecanica
 ```
 
 ---

@@ -1,11 +1,11 @@
-resource "kubernetes_deployment_v1" "oficina_api" {
+resource "kubernetes_deployment_v1" "oficina_mecanica_api" {
   count = var.api_deploy_enabled ? 1 : 0
 
   wait_for_rollout = false
 
   metadata {
-    name      = "oficina-api"
-    namespace = kubernetes_namespace_v1.oficina[0].metadata[0].name
+    name      = "oficina-mecanica-api"
+    namespace = kubernetes_namespace_v1.oficina_mecanica[0].metadata[0].name
   }
 
   spec {
@@ -22,7 +22,7 @@ resource "kubernetes_deployment_v1" "oficina_api" {
 
       spec {
         container {
-          name              = "oficina-api"
+          name              = "oficina-mecanica-api"
           image             = var.api_image_uri
           image_pull_policy = "Always"
 
@@ -44,7 +44,7 @@ resource "kubernetes_deployment_v1" "oficina_api" {
 
           env_from {
             config_map_ref {
-              name = kubernetes_config_map_v1.oficina_api[0].metadata[0].name
+              name = kubernetes_config_map_v1.oficina_mecanica_api[0].metadata[0].name
             }
           }
 
@@ -53,7 +53,7 @@ resource "kubernetes_deployment_v1" "oficina_api" {
 
             value_from {
               secret_key_ref {
-                name = kubernetes_secret_v1.oficina_api[0].metadata[0].name
+                name = kubernetes_secret_v1.oficina_mecanica_api[0].metadata[0].name
                 key  = "Jwt__Secret"
               }
             }
@@ -64,7 +64,7 @@ resource "kubernetes_deployment_v1" "oficina_api" {
 
             value_from {
               secret_key_ref {
-                name = kubernetes_secret_v1.oficina_api[0].metadata[0].name
+                name = kubernetes_secret_v1.oficina_mecanica_api[0].metadata[0].name
                 key  = "Integracoes__Orcamento__WebhookToken"
               }
             }
@@ -75,7 +75,7 @@ resource "kubernetes_deployment_v1" "oficina_api" {
 
             value_from {
               secret_key_ref {
-                name = kubernetes_secret_v1.oficina_api[0].metadata[0].name
+                name = kubernetes_secret_v1.oficina_mecanica_api[0].metadata[0].name
                 key  = "ConnectionStrings__DefaultConnection"
               }
             }
@@ -122,7 +122,7 @@ resource "kubernetes_deployment_v1" "oficina_api" {
   depends_on = [
     module.rds,
     module.ecr,
-    kubernetes_config_map_v1.oficina_api,
-    kubernetes_secret_v1.oficina_api
+    kubernetes_config_map_v1.oficina_mecanica_api,
+    kubernetes_secret_v1.oficina_mecanica_api
   ]
 }

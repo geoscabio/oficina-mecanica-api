@@ -1,7 +1,7 @@
 module "vpc" {
   source = "../../modules/vpc"
 
-  name       = "oficina-vpc-dev"
+  name       = "oficina-mecanica-vpc-dev"
   cidr_block = "10.0.0.0/16"
 
   availability_zones = [

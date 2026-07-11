@@ -1,9 +1,9 @@
-resource "kubernetes_secret_v1" "oficina_api" {
+resource "kubernetes_secret_v1" "oficina_mecanica_api" {
   count = var.api_deploy_enabled ? 1 : 0
 
   metadata {
-    name      = "oficina-api-secret"
-    namespace = kubernetes_namespace_v1.oficina[0].metadata[0].name
+    name      = "oficina-mecanica-api-secret"
+    namespace = kubernetes_namespace_v1.oficina_mecanica[0].metadata[0].name
   }
 
   type = "Opaque"

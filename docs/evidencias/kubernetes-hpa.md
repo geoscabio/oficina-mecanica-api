@@ -14,38 +14,38 @@ Aplicar ambiente:
 
 ```powershell
 kubectl apply -R -f k8s/
-kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
-kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
+kubectl rollout status deployment/sqlserver -n oficina-mecanica --timeout=180s
+kubectl rollout status deployment/oficina-mecanica-api -n oficina-mecanica --timeout=180s
 ```
 
 Monitorar HPA:
 
 ```powershell
-kubectl get hpa -n oficina -w
+kubectl get hpa -n oficina-mecanica -w
 ```
 
 Gerar carga simples dentro do cluster:
 
 ```powershell
 kubectl run load-generator `
-  -n oficina `
+  -n oficina-mecanica `
   --image=busybox:1.36 `
   --restart=Never `
-  -- /bin/sh -c "while true; do wget -q -O- http://oficina-api:8080/api/health; done"
+  -- /bin/sh -c "while true; do wget -q -O- http://oficina-mecanica-api:8080/api/health; done"
 ```
 
 Consultar pods e metricas:
 
 ```powershell
-kubectl get pods -n oficina
-kubectl top pods -n oficina
-kubectl get hpa oficina-api-hpa -n oficina
+kubectl get pods -n oficina-mecanica
+kubectl top pods -n oficina-mecanica
+kubectl get hpa oficina-mecanica-api-hpa -n oficina-mecanica
 ```
 
 Limpeza do gerador de carga:
 
 ```powershell
-kubectl delete pod load-generator -n oficina --ignore-not-found
+kubectl delete pod load-generator -n oficina-mecanica --ignore-not-found
 ```
 
 ## Resultado real
@@ -54,8 +54,8 @@ kubectl delete pod load-generator -n oficina --ignore-not-found
 
 | Campo | Valor |
 | --- | --- |
-| HPA | `oficina-api-hpa` |
-| Namespace | `oficina` |
+| HPA | `oficina-mecanica-api-hpa` |
+| Namespace | `oficina-mecanica` |
 | Replicas minimas | 1 |
 | Replicas maximas | 5 |
 | CPU target | 70% |
@@ -67,5 +67,5 @@ kubectl delete pod load-generator -n oficina --ignore-not-found
 Adicionar o print abaixo:
 
 ```text
-[INSERIR PRINT DO kubectl get hpa -n oficina AQUI]
+[INSERIR PRINT DO kubectl get hpa -n oficina-mecanica AQUI]
 ```
