@@ -13,7 +13,6 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 
 Workflows reutilizáveis:
 
-- `.github/workflows/reusable-quality-gate.yml`
 - `.github/workflows/aws-deploy.yml`
 
 ## Fluxo esperado
@@ -54,13 +53,28 @@ Valida:
 5. zero testes ignorados;
 6. cobertura global mínima de `90%`;
 7. build local da imagem Docker, sem push para registry;
-8. dry-run client-side dos manifests `k8s/` e `infra/aws/k8s/`, sem subir cluster KinD no CI.
+8. dry-run client-side dos manifests `k8s/` e `infra/aws/k8s/` em cluster KinD efemero no CI.
 
 Em `push` de branch de trabalho, a esteira não roda checks pesados nem abre PR automático. Os checks completos rodam uma vez no próprio PR.
 
 O workflow usa `concurrency` por branch/PR para cancelar execuções antigas quando um novo commit chega na mesma branch. Isso evita fila duplicada e reduz custo de tempo no GitHub Actions.
 
 Para acelerar execuções repetidas, a esteira usa cache de pacotes NuGet e cache de camadas Docker via GitHub Actions cache. A validação Kubernetes fica leve no PR; a validação real contra cluster acontece no deploy AWS em EKS.
+
+### Separacao por responsabilidade
+
+O workflow `CI` usa jobs separados para deixar claro o principio de separacao de responsabilidades:
+
+| Job | Responsabilidade |
+| --- | --- |
+| `build_application` | Restaurar dependencias e compilar a solution. |
+| `verify_code_style` | Validar formatacao com `dotnet format`. |
+| `test_application` | Executar testes automatizados, cobertura e artefatos. |
+| `build_container_image` | Validar o build da imagem Docker sem publicar. |
+| `validate_kubernetes_manifests` | Validar manifests locais e AWS em cluster KinD efemero. |
+| `quality_gate` | Consolidar o resultado dos jobs anteriores para branch protection. |
+
+Os nomes tecnicos dos jobs usam `snake_case` porque sao identificadores estaveis no YAML. Os nomes exibidos no GitHub Actions usam texto legivel, como `Build application`, `Test application` e `Quality gate`.
 
 ## CD Development
 
@@ -142,13 +156,14 @@ O environment `development` precisa conter:
 
 ## Proteções obrigatórias recomendadas
 
-Configurar branch protection em `develop` e `main`:
+Configurar branch protection em `develop` e `main`. Quando a branch `release` existir, aplicar a mesma protecao nela.
 
 - bloquear push direto;
 - exigir PR antes de merge;
-- exigir status checks do `CI`;
-- exigir pelo menos um reviewer para `main`;
-- exigir reviewer obrigatório antes do merge para `main`.
+- exigir status check `Quality gate`;
+- exigir pelo menos um reviewer;
+- descartar aprovacoes antigas quando novos commits forem enviados;
+- bloquear force push e delecao da branch.
 
 Com isso, o fluxo fica coerente: ninguém commita direto nas branches protegidas, e o deploy entre estágios acontece por PR.
 

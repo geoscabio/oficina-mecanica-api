@@ -157,12 +157,18 @@ jobs:
           aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
           kubectl config current-context
 
+      - name: Install metrics server
+        run: |
+          kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+          kubectl rollout status deployment/metrics-server -n kube-system --timeout=180s
+
       - name: Wait for rollout
         run: |
           kubectl rollout restart deployment/oficina-api -n oficina
           kubectl rollout status deployment/oficina-api -n oficina --timeout=300s
           kubectl get pods -n oficina -o wide
           kubectl get svc oficina-api -n oficina
+          kubectl get hpa oficina-api-hpa -n oficina
 
       - name: Print LoadBalancer endpoint
         run: |
