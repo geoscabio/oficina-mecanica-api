@@ -1,9 +1,9 @@
-resource "kubernetes_horizontal_pod_autoscaler_v2" "oficina_api" {
+resource "kubernetes_horizontal_pod_autoscaler_v2" "oficina_mecanica_api" {
   count = var.api_deploy_enabled ? 1 : 0
 
   metadata {
-    name      = "oficina-api-hpa"
-    namespace = kubernetes_namespace_v1.oficina[0].metadata[0].name
+    name      = "oficina-mecanica-api-hpa"
+    namespace = kubernetes_namespace_v1.oficina_mecanica[0].metadata[0].name
   }
 
   spec {
@@ -13,7 +13,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "oficina_api" {
     scale_target_ref {
       api_version = "apps/v1"
       kind        = "Deployment"
-      name        = kubernetes_deployment_v1.oficina_api[0].metadata[0].name
+      name        = kubernetes_deployment_v1.oficina_mecanica_api[0].metadata[0].name
     }
 
     metric {
@@ -44,6 +44,6 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "oficina_api" {
   }
 
   depends_on = [
-    kubernetes_deployment_v1.oficina_api
+    kubernetes_deployment_v1.oficina_mecanica_api
   ]
 }

@@ -14,7 +14,7 @@ on:
 
 env:
   TF_WORKING_DIRECTORY: infra/terraform/environments/dev
-  ECR_REPOSITORY_NAME: oficina-api
+  ECR_REPOSITORY_NAME: oficina-mecanica-api
 
 jobs:
   deploy:
@@ -261,18 +261,18 @@ jobs:
         if: env.TERRAFORM_ACTION == 'apply'
         run: |
           set +e
-          kubectl rollout status deployment/oficina-api -n oficina --timeout=600s
+          kubectl rollout status deployment/oficina-mecanica-api -n oficina-mecanica --timeout=600s
           rollout_status=$?
 
-          kubectl get pods -n oficina -o wide
-          kubectl get svc oficina-api -n oficina
-          kubectl get hpa oficina-api-hpa -n oficina
+          kubectl get pods -n oficina-mecanica -o wide
+          kubectl get svc oficina-mecanica-api -n oficina-mecanica
+          kubectl get hpa oficina-mecanica-api-hpa -n oficina-mecanica
 
           if [ "$rollout_status" -ne 0 ]; then
             echo "::group::Deployment diagnostics"
-            kubectl describe deployment oficina-api -n oficina || true
-            kubectl describe pods -n oficina -l app=oficina-api || true
-            kubectl logs deployment/oficina-api -n oficina --all-containers --tail=200 || true
+            kubectl describe deployment oficina-mecanica-api -n oficina-mecanica || true
+            kubectl describe pods -n oficina-mecanica -l app=oficina-mecanica-api || true
+            kubectl logs deployment/oficina-mecanica-api -n oficina-mecanica --all-containers --tail=200 || true
             echo "::endgroup::"
             exit "$rollout_status"
           fi
@@ -281,7 +281,7 @@ jobs:
         if: env.TERRAFORM_ACTION == 'apply'
         run: |
           for attempt in $(seq 1 30); do
-            endpoint="$(kubectl get svc oficina-api -n oficina -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+            endpoint="$(kubectl get svc oficina-mecanica-api -n oficina-mecanica -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
 
             if [ -n "$endpoint" ]; then
               echo "API_URL=http://$endpoint"
@@ -292,4 +292,4 @@ jobs:
             sleep 10
           done
 
-          echo "LoadBalancer endpoint was not ready yet. Check it later with: kubectl get svc oficina-api -n oficina"
+          echo "LoadBalancer endpoint was not ready yet. Check it later with: kubectl get svc oficina-mecanica-api -n oficina-mecanica"

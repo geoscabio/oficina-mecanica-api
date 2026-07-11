@@ -1,7 +1,7 @@
 module "ecr" {
   source = "../../modules/ecr"
 
-  name = "oficina-api"
+  name = "oficina-mecanica-api"
 
   tags = local.common_tags
 }

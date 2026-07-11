@@ -10,7 +10,7 @@ O ambiente AWS Academy possui orcamento limitado. Nenhum recurso AWS deve ser cr
 - EC2/Managed Node Group
 - NAT Gateway
 - RDS SQL Server
-- Load Balancer criado indiretamente por `kubernetes_service_v1.oficina_api` com `type = "LoadBalancer"` em `infra/terraform/environments/dev/api-service.tf`
+- Load Balancer criado indiretamente por `kubernetes_service_v1.oficina_mecanica_api` com `type = "LoadBalancer"` em `infra/terraform/environments/dev/api-service.tf`
 - ECR com imagens armazenadas
 
 ## Antes de aplicar

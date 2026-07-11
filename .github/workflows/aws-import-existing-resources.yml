@@ -76,7 +76,7 @@ jobs:
               "eks_cluster_role_name": os.environ["EKS_CLUSTER_ROLE_NAME"],
               "eks_node_role_name": os.environ["EKS_NODE_ROLE_NAME"],
               "api_deploy_enabled": True,
-              "api_image_uri": "334556710613.dkr.ecr.us-east-1.amazonaws.com/oficina-api:placeholder",
+              "api_image_uri": "334556710613.dkr.ecr.us-east-1.amazonaws.com/oficina-mecanica-api:placeholder",
               "jwt_secret": os.environ["JWT_SECRET"],
               "webhook_token": os.environ["WEBHOOK_TOKEN"],
           }
@@ -137,13 +137,13 @@ jobs:
 
       - name: Discover resource IDs
         run: |
-          vpc_id="$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=oficina-vpc-dev" --query "Vpcs[0].VpcId" --output text)"
+          vpc_id="$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=oficina-mecanica-vpc-dev" --query "Vpcs[0].VpcId" --output text)"
           echo "VPC_ID=$vpc_id" >> "$GITHUB_ENV"
 
-          pub1="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-vpc-dev-public-1" --query "Subnets[0].SubnetId" --output text)"
-          pub2="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-vpc-dev-public-2" --query "Subnets[0].SubnetId" --output text)"
-          priv1="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-vpc-dev-private-1" --query "Subnets[0].SubnetId" --output text)"
-          priv2="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-vpc-dev-private-2" --query "Subnets[0].SubnetId" --output text)"
+          pub1="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-mecanica-vpc-dev-public-1" --query "Subnets[0].SubnetId" --output text)"
+          pub2="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-mecanica-vpc-dev-public-2" --query "Subnets[0].SubnetId" --output text)"
+          priv1="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-mecanica-vpc-dev-private-1" --query "Subnets[0].SubnetId" --output text)"
+          priv2="$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=oficina-mecanica-vpc-dev-private-2" --query "Subnets[0].SubnetId" --output text)"
           echo "PUB1=$pub1" >> "$GITHUB_ENV"
           echo "PUB2=$pub2" >> "$GITHUB_ENV"
           echo "PRIV1=$priv1" >> "$GITHUB_ENV"
@@ -158,12 +158,12 @@ jobs:
           eip_alloc="$(aws ec2 describe-nat-gateways --nat-gateway-ids "$nat_id" --query "NatGateways[0].NatGatewayAddresses[0].AllocationId" --output text)"
           echo "EIP_ALLOC=$eip_alloc" >> "$GITHUB_ENV"
 
-          pub_rt="$(aws ec2 describe-route-tables --filters "Name=tag:Name,Values=oficina-vpc-dev-public-rt" --query "RouteTables[0].RouteTableId" --output text)"
-          priv_rt="$(aws ec2 describe-route-tables --filters "Name=tag:Name,Values=oficina-vpc-dev-private-rt" --query "RouteTables[0].RouteTableId" --output text)"
+          pub_rt="$(aws ec2 describe-route-tables --filters "Name=tag:Name,Values=oficina-mecanica-vpc-dev-public-rt" --query "RouteTables[0].RouteTableId" --output text)"
+          priv_rt="$(aws ec2 describe-route-tables --filters "Name=tag:Name,Values=oficina-mecanica-vpc-dev-private-rt" --query "RouteTables[0].RouteTableId" --output text)"
           echo "PUB_RT=$pub_rt" >> "$GITHUB_ENV"
           echo "PRIV_RT=$priv_rt" >> "$GITHUB_ENV"
 
-          rds_sg="$(aws ec2 describe-security-groups --filters "Name=group-name,Values=oficina-db-dev-sg" --query "SecurityGroups[0].GroupId" --output text)"
+          rds_sg="$(aws ec2 describe-security-groups --filters "Name=group-name,Values=oficina-mecanica-db-dev-sg" --query "SecurityGroups[0].GroupId" --output text)"
           echo "RDS_SG=$rds_sg" >> "$GITHUB_ENV"
 
           echo "--- discovered ---"
@@ -197,23 +197,23 @@ jobs:
           import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
 
           import module.eks.aws_eks_cluster.this "oficina-mecanica-eks-dev"
-          import module.eks.aws_eks_node_group.this "oficina-mecanica-eks-dev:oficina-node-group-dev"
+          import module.eks.aws_eks_node_group.this "oficina-mecanica-eks-dev:oficina-mecanica-node-group-dev"
 
       - name: Import RDS
         run: |
           cd "$TF_WORKING_DIRECTORY"
           import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
 
-          import module.rds.aws_db_subnet_group.this "oficina-db-dev-subnet-group"
+          import module.rds.aws_db_subnet_group.this "oficina-mecanica-db-dev-subnet-group"
           import module.rds.aws_security_group.this "$RDS_SG"
-          import module.rds.aws_db_instance.this "oficina-db-dev"
+          import module.rds.aws_db_instance.this "oficina-mecanica-db-dev"
 
       - name: Import ECR
         run: |
           cd "$TF_WORKING_DIRECTORY"
           import() { terraform import -input=false "$1" "$2" || echo "SKIP (already in state or failed): $1"; }
 
-          import module.ecr.aws_ecr_repository.this "oficina-api"
+          import module.ecr.aws_ecr_repository.this "oficina-mecanica-api"
 
       - name: State after import
         run: terraform -chdir="$TF_WORKING_DIRECTORY" state list

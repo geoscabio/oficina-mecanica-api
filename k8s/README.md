@@ -8,14 +8,14 @@ Execute a partir da raiz do repositório:
 
 ```powershell
 kubectl apply -R -f k8s/
-kubectl rollout status deployment/sqlserver -n oficina --timeout=180s
-kubectl rollout status deployment/oficina-api -n oficina --timeout=180s
+kubectl rollout status deployment/sqlserver -n oficina-mecanica --timeout=180s
+kubectl rollout status deployment/oficina-mecanica-api -n oficina-mecanica --timeout=180s
 ```
 
 ## Acessar API
 
 ```powershell
-kubectl port-forward service/oficina-api 5093:8080 -n oficina
+kubectl port-forward service/oficina-mecanica-api 5093:8080 -n oficina-mecanica
 ```
 
 Depois acesse:

@@ -1,9 +1,9 @@
 module "rds" {
   source = "../../modules/rds"
 
-  identifier = "oficina-db-dev"
+  identifier = "oficina-mecanica-db-dev"
 
-  username = "adminoficina"
+  username = "adminoficinamecanica"
   password = var.db_password
 
   instance_class    = "db.t3.micro"

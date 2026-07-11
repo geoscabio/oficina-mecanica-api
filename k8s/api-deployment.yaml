@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: oficina-api
-  namespace: oficina
+  name: oficina-mecanica-api
+  namespace: oficina-mecanica
 
 spec:
   replicas: 1
 
   selector:
     matchLabels:
-      app: oficina-api
+      app: oficina-mecanica-api
 
   template:
     metadata:
       labels:
-        app: oficina-api
+        app: oficina-mecanica-api
 
     spec:
       containers:
-        - name: oficina-api
+        - name: oficina-mecanica-api
           image: oficina_mecanica_api-api:latest
           imagePullPolicy: IfNotPresent
 
@@ -32,7 +32,7 @@ spec:
 
           envFrom:
             - configMapRef:
-                name: oficina-api-config
+                name: oficina-mecanica-api-config
 
           ports:
             - containerPort: 8080
@@ -66,17 +66,17 @@ spec:
             - name: Jwt__Secret
               valueFrom:
                 secretKeyRef:
-                  name: oficina-api-secret
+                  name: oficina-mecanica-api-secret
                   key: Jwt__Secret
 
             - name: Integracoes__Orcamento__WebhookToken
               valueFrom:
                 secretKeyRef:
-                  name: oficina-api-secret
+                  name: oficina-mecanica-api-secret
                   key: Integracoes__Orcamento__WebhookToken
 
             - name: ConnectionStrings__DefaultConnection
               valueFrom:
                 secretKeyRef:
-                  name: oficina-api-secret
+                  name: oficina-mecanica-api-secret
                   key: ConnectionStrings__DefaultConnection
