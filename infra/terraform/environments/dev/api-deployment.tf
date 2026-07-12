@@ -33,7 +33,7 @@ resource "kubernetes_deployment_v1" "oficina_mecanica_api" {
           resources {
             requests = {
               cpu    = "100m"
-              memory = "128Mi"
+              memory = "256Mi"
             }
 
             limits = {
