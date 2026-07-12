@@ -18,7 +18,7 @@ env:
 
 jobs:
   detect-deploy-scope:
-    name: "🔎 01 · Detectar necessidade de deploy"
+    name: "🔎 01 · Detectar se há mudança que exige deploy"
     runs-on: ubuntu-latest
     outputs:
       deploy_required: ${{ steps.detect.outputs.deploy_required }}

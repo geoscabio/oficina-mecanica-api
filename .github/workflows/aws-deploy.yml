@@ -74,6 +74,12 @@ jobs:
             echo "::warning::TERRAFORM_ACTION=destroy detected. This run will destroy AWS resources managed by Terraform."
           fi
 
+          if [ "$terraform_action" = "apply" ]; then
+            echo "::notice::>>> ACAO DECIDIDA: APPLY (criar/atualizar recursos AWS) <<<"
+          else
+            echo "::notice::>>> ACAO DECIDIDA: DESTROY (destruir recursos AWS) <<<"
+          fi
+
           echo "terraform_action=$terraform_action" >> "$GITHUB_OUTPUT"
 
   prepare_and_plan:
@@ -130,7 +136,7 @@ jobs:
             exit 1
           fi
 
-      - name: "🧮 05 · Calcular conta AWS e URI da imagem ECR"
+      - name: "🏷️ 05 · Montar a tag da imagem Docker no ECR"
         id: prepare_vars
         run: |
           account_id="$(aws sts get-caller-identity --query Account --output text)"
