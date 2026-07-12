@@ -72,22 +72,22 @@ Evitar que a exposição de Swagger e credenciais demo pareça vazamento acident
 
 ## Ajuste de `requests.memory` da API (128Mi -> 256Mi)
 
-Observado em ambiente real (AWS): o HPA escalava de 1 para múltiplas réplicas pouco depois do deploy, mesmo sem carga de usuário. Um pod recém-criado, sem nenhuma requisição recebida, já consumia ~77Mi e subia rapido para ~100-128Mi em poucos minutos - o "custo de largada" normal de uma aplicação .NET/ASP.NET Core (JIT, Entity Framework, geração do Swagger, pipeline de middlewares) somado ao valor de `requests.memory=128Mi`, que era pequeno demais para esse baseline.
+Observado em ambiente real (AWS): o HPA escalava de 1 para múltiplas réplicas pouco depois do deploy, mesmo sem carga de usuário. Um pod recém-criado, sem nenhuma requisição recebida, já consumia ~77Mi e subia rápido para ~100-128Mi em poucos minutos - o "custo de largada" normal de uma aplicação .NET/ASP.NET Core (JIT, Entity Framework, geração do Swagger, pipeline de middlewares) somado ao valor de `requests.memory=128Mi`, que era pequeno demais para esse baseline.
 
-Como o HPA calcula a porcentagem de uso em cima do `requests` (nao do `limits`), o baseline sozinho ja chegava perto/no target de 80%, fazendo o autoscaler reagir a "ruido" de inicializacao em vez de carga real. Ajustado `requests.memory` para `256Mi` em `infra/terraform/environments/dev/api-deployment.tf` e `k8s/api-deployment.yaml` (mantendo `limits.memory=512Mi`), baseado nos valores reais medidos, dando margem confortavel (baseline ~128Mi vira ~50% de 256Mi) para o HPA so escalar quando houver carga de verdade.
+Como o HPA calcula a porcentagem de uso em cima do `requests` (não do `limits`), o baseline sozinho já chegava perto/no target de 80%, fazendo o autoscaler reagir a "ruído" de inicialização em vez de carga real. Ajustado `requests.memory` para `256Mi` em `infra/terraform/environments/dev/api-deployment.tf` e `k8s/api-deployment.yaml` (mantendo `limits.memory=512Mi`), baseado nos valores reais medidos, dando margem confortável (baseline ~128Mi vira ~50% de 256Mi) para o HPA só escalar quando houver carga de verdade.
 
 Motivo:
 
-Fazer o HPA refletir carga real, nao o custo de inicializacao do runtime .NET. `requests.cpu` nao foi alterado porque o uso de CPU observado (1-6m de 100m) estava bem abaixo do target de 70%, sem indicio de problema.
+Fazer o HPA refletir carga real, não o custo de inicialização do runtime .NET. `requests.cpu` não foi alterado porque o uso de CPU observado (1-6m de 100m) estava bem abaixo do target de 70%, sem indício de problema.
 
 ---
 
 ## Workstation GC em vez de Server GC na API
 
-Alem do ajuste de `requests.memory` acima, identificado que a API nao configurava explicitamente o modo do Garbage Collector do .NET, usando o padrao (Server GC). O Server GC cria um heap de memoria separado por nucleo de CPU visivel ao processo, otimizado para aplicacoes de alto throughput com varios nucleos - mas o container roda com `limits.cpu=500m` (meio nucleo), um cenario onde o Server GC reserva memoria para paralelismo que o container nem tem disponivel.
+Além do ajuste de `requests.memory` acima, identificado que a API não configurava explicitamente o modo do Garbage Collector do .NET, usando o padrão (Server GC). O Server GC cria um heap de memória separado por núcleo de CPU visível ao processo, otimizado para aplicações de alto throughput com vários núcleos - mas o container roda com `limits.cpu=500m` (meio núcleo), um cenário onde o Server GC reserva memória para paralelismo que o container nem tem disponível.
 
-Adicionado `<ServerGarbageCollection>false</ServerGarbageCollection>` em `src/OficinaMecanica.API/OficinaMecanica.API.csproj`, ativando o Workstation GC. Confirmado localmente que a opcao e aplicada de verdade no artefato publicado (`"System.GC.Server": false` no `.runtimeconfig.json` gerado pelo build).
+Adicionado `<ServerGarbageCollection>false</ServerGarbageCollection>` em `src/OficinaMecanica.API/OficinaMecanica.API.csproj`, ativando o Workstation GC. Confirmado localmente que a opção é aplicada de verdade no artefato publicado (`"System.GC.Server": false` no `.runtimeconfig.json` gerado pelo build).
 
 Motivo:
 
-Reduzir o consumo real de memoria da aplicacao (nao so aumentar a margem do `requests.memory`), alinhando o modo de GC ao perfil real do container: baixo paralelismo de CPU, baixo trafego, tipico de um ambiente de demonstracao academica.
+Reduzir o consumo real de memória da aplicação (não só aumentar a margem do `requests.memory`), alinhando o modo de GC ao perfil real do container: baixo paralelismo de CPU, baixo tráfego, típico de um ambiente de demonstração acadêmica.
