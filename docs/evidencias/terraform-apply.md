@@ -73,6 +73,8 @@ Execucao real via esteira `CD Development` (nao manual), em `infra/terraform/env
 
 ### Apply (recriacao do ambiente)
 
+PR de evidencia: [#162](https://github.com/geoscabio/oficina_mecanica_api/pull/162).
+
 | Etapa | Resultado |
 | --- | --- |
 | `terraform init` | Sucesso |
@@ -80,7 +82,8 @@ Execucao real via esteira `CD Development` (nao manual), em `infra/terraform/env
 | `terraform plan` | `Plan: 26 to add, 0 to change, 0 to destroy` |
 | `terraform apply` | Sucesso — `Apply complete! Resources: 25 added, 0 changed, 0 destroyed.` (ECR criado antes, via apply direcionado em `module.ecr`, nao contabilizado de novo no apply principal) |
 | `terraform output` | `eks_cluster_name = "oficina-mecanica-eks-dev"`, `rds_endpoint`, `ecr_repository_url`, `api_service_hostname` (Load Balancer) todos presentes |
-| Rollout no EKS | Pod da API subiu, HPA e Service criados, endpoint do Load Balancer respondendo |
+| Rollout no EKS | Pod da API subiu (`1/1 Running`), HPA e Service criados, endpoint do Load Balancer respondendo |
+| Conferencia funcional pos-deploy | `/api/health` respondeu `Healthy`; Swagger carregou; login retornou JWT valido; listagem de clientes retornou dados reais |
 
 ### Destroy (encerramento oficial da sessao)
 
@@ -93,6 +96,52 @@ PR de evidencia: [#159](https://github.com/geoscabio/oficina_mecanica_api/pull/1
 | Conferencia pos-destroy (AWS Console) | EKS, RDS, VPC e ECR confirmados vazios de forma independente (prints abaixo) |
 
 ## Evidencia visual
+
+### Apply — log real do `terraform apply`, com outputs
+
+![Log do apply: Apply complete, 25 added, outputs de eks/rds/ecr/lb](terraform-apply/apply-log-apply-complete.png)
+
+### Apply — PR oficial mergeada
+
+![PR #162 mergeada](terraform-apply/apply-pr-162-merged.png)
+
+### Apply — resumo da esteira CD Development
+
+![Resumo do CD Development](terraform-apply/apply-cd-development-summary.png)
+
+### Apply — resumo do CI
+
+![Resumo do CI](terraform-apply/apply-ci-summary.png)
+
+![Detalhe do build da imagem Docker](terraform-apply/apply-ci-docker-build-detail.png)
+
+### Apply — rollout confirmado via kubectl (log real da esteira)
+
+![kubectl get pods/svc/hpa mostrando o pod Running](terraform-apply/apply-rollout-kubectl-log.png)
+
+### Apply — recursos criados no AWS Console
+
+![VPC criada com 4 subnets](terraform-apply/apply-aws-vpc.png)
+
+![Cluster EKS ativo com node group](terraform-apply/apply-aws-eks.png)
+
+![RDS disponivel](terraform-apply/apply-aws-rds-1.png)
+
+![RDS - grupos de seguranca e replicacao](terraform-apply/apply-aws-rds-2.png)
+
+![Repositorio ECR com a imagem publicada](terraform-apply/apply-aws-ecr.png)
+
+![NAT Gateway disponivel](terraform-apply/apply-aws-nat-gateway.png)
+
+### Apply — validacao funcional da API publicada
+
+![Healthcheck respondendo Healthy](terraform-apply/apply-api-healthcheck.png)
+
+![Swagger UI carregado com todos os endpoints](terraform-apply/apply-swagger-ui.png)
+
+![Login retornando JWT valido](terraform-apply/apply-swagger-login-success.png)
+
+![Listagem de clientes retornando dados reais](terraform-apply/apply-swagger-list-clients-success.png)
 
 ### Destroy — log real do `terraform apply` (plano de destroy)
 
