@@ -1,10 +1,10 @@
-# EKS Module
+# ☸️ EKS Module
 
-## Objetivo
+## 🎯 Objetivo
 
 Este módulo provisiona o cluster Amazon EKS e o Managed Node Group usados para executar a API no ambiente AWS Academy.
 
-## Recursos criados
+## 📦 Recursos criados
 
 - Amazon EKS Cluster
 - Amazon EKS Managed Node Group
@@ -17,14 +17,14 @@ $env:TF_VAR_eks_cluster_role_name = "<LabEksClusterRole-...>"
 $env:TF_VAR_eks_node_role_name = "<LabEksNodeRole-...>"
 ```
 
-## Decisões para AWS Academy
+## 🎓 Decisões para AWS Academy
 
 - Os nós usam subnets privadas.
 - O endpoint privado do cluster fica habilitado.
 - O endpoint público fica habilitado para facilitar a operação no laboratório.
 - O ambiente `dev` limita o Node Group a `desired_size = 1`, `min_size = 1` e `max_size = 1` para evitar crescimento de custo.
 
-## Endurecimento recomendado
+## 🔒 Endurecimento recomendado
 
 Antes de aplicar em AWS, restrinja `cluster_endpoint_public_access_cidrs` para o IP público autorizado quando possível:
 

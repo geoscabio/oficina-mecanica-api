@@ -1,12 +1,12 @@
-# Deploy na AWS
+# ☁️ Deploy na AWS
 
 Este guia descreve como preparar a infraestrutura AWS real do environment `development` e como a esteira Git Flow executa deploy lógico para `homologation` e `production`.
 
-## Regra de ouro
+## 🏆 Regra de ouro
 
 Ambientes temporários devem ser destruídos após a demonstração. Antes de qualquer criação de recurso, tenha um plano claro de `terraform destroy`.
 
-## Provisionamento da infraestrutura
+## 🏗️ Provisionamento da infraestrutura
 
 O provisionamento do ambiente `development` acontece no workflow `CD Development`, após merge/push na branch `develop`.
 
@@ -32,7 +32,7 @@ terraform -chdir=infra/terraform/environments/dev plan
 terraform -chdir=infra/terraform/environments/dev apply
 ```
 
-## GitHub Environments
+## 🔑 GitHub Environments
 
 Criar para o deploy real:
 
@@ -71,7 +71,7 @@ WEBHOOK_TOKEN=<string aleatória com pelo menos 32 caracteres>
 
 Os valores reais devem ser cadastrados somente no GitHub ou no ambiente local seguro. Não adicionar esses valores em `.env`, YAML, Terraform ou Markdown.
 
-## Terraform state entre execuções
+## 💾 Terraform state entre execuções
 
 O Terraform usa backend `local` (arquivo `terraform.tfstate` dentro de `infra/terraform/environments/dev/`). Esse arquivo não é versionado no repositório; para lembrar o que foi criado entre uma execução e outra da esteira, o `CD Development` guarda e recupera o state usando o cache do GitHub Actions (`actions/cache`, chave `tfstate-development-*`).
 
@@ -79,7 +79,7 @@ Motivo da escolha: um bucket S3 dedicado ao state não é exigido pelo enunciado
 
 Se o cache expirar (7 dias sem uso) ou for limpo manualmente no GitHub, a esteira perde a referência dos recursos já criados — nesse caso, use o workflow `AWS Import Existing Resources` (ver seção abaixo) para reconciliar o state com o que já existe na AWS antes de rodar `apply`/`destroy` de novo.
 
-## Workflow de emergência: AWS Import Existing Resources
+## 🚨 Workflow de emergência: AWS Import Existing Resources
 
 `.github/workflows/aws-import-existing-resources.yml` **não faz parte do fluxo normal de CI/CD**. É uma rede de segurança, não um passo do dia a dia.
 
@@ -97,7 +97,7 @@ Os dois sintomas indicam a mesma causa: o state (cache do GitHub Actions) não s
 
 **Por que não roda automaticamente:** se a esteira (`CD Development`) for sempre o único lugar que executa `terraform apply`/`destroy`, o state nunca desalinha, e este workflow nunca precisa ser usado. Ele existe só para o caso de a disciplina falhar ou o cache expirar — não é uma etapa a mais do pipeline normal.
 
-## Evolução futura: Secrets Manager e Parameter Store
+## 🔮 Evolução futura: Secrets Manager e Parameter Store
 
 Para este Tech Challenge, os segredos são injetados no Kubernetes Secret pelo Terraform a partir do GitHub Environment. Isso é suficiente para demonstrar CI/CD, deploy em EKS e uso seguro de secrets sem versionar valores sensíveis.
 
@@ -110,7 +110,7 @@ Em uma evolução mais próxima de produção, é válido mover:
 
 Nesse modelo futuro, a aplicação ou o cluster buscariam os valores em runtime usando integração como External Secrets Operator, AWS Secrets Store CSI Driver ou permissões IAM específicas. Isso reduz a dependência de secrets longos no GitHub, mas adiciona complexidade de IAM e operação.
 
-## Deploy pela esteira
+## 🚀 Deploy pela esteira
 
 | Branch | Ambiente | Próximo passo automático |
 | --- | --- | --- |
@@ -120,7 +120,7 @@ Nesse modelo futuro, a aplicação ou o cluster buscariam os valores em runtime 
 
 O deploy AWS real gerencia os recursos Kubernetes da API pelo Terraform, aguarda rollout e imprime o endpoint do Load Balancer. Os estágios `homologation` e `production` não provisionam AWS enquanto não existirem ambientes físicos separados.
 
-## Onde o Load Balancer é criado
+## ⚖️ Onde o Load Balancer é criado
 
 Não existe um recurso `aws_lb` explícito no Terraform porque o Load Balancer da API é criado pelo cloud provider da AWS quando o Kubernetes Service da API é criado com `type = "LoadBalancer"`.
 
@@ -138,7 +138,7 @@ kubernetes_service_v1.oficina_mecanica_api
 
 O Terraform mantém o Service no state; por consequência, o `terraform destroy` remove o Service Kubernetes e a AWS remove o Load Balancer associado.
 
-## Validação
+## ✅ Validação
 
 - [ ] Validar rollout da API.
 - [ ] Validar `kubectl get pods -n oficina-mecanica`.
@@ -146,7 +146,7 @@ O Terraform mantém o Service no state; por consequência, o `terraform destroy`
 - [ ] Validar `/api/health`.
 - [ ] Validar Swagger.
 
-## Encerramento obrigatório pela esteira
+## 🧹 Encerramento obrigatório pela esteira
 
 Ao final da demonstração, executar o destroy explícito pela própria esteira de CD, usando o mesmo backend/state do deploy.
 

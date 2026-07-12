@@ -1,16 +1,16 @@
-# RDS Module
+# 🗄️ RDS Module
 
-## Objetivo
+## 🎯 Objetivo
 
 Este módulo é responsável por provisionar a infraestrutura de banco de dados da aplicação utilizando o Amazon Relational Database Service (RDS), disponibilizando uma instância gerenciada do SQL Server Express em ambiente AWS.
 
-## Recursos criados
+## 📦 Recursos criados
 
 - Amazon RDS DB Subnet Group
 - Amazon RDS for SQL Server Express
 - Security Group dedicado ao banco de dados
 
-## Funcionalidades
+## ⚙️ Funcionalidades
 
 - Criação de DB Subnet Group utilizando as subnets privadas da VPC;
 - Provisionamento de instância Amazon RDS SQL Server Express;
@@ -19,7 +19,7 @@ Este módulo é responsável por provisionar a infraestrutura de banco de dados 
 - Banco configurado como privado (`publicly_accessible = false`);
 - Aplicação das tags compartilhadas da infraestrutura.
 
-## Variáveis de entrada
+## 🧩 Variáveis de entrada
 
 | Variável | Tipo | Descrição |
 |----------|------|-----------|
@@ -37,7 +37,7 @@ Este módulo é responsável por provisionar a infraestrutura de banco de dados 
 | `skip_final_snapshot` | `bool` | Define se o snapshot final será ignorado no destroy. No AWS Academy permanece `true`. |
 | `tags` | `map(string)` | Tags aplicadas aos recursos. |
 
-## Outputs
+## 📤 Outputs
 
 | Output | Descrição |
 |--------|-----------|
@@ -47,7 +47,7 @@ Este módulo é responsável por provisionar a infraestrutura de banco de dados 
 | `db_instance_port` | Porta de acesso ao banco de dados. |
 | `security_group_id` | ID do Security Group associado ao banco. |
 
-## Observações
+## 📌 Observações
 
 - O Amazon RDS para SQL Server Express não permite informar o parâmetro `db_name` durante a criação da instância. O banco da aplicação deverá ser criado posteriormente por meio de migrations ou scripts de inicialização.
 - A versão da engine (`engine_version`) deve corresponder a uma versão suportada pela região AWS utilizada. Recomenda-se consultar as versões disponíveis antes do provisionamento utilizando:

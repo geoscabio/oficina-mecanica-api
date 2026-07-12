@@ -1,8 +1,8 @@
-# GitHub Actions CI/CD
+# ⚙️ GitHub Actions CI/CD
 
 A esteira foi separada em workflows menores para deixar o Git Flow simples de visualizar e operar.
 
-## Workflows
+## 🔀 Workflows
 
 | Workflow | Arquivo | Quando roda | Objetivo |
 | --- | --- | --- | --- |
@@ -15,7 +15,7 @@ Workflows reutilizáveis:
 
 - `.github/workflows/aws-deploy.yml`
 
-## Fluxo esperado
+## 🔁 Fluxo esperado
 
 ```text
 feature/*, bugfix/*, hotfix/* ...
@@ -36,7 +36,7 @@ feature/*, bugfix/*, hotfix/* ...
 
 No estágio `development`, o deploy AWS é o último passo antes da abertura do PR para `release` quando o merge altera código, infraestrutura, Docker, workflows ou manifests. Merges somente de Markdown/`docs/` pulam o deploy AWS para evitar rebuild desnecessário e rollout sem mudança funcional. Como `homologation` e `production` não existem como ambientes físicos neste projeto, esses estágios registram deploys lógicos para manter o Git Flow completo e auditável.
 
-## CI
+## ✅ CI
 
 O fluxo de integração economiza GitHub Actions no plano gratuito:
 
@@ -61,14 +61,14 @@ O workflow usa `concurrency` por branch/PR para cancelar execuções antigas qua
 
 Para acelerar execuções repetidas, a esteira usa cache de pacotes NuGet e cache de camadas Docker via GitHub Actions cache. A validação Kubernetes fica leve no PR; a validação real contra cluster acontece no deploy AWS em EKS.
 
-### Separacao por responsabilidade
+### Separação por responsabilidade
 
-O workflow `CI` usa jobs separados para deixar claro o principio de separacao de responsabilidades:
+O workflow `CI` usa jobs separados para deixar claro o princípio de separação de responsabilidades:
 
 | Job | Responsabilidade |
 | --- | --- |
-| `build_application` | Restaurar dependencias e compilar a solution. |
-| `verify_code_style` | Validar formatacao com `dotnet format`. |
+| `build_application` | Restaurar dependências e compilar a solution. |
+| `verify_code_style` | Validar formatação com `dotnet format`. |
 | `test_application` | Executar testes automatizados, cobertura e artefatos. |
 | `build_container_image` | Validar o build da imagem Docker sem publicar. |
 | `validate_kubernetes_manifests` | Validar manifests locais em cluster KinD efemero. |
@@ -76,7 +76,7 @@ O workflow `CI` usa jobs separados para deixar claro o principio de separacao de
 
 Os nomes técnicos dos jobs usam `snake_case` porque são identificadores estáveis no YAML. Os nomes exibidos no GitHub Actions usam texto legível, como `Build application`, `Test application` e `Quality gate`.
 
-## CD Development
+## 🚀 CD Development
 
 Roda após merge/push na `develop`.
 
@@ -92,7 +92,7 @@ Fluxo:
 7. Se `TERRAFORM_ACTION=destroy`, executa `plan -destroy`/`apply` e encerra os recursos AWS gerenciados pelo Terraform.
 8. Abre PR automático de `develop` para `release` quando o deploy `apply` passou ou quando a alteração era somente documentação.
 
-## CD Release
+## 🏷️ CD Release
 
 Roda após merge/push na `release` ou `release/**`.
 
@@ -101,7 +101,7 @@ Fluxo:
 1. Deploy lógico em `homologation`.
 2. PR automático de `release` para `main`, se o deploy lógico passou.
 
-## CD Production
+## 🏭 CD Production
 
 Roda após merge/push na `main`.
 
@@ -111,7 +111,7 @@ Fluxo:
 
 O PR para `main` deve exigir aprovação/reviewer antes do merge.
 
-## Encerramento AWS
+## 🧹 Encerramento AWS
 
 O destroy é acionado por PR para `develop`, alterando o arquivo versionado:
 
@@ -137,7 +137,7 @@ Uso operacional:
 
 `TERRAFORM_ACTION=destroy` só é aceito quando o arquivo `terraform-action.env` foi alterado no próprio merge. Isso evita que pushes futuros destruam recursos sem intenção.
 
-## Repository variables
+## 🧩 Repository variables
 
 | Nome | Tipo | Valor esperado | Uso |
 | --- | --- | --- | --- |
@@ -156,7 +156,7 @@ Allow GitHub Actions to create and approve pull requests
 
 Sem essa permissão, o GitHub bloqueia a criação automática de PR por segurança.
 
-## Environments
+## 🔑 Environments
 
 Obrigatório para o deploy real:
 
@@ -177,7 +177,7 @@ Os secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` e `AWS_SESSION_TOKEN` ex
 
 Nenhum valor sensível deve ser escrito nos arquivos `.yml`, `.tf`, `.md` ou `.env` versionados. Os workflows referenciam apenas os nomes dos secrets e variables.
 
-## Proteções obrigatórias recomendadas
+## 🔒 Proteções obrigatórias recomendadas
 
 Configurar branch protection em `develop` e `main`. Quando a branch `release` existir, aplicar a mesma proteção nela.
 
