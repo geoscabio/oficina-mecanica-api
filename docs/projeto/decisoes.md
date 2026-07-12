@@ -64,3 +64,15 @@ Como o HPA calcula a porcentagem de uso em cima do `requests` (nao do `limits`),
 Motivo:
 
 Fazer o HPA refletir carga real, nao o custo de inicializacao do runtime .NET. `requests.cpu` nao foi alterado porque o uso de CPU observado (1-6m de 100m) estava bem abaixo do target de 70%, sem indicio de problema.
+
+---
+
+## Workstation GC em vez de Server GC na API
+
+Alem do ajuste de `requests.memory` acima, identificado que a API nao configurava explicitamente o modo do Garbage Collector do .NET, usando o padrao (Server GC). O Server GC cria um heap de memoria separado por nucleo de CPU visivel ao processo, otimizado para aplicacoes de alto throughput com varios nucleos - mas o container roda com `limits.cpu=500m` (meio nucleo), um cenario onde o Server GC reserva memoria para paralelismo que o container nem tem disponivel.
+
+Adicionado `<ServerGarbageCollection>false</ServerGarbageCollection>` em `src/OficinaMecanica.API/OficinaMecanica.API.csproj`, ativando o Workstation GC. Confirmado localmente que a opcao e aplicada de verdade no artefato publicado (`"System.GC.Server": false` no `.runtimeconfig.json` gerado pelo build).
+
+Motivo:
+
+Reduzir o consumo real de memoria da aplicacao (nao so aumentar a margem do `requests.memory`), alinhando o modo de GC ao perfil real do container: baixo paralelismo de CPU, baixo trafego, tipico de um ambiente de demonstracao academica.
