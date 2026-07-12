@@ -533,4 +533,4 @@ Itens manuais restantes:
 - Não versionar credenciais, tokens, kubeconfig, secrets ou outputs sensíveis.
 - Ambientes AWS temporários devem ser destruídos após a demonstração.
 - O deploy para `main` deve usar branch protection e aprovação obrigatória de PR.
-- O projeto prioriza rastreabilidade e simplicidade operacional para a banca avaliar sem depender de contexto externo.
+- O projeto prioriza rastreabilidade e simplicidade operacional, sem depender de contexto externo para ser compreendido.
