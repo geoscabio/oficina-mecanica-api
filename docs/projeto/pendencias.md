@@ -30,6 +30,6 @@
 
 ## Entrega
 
-- Montar roteiro do vídeo.
-- Gravar demonstração.
-- Gerar PDF final.
+- Roteiro do vídeo rascunhado: [`docs/projeto/roteiro-video.md`](roteiro-video.md).
+- Estrutura do PDF final pronta (só faltam vídeo/diagramas/integrantes): [`docs/projeto/pdf-entrega.md`](pdf-entrega.md).
+- Só restam: diagramas finais, gravar demonstração e gerar o PDF.
