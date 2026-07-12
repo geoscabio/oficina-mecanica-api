@@ -2,7 +2,7 @@
 
 Esta pasta concentra os guias operacionais de CI/CD, Kubernetes, Terraform e AWS.
 
-Os recursos execut?veis ficam fora de `docs/`: Docker Compose local em [`../../README.md#execucao-local-docker-compose`](../../README.md#execucao-local-docker-compose), manifests Kubernetes em [`../../k8s/README.md`](../../k8s/README.md) e AWS real em [`../../infra/terraform/environments/dev/`](../../infra/terraform/environments/dev/). Esta pasta mant?m apenas guias e checklists.
+Os recursos executáveis ficam fora de `docs/`: Docker Compose local em [`../../README.md#execucao-local-docker-compose`](../../README.md#execucao-local-docker-compose), manifests Kubernetes em [`../../k8s/README.md`](../../k8s/README.md) e AWS real em [`../../infra/terraform/environments/dev/`](../../infra/terraform/environments/dev/). Esta pasta mantém apenas guias e checklists.
 
 ## Arquivos
 

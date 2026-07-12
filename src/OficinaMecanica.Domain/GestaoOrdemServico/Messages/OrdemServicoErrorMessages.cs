@@ -2,22 +2,22 @@ namespace OficinaMecanica.Domain.GestaoOrdemServico.Messages;
 
 public static class OrdemServicoErrorMessages
 {
-    public const string OrdemServicoNaoEncontrada = "Ordem de servico nao encontrada.";
-    public const string NumeroObrigatorio = "Numero da ordem de servico e obrigatorio.";
-    public const string VeiculoObrigatorio = "Veiculo da ordem de servico e obrigatorio.";
-    public const string MecanicoObrigatorio = "Mecanico da ordem de servico e obrigatorio.";
-    public const string ServicoObrigatorioParaAguardarAprovacao = "Ordem de servico deve possuir ao menos um servico para aguardar aprovacao.";
-    public const string ServicosFinalizadosObrigatorios = "Todos os servicos devem estar finalizados para finalizar a ordem de servico.";
-    public const string CancelamentoStatusInvalido = "Ordem de servico nao pode ser cancelada no status atual.";
-    public const string MotivoCancelamentoInvalido = "Motivo de cancelamento da ordem de servico invalido.";
-    public const string DecisaoOrcamentoInvalida = "Decisao do orcamento invalida.";
-    public const string ServicoNaoEncontrado = "Servico nao encontrado na ordem de servico.";
-    public const string TransicaoStatusInvalida = "Transicao de status da ordem de servico invalida.";
-    public const string PecaInsumoCatalogoObrigatorio = "Peca ou insumo do catalogo e obrigatorio.";
-    public const string QuantidadePecaInsumoMaiorQueZero = "Quantidade da peca ou insumo deve ser maior que zero.";
-    public const string ValorUnitarioPecaInsumoMaiorQueZero = "Valor unitario da peca ou insumo deve ser maior que zero.";
-    public const string ServicoCatalogoObrigatorio = "Servico do catalogo e obrigatorio.";
-    public const string ValorServicoMaiorQueZero = "Valor do servico deve ser maior que zero.";
-    public const string ServicoPendenteParaIniciarExecucao = "Servico deve estar pendente para iniciar execucao.";
-    public const string ServicoEmExecucaoParaFinalizar = "Servico deve estar em execucao para finalizar.";
+    public const string OrdemServicoNaoEncontrada = "Ordem de serviço não encontrada.";
+    public const string NumeroObrigatorio = "Número da ordem de serviço é obrigatório.";
+    public const string VeiculoObrigatorio = "Veículo da ordem de serviço é obrigatório.";
+    public const string MecanicoObrigatorio = "Mecânico da ordem de serviço é obrigatório.";
+    public const string ServicoObrigatorioParaAguardarAprovacao = "Ordem de serviço deve possuir ao menos um serviço para aguardar aprovação.";
+    public const string ServicosFinalizadosObrigatorios = "Todos os serviços devem estar finalizados para finalizar a ordem de serviço.";
+    public const string CancelamentoStatusInvalido = "Ordem de serviço não pode ser cancelada no status atual.";
+    public const string MotivoCancelamentoInvalido = "Motivo de cancelamento da ordem de serviço inválido.";
+    public const string DecisaoOrcamentoInvalida = "Decisão do orçamento inválida.";
+    public const string ServicoNaoEncontrado = "Serviço não encontrado na ordem de serviço.";
+    public const string TransicaoStatusInvalida = "Transição de status da ordem de serviço inválida.";
+    public const string PecaInsumoCatalogoObrigatorio = "Peça ou insumo do catálogo é obrigatório.";
+    public const string QuantidadePecaInsumoMaiorQueZero = "Quantidade da peça ou insumo deve ser maior que zero.";
+    public const string ValorUnitarioPecaInsumoMaiorQueZero = "Valor unitário da peça ou insumo deve ser maior que zero.";
+    public const string ServicoCatalogoObrigatorio = "Serviço do catálogo é obrigatório.";
+    public const string ValorServicoMaiorQueZero = "Valor do serviço deve ser maior que zero.";
+    public const string ServicoPendenteParaIniciarExecucao = "Serviço deve estar pendente para iniciar execução.";
+    public const string ServicoEmExecucaoParaFinalizar = "Serviço deve estar em execução para finalizar.";
 }

@@ -149,17 +149,17 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 
 ```text
 .
-??? .github/workflows/              # Esteira CI/CD
-??? docs/                           # ?ndice, guias, evid?ncias e diagramas
-??? infra/terraform/                # Infraestrutura AWS real
-?   ??? environments/dev/           # Ambiente development
-?   ??? modules/                    # M?dulos AWS: VPC, ECR, RDS e EKS
-??? k8s/                            # Manifests Kubernetes
-??? src/                            # C?digo de produ??o
-??? tests/                          # Testes unit?rios e integra??o
-??? Dockerfile                      # Build da imagem da API
-??? docker-compose.yml              # Docker Compose local
-??? OficinaMecanica.sln
+├── .github/workflows/              # Esteira CI/CD
+├── docs/                           # Índice, guias, evidências e diagramas
+├── infra/terraform/                # Infraestrutura AWS real
+│   ├── environments/dev/           # Ambiente development
+│   └── modules/                    # Módulos AWS: VPC, ECR, RDS e EKS
+├── k8s/                            # Manifests Kubernetes
+├── src/                            # Código de produção
+├── tests/                          # Testes unitários e integração
+├── Dockerfile                      # Build da imagem da API
+├── docker-compose.yml              # Docker Compose local
+└── OficinaMecanica.sln
 ```
 
 ---

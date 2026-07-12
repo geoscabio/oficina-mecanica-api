@@ -74,7 +74,7 @@ O workflow `CI` usa jobs separados para deixar claro o principio de separacao de
 | `validate_kubernetes_manifests` | Validar manifests locais em cluster KinD efemero. |
 | `quality_gate` | Consolidar o resultado dos jobs anteriores para branch protection. |
 
-Os nomes tecnicos dos jobs usam `snake_case` porque sao identificadores estaveis no YAML. Os nomes exibidos no GitHub Actions usam texto legivel, como `Build application`, `Test application` e `Quality gate`.
+Os nomes técnicos dos jobs usam `snake_case` porque são identificadores estáveis no YAML. Os nomes exibidos no GitHub Actions usam texto legível, como `Build application`, `Test application` e `Quality gate`.
 
 ## CD Development
 
@@ -179,7 +179,7 @@ Nenhum valor sensível deve ser escrito nos arquivos `.yml`, `.tf`, `.md` ou `.e
 
 ## Proteções obrigatórias recomendadas
 
-Configurar branch protection em `develop` e `main`. Quando a branch `release` existir, aplicar a mesma protecao nela.
+Configurar branch protection em `develop` e `main`. Quando a branch `release` existir, aplicar a mesma proteção nela.
 
 - bloquear push direto;
 - exigir PR antes de merge;
