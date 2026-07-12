@@ -4,8 +4,11 @@
 
 - Colar print do SonarQube Quality Gate em `docs/evidencias/sonarqube.md`.
 - Colar resultado real do OWASP ZAP em `docs/evidencias/owasp-zap.md`.
-- Colar print do HPA durante carga em `docs/evidencias/kubernetes-hpa.md`.
-- Colar outputs reais de Terraform em `docs/evidencias/terraform-apply.md`.
+
+## ADRs
+
+- ADRs oficiais da Fase 1 trazidas para `docs/architecture/adrs/` (ADR-0001 a ADR-0004: Clean Architecture, .NET, SQL Server, JWT).
+- Revisar se falta registrar alguma decisão arquitetural tomada só na Fase 2 (ex.: EKS/Terraform, HPA, escolha de GC) como ADR nova.
 
 ## Diagramas ainda aguardando arquivos finais
 
