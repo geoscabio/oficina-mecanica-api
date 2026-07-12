@@ -35,6 +35,7 @@
 ## Revisão final (depois de tudo o resto pronto)
 
 - Varredura completa no projeto procurando palavras/frases sem acentuação gráfica correta (código, docs, README, evidências).
+- Revisar os `.md`/READMEs internos (ex.: `docs/deploy/README.md`, `docs/projeto/README.md`, READMEs dos módulos Terraform, `k8s/README.md`) que ainda estão em texto padrão simples, sem o mesmo cuidado de formatação amigável (ícones/emojis, seções destacadas) já aplicado no `README.md` principal e nas esteiras de CI/CD.
 - Auditoria geral final de todo o projeto antes da entrega.
 
 ## Entrega
