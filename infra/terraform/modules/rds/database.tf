@@ -6,6 +6,7 @@ resource "aws_db_instance" "this" {
 
   instance_class    = var.instance_class
   allocated_storage = var.allocated_storage
+  storage_encrypted = true
 
   username = var.username
   password = var.password

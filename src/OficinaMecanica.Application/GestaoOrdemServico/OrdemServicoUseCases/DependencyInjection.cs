@@ -42,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<IValidator<ConsultarTempoMedioExecucaoServicoRequest>, ConsultarTempoMedioExecucaoServicoValidator>();
         services.AddScoped<IValidator<ListarTempoMedioExecucaoServicosRequest>, ListarTempoMedioExecucaoServicosValidator>();
 
+        services.AddScoped<AbrirOrdemServicoRepositorios>();
         services.AddScoped<AbrirOrdemServicoUseCase>();
         services.AddScoped<IniciarDiagnosticoOrdemServicoUseCase>();
         services.AddScoped<DefinirServicosUseCase>();

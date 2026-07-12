@@ -32,24 +32,18 @@ public sealed class AbrirOrdemServicoUseCase
     private readonly IMapper _mapper;
 
     public AbrirOrdemServicoUseCase(
-        IOrdemServicoRepository ordemServicoRepository,
-        IClienteRepository clienteRepository,
-        IVeiculoRepository veiculoRepository,
-        IMecanicoRepository mecanicoRepository,
-        IServicoCatalogoRepository servicoCatalogoRepository,
-        IPecaInsumoCatalogoRepository pecaInsumoCatalogoRepository,
-        IEstoqueRepository estoqueRepository,
+        AbrirOrdemServicoRepositorios repositorios,
         IUnitOfWork unitOfWork,
         IValidator<AbrirOrdemServicoRequest> validator,
         IMapper mapper)
     {
-        _ordemServicoRepository = ordemServicoRepository;
-        _clienteRepository = clienteRepository;
-        _veiculoRepository = veiculoRepository;
-        _mecanicoRepository = mecanicoRepository;
-        _servicoCatalogoRepository = servicoCatalogoRepository;
-        _pecaInsumoCatalogoRepository = pecaInsumoCatalogoRepository;
-        _estoqueRepository = estoqueRepository;
+        _ordemServicoRepository = repositorios.OrdemServico;
+        _clienteRepository = repositorios.Cliente;
+        _veiculoRepository = repositorios.Veiculo;
+        _mecanicoRepository = repositorios.Mecanico;
+        _servicoCatalogoRepository = repositorios.ServicoCatalogo;
+        _pecaInsumoCatalogoRepository = repositorios.PecaInsumoCatalogo;
+        _estoqueRepository = repositorios.Estoque;
         _unitOfWork = unitOfWork;
         _validator = validator;
         _mapper = mapper;
@@ -100,35 +94,13 @@ public sealed class AbrirOrdemServicoUseCase
             ordemServico.RegistrarServicoNaAbertura(servicoCatalogo.Id, servicoCatalogo.Valor);
         }
 
-        Estoque? estoque = null;
-
-        if (pecasInsumos.Count > 0)
+        var resultadoReserva = await ReservarPecasInsumosAsync(ordemServico, pecasInsumos, cancellationToken);
+        if (!resultadoReserva.Sucesso)
         {
-            estoque = await _estoqueRepository.ObterAsync(cancellationToken);
-            if (estoque is null)
-            {
-                return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
-            }
-
-            var pecasInsumosCatalogo = await ObterPecasInsumosCatalogoAsync(pecasInsumos, cancellationToken);
-            if (pecasInsumos.Any(pecaInsumo => !pecasInsumosCatalogo.ContainsKey(pecaInsumo.PecaInsumoCatalogoId)))
-            {
-                return Result<OrdemServicoResponse>.Falha(PecaInsumoCatalogoErrorMessages.PecaInsumoCatalogoNaoEncontrado, TipoErro.NaoEncontrado);
-            }
-
-            if (!ExisteEstoqueDisponivel(estoque, pecasInsumos))
-            {
-                return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueInsuficiente, TipoErro.RegraNegocio);
-            }
-
-            foreach (var pecaInsumo in pecasInsumos)
-            {
-                var pecaInsumoCatalogo = pecasInsumosCatalogo[pecaInsumo.PecaInsumoCatalogoId];
-
-                ordemServico.RegistrarPecaInsumoNaAbertura(pecaInsumoCatalogo.Id, pecaInsumo.Quantidade, pecaInsumoCatalogo.Valor);
-                estoque.ReservarItens(pecaInsumoCatalogo.Id, pecaInsumo.Quantidade);
-            }
+            return Result<OrdemServicoResponse>.Falha(resultadoReserva.Erro!.Mensagem, resultadoReserva.Erro.Tipo);
         }
+
+        var estoque = resultadoReserva.Valor;
 
         if (estoque is null)
         {
@@ -146,6 +118,41 @@ public sealed class AbrirOrdemServicoUseCase
         }
 
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
+    }
+
+    private async Task<Result<Estoque?>> ReservarPecasInsumosAsync(OrdemServico ordemServico, IReadOnlyCollection<PecaInsumoRequest> pecasInsumos, CancellationToken cancellationToken)
+    {
+        if (pecasInsumos.Count == 0)
+        {
+            return Result<Estoque?>.Ok(null);
+        }
+
+        var estoque = await _estoqueRepository.ObterAsync(cancellationToken);
+        if (estoque is null)
+        {
+            return Result<Estoque?>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
+        }
+
+        var pecasInsumosCatalogo = await ObterPecasInsumosCatalogoAsync(pecasInsumos, cancellationToken);
+        if (pecasInsumos.Any(pecaInsumo => !pecasInsumosCatalogo.ContainsKey(pecaInsumo.PecaInsumoCatalogoId)))
+        {
+            return Result<Estoque?>.Falha(PecaInsumoCatalogoErrorMessages.PecaInsumoCatalogoNaoEncontrado, TipoErro.NaoEncontrado);
+        }
+
+        if (!ExisteEstoqueDisponivel(estoque, pecasInsumos))
+        {
+            return Result<Estoque?>.Falha(EstoqueErrorMessages.EstoqueInsuficiente, TipoErro.RegraNegocio);
+        }
+
+        foreach (var pecaInsumo in pecasInsumos)
+        {
+            var pecaInsumoCatalogo = pecasInsumosCatalogo[pecaInsumo.PecaInsumoCatalogoId];
+
+            ordemServico.RegistrarPecaInsumoNaAbertura(pecaInsumoCatalogo.Id, pecaInsumo.Quantidade, pecaInsumoCatalogo.Valor);
+            estoque.ReservarItens(pecaInsumoCatalogo.Id, pecaInsumo.Quantidade);
+        }
+
+        return Result<Estoque?>.Ok(estoque);
     }
 
     private async Task<Cliente?> ObterClienteAsync(AbrirOrdemServicoRequest request, CancellationToken cancellationToken)

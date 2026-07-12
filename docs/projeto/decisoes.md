@@ -10,6 +10,21 @@ A execução local utilizando Kubernetes é um dos entregáveis da Fase 2 do Tec
 
 ---
 
+## Achados aceitos do SonarQube
+
+A análise de SonarQube (ver [`docs/evidencias/sonarqube.md`](../evidencias/sonarqube.md)) terminou com 0 issues abertas e nota A em todas as categorias. Quatro achados foram resolvidos via `Won't Fix`/`Safe` (com justificativa registrada na própria issue do SonarQube), por serem intencionais e não representarem risco real:
+
+- `k8s/api-secret.yaml`: contém uma senha de banco e segredos de demonstração em texto plano, claramente identificados como `-local-2026` no valor. Aceito porque a pasta `k8s/` é só para execução local (ver seção acima); o ambiente AWS usa segredos via Terraform/GitHub Secrets, nunca commitados.
+- `k8s/api-configmap.yaml`: usa `ASPNETCORE_URLS=http://+:8080` (protocolo em texto plano). Aceito porque a terminação TLS acontece fora do container — no Load Balancer da AWS em produção, e não é necessária na máquina do próprio desenvolvedor em execução local.
+- `k8s/api-deployment.yaml`: usa `image: oficina_mecanica_api-api:latest`, tag não fixada em uma versão especifica. Aceito porque a imagem é construída localmente pelo próprio desenvolvedor (nunca publicada em um registry), sem um esquema de versionamento semântico no projeto — fixar uma versão arbitrária e nunca atualizada seria mais enganoso do que usar `latest` de forma explícita e consciente.
+- `tests/OficinaMecanica.API.IntegrationTests/GestaoOrdemServico/Builders/OrdemServicoRequestBuilder.cs`: o método `BuildNotificacaoOrcamento` não acessa dados de instância e poderia ser `static`, mas foi mantido como método de instância de propósito, para preservar a consistência do padrão Builder fluente (`Novo().Build...()`) usado pelos demais métodos `Build` da classe.
+
+Motivo (para os três achados em `k8s/`):
+
+Manter a simplicidade de um único `kubectl apply -R -f k8s/` para o ambiente local, sem introduzir gerenciamento externo de segredos (ex.: `kubectl create secret` fora do versionamento) que os requisitos da Fase 2 não exigem para este cenário.
+
+---
+
 ## Deploy AWS
 
 O deploy na AWS utiliza recursos específicos gerenciados pelo Terraform em `infra/terraform/environments/dev/`. Não há manifests YAML AWS duplicados no repositório: o workload Kubernetes da API na AWS fica em arquivos Terraform separados por responsabilidade (`namespace.tf`, `api-configmap.tf`, `api-secret.tf`, `api-deployment.tf`, `api-service.tf`, `api-hpa.tf`), no mesmo padrão adotado em `k8s/`.

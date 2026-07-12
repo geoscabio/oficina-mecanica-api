@@ -404,14 +404,17 @@ public class AbrirOrdemServicoUseCaseTests
         Mock<IEstoqueRepository>? estoqueRepository = null,
         Mock<IUnitOfWork>? unitOfWork = null)
     {
-        return new AbrirOrdemServicoUseCase(
+        var repositorios = new AbrirOrdemServicoRepositorios(
             ordemServicoRepository.Object,
             clienteRepository.Object,
             veiculoRepository.Object,
             mecanicoRepository.Object,
             (servicoCatalogoRepository ?? CriarServicoCatalogoRepository()).Object,
             (pecaInsumoCatalogoRepository ?? CriarPecaInsumoCatalogoRepository()).Object,
-            (estoqueRepository ?? CriarEstoqueRepository(null)).Object,
+            (estoqueRepository ?? CriarEstoqueRepository(null)).Object);
+
+        return new AbrirOrdemServicoUseCase(
+            repositorios,
             (unitOfWork ?? CriarUnitOfWork()).Object,
             new AbrirOrdemServicoValidator(),
             MapperFactory.Criar());
