@@ -29,6 +29,11 @@
 - Evoluir o ambiente AWS para Multi-AZ, backups, snapshot final e rotação formal de segredos quando sair do contexto AWS Academy.
 - Trocar o hostname bruto do Load Balancer (ex: `a8bceeb...elb.amazonaws.com`) por um DNS amigável via domínio próprio + Route 53 (ex: `api.oficinamecanica.com`). Não fizemos agora porque exige domínio comprado e, como o ambiente é destruído/recriado a cada demo, o registro DNS precisaria ser atualizado automaticamente a cada apply (mais uma peça de infra pra manter).
 
+## Revisão final (depois de tudo o resto pronto)
+
+- Varredura completa no projeto procurando palavras/frases sem acentuação gráfica correta (código, docs, README, evidências).
+- Auditoria geral final de todo o projeto antes da entrega.
+
 ## Entrega
 
 - Montar roteiro do vídeo.
