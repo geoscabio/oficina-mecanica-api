@@ -8,14 +8,18 @@ Motivo:
 
 A execução local utilizando Kubernetes é um dos entregáveis da Fase 2 do Tech Challenge.
 
-### Achados aceitos do SonarQube em `k8s/`
+---
 
-A análise de SonarQube sinaliza dois pontos em `k8s/`, ambos intencionais e restritos ao ambiente local:
+## Achados aceitos do SonarQube
 
-- `k8s/api-secret.yaml`: contém uma senha de banco e segredos de demonstração em texto plano, claramente identificados como `-local-2026` no valor. Aceito porque a pasta `k8s/` é só para execução local (ver acima); o ambiente AWS usa segredos via Terraform/GitHub Secrets, nunca commitados.
+A análise de SonarQube (ver [`docs/evidencias/sonarqube.md`](../evidencias/sonarqube.md)) terminou com 0 issues abertas e nota A em todas as categorias. Quatro achados foram resolvidos via `Won't Fix`/`Safe` (com justificativa registrada na própria issue do SonarQube), por serem intencionais e não representarem risco real:
+
+- `k8s/api-secret.yaml`: contém uma senha de banco e segredos de demonstração em texto plano, claramente identificados como `-local-2026` no valor. Aceito porque a pasta `k8s/` é só para execução local (ver seção acima); o ambiente AWS usa segredos via Terraform/GitHub Secrets, nunca commitados.
 - `k8s/api-configmap.yaml`: usa `ASPNETCORE_URLS=http://+:8080` (protocolo em texto plano). Aceito porque a terminação TLS acontece fora do container — no Load Balancer da AWS em produção, e não é necessária na máquina do próprio desenvolvedor em execução local.
+- `k8s/api-deployment.yaml`: usa `image: oficina_mecanica_api-api:latest`, tag não fixada em uma versão especifica. Aceito porque a imagem é construída localmente pelo próprio desenvolvedor (nunca publicada em um registry), sem um esquema de versionamento semântico no projeto — fixar uma versão arbitrária e nunca atualizada seria mais enganoso do que usar `latest` de forma explícita e consciente.
+- `tests/OficinaMecanica.API.IntegrationTests/GestaoOrdemServico/Builders/OrdemServicoRequestBuilder.cs`: o método `BuildNotificacaoOrcamento` não acessa dados de instância e poderia ser `static`, mas foi mantido como método de instância de propósito, para preservar a consistência do padrão Builder fluente (`Novo().Build...()`) usado pelos demais métodos `Build` da classe.
 
-Motivo:
+Motivo (para os três achados em `k8s/`):
 
 Manter a simplicidade de um único `kubectl apply -R -f k8s/` para o ambiente local, sem introduzir gerenciamento externo de segredos (ex.: `kubectl create secret` fora do versionamento) que os requisitos da Fase 2 não exigem para este cenário.
 

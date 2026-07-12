@@ -13,6 +13,8 @@ namespace OficinaMecanica.API.IntegrationTests.GestaoOrdemServico.Controllers;
 [Collection(OficinaMecanicaApiCollection.Nome)]
 public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
 {
+    private static readonly string[] StatusHistoricoEsperados = ["Finalizada", "Entregue", "Cancelada"];
+
     public OrdensServicoControllerTests(OficinaMecanicaApiFixture fixture)
         : base(fixture)
     {
@@ -130,12 +132,7 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
             ordemRecebidaNovaId);
 
         ordensHistorico.GetProperty("totalItens").GetInt32().Should().Be(8);
-        itensHistorico.Select(item => ObterString(item, "status")).Should().Contain(new[]
-        {
-            "Finalizada",
-            "Entregue",
-            "Cancelada"
-        });
+        itensHistorico.Select(item => ObterString(item, "status")).Should().Contain(StatusHistoricoEsperados);
     }
 
     [RequiresDockerFact]
