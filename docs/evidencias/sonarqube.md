@@ -31,7 +31,7 @@ Analise rodada em `2026-07-12`, contra o commit `1b8de662`.
 | Quality Gate | ✅ **Passed** |
 | Linhas de codigo | 9.152 |
 | Testes executados | 424 (160 Domain + 226 Application + 38 Integration) — 100% aprovados |
-| Coverage | 87,4% |
+| Coverage (linha + branch combinados) | 87,4% — ver nota abaixo sobre a diferença para o gate de 90% da esteira |
 | Bugs | **0** |
 | Reliability Rating | **A** |
 | Code Smells | **0** |
@@ -40,6 +40,16 @@ Analise rodada em `2026-07-12`, contra o commit `1b8de662`.
 | Vulnerabilities | **0** |
 | Security Hotspots | **0** (revisados) |
 | Security Rating | **A** |
+
+## Por que o Coverage do SonarQube (87,4%) e diferente do gate de 90% da esteira
+
+Nao e uma inconsistencia: sao duas metricas diferentes, medidas de formas diferentes, a partir dos mesmos relatorios de teste.
+
+- **A esteira (`CI`, job `test_application`)** mede exclusivamente **cobertura de linha** (`line-rate` do Cobertura.xml apos merge com ReportGenerator) e exige minimo de 90%. No commit desta evidencia, esse numero real foi **92,47%** (log real da esteira, run `29192181661`), acima do minimo.
+- **O SonarQube** reporta "Coverage" como uma metrica combinada de **cobertura de linha + cobertura de branch/condicao** (`if`/`else`, curto-circuito, etc). Nos relatorios reais deste projeto, o `branch-rate` e sempre mais baixo que o `line-rate` (ex.: `line-rate=0.90` vs `branch-rate=0.79` em um dos assemblies) — cobrir toda linha nao garante cobrir todo caminho condicional. Isso puxa a media combinada do Sonar para baixo, resultando em 87,4%.
+- O proprio Quality Gate do SonarQube usado aqui ("Sonar way") so exige 80% de cobertura em **codigo novo** (`new_coverage`) para essa metrica combinada — que tambem foi atendido (`new_coverage actualValue=95.6`, ver Quality Gate acima).
+
+Resumindo: a esteira aplica um criterio (linha, 90%) e o SonarQube aplica outro, mais rigoroso (linha+branch, 80% no gate padrao) — os dois passam, cada um no seu proprio criterio, sobre os mesmos testes reais.
 
 ## Trajetoria ate o resultado zerado
 
