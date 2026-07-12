@@ -17,5 +17,5 @@ Use estes documentos como apoio para:
 - revisar escopo antes do merge final;
 - preparar roteiro do video;
 - montar PDF final;
-- explicar decisoes para a banca;
+- documentar o raciocinio por tras das decisoes;
 - acompanhar pendencias manuais de prints, diagramas restantes, video e PDF.
