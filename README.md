@@ -472,8 +472,10 @@ Consulta pública de status não exige autenticação.
 | Swagger local | `http://localhost:5093/swagger` |
 | OpenAPI local | `http://localhost:5093/swagger/v1/swagger.json` |
 | OpenAPI versionado | [`docs/openapi/oficina-mecanica-openapi.json`](docs/openapi/oficina-mecanica-openapi.json) |
+| Collection Postman pronta | [`docs/postman/oficina-mecanica-api.postman_collection.json`](docs/postman/oficina-mecanica-api.postman_collection.json) |
+| Environments Postman | [`local`](docs/postman/oficina-mecanica-local.postman_environment.json) · [`AWS dev`](docs/postman/oficina-mecanica-aws-dev.postman_environment.json) |
 
-O arquivo OpenAPI versionado pode ser importado como collection no Postman, Insomnia ou Bruno.
+O arquivo OpenAPI versionado pode ser importado como collection no Postman, Insomnia ou Bruno. Como alternativa mais rapida, a collection e os environments do Postman já prontos estão em [`docs/postman/`](docs/postman/) — detalhes de uso em [`docs/evidencias/postman.md`](docs/evidencias/postman.md).
 
 ---
 
