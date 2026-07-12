@@ -40,7 +40,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: "📚 04 · Restaurar dependências do projeto"
+      - name: "📚 04 · Resolver dependências do projeto (dotnet restore)"
         run: dotnet restore OficinaMecanica.sln
 
       - name: "🔨 05 · Compilar a solução"
@@ -59,7 +59,7 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: "📚 03 · Restaurar dependências do projeto"
+      - name: "📚 03 · Resolver dependências do projeto (dotnet restore)"
         run: dotnet restore OficinaMecanica.sln
 
       - name: "✅ 04 · Verificar formatação do código"
@@ -86,7 +86,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: "📚 04 · Restaurar dependências do projeto"
+      - name: "📚 04 · Resolver dependências do projeto (dotnet restore)"
         run: dotnet restore OficinaMecanica.sln
 
       - name: "🔨 05 · Compilar a solução"

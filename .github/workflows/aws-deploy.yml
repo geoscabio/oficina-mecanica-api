@@ -74,6 +74,12 @@ jobs:
             echo "::warning::TERRAFORM_ACTION=destroy detected. This run will destroy AWS resources managed by Terraform."
           fi
 
+          if [ "$terraform_action" = "apply" ]; then
+            echo "::notice::>>> ACAO DECIDIDA: APPLY (criar/atualizar recursos AWS) <<<"
+          else
+            echo "::notice::>>> ACAO DECIDIDA: DESTROY (destruir recursos AWS) <<<"
+          fi
+
           echo "terraform_action=$terraform_action" >> "$GITHUB_OUTPUT"
 
   prepare_and_plan:
@@ -130,7 +136,7 @@ jobs:
             exit 1
           fi
 
-      - name: "🧮 05 · Calcular conta AWS e URI da imagem ECR"
+      - name: "🏷️ 05 · Montar a tag da imagem Docker no ECR"
         id: prepare_vars
         run: |
           account_id="$(aws sts get-caller-identity --query Account --output text)"
@@ -310,7 +316,10 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: "📦 04 · Restaurar cache do state do Terraform"
+      - name: "🚀 04 · Inicializar Terraform (baixa os plugins dos providers)"
+        run: terraform -chdir="$TF_WORKING_DIRECTORY" init -input=false
+
+      - name: "📦 05 · Restaurar cache do state do Terraform"
         uses: actions/cache/restore@v6
         with:
           path: |
@@ -320,16 +329,16 @@ jobs:
           restore-keys: |
             tfstate-${{ inputs.environment_name }}-
 
-      - name: "⬇️ 05 · Baixar plano do Terraform publicado"
+      - name: "⬇️ 06 · Baixar plano do Terraform publicado"
         uses: actions/download-artifact@v8
         with:
           name: tfplan-${{ github.run_id }}
           path: ${{ env.TF_WORKING_DIRECTORY }}
 
-      - name: "✅ 06 · Aplicar plano do Terraform (apply ou destroy)"
+      - name: "✅ 07 · Aplicar plano do Terraform (apply ou destroy)"
         run: terraform -chdir="$TF_WORKING_DIRECTORY" apply -input=false -auto-approve tfplan
 
-      - name: "💾 07 · Salvar cache final do state do Terraform"
+      - name: "💾 08 · Salvar cache final do state do Terraform"
         if: always()
         uses: actions/cache/save@v6
         with:
@@ -338,7 +347,7 @@ jobs:
             ${{ env.TF_WORKING_DIRECTORY }}/terraform.tfstate.backup
           key: tfstate-${{ inputs.environment_name }}-${{ github.run_id }}
 
-      - name: "📖 08 · Ler nome do cluster EKS"
+      - name: "📖 09 · Ler nome do cluster EKS"
         id: read_outputs
         if: env.TERRAFORM_ACTION == 'apply'
         run: |
