@@ -17,6 +17,8 @@ spec:
         app: oficina-mecanica-api
 
     spec:
+      automountServiceAccountToken: false
+
       containers:
         - name: oficina-mecanica-api
           image: oficina_mecanica_api-api:latest

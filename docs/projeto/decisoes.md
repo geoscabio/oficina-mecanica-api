@@ -8,6 +8,17 @@ Motivo:
 
 A execução local utilizando Kubernetes é um dos entregáveis da Fase 2 do Tech Challenge.
 
+### Achados aceitos do SonarQube em `k8s/`
+
+A análise de SonarQube sinaliza dois pontos em `k8s/`, ambos intencionais e restritos ao ambiente local:
+
+- `k8s/api-secret.yaml`: contém uma senha de banco e segredos de demonstração em texto plano, claramente identificados como `-local-2026` no valor. Aceito porque a pasta `k8s/` é só para execução local (ver acima); o ambiente AWS usa segredos via Terraform/GitHub Secrets, nunca commitados.
+- `k8s/api-configmap.yaml`: usa `ASPNETCORE_URLS=http://+:8080` (protocolo em texto plano). Aceito porque a terminação TLS acontece fora do container — no Load Balancer da AWS em produção, e não é necessária na máquina do próprio desenvolvedor em execução local.
+
+Motivo:
+
+Manter a simplicidade de um único `kubectl apply -R -f k8s/` para o ambiente local, sem introduzir gerenciamento externo de segredos (ex.: `kubectl create secret` fora do versionamento) que os requisitos da Fase 2 não exigem para este cenário.
+
 ---
 
 ## Deploy AWS
