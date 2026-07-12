@@ -69,22 +69,55 @@ aws ecr describe-repositories --region us-east-1
 
 ## Resultado real
 
-> Colar aqui os outputs reais quando a execucao for feita.
+Execucao real via esteira `CD Development` (nao manual), em `infra/terraform/environments/dev`.
+
+### Apply (recriacao do ambiente)
 
 | Etapa | Resultado |
 | --- | --- |
-| `terraform init` | Pendente de execucao real |
-| `terraform validate` | Pendente de execucao real |
-| `terraform plan` | Pendente de execucao real |
-| `terraform apply` | Pendente de aprovacao |
-| `terraform output` | Pendente de execucao real |
-| `terraform destroy` | Pendente de execucao real |
-| Conferencia pos-destroy | Pendente de execucao real |
+| `terraform init` | Sucesso |
+| `terraform validate` | Sucesso |
+| `terraform plan` | `Plan: 26 to add, 0 to change, 0 to destroy` |
+| `terraform apply` | Sucesso — `Apply complete! Resources: 25 added, 0 changed, 0 destroyed.` (ECR criado antes, via apply direcionado em `module.ecr`, nao contabilizado de novo no apply principal) |
+| `terraform output` | `eks_cluster_name = "oficina-mecanica-eks-dev"`, `rds_endpoint`, `ecr_repository_url`, `api_service_hostname` (Load Balancer) todos presentes |
+| Rollout no EKS | Pod da API subiu, HPA e Service criados, endpoint do Load Balancer respondendo |
+
+### Destroy (encerramento oficial da sessao)
+
+PR de evidencia: [#159](https://github.com/geoscabio/oficina_mecanica_api/pull/159).
+
+| Etapa | Resultado |
+| --- | --- |
+| `terraform plan -destroy` | `Plan: 0 to add, 0 to change, 26 to destroy` |
+| `terraform destroy` (via `apply` do plano de destroy) | Sucesso — `Apply complete! Resources: 0 added, 0 changed, 26 destroyed.` |
+| Conferencia pos-destroy (AWS Console) | EKS, RDS, VPC e ECR confirmados vazios de forma independente (prints abaixo) |
 
 ## Evidencia visual
 
-Adicionar prints abaixo:
+### Destroy — log real do `terraform apply` (plano de destroy)
 
-```text
-[INSERIR PRINT DO PLAN/APPLY/OUTPUT/DESTROY AQUI]
-```
+![Log do destroy: Apply complete, 26 destroyed](terraform-apply/destroy-log-apply-complete.png)
+
+### Destroy — PR oficial mergeada
+
+![PR #159 mergeada](terraform-apply/destroy-pr-159-merged.png)
+
+### Destroy — resumo da esteira CD Development
+
+![Resumo do CD Development](terraform-apply/destroy-cd-development-summary.png)
+
+### Destroy — resumo do CI
+
+![Resumo do CI](terraform-apply/destroy-ci-summary.png)
+
+![Detalhe do build da imagem Docker](terraform-apply/destroy-ci-docker-build-detail.png)
+
+### Destroy — conferencia independente no AWS Console
+
+![EKS sem clusters](terraform-apply/destroy-aws-eks-empty.png)
+
+![RDS sem bancos de dados](terraform-apply/destroy-aws-rds-empty.png)
+
+![VPC sem recursos](terraform-apply/destroy-aws-vpc-empty.png)
+
+![ECR sem repositorios](terraform-apply/destroy-aws-ecr-empty.png)
