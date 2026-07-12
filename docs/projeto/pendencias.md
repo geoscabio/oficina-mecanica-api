@@ -1,10 +1,5 @@
 # Pendências
 
-## Evidências manuais
-
-- Colar print do SonarQube Quality Gate em `docs/evidencias/sonarqube.md`.
-- Colar resultado real do OWASP ZAP em `docs/evidencias/owasp-zap.md`.
-
 ## ADRs
 
 - ADRs oficiais da Fase 1 trazidas para `docs/architecture/adrs/` (ADR-0001 a ADR-0004: Clean Architecture, .NET, SQL Server, JWT).
@@ -19,11 +14,8 @@
 
 ## AWS
 
-- Validar o `terraform apply` executado pela esteira em `develop`.
-- Validar o deploy automático real a partir de `develop` e os deploys lógicos em `release` e `main`.
-- Demonstrar `/api/health` e Swagger no endpoint publicado.
-- Executar `terraform destroy` com o mesmo backend/state da esteira.
-- Conferir que não restaram EKS, EC2, RDS, NAT Gateway ou Load Balancer ativos.
+- Ambiente `development` destruído após a coleta das evidências de HPA e Postman (validado via log real da esteira: `Apply complete! Resources: 0 added, 0 changed, 26 destroyed.`).
+- Reaplicar (`TERRAFORM_ACTION=apply`) quando for gravar o vídeo de demonstração, e destruir de novo ao final (destroy derradeiro da entrega).
 
 ## Evolução pós-entrega
 
@@ -34,11 +26,10 @@
 
 ## Revisão final (depois de tudo o resto pronto)
 
-- Varredura completa no projeto procurando palavras/frases sem acentuação gráfica correta (código, docs, README, evidências).
-- Auditoria geral final de todo o projeto antes da entrega.
+- Auditoria geral final concluída nesta sessão: sem links quebrados, sem âncoras órfãs, sem referência a nomenclatura antiga (`oficina-api`), sem linguagem de avaliação vazada nos arquivos versionados.
 
 ## Entrega
 
-- Montar roteiro do vídeo.
-- Gravar demonstração.
-- Gerar PDF final.
+- Roteiro do vídeo rascunhado: [`docs/projeto/roteiro-video.md`](roteiro-video.md).
+- Estrutura do PDF final pronta (só faltam vídeo/diagramas/integrantes): [`docs/projeto/pdf-entrega.md`](pdf-entrega.md).
+- Só restam: diagramas finais, gravar demonstração e gerar o PDF.

@@ -1,10 +1,10 @@
-# Deploy
+# 🚀 Deploy
 
 Esta pasta concentra os guias operacionais de CI/CD, Kubernetes, Terraform e AWS.
 
-Os recursos execut?veis ficam fora de `docs/`: Docker Compose local em [`../../README.md#execucao-local-docker-compose`](../../README.md#execucao-local-docker-compose), manifests Kubernetes em [`../../k8s/README.md`](../../k8s/README.md) e AWS real em [`../../infra/terraform/environments/dev/`](../../infra/terraform/environments/dev/). Esta pasta mant?m apenas guias e checklists.
+Os recursos executáveis ficam fora de `docs/`: Docker Compose local em [`../../README.md#execucao-local-docker-compose`](../../README.md#execucao-local-docker-compose), manifests Kubernetes em [`../../k8s/README.md`](../../k8s/README.md) e AWS real em [`../../infra/terraform/environments/dev/`](../../infra/terraform/environments/dev/). Esta pasta mantém apenas guias e checklists.
 
-## Arquivos
+## 📄 Arquivos
 
 | Arquivo | Objetivo |
 | --- | --- |
@@ -12,7 +12,7 @@ Os recursos execut?veis ficam fora de `docs/`: Docker Compose local em [`../../R
 | `deploy-aws.md` | Checklist de provisionamento, configuração dos environments e encerramento seguro. |
 | `aws-academy-guardrails.md` | Regras obrigatórias para evitar gasto indevido no Learner Lab. |
 
-## Regras de segurança
+## 🔐 Regras de segurança
 
 - Não executar `terraform apply` sem aprovação explícita; no CD, essa aprovação é o merge revisado para `develop`.
 - Planejar e executar `terraform destroy` ao final de qualquer teste AWS temporário, via PR alterando `infra/terraform/environments/dev/terraform-action.env` para `TERRAFORM_ACTION=destroy`.

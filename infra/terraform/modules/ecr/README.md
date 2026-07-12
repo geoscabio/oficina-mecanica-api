@@ -1,21 +1,21 @@
-# ECR Module
+# 🐳 ECR Module
 
-## Objetivo
+## 🎯 Objetivo
 
 Este módulo é responsável por provisionar um repositório privado no Amazon Elastic Container Registry (ECR), utilizado para armazenar as imagens Docker da aplicação.
 
-## Recursos criados
+## 📦 Recursos criados
 
 - Amazon ECR Repository
 
-## Funcionalidades
+## ⚙️ Funcionalidades
 
 - Criação de repositório privado;
 - Imutabilidade das tags de imagem (`IMMUTABLE`);
 - Verificação automática de vulnerabilidades (`scan_on_push`);
 - Aplicação das tags compartilhadas da infraestrutura.
 
-## Variáveis de entrada
+## 🧩 Variáveis de entrada
 
 | Variável | Tipo | Descrição |
 |----------|------|-----------|
@@ -24,7 +24,7 @@ Este módulo é responsável por provisionar um repositório privado no Amazon E
 | `scan_on_push` | `bool` | Habilita a verificação automática de vulnerabilidades após o envio da imagem. |
 | `tags` | `map(string)` | Tags aplicadas ao recurso. |
 
-## Outputs
+## 📤 Outputs
 
 | Output | Descrição |
 |--------|-----------|

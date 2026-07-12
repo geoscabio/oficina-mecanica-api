@@ -1,12 +1,12 @@
-# VPC Module
+# 🌐 VPC Module
 
-## Objetivo
+## 🎯 Objetivo
 
 Este módulo é responsável por provisionar a infraestrutura de rede da aplicação na AWS.
 
 A implementação segue boas práticas recomendadas pela AWS e pela HashiCorp, fornecendo a base necessária para os demais serviços da infraestrutura, como Amazon EKS, Amazon RDS e Amazon ECR.
 
-## Recursos criados
+## 📦 Recursos criados
 
 Atualmente este módulo provisiona os seguintes recursos:
 
@@ -20,7 +20,7 @@ Atualmente este módulo provisiona os seguintes recursos:
 - Route Table privada
 - Associações entre Subnets e Route Tables
 
-## Arquitetura
+## 🏗️ Arquitetura
 
 ```text
                          Internet
@@ -42,7 +42,7 @@ Atualmente este módulo provisiona os seguintes recursos:
 Private Subnet A     Private Subnet B
 ```
 
-## Estrutura do módulo
+## 📁 Estrutura do módulo
 
 ```text
 networking/vpc/
@@ -57,7 +57,7 @@ networking/vpc/
 └── vpc.tf
 ```
 
-## Decisões de arquitetura
+## 🧠 Decisões de arquitetura
 
 A VPC foi projetada seguindo a arquitetura recomendada pela AWS para aplicações executadas em ambientes privados.
 
@@ -65,7 +65,7 @@ Os recursos de banco de dados e Kubernetes são implantados em sub-redes privada
 
 Essa arquitetura atende aos requisitos de isolamento de rede definidos para a segunda fase do Tech Challenge e aproxima a solução de um ambiente de produção.
 
-## Boas práticas adotadas
+## ✅ Boas práticas adotadas
 
 - Organização por responsabilidade de cada recurso.
 - Utilização de módulos reutilizáveis do Terraform.
@@ -73,7 +73,7 @@ Essa arquitetura atende aos requisitos de isolamento de rede definidos para a se
 - Separação entre ambientes (`environments`) e módulos (`modules`).
 - Padronização da nomenclatura dos recursos.
 
-## Observações
+## 📌 Observações
 
 Este módulo representa apenas a camada de rede da infraestrutura.
 

@@ -1,6 +1,6 @@
-# Evidencia: build, testes e cobertura
+# Evidência: build, testes e cobertura
 
-Data da execucao local: 09/07/2026
+Data da execução local: 09/07/2026
 
 ## Comandos executados
 
@@ -28,7 +28,7 @@ dotnet test OficinaMecanica.sln `
   --logger "trx"
 ```
 
-Geracao de relatorio com ReportGenerator:
+Geração de relatório com ReportGenerator:
 
 ```powershell
 dotnet tool install dotnet-reportgenerator-globaltool --tool-path "$env:TEMP\dotnet-reportgenerator"
@@ -50,21 +50,21 @@ dotnet tool install dotnet-reportgenerator-globaltool --tool-path "$env:TEMP\dot
 
 ## Cobertura real
 
-Resumo validado a partir dos arquivos `coverage.cobertura.xml` com Docker acessivel para executar os testes de integracao:
+Resumo validado a partir dos arquivos `coverage.cobertura.xml` com Docker acessível para executar os testes de integração:
 
-| Metrica | Resultado |
+| Métrica | Resultado |
 | --- | --- |
 | Line coverage global | 91.2% (3679 de 4036 linhas) |
 | Testes ignorados | 0 |
 | Assemblies | 4 |
 | Projetos de teste | 3 |
 
-## Observacoes
+## Observações
 
-- A suite completa sem cobertura foi usada como referencia principal de qualidade funcional.
-- O numero anterior de 42.6% foi descartado porque a coleta havia ignorado testes de integracao quando o runner nao enxergou o Docker.
-- A evidencia valida exige Docker acessivel, 424 testes aprovados e 0 testes ignorados.
-- A geracao simultanea de Cobertura e OpenCover depende do ajuste de CI/CD que configura `tests/sonarqube.runsettings` com os dois formatos.
+- A suite completa sem cobertura foi usada como referência principal de qualidade funcional.
+- O número anterior de 42.6% foi descartado porque a coleta havia ignorado testes de integração quando o runner não enxergou o Docker.
+- A evidência válida exige Docker acessível, 424 testes aprovados e 0 testes ignorados.
+- A geração simultânea de Cobertura e OpenCover depende do ajuste de CI/CD que configura `tests/sonarqube.runsettings` com os dois formatos.
 - O pipeline do PR de CI/CD falha se houver teste ignorado ou cobertura global de linhas abaixo de 90%.
 - Os arquivos brutos ficam em `TestResults/`, pasta ignorada pelo Git.
-- No GitHub Actions, o artifact `test-and-coverage-results` guarda `.trx`, Cobertura XML e relatorio HTML/Markdown.
+- No GitHub Actions, o artifact `test-and-coverage-results` guarda `.trx`, Cobertura XML e relatório HTML/Markdown.

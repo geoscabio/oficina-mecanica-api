@@ -1,10 +1,10 @@
-# Guardrails AWS Academy
+# 🛡️ Guardrails AWS Academy
 
-## Regra obrigatoria
+## ⚠️ Regra obrigatória
 
-O ambiente AWS Academy possui orcamento limitado. Nenhum recurso AWS deve ser criado sem aprovacao explicita antes do comando ou merge que dispara CD, e todo `terraform apply` deve ter um `terraform destroy` planejado para o fim da sessao.
+O ambiente AWS Academy possui orçamento limitado. Nenhum recurso AWS deve ser criado sem aprovação explícita antes do comando ou merge que dispara CD, e todo `terraform apply` deve ter um `terraform destroy` planejado para o fim da sessão.
 
-## Recursos com maior risco de custo
+## 💰 Recursos com maior risco de custo
 
 - EKS Cluster
 - EC2/Managed Node Group
@@ -13,24 +13,24 @@ O ambiente AWS Academy possui orcamento limitado. Nenhum recurso AWS deve ser cr
 - Load Balancer criado indiretamente por `kubernetes_service_v1.oficina_mecanica_api` com `type = "LoadBalancer"` em `infra/terraform/environments/dev/api-service.tf`
 - ECR com imagens armazenadas
 
-## Antes de aplicar
+## ✅ Antes de aplicar
 
-1. Confirmar que o Learner Lab esta iniciado.
-2. Configurar credenciais temporarias da AWS Academy.
-3. Configurar a senha fora do repositorio:
+1. Confirmar que o Learner Lab está iniciado.
+2. Configurar credenciais temporárias da AWS Academy.
+3. Configurar a senha fora do repositório:
 
 ```powershell
 $env:TF_VAR_db_password = "<senha-forte>"
 ```
 
-4. Configurar as roles EKS existentes do lab fora do repositorio:
+4. Configurar as roles EKS existentes do lab fora do repositório:
 
 ```powershell
 $env:TF_VAR_eks_cluster_role_name = "<LabEksClusterRole-...>"
 $env:TF_VAR_eks_node_role_name = "<LabEksNodeRole-...>"
 ```
 
-5. Rodar somente validacoes locais:
+5. Rodar somente validações locais:
 
 ```powershell
 terraform fmt -check -recursive infra
@@ -45,9 +45,9 @@ terraform -chdir=infra/terraform/environments/dev init
 terraform -chdir=infra/terraform/environments/dev plan
 ```
 
-7. Conferir no plano se serao criados apenas os recursos esperados.
+7. Conferir no plano se serão criados apenas os recursos esperados.
 
-## Depois de testar
+## 🧹 Depois de testar
 
 Destruir a infraestrutura e os recursos Kubernetes gerenciados pelo Terraform pela esteira:
 
@@ -55,10 +55,10 @@ Destruir a infraestrutura e os recursos Kubernetes gerenciados pelo Terraform pe
 2. Alterar `infra/terraform/environments/dev/terraform-action.env` para `TERRAFORM_ACTION=destroy`.
 3. Abrir PR para `develop`.
 4. Fazer merge do PR.
-5. Acompanhar o workflow `CD Development` ate a etapa `Terraform destroy`.
+5. Acompanhar o workflow `CD Development` até a etapa `Terraform destroy`.
 6. Depois do destroy, abrir outro PR voltando para `TERRAFORM_ACTION=apply`.
 
-Conferir se nao restou recurso cobravel:
+Conferir se não restou recurso cobrável:
 
 ```powershell
 aws eks list-clusters --region us-east-1
@@ -67,6 +67,6 @@ aws elbv2 describe-load-balancers --region us-east-1
 aws ec2 describe-nat-gateways --region us-east-1
 ```
 
-## Observacao importante
+## 📌 Observação importante
 
-O fim da sessao do Learner Lab pode encerrar instancias EC2, mas outros recursos como RDS, Load Balancer e NAT Gateway podem continuar existindo e consumindo credito. Por isso, o destroy via esteira e obrigatorio.
+O fim da sessão do Learner Lab pode encerrar instâncias EC2, mas outros recursos como RDS, Load Balancer e NAT Gateway podem continuar existindo e consumindo crédito. Por isso, o destroy via esteira é obrigatório.
