@@ -3,7 +3,7 @@
 ## ADRs
 
 - ADRs oficiais da Fase 1 trazidas para `docs/architecture/adrs/` (ADR-0001 a ADR-0004: Clean Architecture, .NET, SQL Server, JWT).
-- Concluído: decisões arquiteturais da Fase 2 registradas como ADR-0005 (Kubernetes/EKS + Terraform), ADR-0006 (webhook com token compartilhado para decisão de orçamento) e ADR-0007 (autoscaling HPA + ajuste de runtime .NET).
+- Concluído: decisões arquiteturais da Fase 2 registradas em `docs/architecture/adrs/` (ADR-0005 a ADR-0013) — orquestração Kubernetes/EKS + Terraform, webhook com token compartilhado, autoscaling HPA + runtime .NET, state do Terraform, topologia de rede AWS, RDS single-AZ, Load Balancer via Kubernetes Service, pipeline CI/CD em estágios e controle de apply/destroy via arquivo versionado. Revisão completa feita em 2026-07-13, cobrindo infra, integração externa e pipeline.
 
 ## Diagramas
 
