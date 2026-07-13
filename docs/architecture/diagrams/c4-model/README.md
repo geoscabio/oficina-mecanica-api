@@ -8,12 +8,12 @@ Modelo C4 oficial do projeto, mantido em Structurizr DSL.
 
 ## Views exportadas
 
-- `C4ModelL1SystemContext.svg`: visão de contexto do sistema.
-- `C4ModelL1SystemContext-key.svg`: legenda da visão L1.
-- `C4ModelL2Containers.svg`: visão de contêineres.
-- `C4ModelL2Containers-key.svg`: legenda da visão L2.
-- `C4ModelL3ComponentsApi.svg`: visão de componentes da API.
-- `C4ModelL3ComponentsApi-key.svg`: legenda da visão L3.
+- `c4-model-l1-system-context.svg`: visão de contexto do sistema.
+- `c4-model-l1-system-context-key.svg`: legenda da visão L1.
+- `c4-model-l2-containers.svg`: visão de contêineres.
+- `c4-model-l2-containers-key.svg`: legenda da visão L2.
+- `c4-model-l3-components-api.svg`: visão de componentes da API.
+- `c4-model-l3-components-api-key.svg`: legenda da visão L3.
 
 ## Validação
 
