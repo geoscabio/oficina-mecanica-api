@@ -1,0 +1,66 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Docker-Local" id="docker-local">
+    <mxGraphModel dx="1876" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1300" pageHeight="700" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="user" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontColor=#000000;" value="Usuario / Navegador (Host)" vertex="1">
+          <mxGeometry height="70" width="180" x="20" y="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="env" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=8;fontColor=#000000;" value="Arquivo .env (nao versionado)&#xa;Configuracao sensivel do host&#xa;(NAO e Docker Secret)&#xa;&#xa;OFICINA_MECANICA_SQL_SA_PASSWORD&#xa;OFICINA_MECANICA_JWT_SECRET&#xa;OFICINA_MECANICA_ORCAMENTO_WEBHOOK_TOKEN" vertex="1">
+          <mxGeometry height="160" width="320" x="20" y="280" as="geometry" />
+        </mxCell>
+
+        <mxCell id="compose" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf6ff;strokeColor=#2496ED;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=13;spacingTop=8;dashed=1;fontColor=#000000;" value="Docker Compose project: oficina_mecanica_api (docker-compose.yml)" vertex="1">
+          <mxGeometry height="580" width="900" x="380" y="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bridge" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0b5b8c;dashed=1;verticalAlign=top;fontStyle=1;fontSize=11;spacingTop=6;fontColor=#000000;" value="Rede padrao do Compose (bridge) — containers se resolvem entre si pelo nome do servico (DNS interno)" vertex="1">
+          <mxGeometry height="300" width="840" x="410" y="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2496ED;strokeColor=#0b5b8c;fontColor=#ffffff;fontStyle=1;fontSize=11;align=left;spacingLeft=8;verticalAlign=middle;" value="Container: api&#xa;oficina-mecanica-api&#xa;build: Dockerfile (contexto raiz)&#xa;porta host:container 5093:8080&#xa;ASPNETCORE_ENVIRONMENT=Development" vertex="1">
+          <mxGeometry height="140" width="300" x="440" y="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sqlserver" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2496ED;strokeColor=#0b5b8c;fontColor=#ffffff;fontStyle=1;fontSize=11;align=left;spacingLeft=8;verticalAlign=middle;" value="Container: sqlserver&#xa;oficina-mecanica-sqlserver&#xa;image: mcr.microsoft.com/mssql/server:2022-latest&#xa;porta host:container 14333:1433&#xa;&#xa;Healthcheck (diretiva do proprio container):&#xa;sqlcmd SELECT 1&#xa;interval 10s, timeout 5s, retries 10" vertex="1">
+          <mxGeometry height="180" width="300" x="880" y="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="volume" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#666666;fontSize=11;fontColor=#000000;" value="Volume nomeado&#xa;oficina-mecanica-sqlserver-data&#xa;(fora da rede, persiste dados em disco)" vertex="1">
+          <mxGeometry height="70" width="300" x="880" y="450" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e-user-api" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.3;exitDx=0;exitDy=0;" target="api" value="http://localhost:5093&#xa;(fluxo principal)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-env-api" edge="1" parent="1" source="env" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.3;exitDx=0;exitDy=0;" target="api" value="variaveis de ambiente&#xa;(config)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-env-sql" edge="1" parent="1" source="env" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="sqlserver" value="MSSQL_SA_PASSWORD&#xa;(config)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="310" />
+              <mxPoint x="340" y="60" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-api-sql-traffic" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.7;entryDx=0;entryDy=0;" target="sqlserver" value="Server=sqlserver,1433&#xa;(fluxo principal, DNS interno)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-api-sql-depends" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.2;exitDx=0;exitDy=0;entryX=0;entryY=0.2;entryDx=0;entryDy=0;" target="sqlserver" value="depends_on: service_healthy&#xa;(lifecycle/controle de inicializacao)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-vol-sql" edge="1" parent="1" source="volume" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="sqlserver" value="monta em /var/opt/mssql&#xa;(persistencia)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontColor=#333333;" value="Legenda: seta solida preta = fluxo principal/execucao | seta cinza pontilhada = configuracao/secret/cache | seta amarela pontilhada = controle/lifecycle" vertex="1">
+          <mxGeometry height="30" width="840" x="410" y="640" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
