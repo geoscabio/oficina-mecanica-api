@@ -1,6 +1,6 @@
 # Evidência: build, testes e cobertura
 
-Data da execução local: 09/07/2026
+Data da execução local: 12/07/2026 (atualizado após refatoração do AbrirOrdemServicoUseCase)
 
 ## Comandos executados
 
@@ -54,10 +54,13 @@ Resumo validado a partir dos arquivos `coverage.cobertura.xml` com Docker acess�
 
 | Métrica | Resultado |
 | --- | --- |
-| Line coverage global | 91.2% (3679 de 4036 linhas) |
+| Line coverage global | 92.47% (3462 de 3744 linhas) |
+| Branch coverage global | 78.80% |
 | Testes ignorados | 0 |
 | Assemblies | 4 |
 | Projetos de teste | 3 |
+
+> O gate da esteira (`CI`, job `test_application`) usa exclusivamente **line coverage** (92.47% acima), com mínimo de 90%. O SonarQube reporta uma métrica combinada de line + branch coverage (87.4%, ver [`sonarqube.md`](sonarqube.md#por-que-o-coverage-do-sonarqube-874-e-diferente-do-gate-de-90-da-esteira)) — são dois critérios diferentes sobre os mesmos testes, não um erro de configuração.
 
 ## Observações
 
