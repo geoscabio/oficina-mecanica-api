@@ -1,20 +1,22 @@
-# ADR-0009 — Topologia de rede AWS: VPC, 2 AZs, subnets públicas/privadas e NAT Gateway único
+# ADR-0007 — Topologia de rede AWS: VPC, 2 AZs, subnets públicas/privadas e NAT Gateway único
 
 ## Status
 
 **Status:** ✅ Aceito
-**Data:** 13/07/2026
+**Data:** 07/07/2026
 **Autores:** Gabriel de Sousa Silva, Geovanna Monteiro Scabio
 
 ---
 
 ## 1. Contexto e Problema
 
-> A infraestrutura AWS precisa de uma rede isolada (VPC) que hospede o cluster EKS e o banco RDS com segurança, seguindo o requisito de alta disponibilidade que a própria AWS exige de alguns serviços (EKS e subnet group do RDS pedem subnets em pelo menos duas zonas de disponibilidade), mas o ambiente é temporário, de laboratório, e recriado a cada demonstração — não pode ter custo desnecessário.
+> O enunciado da Fase 2 não menciona VPC, subnets, Availability Zones ou NAT Gateway em nenhum momento — esses são detalhes de implementação decorrentes de uma escolha anterior e também não obrigatória: rodar o cluster Kubernetes na nuvem (a IaC pode provisionar o cluster "local ou cloud", segundo o próprio enunciado). Optamos pela AWS, e como consequência precisamos desenhar uma rede isolada (VPC) que hospede o cluster EKS e o banco RDS com segurança, respeitando também um requisito técnico da própria AWS (não do Tech Challenge): EKS e o subnet group do RDS exigem subnets distribuídas em pelo menos duas Availability Zones. O ambiente é temporário, de laboratório, recriado a cada demonstração — não pode ter custo desnecessário.
+
+**Nada nesta ADR é exigência do Tech Challenge.** É 100% decorrência técnica de termos optado por rodar na AWS (opção nossa) e da própria AWS exigir 2 AZs para EKS/RDS (regra da AWS, não da FIAP).
 
 ## 2. Fatores Decisivos (Drivers)
 
-- **Exigência técnica da AWS:** EKS e o subnet group do RDS exigem subnets distribuídas em no mínimo duas Availability Zones (AZs), mesmo que os recursos reais rodem em apenas uma.
+- **Exigência técnica da AWS** (não do enunciado): EKS e o subnet group do RDS exigem subnets distribuídas em no mínimo duas Availability Zones (AZs), mesmo que os recursos reais rodem em apenas uma.
 - **Separação público/privado:** recursos que não devem ser expostos diretamente à internet (node do EKS, RDS) precisam ficar em subnets privadas.
 - **Custo:** cada NAT Gateway é cobrado por hora, mesmo ocioso — ter um por AZ dobraria o custo sem necessidade real para o volume de tráfego de uma demonstração acadêmica.
 
@@ -24,7 +26,7 @@
 
 ## 4. Justificativa
 
-- A estrutura de subnets nas duas AZs satisfaz a exigência da AWS para EKS e RDS, mesmo com os recursos reais concentrados em uma única zona (1 node EKS, RDS single-AZ — ver ADR-0007 e ADR-0010).
+- A estrutura de subnets nas duas AZs satisfaz a exigência técnica da AWS para EKS e RDS, mesmo com os recursos reais concentrados em uma única zona (1 node EKS, RDS single-AZ — ver ADR-0006 e ADR-0008).
 - Um NAT Gateway único reduz o custo pela metade em comparação a um NAT por AZ, aceitável porque a perda de resiliência (se a AZ do NAT cair, a saída para internet das duas subnets privadas para) não é crítica para uma demonstração de curta duração.
 - Route tables compartilhadas (uma pública, uma privada) evitam duplicar a mesma regra de rota subnet a subnet.
 

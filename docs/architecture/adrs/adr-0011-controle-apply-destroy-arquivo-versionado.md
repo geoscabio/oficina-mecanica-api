@@ -1,16 +1,16 @@
-# ADR-0013 — Controle de apply/destroy do Terraform via arquivo versionado com aprovação por PR
+# ADR-0011 — Controle de apply/destroy do Terraform via arquivo versionado com aprovação por PR
 
 ## Status
 
 **Status:** ✅ Aceito
-**Data:** 13/07/2026
+**Data:** 11/07/2026
 **Autores:** Gabriel de Sousa Silva, Geovanna Monteiro Scabio
 
 ---
 
 ## 1. Contexto e Problema
 
-> Rodar `terraform apply` ou `terraform destroy` na AWS tem consequência real de custo e de disponibilidade do ambiente de demonstração. É preciso um mecanismo que decida qual ação a esteira executa a cada `push` em `develop`, sem exigir que alguém dispare manualmente um workflow (o que teria menos rastreabilidade) e sem permitir que uma ação destrutiva aconteça sem revisão.
+> O enunciado da Fase 2 não menciona como controlar quando a pipeline aplica ou destrói infraestrutura — é uma decisão puramente operacional da equipe, motivada pelo risco real de custo no AWS Academy Learner Lab. Rodar `terraform apply` ou `terraform destroy` na AWS tem consequência real de custo e de disponibilidade do ambiente de demonstração. Era preciso um mecanismo que decidisse qual ação a esteira executa a cada `push` em `develop`, sem exigir que alguém dispare manualmente um workflow (o que teria menos rastreabilidade) e sem permitir que uma ação destrutiva acontecesse sem revisão.
 
 ## 2. Fatores Decisivos (Drivers)
 

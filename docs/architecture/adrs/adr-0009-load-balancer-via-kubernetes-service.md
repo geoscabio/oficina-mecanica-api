@@ -1,16 +1,16 @@
-# ADR-0011 — Load Balancer provisionado via Kubernetes Service em vez de recurso Terraform explícito
+# ADR-0009 — Load Balancer provisionado via Kubernetes Service em vez de recurso Terraform explícito
 
 ## Status
 
 **Status:** ✅ Aceito
-**Data:** 13/07/2026
+**Data:** 08/07/2026
 **Autores:** Gabriel de Sousa Silva, Geovanna Monteiro Scabio
 
 ---
 
 ## 1. Contexto e Problema
 
-> A API precisa de um ponto de entrada público na internet, direcionando o tráfego para o Pod correto dentro do EKS. Existem duas formas comuns de expor isso na AWS: criar o Load Balancer explicitamente como um recurso Terraform (`aws_lb`) apontando para o cluster, ou deixar o próprio Kubernetes provisionar o Load Balancer automaticamente a partir de um `Service` do tipo `LoadBalancer`.
+> O enunciado da Fase 2 não menciona Load Balancer em nenhum momento — é um detalhe de implementação decorrente da ADR-0008 (rodar na AWS via EKS). A API precisa de um ponto de entrada público na internet, direcionando o tráfego para o Pod correto dentro do EKS. Existem duas formas comuns de expor isso na AWS: criar o Load Balancer explicitamente como um recurso Terraform (`aws_lb`) apontando para o cluster, ou deixar o próprio Kubernetes provisionar o Load Balancer automaticamente a partir de um `Service` do tipo `LoadBalancer`. Decisão 100% técnica da equipe, sem relação direta com nenhum item do enunciado.
 
 ## 2. Fatores Decisivos (Drivers)
 
