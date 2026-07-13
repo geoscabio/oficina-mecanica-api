@@ -5,96 +5,96 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <mxCell id="branch" value="feature/*, bugfix/*, hotfix/*&#10;PR manual para develop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="branch" value="feature/*, bugfix/*, hotfix/*&#10;PR manual para develop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="40" y="270" width="180" height="60" as="geometry" />
         </mxCell>
 
-        <mxCell id="ci" value="CI&#10;(.github/workflows/ci.yml)&#10;Trigger: pull_request" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#24292e;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=13;spacingTop=6;" vertex="1" parent="1">
+        <mxCell id="ci" value="CI&#10;(.github/workflows/ci.yml)&#10;Trigger: pull_request" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#24292e;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=13;spacingTop=6;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="280" y="40" width="260" height="440" as="geometry" />
         </mxCell>
-        <mxCell id="ci1" value="build_application&#10;Restore + build" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="ci1" value="build_application&#10;Restore + build" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="300" y="90" width="220" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="ci2" value="verify_code_style&#10;dotnet format" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="ci2" value="verify_code_style&#10;dotnet format" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="300" y="145" width="220" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="ci3" value="test_application&#10;Testes + cobertura minima 90%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="ci3" value="test_application&#10;Testes + cobertura minima 90%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="300" y="200" width="220" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="ci4" value="build_container_image&#10;Build imagem Docker (validacao, sem push)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f0fa;strokeColor=#2496ED;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="ci4" value="build_container_image&#10;Build imagem Docker (validacao, sem push)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f0fa;strokeColor=#2496ED;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="300" y="255" width="220" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="ci5" value="validate_kubernetes_manifests&#10;Dry-run em cluster KinD efemero" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="ci5" value="validate_kubernetes_manifests&#10;Dry-run em cluster KinD efemero" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="300" y="310" width="220" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="ci6" value="quality_gate&#10;Consolida os jobs anteriores" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="ci6" value="quality_gate&#10;Consolida os jobs anteriores" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontStyle=1;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="300" y="365" width="220" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="e-ci-steps1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="ci1" target="ci2"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e-ci-steps2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="ci2" target="ci3"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e-ci-steps3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="ci3" target="ci4"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e-ci-steps4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="ci4" target="ci5"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e-ci-steps5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="ci5" target="ci6"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-ci-steps1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="ci1" target="ci2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-ci-steps2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="ci2" target="ci3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-ci-steps3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="ci3" target="ci4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-ci-steps4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="ci4" target="ci5"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-ci-steps5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="ci5" target="ci6"><mxGeometry relative="1" as="geometry" /></mxCell>
 
-        <mxCell id="cddev" value="CD Development&#10;(cd-development.yml)&#10;Trigger: push em develop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#24292e;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=13;spacingTop=6;" vertex="1" parent="1">
+        <mxCell id="cddev" value="CD Development&#10;(cd-development.yml)&#10;Trigger: push em develop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#24292e;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=13;spacingTop=6;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="620" y="40" width="280" height="500" as="geometry" />
         </mxCell>
-        <mxCell id="cd1" value="Detecta mudanca deployable&#10;(pula deploy se for so docs/Markdown)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="cd1" value="Detecta mudanca deployable&#10;(pula deploy se for so docs/Markdown)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="640" y="90" width="240" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="cd2" value="Terraform apply&#10;VPC, RDS, EKS (infra real AWS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5d0;strokeColor=#7B42BC;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="cd2" value="Terraform apply&#10;VPC, RDS, EKS (infra real AWS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5d0;strokeColor=#7B42BC;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="640" y="150" width="240" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="cd3" value="Build e push da imagem&#10;Amazon ECR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f0fa;strokeColor=#2496ED;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="cd3" value="Build e push da imagem&#10;Amazon ECR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f0fa;strokeColor=#2496ED;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="640" y="210" width="240" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="cd4" value="Deploy dos manifestos&#10;Amazon EKS (via provider kubernetes do Terraform)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="cd4" value="Deploy dos manifestos&#10;Amazon EKS (via provider kubernetes do Terraform)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="640" y="270" width="240" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="cd5" value="Valida rollout&#10;Imprime endpoint do Load Balancer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="cd5" value="Valida rollout&#10;Imprime endpoint do Load Balancer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="640" y="330" width="240" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="cd6" value="Salva Terraform state&#10;Cache do GitHub Actions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="cd6" value="Salva Terraform state&#10;Cache do GitHub Actions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="640" y="390" width="240" height="50" as="geometry" />
         </mxCell>
         <mxCell id="cd7" value="Abre PR automatico&#10;develop -&gt; release" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#24292e;strokeColor=#000000;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="640" y="450" width="240" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="e-cd1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="cd1" target="cd2"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e-cd2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="cd2" target="cd3"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e-cd3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="cd3" target="cd4"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e-cd4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="cd4" target="cd5"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e-cd5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="cd5" target="cd6"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e-cd6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="cd6" target="cd7"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-cd1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cd1" target="cd2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-cd2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cd2" target="cd3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-cd3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cd3" target="cd4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-cd4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cd4" target="cd5"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-cd5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cd5" target="cd6"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-cd6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cd6" target="cd7"><mxGeometry relative="1" as="geometry" /></mxCell>
 
-        <mxCell id="cdrel" value="CD Release&#10;(cd-release.yml)&#10;Trigger: push em release" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#24292e;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=13;spacingTop=6;" vertex="1" parent="1">
+        <mxCell id="cdrel" value="CD Release&#10;(cd-release.yml)&#10;Trigger: push em release" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#24292e;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=13;spacingTop=6;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="980" y="40" width="220" height="200" as="geometry" />
         </mxCell>
-        <mxCell id="cr1" value="Registra deploy logico&#10;homologation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="cr1" value="Registra deploy logico&#10;homologation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="1000" y="90" width="180" height="50" as="geometry" />
         </mxCell>
         <mxCell id="cr2" value="Abre PR automatico&#10;release -&gt; main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#24292e;strokeColor=#000000;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="1000" y="150" width="180" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="e-cr1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;" edge="1" parent="1" source="cr1" target="cr2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-cr1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cr1" target="cr2"><mxGeometry relative="1" as="geometry" /></mxCell>
 
-        <mxCell id="cdprod" value="CD Production&#10;(cd-production.yml)&#10;Trigger: push em main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#24292e;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=13;spacingTop=6;" vertex="1" parent="1">
+        <mxCell id="cdprod" value="CD Production&#10;(cd-production.yml)&#10;Trigger: push em main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#24292e;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=13;spacingTop=6;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="980" y="280" width="220" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="cp1" value="Registra deploy logico&#10;production" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="cp1" value="Registra deploy logico&#10;production" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=11;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="1000" y="330" width="180" height="70" as="geometry" />
         </mxCell>
 
-        <mxCell id="e-branch-ci" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="branch" target="ci">
+        <mxCell id="e-branch-ci" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="branch" target="ci">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-ci-cddev" value="merge revisado&#10;(develop)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="ci" target="cddev">
+        <mxCell id="e-ci-cddev" value="merge revisado&#10;(develop)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="ci" target="cddev">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-cddev-cdrel" value="PR automatico +&#10;merge revisado" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="cddev" target="cdrel">
+        <mxCell id="e-cddev-cdrel" value="PR automatico +&#10;merge revisado" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cddev" target="cdrel">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-cdrel-cdprod" value="PR automatico +&#10;merge com aprovacao&#10;obrigatoria" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="cdrel" target="cdprod">
+        <mxCell id="e-cdrel-cdprod" value="PR automatico +&#10;merge com aprovacao&#10;obrigatoria" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cdrel" target="cdprod">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
