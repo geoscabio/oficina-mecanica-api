@@ -3,7 +3,7 @@
 ## ADRs
 
 - ADRs oficiais da Fase 1 trazidas para `docs/architecture/adrs/` (ADR-0001 a ADR-0004: Clean Architecture, .NET, SQL Server, JWT).
-- Revisar se falta registrar alguma decisão arquitetural tomada só na Fase 2 (ex.: EKS/Terraform, HPA, escolha de GC) como ADR nova.
+- Concluído: decisões arquiteturais da Fase 2 registradas como ADR-0005 (Kubernetes/EKS + Terraform), ADR-0006 (webhook com token compartilhado para decisão de orçamento) e ADR-0007 (autoscaling HPA + ajuste de runtime .NET).
 
 ## Diagramas
 
@@ -16,7 +16,7 @@ Diagramas separados de Kubernetes e Docker não são mais necessários: o profes
 
 - Ambiente `development` destruído após a coleta das evidências de HPA e Postman (validado via log real da esteira: `Apply complete! Resources: 0 added, 0 changed, 26 destroyed.`).
 - Reaplicar (`TERRAFORM_ACTION=apply`) quando for gravar o vídeo de demonstração, e destruir de novo ao final (destroy derradeiro da entrega).
-- Evidenciar e executar de fato o deploy lógico nos ambientes `homologation` (branch `release`) e `production` (branch `main`) — ainda não validamos esses dois estágios do Git Flow com uma execução real registrada, só o deploy real em `development`. Aproveitar a PR automática `develop → release` já aberta para disparar e capturar essa evidência.
+- Evidenciar e executar de fato o deploy lógico nos ambientes `homologation` (branch `release`) e `production` (branch `main`) — ainda não validamos esses dois estágios do Git Flow com uma execução real registrada, só o deploy real em `development`. Confirmado em auditoria (2026-07-13): `release` está 155 commits atrás de `develop` e `main` igual a `release` — a PR automática `develop → release` abre e fecha sozinha a cada novo commit sem nunca ter sido mergeada. Próximo passo: mergear a próxima PR automática que abrir (ou disparar uma nova) para gerar a primeira execução real do `CD Release`, depois mergear `release → main` para `CD Production`.
 
 ## Evolução pós-entrega
 
