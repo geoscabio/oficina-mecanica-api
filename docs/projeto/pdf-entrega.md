@@ -60,6 +60,17 @@ Registradas em [`docs/architecture/adrs/`](../architecture/adrs/):
 - ADR-0002 — Linguagem e framework (.NET)
 - ADR-0003 — Banco de dados relacional (SQL Server)
 - ADR-0004 — Autenticação e autorização (JWT)
+- ADR-0005 — Webhook com token compartilhado para decisão de orçamento
+- ADR-0006 — RDS single-AZ sem backup automatizado
+- ADR-0007 — Topologia de rede AWS: VPC, 2 AZs e NAT Gateway único
+- ADR-0008 — Orquestração com Kubernetes/EKS e Terraform como IaC
+- ADR-0009 — Load Balancer provisionado via Kubernetes Service
+- ADR-0010 — Pipeline CI/CD em estágios com deploys lógicos
+- ADR-0011 — Controle de apply/destroy via arquivo versionado
+- ADR-0012 — Terraform state em backend local com cache do GitHub Actions
+- ADR-0013 — Autoscaling horizontal via HPA e ajuste de runtime .NET
+
+ADR-0005 a ADR-0013 numeradas na ordem cronológica real em que as decisões foram tomadas (não na ordem de documentação), com data de cada decisão registrada no próprio ADR e conferida no histórico de commits do repositório.
 
 ## 7. Evidências técnicas
 
