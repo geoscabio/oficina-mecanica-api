@@ -10,7 +10,9 @@
 
 ## 1. Contexto e Problema
 
-> O fluxo de negócio inclui um canal externo de orçamento: depois que a oficina calcula o orçamento de uma ordem de serviço, esse canal comunica o valor ao cliente e devolve a decisão (aprovado ou recusado) para a API. Esse canal externo não é um usuário autenticado do sistema (não é Atendente, Mecânico ou Cliente logado via JWT) — é outro sistema avisando um evento que já aconteceu fora da nossa API.
+> O fluxo de negócio funciona em duas etapas distintas. Primeiro, o **Atendente** — usuário autenticado do sistema — calcula o orçamento e aciona `POST .../aguardar-aprovacao` (endpoint comum, protegido por JWT), colocando a ordem de serviço em estado "aguardando aprovação" e comunicando esse orçamento ao cliente por fora da API, através de um canal externo (ex.: WhatsApp, e-mail, app parceiro). Depois, o **cliente** decide (aprova ou recusa) *dentro desse canal externo*, e é o canal externo — não o Atendente, não o Cliente diretamente — quem precisa devolver essa decisão para a API. Esse canal externo não é um usuário autenticado do sistema (não é Atendente, Mecânico ou Cliente logado via JWT) — é outro sistema avisando um evento que já aconteceu fora da nossa API. Esta ADR trata especificamente dessa segunda etapa: como a API recebe essa notificação de volta.
+
+**Fora de escopo desta ADR:** o envio do orçamento ao cliente (`aguardar-aprovacao`) já usa autenticação JWT normal, igual a qualquer outro endpoint operado por um usuário do sistema — não precisou de nenhuma decisão especial.
 
 ## 2. Fatores Decisivos (Drivers)
 
