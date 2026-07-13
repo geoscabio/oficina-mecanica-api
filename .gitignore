@@ -11,8 +11,8 @@ TestResults/
 .env.local
 *.env.local
 
-Contexto para IA.zip
-_contexto_para_ia_extracted/
+Material de apoio local.zip
+_material_apoio_extraido/
 
 # Terraform
 **/.terraform/*
