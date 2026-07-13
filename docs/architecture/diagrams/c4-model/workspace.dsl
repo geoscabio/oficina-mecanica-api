@@ -102,7 +102,7 @@ workspace "Oficina Mecânica API" "Arquitetura C4 da API de oficina mecânica, f
     }
 
     views {
-        systemContext oficina "C4ModelL1SystemContext" {
+        systemContext oficina "c4-model-l1-system-context" {
             title "C4 Model - L1 - Visão de Contexto do Sistema"
             description "Visão para stakeholders: quem usa o sistema, qual problema ele resolve e qual canal externo participa da decisão de orçamento."
             include administrador
@@ -113,7 +113,7 @@ workspace "Oficina Mecânica API" "Arquitetura C4 da API de oficina mecânica, f
             include oficina
         }
 
-        container oficina "C4ModelL2Containers" {
+        container oficina "c4-model-l2-containers" {
             title "C4 Model - L2 - Visão de Contêineres"
             description "Aplicação e banco de dados que compõem o sistema da oficina."
             include administrador
@@ -125,7 +125,7 @@ workspace "Oficina Mecânica API" "Arquitetura C4 da API de oficina mecânica, f
             include database
         }
 
-        component api "C4ModelL3ComponentsApi" {
+        component api "c4-model-l3-components-api" {
             title "C4 Model - L3 - Visão de Componentes da API"
             description "Componentes internos da API organizados de fora para dentro: Entrada, Aplicação, Domínio, Infraestrutura e Dados."
             include segurancaApi
