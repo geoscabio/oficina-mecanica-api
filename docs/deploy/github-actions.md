@@ -126,14 +126,7 @@ TERRAFORM_ACTION=apply
 TERRAFORM_ACTION=destroy
 ```
 
-Uso operacional:
-
-1. Manter `TERRAFORM_ACTION=apply` para deploy normal.
-2. Alterar para `TERRAFORM_ACTION=destroy` em uma branch dedicada quando quiser encerrar a AWS.
-3. Abrir PR para `develop`.
-4. Fazer merge e acompanhar `CD Development`.
-5. Conferir no console AWS se não restaram EKS, RDS, ECR, Load Balancer, NAT Gateway ou EC2 ativos.
-6. Abrir novo PR voltando para `TERRAFORM_ACTION=apply` antes do próximo deploy.
+Procedimento completo (branch, PR, acompanhamento da esteira, verificação): ver a seção "Encerramento obrigatório pela esteira" em [`deploy-aws.md`](deploy-aws.md).
 
 `TERRAFORM_ACTION=destroy` só é aceito quando o arquivo `terraform-action.env` foi alterado no próprio merge. Isso evita que pushes futuros destruam recursos sem intenção.
 
