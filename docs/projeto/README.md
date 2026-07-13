@@ -6,7 +6,6 @@ Esta pasta concentra documentos de acompanhamento e decisão do projeto.
 
 | Arquivo | Objetivo |
 | --- | --- |
-| `backlog.md` | Status dos itens técnicos e entregáveis finais. |
 | `decisoes.md` | Decisões arquiteturais e operacionais relevantes. |
 | `pendencias.md` | Pendências controladas para revisão final e apresentação. |
 
