@@ -16,6 +16,7 @@
 
 - Ambiente `development` destruído após a coleta das evidências de HPA e Postman (validado via log real da esteira: `Apply complete! Resources: 0 added, 0 changed, 26 destroyed.`).
 - Reaplicar (`TERRAFORM_ACTION=apply`) quando for gravar o vídeo de demonstração, e destruir de novo ao final (destroy derradeiro da entrega).
+- Evidenciar e executar de fato o deploy lógico nos ambientes `homologation` (branch `release`) e `production` (branch `main`) — ainda não validamos esses dois estágios do Git Flow com uma execução real registrada, só o deploy real em `development`. Aproveitar a PR automática `develop → release` já aberta para disparar e capturar essa evidência.
 
 ## Evolução pós-entrega
 
