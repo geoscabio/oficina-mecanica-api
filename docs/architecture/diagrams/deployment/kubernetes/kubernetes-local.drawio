@@ -1,95 +1,131 @@
-<mxfile host="Electron">
+<mxfile host="app.diagrams.net">
   <diagram name="Kubernetes-Local" id="k8s-local">
-    <mxGraphModel dx="1476" dy="841" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1250" pageHeight="650" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="1876" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1650" pageHeight="800" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+
         <mxCell id="user" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontColor=#000000;" value="Usuario / Navegador" vertex="1">
-          <mxGeometry height="70" width="180" x="96" y="86" as="geometry" />
+          <mxGeometry height="70" width="180" x="20" y="290" as="geometry" />
         </mxCell>
+
         <mxCell id="cluster" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eef2fb;strokeColor=#326CE5;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=13;spacingTop=8;dashed=1;fontColor=#000000;" value="Cluster Kubernetes local (Kind / Minikube / Docker Desktop)" vertex="1">
-          <mxGeometry height="560" width="996" x="403" y="30" as="geometry" />
+          <mxGeometry height="700" width="1360" x="260" y="20" as="geometry" />
         </mxCell>
         <mxCell id="ns" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#326CE5;verticalAlign=top;fontStyle=1;fontSize=12;spacingTop=6;fontColor=#000000;" value="Namespace: oficina-mecanica" vertex="1">
-          <mxGeometry height="510" width="938" x="446" y="68" as="geometry" />
+          <mxGeometry height="640" width="1300" x="290" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="ing" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#326CE5;strokeColor=#1a3f8f;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Ingress&#xa;oficina-mecanica-api&#xa;host: oficina-mecanica.local (nginx)" vertex="1">
-          <mxGeometry height="70" width="240" x="475" y="116" as="geometry" />
+
+        <!-- API side: entrada -->
+        <mxCell id="ing" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;fontColor=#000000;" value="Ingress (recurso)&#xa;oficina-mecanica-api&#xa;host: oficina-mecanica.local&#xa;regra: path / -> Service :8080" vertex="1">
+          <mxGeometry height="70" width="240" x="320" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="svcapi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#326CE5;strokeColor=#1a3f8f;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Service&#xa;oficina-mecanica-api&#xa;ClusterIP :8080" vertex="1">
-          <mxGeometry height="60" width="240" x="475" y="213" as="geometry" />
+        <mxCell id="ingctrl" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#009639;strokeColor=#00611f;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Ingress Controller (nginx)&#xa;Pod/Deployment que le os&#xa;recursos Ingress e roteia&#xa;o trafego de verdade" vertex="1">
+          <mxGeometry height="80" width="240" x="320" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="depapi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#326CE5;strokeColor=#1a3f8f;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Deployment&#xa;oficina-mecanica-api&#xa;(Pods, 1 a 5 replicas)" vertex="1">
-          <mxGeometry height="80" width="240" x="475" y="364" as="geometry" />
+        <mxCell id="svcapi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#326CE5;strokeColor=#1a3f8f;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Service&#xa;oficina-mecanica-api&#xa;ClusterIP :8080&#xa;selector: app=oficina-mecanica-api" vertex="1">
+          <mxGeometry height="70" width="240" x="320" y="320" as="geometry" />
         </mxCell>
-        <mxCell id="cm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;fontColor=#000000;" value="ConfigMap&#xa;api-configmap" vertex="1">
-          <mxGeometry height="50" width="115" x="470" y="495" as="geometry" />
+        <mxCell id="podapi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#326CE5;strokeColor=#1a3f8f;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Pod(s)&#xa;oficina-mecanica-api&#xa;label: app=oficina-mecanica-api&#xa;1 a 5 replicas (HPA)" vertex="1">
+          <mxGeometry height="80" width="240" x="320" y="430" as="geometry" />
         </mxCell>
-        <mxCell id="secapi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;fontColor=#000000;" value="Secret&#xa;api-secret" vertex="1">
-          <mxGeometry height="50" width="115" x="600" y="495" as="geometry" />
+        <mxCell id="cm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#666666;fontSize=11;fontColor=#000000;" value="ConfigMap&#xa;oficina-mecanica-api-config" vertex="1">
+          <mxGeometry height="55" width="150" x="590" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="secapi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#666666;fontSize=11;fontColor=#000000;" value="Secret&#xa;oficina-mecanica-api-secret" vertex="1">
+          <mxGeometry height="55" width="150" x="590" y="495" as="geometry" />
+        </mxCell>
+        <mxCell id="rsapi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce8d6;strokeColor=#7B42BC;fontSize=11;fontColor=#000000;" value="ReplicaSet&#xa;oficina-mecanica-api-xxxxx&#xa;garante N replicas do Pod" vertex="1">
+          <mxGeometry height="60" width="240" x="320" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="depapi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5d0;strokeColor=#7B42BC;fontSize=11;fontColor=#000000;" value="Deployment&#xa;oficina-mecanica-api&#xa;replicas iniciais: 1" vertex="1">
+          <mxGeometry height="70" width="240" x="320" y="640" as="geometry" />
         </mxCell>
         <mxCell id="hpa" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontColor=#000000;" value="HorizontalPodAutoscaler&#xa;oficina-mecanica-api-hpa&#xa;min 1 / max 5, CPU 70% / Mem 80%" vertex="1">
-          <mxGeometry height="80" width="220" x="783" y="457" as="geometry" />
+          <mxGeometry height="70" width="240" x="600" y="640" as="geometry" />
         </mxCell>
-        <mxCell id="svcdb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#326CE5;strokeColor=#1a3f8f;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Service&#xa;sqlserver&#xa;ClusterIP :1433" vertex="1">
-          <mxGeometry height="60" width="220" x="1137" y="126" as="geometry" />
+
+        <!-- DB side -->
+        <mxCell id="svcdb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#326CE5;strokeColor=#1a3f8f;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Service&#xa;sqlserver&#xa;ClusterIP :1433&#xa;selector: app=sqlserver" vertex="1">
+          <mxGeometry height="70" width="240" x="1000" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="depdb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#326CE5;strokeColor=#1a3f8f;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Deployment&#xa;sqlserver&#xa;(1 replica)" vertex="1">
-          <mxGeometry height="80" width="220" x="1137" y="299" as="geometry" />
+        <mxCell id="poddb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#326CE5;strokeColor=#1a3f8f;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Pod&#xa;sqlserver&#xa;label: app=sqlserver" vertex="1">
+          <mxGeometry height="70" width="240" x="1000" y="310" as="geometry" />
         </mxCell>
-        <mxCell id="pvc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;fontColor=#000000;" value="PVC&#xa;sqlserver-pvc" vertex="1">
-          <mxGeometry height="50" width="105" x="1089" y="466" as="geometry" />
+        <mxCell id="secdb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#666666;fontSize=11;fontColor=#000000;" value="Secret&#xa;sqlserver-secret&#xa;MSSQL_SA_PASSWORD" vertex="1">
+          <mxGeometry height="60" width="150" x="1270" y="310" as="geometry" />
         </mxCell>
-        <mxCell id="secdb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8edfb;strokeColor=#326CE5;fontSize=11;fontColor=#000000;" value="Secret&#xa;sqlserver-secret" vertex="1">
-          <mxGeometry height="50" width="105" x="1271" y="466" as="geometry" />
+        <mxCell id="rsdb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce8d6;strokeColor=#7B42BC;fontSize=11;fontColor=#000000;" value="ReplicaSet&#xa;sqlserver-xxxxx&#xa;garante 1 replica do Pod" vertex="1">
+          <mxGeometry height="60" width="240" x="1000" y="420" as="geometry" />
         </mxCell>
-        <mxCell id="e-user-ing" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="ing" value="http://oficina-mecanica.local">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="216" y="97" as="sourcePoint" />
-          </mxGeometry>
+        <mxCell id="depdb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5d0;strokeColor=#7B42BC;fontSize=11;fontColor=#000000;" value="Deployment&#xa;sqlserver&#xa;replicas: 1" vertex="1">
+          <mxGeometry height="60" width="240" x="1000" y="510" as="geometry" />
         </mxCell>
-        <mxCell id="e-ing-svc" edge="1" parent="1" source="ing" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" target="svcapi">
+        <mxCell id="pvc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d6f0ea;strokeColor=#0e8a6f;fontSize=11;fontColor=#000000;" value="PVC (claim de storage)&#xa;sqlserver-pvc" vertex="1">
+          <mxGeometry height="55" width="150" x="1000" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="pv" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d6f0ea;strokeColor=#0e8a6f;fontSize=11;fontColor=#000000;" value="PersistentVolume&#xa;(provisionado pelo StorageClass&#xa;padrao do cluster local)" vertex="1">
+          <mxGeometry height="55" width="180" x="1180" y="610" as="geometry" />
+        </mxCell>
+
+        <!-- Fluxo principal (solido) -->
+        <mxCell id="e-user-ingctrl" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="ingctrl" value="http://oficina-mecanica.local&#xa;(fluxo principal)">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-svc-dep" edge="1" parent="1" source="svcapi" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" target="depapi">
+        <mxCell id="e-ingctrl-svc" edge="1" parent="1" source="ingctrl" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="svcapi" value="roteia conforme a regra do Ingress">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-cm-dep" edge="1" parent="1" source="cm" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontColor=#000000;labelBackgroundColor=#ffffff;" target="depapi">
+        <mxCell id="e-svc-pod" edge="1" parent="1" source="svcapi" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="podapi" value="seleciona Pods por label&#xa;(fluxo principal, via Endpoints)">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-sec-dep" edge="1" parent="1" source="secapi" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontColor=#000000;labelBackgroundColor=#ffffff;" target="depapi">
+        <mxCell id="e-pod-svcdb" edge="1" parent="1" source="podapi" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="svcdb" value="acesso ao banco, porta 1433&#xa;(fluxo principal)">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-hpa-dep" edge="1" parent="1" source="hpa" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1.004;entryY=0.4;entryDx=0;entryDy=0;entryPerimeter=0;" target="depapi" value="escala conforme&#xa;CPU/memoria">
-          <mxGeometry relative="1" x="0.0586" y="2" as="geometry">
-            <mxPoint as="offset" />
-            <mxPoint x="812" y="416" as="sourcePoint" />
-            <mxPoint x="624" y="363" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e-dep-svcdb" edge="1" parent="1" source="depapi" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.75;exitY=0;exitDx=0;exitDy=0;" value="acesso ao banco&#xa;porta 1433">
-          <mxGeometry relative="1" x="0.0015" as="geometry">
-            <mxPoint as="offset" />
-            <Array as="points">
-              <mxPoint x="655" y="286" />
-              <mxPoint x="1114" y="286" />
-              <mxPoint x="1114" y="150" />
-            </Array>
-            <mxPoint x="597" y="366.5" as="sourcePoint" />
-            <mxPoint x="1137" y="150" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e-svcdb-depdb" edge="1" parent="1" source="svcdb" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" target="depdb">
+        <mxCell id="e-svcdb-poddb" edge="1" parent="1" source="svcdb" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="poddb" value="seleciona Pod por label">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-pvc-depdb" edge="1" parent="1" source="pvc" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="depdb" value="persiste dados">
+
+        <!-- Configuracao (cinza pontilhado) -->
+        <mxCell id="e-ing-ingctrl" edge="1" parent="1" source="ing" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="ingctrl" value="define a regra&#xa;(configuracao)">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-secdb-depdb" edge="1" parent="1" source="secdb" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontColor=#000000;labelBackgroundColor=#ffffff;" target="depdb">
+        <mxCell id="e-cm-pod" edge="1" parent="1" source="cm" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="podapi" value="configuracao">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="note" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontColor=#666666;" value="Setas solidas = trafego real | Setas pontilhadas = configuracao/gerenciamento" vertex="1">
-          <mxGeometry height="30" width="600" x="446" y="603" as="geometry" />
+        <mxCell id="e-sec-pod" edge="1" parent="1" source="secapi" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="podapi" value="configuracao">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-secdb-poddb" edge="1" parent="1" source="secdb" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#666666;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="poddb" value="configuracao">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Controle/lifecycle/autoscaling (amarelo pontilhado) -->
+        <mxCell id="e-rsapi-podapi" edge="1" parent="1" source="rsapi" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="podapi" value="garante replicas&#xa;(gerenciamento)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-depapi-rsapi" edge="1" parent="1" source="depapi" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="rsapi" value="gerencia versao&#xa;(rollout)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-hpa-depapi" edge="1" parent="1" source="hpa" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=0.3;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.7;entryDx=0;entryDy=0;" target="depapi" value="escala conforme&#xa;CPU/memoria">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-rsdb-poddb" edge="1" parent="1" source="rsdb" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="poddb" value="garante replica&#xa;(gerenciamento)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-depdb-rsdb" edge="1" parent="1" source="depdb" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="rsdb" value="gerencia versao&#xa;(rollout)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Persistencia (verde-azulado pontilhado) -->
+        <mxCell id="e-pvc-pv" edge="1" parent="1" source="pvc" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#0e8a6f;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;" target="pv" value="claim vinculado a&#xa;(persistencia)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-pv-poddb" edge="1" parent="1" source="pv" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#0e8a6f;dashed=1;fontSize=10;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.7;entryY=1;entryDx=0;entryDy=0;" target="poddb" value="monta /var/opt/mssql&#xa;(persistencia)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontColor=#333333;" value="Legenda: preta solida = trafego real | cinza pontilhada = configuracao | amarela pontilhada = controle/lifecycle/autoscaling | verde-azulada pontilhada = persistencia" vertex="1">
+          <mxGeometry height="30" width="1000" x="290" y="720" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
