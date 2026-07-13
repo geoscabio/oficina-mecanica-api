@@ -112,6 +112,8 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 | 🧩 C4 Model oficial validado | [`docs/architecture/diagrams/c4-model`](docs/architecture/diagrams/c4-model) |
 | ☁️ Diagrama de infraestrutura AWS (inclui Kubernetes/Docker) | [`docs/architecture/diagrams/aws`](docs/architecture/diagrams/aws) |
 | 🔁 Diagrama de fluxo CI/CD | [`docs/architecture/diagrams/ci-cd`](docs/architecture/diagrams/ci-cd) |
+| ☸️ Diagrama do ambiente local Kubernetes | [`docs/architecture/diagrams/deployment/kubernetes`](docs/architecture/diagrams/deployment/kubernetes) |
+| 🐳 Diagrama do ambiente local Docker | [`docs/architecture/diagrams/deployment/docker`](docs/architecture/diagrams/deployment/docker) |
 | 🐳 Docker Compose local | [`docker-compose.yml`](docker-compose.yml) |
 | ☸️ Manifests Kubernetes | [`k8s`](k8s) |
 | 📄 Evidências de qualidade | [`docs/evidencias`](docs/evidencias) |

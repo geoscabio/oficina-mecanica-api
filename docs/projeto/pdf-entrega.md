@@ -26,7 +26,9 @@ Fontes versionadas no repositório:
 
 - C4 Model (Contexto, Containers, Componentes): [`docs/architecture/diagrams/c4-model/`](../architecture/diagrams/c4-model/)
 - Diagrama de infraestrutura e solução AWS (VPC, EKS, RDS, Kubernetes, Docker): [`docs/architecture/diagrams/aws/`](../architecture/diagrams/aws/)
-- Diagrama do fluxo de deploy CI/CD: `docs/architecture/diagrams/ci-cd/` `[PENDENTE]`
+- Diagrama do fluxo de deploy CI/CD: [`docs/architecture/diagrams/ci-cd/`](../architecture/diagrams/ci-cd/)
+- Diagrama do ambiente local Kubernetes (extra): [`docs/architecture/diagrams/deployment/kubernetes/`](../architecture/diagrams/deployment/kubernetes/)
+- Diagrama do ambiente local Docker (extra): [`docs/architecture/diagrams/deployment/docker/`](../architecture/diagrams/deployment/docker/)
 
 ## 4. Link do vídeo de demonstração
 
