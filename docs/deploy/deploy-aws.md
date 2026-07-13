@@ -38,36 +38,7 @@ Criar para o deploy real:
 
 - `development`
 
-O environment `development` precisa conter:
-
-Environment secrets:
-
-| Nome | Origem do valor | Observação |
-| --- | --- | --- |
-| `AWS_ACCESS_KEY_ID` | AWS Academy > AWS Details > credenciais CLI. | Geralmente começa com `ASIA` em credenciais temporárias. |
-| `AWS_SECRET_ACCESS_KEY` | AWS Academy > AWS Details > credenciais CLI. | Copiar exatamente como fornecido. |
-| `AWS_SESSION_TOKEN` | AWS Academy > AWS Details > credenciais CLI. | Obrigatório no Learner Lab e expira a cada sessão. |
-| `DB_PASSWORD` | Valor criado pelo grupo. | Senha forte do administrador do RDS SQL Server. Não versionar. |
-| `JWT_SECRET` | Valor criado pelo grupo. | String aleatória com pelo menos 32 caracteres para assinar tokens JWT. |
-| `WEBHOOK_TOKEN` | Valor criado pelo grupo. | String aleatória com pelo menos 32 caracteres para proteger o webhook de orçamento. |
-
-Repository variables:
-
-| Nome | Valor esperado | Observação |
-| --- | --- | --- |
-| `AUTO_PR_ENABLED` | `true` ou `false` | `true` abre PR automático após deploy: `develop -> release` e `release -> main`. |
-| `RELEASE_BRANCH` | `release` | Opcional. Default: `release`. |
-| `AWS_REGION` | `us-east-1` | Opcional. Default: `us-east-1`. |
-| `EKS_CLUSTER_ROLE_NAME` | `LabRole` | Opcional se o AWS Academy usar `LabRole`. Ajustar se o lab informar outro nome. |
-| `EKS_NODE_ROLE_NAME` | `LabRole` | Opcional se o AWS Academy usar `LabRole`. Ajustar se o lab informar outro nome. |
-
-Exemplos de valores criados pelo grupo:
-
-```text
-DB_PASSWORD=<senha forte, não colar no repositório>
-JWT_SECRET=<string aleatória com pelo menos 32 caracteres>
-WEBHOOK_TOKEN=<string aleatória com pelo menos 32 caracteres>
-```
+Lista completa dos secrets e repository variables do environment `development` (nomes, origem, tipos): ver as seções "Environments" e "Repository variables" em [`github-actions.md`](github-actions.md).
 
 Os valores reais devem ser cadastrados somente no GitHub ou no ambiente local seguro. Não adicionar esses valores em `.env`, YAML, Terraform ou Markdown.
 

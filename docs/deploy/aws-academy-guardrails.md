@@ -49,16 +49,9 @@ terraform -chdir=infra/terraform/environments/dev plan
 
 ## 🧹 Depois de testar
 
-Destruir a infraestrutura e os recursos Kubernetes gerenciados pelo Terraform pela esteira:
+Procedimento completo de destroy (branch, `terraform-action.env`, PR, acompanhamento da esteira): ver a seção "Encerramento obrigatório pela esteira" em [`deploy-aws.md`](deploy-aws.md).
 
-1. Criar uma branch a partir da `develop`.
-2. Alterar `infra/terraform/environments/dev/terraform-action.env` para `TERRAFORM_ACTION=destroy`.
-3. Abrir PR para `develop`.
-4. Fazer merge do PR.
-5. Acompanhar o workflow `CD Development` até a etapa `Terraform destroy`.
-6. Depois do destroy, abrir outro PR voltando para `TERRAFORM_ACTION=apply`.
-
-Conferir se não restou recurso cobrável:
+Depois do destroy, conferir se não restou recurso cobrável:
 
 ```powershell
 aws eks list-clusters --region us-east-1
