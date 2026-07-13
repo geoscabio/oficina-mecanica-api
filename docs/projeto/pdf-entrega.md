@@ -25,10 +25,8 @@ Repositório público, com todo o histórico de commits, Pull Requests e esteira
 Fontes versionadas no repositório:
 
 - C4 Model (Contexto, Containers, Componentes): [`docs/architecture/diagrams/c4-model/`](../architecture/diagrams/c4-model/)
-- Diagrama de infraestrutura AWS: `docs/architecture/diagrams/aws/` `[PENDENTE]`
-- Diagrama de deployment Kubernetes: `docs/architecture/diagrams/deployment/kubernetes/` `[PENDENTE]`
-- Diagrama de deployment Docker: `docs/architecture/diagrams/deployment/docker/` `[PENDENTE]`
-- Diagrama do fluxo CI/CD: `docs/architecture/diagrams/ci-cd/` `[PENDENTE]`
+- Diagrama de infraestrutura e solução AWS (VPC, EKS, RDS, Kubernetes, Docker): [`docs/architecture/diagrams/aws/`](../architecture/diagrams/aws/)
+- Diagrama do fluxo de deploy CI/CD: `docs/architecture/diagrams/ci-cd/` `[PENDENTE]`
 
 ## 4. Link do vídeo de demonstração
 

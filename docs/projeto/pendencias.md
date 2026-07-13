@@ -5,12 +5,12 @@
 - ADRs oficiais da Fase 1 trazidas para `docs/architecture/adrs/` (ADR-0001 a ADR-0004: Clean Architecture, .NET, SQL Server, JWT).
 - Revisar se falta registrar alguma decisão arquitetural tomada só na Fase 2 (ex.: EKS/Terraform, HPA, escolha de GC) como ADR nova.
 
-## Diagramas ainda aguardando arquivos finais
+## Diagramas
 
-- `docs/architecture/diagrams/aws/`
-- `docs/architecture/diagrams/deployment/kubernetes/`
-- `docs/architecture/diagrams/deployment/docker/`
-- `docs/architecture/diagrams/ci-cd/`
+- `docs/architecture/diagrams/aws/` — concluído: diagrama combinado de infraestrutura e solução (VPC, EKS, RDS, NAT/Internet Gateway, Load Balancer, ECR, IAM Role), validado campo a campo contra o Terraform real.
+- `docs/architecture/diagrams/ci-cd/` — pendente: diagrama de fluxo de deploy (CI → CD, Git Flow).
+
+Diagramas separados de Kubernetes e Docker não são mais necessários: o professor confirmou que o nível de componentes já está coberto pelo C4 Model, e a infraestrutura combinada acima já cobre Kubernetes/Docker num único diagrama.
 
 ## AWS
 
