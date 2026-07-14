@@ -64,6 +64,7 @@ jobs:
         run: |
           account_id="$(aws sts get-caller-identity --query Account --output text)"
           echo "AWS_ACCOUNT_ID=$account_id" >> "$GITHUB_ENV"
+          export AWS_ACCOUNT_ID="$account_id"
 
           python - <<'PY'
           import json
@@ -76,7 +77,7 @@ jobs:
               "eks_cluster_role_name": os.environ["EKS_CLUSTER_ROLE_NAME"],
               "eks_node_role_name": os.environ["EKS_NODE_ROLE_NAME"],
               "api_deploy_enabled": True,
-              "api_image_uri": "334556710613.dkr.ecr.us-east-1.amazonaws.com/oficina-mecanica-api:placeholder",
+              "api_image_uri": f"{os.environ['AWS_ACCOUNT_ID']}.dkr.ecr.{os.environ['AWS_REGION']}.amazonaws.com/oficina-mecanica-api:placeholder",
               "jwt_secret": os.environ["JWT_SECRET"],
               "webhook_token": os.environ["WEBHOOK_TOKEN"],
           }
