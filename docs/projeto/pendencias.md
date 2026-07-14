@@ -9,13 +9,10 @@
 ## Diagramas
 
 - `docs/architecture/diagrams/aws/` — concluído: diagrama combinado de infraestrutura e solução (VPC, EKS, RDS, NAT/Internet Gateway, Load Balancer, ECR, IAM Role), validado campo a campo contra o Terraform real.
-- `docs/architecture/diagrams/ci-cd/ci-cd-pipeline.drawio` — concluído: fluxo completo CI → CD Development → CD Release → CD Production, com Git Flow.
-- `docs/architecture/diagrams/deployment/kubernetes/kubernetes-local.drawio` — concluído (extra, além do exigido): ambiente local Kubernetes (namespace, deployment, service, ingress, HPA, configmap/secret, PVC).
-- `docs/architecture/diagrams/deployment/docker/docker-local.drawio` — concluído (extra, além do exigido): ambiente local Docker Compose (containers, volume, rede, variáveis de ambiente).
 
-O professor havia confirmado que diagramas separados de Kubernetes e Docker não são obrigatórios (o nível de componentes já está coberto pelo C4 Model, e a infraestrutura combinada AWS já cobre Kubernetes/Docker num único diagrama) — os dois locais foram feitos mesmo assim, por decisão própria, como material extra.
+O professor havia confirmado que diagramas separados de Kubernetes e Docker não são obrigatórios (o nível de componentes já está coberto pelo C4 Model, e a infraestrutura combinada AWS já cobre Kubernetes/Docker num único diagrama).
 
-**Pendente:** os 3 arquivos `.drawio` foram gerados via XML (sem confirmação visual, já que não houve compartilhamento de tela nesta rodada) — abrir cada um no draw.io antes da entrega para conferir que os ícones/layout renderizaram como esperado, e exportar `.png`/`.svg` de cada um.
+**Pendente:** diagrama de CI/CD e diagramas de deployment local (Kubernetes e Docker) — removidos os rascunhos gerados via XML; serão desenhados do zero manualmente, sem pressa de entrega.
 
 ## AWS
 
