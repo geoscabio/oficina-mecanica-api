@@ -9,10 +9,11 @@
 ## Diagramas
 
 - `docs/architecture/diagrams/aws/` — concluído: diagrama combinado de infraestrutura e solução (VPC, EKS, RDS, NAT/Internet Gateway, Load Balancer, ECR, IAM Role), validado campo a campo contra o Terraform real.
+- `docs/architecture/diagrams/ci-cd/ci-cd-pipeline.drawio` — concluído: fluxo CI → CD Development → CD Release → CD Production, desenhado manualmente, refletindo os jobs reais das esteiras (`ci.yml`, `cd-development.yml`, `cd-release.yml`, `cd-production.yml`).
 
-O professor havia confirmado que diagramas separados de Kubernetes e Docker não são obrigatórios (o nível de componentes já está coberto pelo C4 Model, e a infraestrutura combinada AWS já cobre Kubernetes/Docker num único diagrama).
+O professor havia confirmado que diagramas separados de Kubernetes e Docker não são obrigatórios (o nível de componentes já está coberto pelo C4 Model, e a infraestrutura combinada AWS já cobre Kubernetes/Docker num único diagrama) — por isso ficam como opcionais, não bloqueiam a entrega.
 
-**Pendente:** diagrama de CI/CD e diagramas de deployment local (Kubernetes e Docker) — removidos os rascunhos gerados via XML; serão desenhados do zero manualmente, sem pressa de entrega.
+**Backlog (opcional, pós-entrega):** diagramas de deployment local Kubernetes (`kubernetes-local`) e Docker (`docker-local`) — ainda não desenhados; não são exigência da Fase 2, ficam como material extra para quando houver tempo disponível.
 
 ## AWS
 
