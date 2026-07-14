@@ -1,59 +1,79 @@
 # Roteiro do vídeo de demonstração
 
-Rascunho de roteiro para a gravação final (limite de 15 minutos). Ajuste o texto livremente na hora de gravar — o objetivo aqui é garantir que nenhum item obrigatório fique de fora e que a ordem faça sentido.
+Roteiro para gravação em **6 mini-vídeos** (um por seção), depois unidos no Clipchamp até totalizar no máximo 15 minutos. Cada seção separa **Falar** (o que verbalizar) de **Mostrar** (o que demonstrar na tela).
 
-Pré-requisito antes de gravar: `terraform apply` executado (ambiente AWS `development` no ar). Ver [`docs/deploy/deploy-aws.md`](../deploy/deploy-aws.md).
+Pré-requisito antes de gravar os vídeos 2 a 5: `terraform apply` executado (ambiente AWS `development` no ar). Ver [`docs/deploy/deploy-aws.md`](../deploy/deploy-aws.md). Os vídeos 1 e 6 não dependem do ambiente estar de pé — podem ser gravados a qualquer momento.
 
-## 0:00 – 1:00 · Abertura
+## Vídeo 1 · Abertura (~1:00)
 
-- Apresentação rápida: nome do projeto (Oficina Mecânica API), contexto (Tech Challenge Fase 2, FIAP Pós-Tech Software Architecture).
-- Uma frase sobre a arquitetura: monólito em Clean Architecture (.NET 10), modularizado por bounded contexts (Identidade, Atendimento, Administrativo, Gestão de Estoque, Gestão de Ordem de Serviço), publicado em Kubernetes (Amazon EKS) via Terraform e GitHub Actions.
+**Falar:**
+- Nome do projeto (Oficina Mecânica API) e contexto (Tech Challenge Fase 2, FIAP Pós-Tech Software Architecture).
+- Uma frase de arquitetura: monólito em Clean Architecture (.NET 10), modularizado por bounded contexts (Identidade, Atendimento, Administrativo, Gestão de Estoque, Gestão de Ordem de Serviço), publicado em Kubernetes (Amazon EKS) via Terraform e GitHub Actions.
 
-## 1:00 – 3:30 · CI/CD
+**Mostrar:** nada além de você falando (ou o README do projeto de fundo).
 
-- Mostrar um Pull Request real sendo aberto contra `develop` (pode ser um PR já existente no histórico, ex. [#177](https://github.com/geoscabio/oficina_mecanica_api/pull/177) ou similar).
-- Mostrar a esteira `CI` rodando: build, testes (424 testes, cobertura), quality gate — aba **Actions** do GitHub.
-- Mostrar o merge disparando a esteira `CD Development`: `terraform init/plan/apply`, build e push da imagem Docker no ECR, rollout no EKS.
-- Falar rapidamente sobre o guardrail: `terraform destroy` só roda quando alguém altera `terraform-action.env` no próprio PR — evita destruição acidental.
+## Vídeo 2 · CI/CD (~2:30)
 
-## 3:30 – 5:30 · Deploy real na AWS
+**Falar:**
+- Que todo merge em `develop` dispara a esteira automaticamente.
+- Que o guardrail de `terraform destroy` só roda quando alguém altera `terraform-action.env` no próprio PR — evita destruição acidental.
 
-- AWS Console: mostrar os recursos vivos — EKS Cluster (`oficina-mecanica-eks-dev`), RDS, Load Balancer, ECR com a imagem publicada.
-- Terminal: `kubectl get pods,svc,hpa -n oficina-mecanica` confirmando o pod `Running` e o Service com o hostname do Load Balancer.
+**Mostrar:**
+- Um PR real já mergeado (ex. [#177](https://github.com/geoscabio/oficina_mecanica_api/pull/177)) e a aba **Actions** do GitHub.
+- Esteira `CI` rodando: build, testes (424 testes, cobertura), quality gate.
+- Esteira `CD Development` disparada pelo merge: `terraform init/plan/apply`, build e push da imagem no ECR, rollout no EKS.
+
+## Vídeo 3 · Deploy real na AWS (~2:00)
+
+**Falar:** que os recursos abaixo estão vivos na AWS agora, não simulados.
+
+**Mostrar:**
+- AWS Console: EKS Cluster (`oficina-mecanica-eks-dev`), RDS, Load Balancer, ECR com a imagem publicada.
+- Terminal: `kubectl get pods,svc,hpa -n oficina-mecanica` com pod `Running` e Service com o hostname do Load Balancer.
 - `curl <endpoint>/api/health` retornando `Healthy`.
 
-## 5:30 – 9:30 · Consumo da API
+## Vídeo 4 · Consumo da API (~4:00)
 
-- Abrir o Swagger publicado (`<endpoint>/swagger`) para mostrar o contrato completo.
-- Trocar para o **Postman** (collection em [`docs/postman/`](../postman/), guia em [`docs/evidencias/postman.md`](../evidencias/postman.md)):
-  - Selecionar o environment **AWS Dev**.
-  - Rodar o login (token capturado automaticamente).
-  - Rodar o fluxo principal de uma Ordem de Serviço: cadastrar cliente → cadastrar veículo → cadastrar mecânico → abrir OS → iniciar diagnóstico → definir serviços → aguardar aprovação → notificar decisão do orçamento (webhook) → iniciar execução → finalizar → entregar.
-  - Destacar a consulta pública de status (`consultar-status`, sem autenticação) — é o endpoint que o cliente final usaria.
+**Falar:** que o fluxo inteiro de uma Ordem de Serviço está sendo executado contra o endpoint real da AWS, incluindo a consulta pública de status (sem autenticação) — o endpoint que o cliente final usaria.
 
-## 9:30 – 13:30 · Escalabilidade automática (HPA)
+**Mostrar:**
+- Swagger publicado (`<endpoint>/swagger`) com o contrato completo.
+- Postman (collection em [`docs/postman/`](../postman/), guia em [`docs/evidencias/postman.md`](../evidencias/postman.md)), environment **AWS Dev**:
+  - Login (token capturado automaticamente).
+  - Fluxo principal: cadastrar cliente → cadastrar veículo → cadastrar mecânico → abrir OS → iniciar diagnóstico → definir serviços → aguardar aprovação → notificar decisão do orçamento (webhook) → iniciar execução → finalizar → entregar.
+  - `consultar-status` (endpoint público).
 
-- Abrir a AWS Console em **EKS → `oficina-mecanica-eks-dev` → Resources → HorizontalPodAutoscalers → `oficina-mecanica-api-hpa`** e um terminal com `kubectl get hpa oficina-mecanica-api-hpa -n oficina-mecanica --watch` lado a lado.
-- No Postman, rodar o **Performance Test** (Collection Runner) contra o environment AWS Dev — mesma configuração documentada em [`docs/evidencias/kubernetes-hpa.md`](../evidencias/kubernetes-hpa.md) (20 Virtual Users, 5 minutos, Login + Listar clientes).
-- Narrar o que está acontecendo enquanto a réplica sobe: "o HPA está reagindo à carga real gerada pelo Postman, sem nenhuma intervenção manual — CPU passa de X% e ele decide escalar".
-- Se der tempo, deixar a carga cessar em câmera e mostrar o downscale automático de volta a 1 réplica (senão, citar que a evidência completa do ciclo de subida e descida está documentada no repositório).
+## Vídeo 5 · Escalabilidade automática — HPA (~4:00)
 
-## 13:30 – 14:30 · Encerramento
+**Falar:** que o HPA está reagindo à carga real gerada pelo Postman, sem intervenção manual — a CPU passa de X% e ele decide escalar sozinho.
 
-- Reforçar: todo o ciclo (deploy, CI/CD, consumo, escalabilidade) foi demonstrado contra o ambiente real na AWS, não simulado localmente.
-- Falar que ao final da gravação/avaliação o ambiente é destruído pela esteira, para não gerar custo indevido no AWS Academy Learner Lab.
-- Encerrar com o link do repositório: <https://github.com/geoscabio/oficina_mecanica_api>.
+**Mostrar:**
+- Lado a lado: AWS Console (**EKS → `oficina-mecanica-eks-dev` → Resources → HorizontalPodAutoscalers**) e terminal com `kubectl get hpa oficina-mecanica-api-hpa -n oficina-mecanica --watch`.
+- Postman **Performance Test** (Collection Runner) contra o environment AWS Dev — mesma configuração de [`docs/evidencias/kubernetes-hpa.md`](../evidencias/kubernetes-hpa.md) (20 Virtual Users, 5 minutos, Login + Listar clientes).
+- Se der tempo, o downscale automático de volta a 1 réplica após a carga cessar (senão, citar que o ciclo completo de subida e descida já está documentado no repositório).
+
+## Vídeo 6 · Encerramento (~1:00)
+
+**Falar:**
+- Que todo o ciclo (deploy, CI/CD, consumo, escalabilidade) foi demonstrado contra o ambiente real na AWS.
+- Que ao final da avaliação o ambiente é destruído pela esteira, para não gerar custo indevido no AWS Academy Learner Lab.
+- Link do repositório: <https://github.com/geoscabio/oficina_mecanica_api>.
+
+**Mostrar:** nada além de você falando (ou a tela final do repositório no GitHub).
 
 ## Checklist antes de gravar
 
-- [ ] Ambiente AWS aplicado e saudável (`/api/health` = `Healthy`).
+- [ ] Vídeos 1 e 6: podem ser gravados a qualquer momento, ambiente AWS não precisa estar no ar.
+- [ ] Antes dos vídeos 2 a 5: `terraform apply` rodado, ambiente saudável (`/api/health` = `Healthy`).
 - [ ] Postman com environment **AWS Dev** configurado e testado (login funcionando).
 - [ ] Terminal com `kubectl` configurado e testado (`kubectl get hpa` retornando dados).
-- [ ] Janelas organizadas na tela antes de começar a gravar (Console AWS, terminal, Postman, Swagger).
-- [ ] Cronômetro/rascunho de tempo por seção para não estourar os 15 minutos.
+- [ ] Janelas organizadas na tela antes de gravar cada vídeo (Console AWS, terminal, Postman, Swagger).
+- [ ] Gravar os vídeos 2 a 5 em sequência, sem reaplicar/destruir o Terraform entre eles.
+- [ ] Mirar o tempo de cada mini-vídeo perto do alvo da seção — o Clipchamp só concatena, não corta por tempo.
 
 ## Depois de gravar
 
-- Subir o vídeo (YouTube não listado, Google Drive ou similar) e anotar o link.
+- Juntar os 6 mini-vídeos no Clipchamp (modo IA) e conferir se o total ficou dentro de 15 minutos.
+- Subir o vídeo final (YouTube não listado, Google Drive ou similar) e anotar o link.
 - Preencher o link em [`docs/projeto/pdf-entrega.md`](pdf-entrega.md).
 - Rodar o `terraform destroy` final (ver [`docs/deploy/aws-academy-guardrails.md`](../deploy/aws-academy-guardrails.md)).
