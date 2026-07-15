@@ -5,10 +5,9 @@ Este é o índice mestre da documentação do projeto. Use este arquivo para nav
 ## Leitura recomendada
 
 1. [`../README.md`](../README.md) para visão geral, execução local, CI/CD e entrega.
-2. [`projeto/decisoes.md`](projeto/decisoes.md) para decisões arquiteturais e trade-offs AWS Academy.
+2. [`architecture/adrs/`](architecture/adrs/) para decisões arquiteturais e trade-offs AWS Academy.
 3. [`deploy/github-actions.md`](deploy/github-actions.md) para entender a esteira e o Git Flow.
 4. [`deploy/deploy-aws.md`](deploy/deploy-aws.md) para provisionar, validar e destruir o ambiente AWS.
-5. [`projeto/pendencias.md`](projeto/pendencias.md) para itens manuais antes do vídeo/PDF final.
 
 ## Índice por tema
 
@@ -19,9 +18,8 @@ Este é o índice mestre da documentação do projeto. Use este arquivo para nav
 | GitHub Actions | [`deploy/github-actions.md`](deploy/github-actions.md) | Explicar CI, CD Development, release lógico e production lógico. |
 | AWS real | [`deploy/deploy-aws.md`](deploy/deploy-aws.md) | Configurar GitHub Environment, rodar deploy e encerrar recursos. |
 | Guardrails AWS Academy | [`deploy/aws-academy-guardrails.md`](deploy/aws-academy-guardrails.md) | Evitar gasto indevido e operar com segurança no Learner Lab. |
-| Projeto | [`projeto/README.md`](projeto/README.md) | Entrada para decisões e pendências. |
-| Decisões | [`projeto/decisoes.md`](projeto/decisoes.md) | Justificar arquitetura, deploy e trade-offs. |
-| Pendências | [`projeto/pendencias.md`](projeto/pendencias.md) | Controlar evidências, diagramas, vídeo e PDF. |
+| Projeto | [`projeto/README.md`](projeto/README.md) | Entrada para pendências do projeto. |
+| Pendências | [`projeto/pendencias.md`](projeto/pendencias.md) | Itens operacionais ainda em aberto (ex.: promoção para release/production). |
 | Evidências | [`evidencias/`](evidencias/) | Registrar prints e saídas reais de qualidade, segurança e infra. |
 | OpenAPI | [`openapi/`](openapi/) | Consultar contrato versionado da API. |
 | C4 Model | [`architecture/diagrams/c4-model/README.md`](architecture/diagrams/c4-model/README.md) | Ver modelo C4 validado e arquivos Structurizr/SVG. |

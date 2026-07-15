@@ -1,20 +1,10 @@
 # 📋 Projeto
 
-Esta pasta concentra documentos de acompanhamento e decisão do projeto.
+Esta pasta concentra documentos de acompanhamento do projeto. Decisões arquiteturais e operacionais ficam registradas como ADRs em [`docs/architecture/adrs/`](../architecture/adrs/).
 
 ## 📄 Arquivos
 
 | Arquivo | Objetivo |
 | --- | --- |
-| `decisoes.md` | Decisões arquiteturais e operacionais relevantes. |
-| `pendencias.md` | Pendências controladas para revisão final e apresentação. |
-
-## 🎯 Uso na entrega
-
-Use estes documentos como apoio para:
-
-- revisar escopo antes do merge final;
-- preparar roteiro do vídeo;
-- montar PDF final;
-- documentar o raciocínio por trás das decisões;
-- acompanhar pendências manuais de prints, diagramas restantes, vídeo e PDF.
+| `pendencias.md` | Itens operacionais ainda em aberto (ex.: promoção de deploy para release/production). |
+| `enunciado-fase-2-tech-challenge.pdf` | Enunciado oficial da Fase 2, citado pelos ADRs para separar exigência literal de decisão da equipe. |
