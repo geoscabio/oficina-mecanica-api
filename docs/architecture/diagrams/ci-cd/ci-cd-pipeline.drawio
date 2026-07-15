@@ -1,0 +1,116 @@
+<mxfile host="Electron">
+  <diagram name="OficinaMecanica-CiCdPipeline" id="oficina-mecanica-cicd-pipeline-1">
+    <mxGraphModel dx="2912" dy="1521" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="0" fold="1" page="0" pageScale="1" pageWidth="1500" pageHeight="550" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="YEBqnw7FEd6Bprcxb7eJ-3" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="748" width="1723.5" x="-4" y="-331" as="geometry" />
+        </mxCell>
+        <mxCell id="bcToiluRT4H2tZl9O3p9-1" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="rounded=0;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#000000;dashed=1;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="748" width="1723.5" as="geometry" />
+        </mxCell>
+        <mxCell id="x-e1" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-3" source="ci-j6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;strokeColor=#000000;fontSize=10;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontColor=#000000;labelBackgroundColor=none;" target="cdd-g" value="&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;&lt;font style=&quot;&quot;&gt;&lt;b&gt;Merge para develop&lt;/b&gt;&lt;/font&gt;&lt;/span&gt;">
+          <mxGeometry relative="1" x="0.1008" y="-4" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x-e2" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-3" source="cdd-j3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;strokeColor=#000000;fontSize=10;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontColor=#000000;labelBackgroundColor=none;" target="cdr-g" value="&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;&lt;b&gt;PR automático mergeado&lt;/b&gt;&lt;/span&gt;">
+          <mxGeometry relative="1" x="-0.0033" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x-e3" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-3" source="cdr-j2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;strokeColor=#000000;fontSize=10;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontColor=#000000;labelBackgroundColor=none;" target="cdp-g" value="&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;&lt;b&gt;PR automático mergeado&lt;/b&gt;&lt;/span&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="1ulaTZoksTE1NcFQhYYi-3" connectable="0" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="group;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;container=0;" value="" vertex="1">
+          <mxGeometry height="238" width="300" x="945.5" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="1ulaTZoksTE1NcFQhYYi-4" connectable="0" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="group;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="177" width="300" x="1402.5" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cdp-g" parent="1ulaTZoksTE1NcFQhYYi-4" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#000000;verticalAlign=top;fontSize=14;fontStyle=1;align=center;spacingTop=8;fontColor=#000000;labelBackgroundColor=none;" value="&lt;br&gt;🚀 CD Production&lt;div style=&quot;font-weight: normal; font-size: 10px; margin-top: 4px;&quot;&gt;&lt;span style=&quot;font-size: 14px; font-weight: 700;&quot;&gt;⚡&lt;/span&gt;Trigger:&amp;nbsp;&lt;span style=&quot;background-color: transparent;&quot;&gt;Push/Merge→ main&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="177" width="300" as="geometry" />
+        </mxCell>
+        <mxCell id="cdp-j1" parent="1ulaTZoksTE1NcFQhYYi-4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;div style=&quot;&quot;&gt;&lt;b&gt;🚀 01 · Deploy lógico em production&lt;br&gt;&lt;/b&gt;&lt;font size=&quot;1&quot;&gt;&lt;i&gt;Registra deploy lógico final de produção&lt;/i&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="260" x="20" y="87" as="geometry" />
+        </mxCell>
+        <mxCell id="1ulaTZoksTE1NcFQhYYi-5" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="dashed=0;outlineConnect=0;html=1;align=center;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;shape=mxgraph.weblogos.github;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;" value="&lt;font style=&quot;&quot;&gt;Esteiras de CI/CD via Github Actions&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="75" x="824.25" y="29" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-g" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#000000;verticalAlign=top;fontSize=14;fontStyle=1;align=center;spacingTop=8;fontColor=#000000;labelBackgroundColor=none;" value="&lt;br&gt;&lt;div style=&quot;margin-top: 4px;&quot;&gt;&lt;span style=&quot;text-wrap-mode: nowrap;&quot;&gt;✅ CI&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;margin-top: 4px;&quot;&gt;&lt;span style=&quot;&quot;&gt;⚡&lt;/span&gt;&lt;span style=&quot;font-size: 10px; font-weight: normal;&quot;&gt;Trigger: Pull Request → develop&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="554" width="300" x="51.5" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-j1" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;b&gt;🏗️ 01 · Build da aplicação&lt;/b&gt;&lt;div style=&quot;font-size: 9px;&quot;&gt;&lt;i&gt;Build da aplicação .NET&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="260" x="71.5" y="247" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-j2" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;b&gt;🎨 02 · Verificar padrão de código&lt;/b&gt;&lt;div style=&quot;font-size: 9px;&quot;&gt;&lt;i&gt;Lint / formatação do código&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="260" x="71.5" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-j3" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;b&gt;🧪 03 · Testar aplicação&lt;/b&gt;&lt;div style=&quot;font-size: 9px;&quot;&gt;&lt;i&gt;424 testes automatizados&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="260" x="71.5" y="412" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-j4" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;b&gt;🐳 04 · Build da imagem Docker&lt;/b&gt;&lt;div style=&quot;font-size: 9px;&quot;&gt;&lt;i&gt;Build da imagem Docker&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="260" x="71.5" y="494" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-j5" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;div style=&quot;&quot;&gt;&lt;b&gt;☸️ 05 · Validar manifests Kubernetes&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;font size=&quot;1&quot;&gt;&lt;i&gt;Valida os manifests Kubernetes&lt;/i&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="260" x="71.5" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-j6" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;fontColor=#000000;labelBackgroundColor=none;" value="🚦 06 · Quality gate&lt;div style=&quot;font-size: 9px; font-weight: normal;&quot;&gt;&lt;i&gt;Bloqueia o merge se algo falhar&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="260" x="71.5" y="651" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-e1" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-3" source="ci-j1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;" target="ci-j2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-e2" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-3" source="ci-j2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;" target="ci-j3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-e3" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-3" source="ci-j3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;" target="ci-j4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-e4" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-3" source="ci-j4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;" target="ci-j5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-e5" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-3" source="ci-j5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;" target="ci-j6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="YEBqnw7FEd6Bprcxb7eJ-1" connectable="0" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="group" value="" vertex="1">
+          <mxGeometry height="341" width="319" x="468.5" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cdd-g" parent="YEBqnw7FEd6Bprcxb7eJ-1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#000000;verticalAlign=top;fontSize=14;fontStyle=1;align=center;spacingTop=8;fontColor=#000000;labelBackgroundColor=none;" value="&lt;br&gt;&lt;div style=&quot;margin-top: 4px;&quot;&gt;🚀 CD Development&lt;br&gt;⚡&lt;span style=&quot;font-size: 10px; font-weight: normal;&quot;&gt;Trigger&lt;/span&gt;&lt;span style=&quot;font-size: 10px; font-weight: normal;&quot;&gt;:&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;font-size: 10px; font-weight: 400; background-color: transparent;&quot;&gt;Push/Merge→ develop&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="341" width="319" as="geometry" />
+        </mxCell>
+        <mxCell id="cdd-j1" parent="YEBqnw7FEd6Bprcxb7eJ-1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;div style=&quot;&quot;&gt;&lt;b&gt;🔎 01 · Detectar se há mudança que exige deploy&lt;br&gt;&lt;/b&gt;&lt;font size=&quot;1&quot;&gt;&lt;i&gt;Detecta se a mudança exige deploy&lt;/i&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="278" x="20" y="88" as="geometry" />
+        </mxCell>
+        <mxCell id="cdd-j2" parent="YEBqnw7FEd6Bprcxb7eJ-1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;div style=&quot;&quot;&gt;&lt;b&gt;☁️ 02 · Deploy em development&lt;br&gt;&lt;/b&gt;&lt;font size=&quot;1&quot;&gt;&lt;i&gt;terraform apply/destroy + push ECR + rollout EKS&lt;/i&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="278" x="20" y="177" as="geometry" />
+        </mxCell>
+        <mxCell id="cdd-j3" parent="YEBqnw7FEd6Bprcxb7eJ-1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;div style=&quot;&quot;&gt;&lt;b&gt;🔀 03 · Abrir PR para release&lt;br&gt;&lt;/b&gt;&lt;font size=&quot;1&quot;&gt;&lt;i&gt;Abre PR automático develop → release&lt;/i&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="277" x="21" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="cdd-e1" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-1" source="cdd-j1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;" target="cdd-j2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cdd-e2" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-1" source="cdd-j2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;" target="cdd-j3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="YEBqnw7FEd6Bprcxb7eJ-2" connectable="0" parent="YEBqnw7FEd6Bprcxb7eJ-3" style="group" value="" vertex="1">
+          <mxGeometry height="238" width="300" x="945.5" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cdr-g" parent="YEBqnw7FEd6Bprcxb7eJ-2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#000000;verticalAlign=top;fontSize=14;fontStyle=1;align=center;spacingTop=8;fontColor=#000000;labelBackgroundColor=none;" value="&lt;br&gt;🚀 CD Release&lt;div style=&quot;font-weight: normal; font-size: 10px; margin-top: 4px;&quot;&gt;&lt;span style=&quot;font-size: 14px; font-weight: 700;&quot;&gt;⚡&lt;/span&gt;Trigger:&amp;nbsp;&lt;span style=&quot;background-color: transparent;&quot;&gt;Push/Merge→ release&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="238" width="300" as="geometry" />
+        </mxCell>
+        <mxCell id="cdr-j1" parent="YEBqnw7FEd6Bprcxb7eJ-2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;div style=&quot;&quot;&gt;&lt;b&gt;🚀 01 · Deploy lógico em homologation&lt;br&gt;&lt;/b&gt;&lt;font size=&quot;1&quot;&gt;&lt;i&gt;Registra deploy lógico de homologação&lt;/i&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="260" x="20" y="88" as="geometry" />
+        </mxCell>
+        <mxCell id="cdr-j2" parent="YEBqnw7FEd6Bprcxb7eJ-2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=11;fontColor=#000000;labelBackgroundColor=none;" value="&lt;div style=&quot;&quot;&gt;&lt;b&gt;🔀 02 · Abrir PR para main&lt;br&gt;&lt;/b&gt;&lt;font size=&quot;1&quot;&gt;&lt;i&gt;Abre PR automático release → main&lt;/i&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="260" x="20" y="177" as="geometry" />
+        </mxCell>
+        <mxCell id="cdr-e1" edge="1" parent="YEBqnw7FEd6Bprcxb7eJ-2" source="cdr-j1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontColor=#000000;labelBackgroundColor=none;strokeColor=#000000;" target="cdr-j2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
