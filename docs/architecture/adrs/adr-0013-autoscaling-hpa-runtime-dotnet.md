@@ -40,7 +40,7 @@
 
 ### ❌ Negativo (Perdas/Riscos)
 
-- O node group do EKS permanece fixo em 1 node (decisão de custo do AWS Academy, ver ADR-0008 e `decisoes.md`); em um cenário de carga muito acima do teto configurado (5 réplicas), o HPA não teria para onde crescer sem também escalar o node group — fora do escopo atual.
+- O node group do EKS permanece fixo em 1 node (decisão de custo do AWS Academy, ver ADR-0008); em um cenário de carga muito acima do teto configurado (5 réplicas), o HPA não teria para onde crescer sem também escalar o node group — fora do escopo atual.
 - Os ajustes de memória/GC foram calibrados para o perfil observado neste ambiente específico (t3.small, 1 node); uma mudança de tipo de instância ou de carga de trabalho exigiria remedir o baseline.
 
 ## 6. Referências

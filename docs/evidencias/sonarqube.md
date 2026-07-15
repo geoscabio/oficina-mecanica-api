@@ -72,7 +72,7 @@ Todas as 424 testes continuam passando apos essas mudancas (nenhum comportamento
 
 ### Aceitos e documentados (marcados "Won't Fix" no SonarQube, com justificativa)
 
-Estes 4 achados sao intencionais e nao representam risco real — a justificativa completa de cada um esta em [`docs/projeto/decisoes.md`](../projeto/decisoes.md#achados-aceitos-do-sonarqube):
+Estes 4 achados sao intencionais e nao representam risco real:
 
 | Achado | Arquivo | Motivo aceito |
 | --- | --- | --- |

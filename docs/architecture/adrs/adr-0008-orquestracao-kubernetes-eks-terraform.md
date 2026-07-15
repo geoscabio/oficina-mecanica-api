@@ -30,7 +30,7 @@
 - **EKS é o padrão gerenciado da AWS para Kubernetes**, com integração nativa a VPC, IAM e Load Balancer — evita operar um control plane próprio, e demonstra um cenário mais próximo de produção do que um cluster local.
 - **Terraform versiona e audita todo o ciclo de vida**: o mesmo `terraform apply`/`destroy` que cria a rede e o banco também aplica os manifests Kubernetes da API, então um único `plan` mostra o ambiente inteiro antes de qualquer mudança.
 - **Um único pipeline de CI/CD (`CD Development`) controla tudo**, alternando `TERRAFORM_ACTION=apply`/`destroy` por um arquivo versionado (`terraform-action.env`), reduzindo o risco de esquecer recursos ativos entre sessões do Learner Lab.
-- Evita duplicar lógica entre `k8s/` (execução local) e um conjunto de YAMLs para AWS: a pasta `k8s/` fica dedicada à execução local (ver `decisoes.md`), e o ambiente AWS usa os mesmos conceitos via Terraform.
+- Evita duplicar lógica entre `k8s/` (execução local) e um conjunto de YAMLs para AWS: a pasta `k8s/` fica dedicada à execução local, e o ambiente AWS usa os mesmos conceitos via Terraform.
 
 ## 5. Consequências (Trade-offs)
 

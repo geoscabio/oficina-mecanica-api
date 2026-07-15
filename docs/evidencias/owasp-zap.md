@@ -46,7 +46,7 @@ Scan executado em `2026-07-12`, contra a API local (`docker compose`, commit `4d
 | Relatorio HTML | [`zap/zap-baseline.html`](zap/zap-baseline.html) |
 | Relatorio JSON | [`zap/zap-baseline.json`](zap/zap-baseline.json) |
 
-Nenhuma falha de seguranca real (FAIL) foi encontrada. Os 4 avisos existentes sao todos originados pela interface do **Swagger UI** — ferramenta de terceiros (Swashbuckle), intencionalmente exposta neste ambiente para fins de avaliacao/demonstracao (ja documentado em [`docs/projeto/decisoes.md`](../projeto/decisoes.md), seção "Ambiente AWS de demonstração"), nao pela API de negocio em si:
+Nenhuma falha de seguranca real (FAIL) foi encontrada. Os 4 avisos existentes sao todos originados pela interface do **Swagger UI** — ferramenta de terceiros (Swashbuckle), intencionalmente exposta neste ambiente para fins de avaliacao/demonstracao (ver [`docs/deploy/deploy-aws.md`](../deploy/deploy-aws.md)), nao pela API de negocio em si:
 
 | Regra | Alertas | Motivo aceito |
 | --- | --- | --- |

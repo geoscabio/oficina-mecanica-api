@@ -27,7 +27,7 @@
 ## 4. Justificativa
 
 - Sem Multi-AZ: não há necessidade de alta disponibilidade de banco para uma demonstração de curta duração sem usuários reais concorrentes.
-- Sem retenção de backup automatizado: os dados são recriados via migration + seed a cada `terraform apply` (ver `decisoes.md`), então não há dado de produção real para proteger.
+- Sem retenção de backup automatizado: os dados são recriados via migration + seed a cada `terraform apply`, então não há dado de produção real para proteger.
 - `skip_final_snapshot = true` e `deletion_protection = false`: garantem que o `terraform destroy` complete sem exigir confirmação manual extra ou deixar um snapshot órfão gerando custo de armazenamento após o encerramento.
 - `db.t3.micro` é dimensionado para o volume de uma demonstração acadêmica, não para carga de produção.
 
@@ -50,4 +50,3 @@
 - **FIAP, Pós-Tech Software Architecture.** [Enunciado do Tech Challenge — Fase 2](../../projeto/enunciado-fase-2-tech-challenge.pdf), seção "Infraestrutura como Código (IaC)".
 - **AWS.** *Amazon RDS Multi-AZ Deployments*. 2026.
 - Configuração real: [`infra/terraform/environments/dev/rds.tf`](../../../infra/terraform/environments/dev/rds.tf).
-- Trade-offs relacionados: [`docs/projeto/decisoes.md`](../../projeto/decisoes.md).
