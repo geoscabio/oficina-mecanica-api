@@ -23671,6 +23671,412 @@
         }
       ]
     }
+,
+    {
+      "name": "fluxo-demo-ordem-servico-completo",
+      "item": [
+        {
+          "name": "01. login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.environment.set('token', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"login\": \"admin\",\n    \"senha\": \"admin123\"\n}",
+              "options": { "raw": { "headerFamily": "json", "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identidade/autenticacao/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identidade", "autenticacao", "login"]
+            }
+          }
+        },
+        {
+          "name": "02. cadastrar servico-catalogo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('servicoCatalogoId', jsonData.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Troca de óleo e filtro\",\n  \"valor\": 180.00\n}",
+              "options": { "raw": { "headerFamily": "json", "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/administrativo/servicos-catalogo/cadastrar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "administrativo", "servicos-catalogo", "cadastrar"]
+            }
+          }
+        },
+        {
+          "name": "03. cadastrar cliente",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function calcularDigito(base, pesoInicial) {",
+                  "    let soma = 0;",
+                  "    for (let i = 0; i < base.length; i++) {",
+                  "        soma += base[i] * (pesoInicial - i);",
+                  "    }",
+                  "    const resto = soma % 11;",
+                  "    return resto < 2 ? 0 : 11 - resto;",
+                  "}",
+                  "",
+                  "let nums;",
+                  "do {",
+                  "    nums = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10));",
+                  "} while (nums.every((d) => d === nums[0]));",
+                  "",
+                  "const d1 = calcularDigito(nums, 10);",
+                  "const d2 = calcularDigito([...nums, d1], 11);",
+                  "const cpfGerado = [...nums, d1, d2].join('');",
+                  "",
+                  "pm.collectionVariables.set('documentoGerado', cpfGerado);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('clienteId', jsonData.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documento\": \"{{documentoGerado}}\",\n  \"nome\": \"Maria Aparecida Souza\",\n  \"endereco\": {\n    \"logradouro\": \"Rua das Flores\",\n    \"numero\": \"123\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"São Paulo\",\n    \"cep\": \"01310-100\"\n  },\n  \"telefone\": \"11987654321\",\n  \"email\": \"maria.souza@example.com\"\n}",
+              "options": { "raw": { "headerFamily": "json", "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/atendimento/clientes/cadastrar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "atendimento", "clientes", "cadastrar"]
+            }
+          }
+        },
+        {
+          "name": "04. cadastrar veiculo",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';",
+                  "const letra = () => letras[Math.floor(Math.random() * letras.length)];",
+                  "const digito = () => Math.floor(Math.random() * 10);",
+                  "const placaGerada = `${letra()}${letra()}${letra()}${digito()}${letra()}${digito()}${digito()}`;",
+                  "",
+                  "pm.collectionVariables.set('placaGerada', placaGerada);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('veiculoId', jsonData.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"placa\": \"{{placaGerada}}\",\n  \"marca\": \"Fiat\",\n  \"modelo\": \"Uno\",\n  \"ano\": 2020\n}",
+              "options": { "raw": { "headerFamily": "json", "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/atendimento/veiculos/cadastrar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "atendimento", "veiculos", "cadastrar"]
+            }
+          }
+        },
+        {
+          "name": "05. cadastrar mecanico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('mecanicoId', jsonData.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Pereira\",\n  \"funcional\": \"MEC-001\"\n}",
+              "options": { "raw": { "headerFamily": "json", "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/administrativo/mecanicos/cadastrar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "administrativo", "mecanicos", "cadastrar"]
+            }
+          }
+        },
+        {
+          "name": "06. abrir ordem de servico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('ordemServicoId', jsonData.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"veiculoId\": \"{{veiculoId}}\",\n  \"mecanicoId\": \"{{mecanicoId}}\",\n  \"servicosCatalogoIds\": [],\n  \"pecasInsumos\": []\n}",
+              "options": { "raw": { "headerFamily": "json", "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/gestao-ordem-servico/ordens-servico/cadastrar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "gestao-ordem-servico", "ordens-servico", "cadastrar"]
+            }
+          }
+        },
+        {
+          "name": "07. iniciar diagnostico",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/gestao-ordem-servico/ordens-servico/{{ordemServicoId}}/iniciar-diagnostico",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "gestao-ordem-servico", "ordens-servico", "{{ordemServicoId}}", "iniciar-diagnostico"]
+            }
+          }
+        },
+        {
+          "name": "08. definir servicos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.servicos && jsonData.servicos.length > 0) {",
+                  "        pm.collectionVariables.set('servicoId', jsonData.servicos[0].id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"servicosCatalogoIds\": [\"{{servicoCatalogoId}}\"]\n}",
+              "options": { "raw": { "headerFamily": "json", "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/gestao-ordem-servico/ordens-servico/{{ordemServicoId}}/definir-servicos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "gestao-ordem-servico", "ordens-servico", "{{ordemServicoId}}", "definir-servicos"]
+            }
+          }
+        },
+        {
+          "name": "09. aguardar aprovacao",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/gestao-ordem-servico/ordens-servico/{{ordemServicoId}}/aguardar-aprovacao",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "gestao-ordem-servico", "ordens-servico", "{{ordemServicoId}}", "aguardar-aprovacao"]
+            }
+          }
+        },
+        {
+          "name": "10. notificar decisao orcamento (webhook)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" },
+              { "key": "X-Webhook-Token", "value": "{{webhookToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decisao\": 1\n}",
+              "options": { "raw": { "headerFamily": "json", "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/gestao-ordem-servico/ordens-servico/{{ordemServicoId}}/orcamento/notificacoes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "gestao-ordem-servico", "ordens-servico", "{{ordemServicoId}}", "orcamento", "notificacoes"]
+            }
+          }
+        },
+        {
+          "name": "11. iniciar execucao (servico)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/gestao-ordem-servico/ordens-servico/{{ordemServicoId}}/servicos/{{servicoId}}/iniciar-execucao",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "gestao-ordem-servico", "ordens-servico", "{{ordemServicoId}}", "servicos", "{{servicoId}}", "iniciar-execucao"]
+            }
+          }
+        },
+        {
+          "name": "12. finalizar servico",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/gestao-ordem-servico/ordens-servico/{{ordemServicoId}}/servicos/{{servicoId}}/finalizar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "gestao-ordem-servico", "ordens-servico", "{{ordemServicoId}}", "servicos", "{{servicoId}}", "finalizar"]
+            }
+          }
+        },
+        {
+          "name": "13. finalizar ordem de servico",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/gestao-ordem-servico/ordens-servico/{{ordemServicoId}}/finalizar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "gestao-ordem-servico", "ordens-servico", "{{ordemServicoId}}", "finalizar"]
+            }
+          }
+        },
+        {
+          "name": "14. entregar ordem de servico",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/gestao-ordem-servico/ordens-servico/{{ordemServicoId}}/entregar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "gestao-ordem-servico", "ordens-servico", "{{ordemServicoId}}", "entregar"]
+            }
+          }
+        },
+        {
+          "name": "15. consultar status (publico, sem autenticacao)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/gestao-ordem-servico/ordens-servico/{{ordemServicoId}}/consultar-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "gestao-ordem-servico", "ordens-servico", "{{ordemServicoId}}", "consultar-status"]
+            }
+          }
+        }
+      ]
+    }
   ],
   "auth": {
     "type": "bearer",
@@ -23710,6 +24116,42 @@
     {
       "key": "baseUrl",
       "value": "/"
+    },
+    {
+      "key": "servicoCatalogoId",
+      "value": ""
+    },
+    {
+      "key": "clienteId",
+      "value": ""
+    },
+    {
+      "key": "veiculoId",
+      "value": ""
+    },
+    {
+      "key": "mecanicoId",
+      "value": ""
+    },
+    {
+      "key": "ordemServicoId",
+      "value": ""
+    },
+    {
+      "key": "servicoId",
+      "value": ""
+    },
+    {
+      "key": "webhookToken",
+      "value": ""
+    },
+    {
+      "key": "documentoGerado",
+      "value": ""
+    },
+    {
+      "key": "placaGerada",
+      "value": ""
     }
   ]
 }
