@@ -17,9 +17,11 @@ public static class ApiServiceCollectionExtensions
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
+        services.AddHealthChecks();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options => options.AddJwtSwagger());
         services.AddJwtAuthentication(configuration);
+        services.AddWebhookTokenAuthentication(configuration);
 
         services.Configure<ApiBehaviorOptions>(options =>
         {

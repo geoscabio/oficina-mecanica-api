@@ -1,0 +1,65 @@
+name: "🔀 CD Release"
+
+on:
+  push:
+    branches:
+      - release
+      - "release/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-homologation:
+    name: "🚀 01 · Deploy lógico em homologation"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "📝 01 · Registrar deploy lógico"
+        run: |
+          echo "Homologation deploy is logical in this Tech Challenge repository."
+          echo "No AWS homologation resources are provisioned because the physical environment does not exist."
+          echo "The deploy flow continues through pull requests to keep the Git Flow complete and auditable."
+
+  open-pr-to-main:
+    name: "🔀 02 · Abrir PR para main"
+    runs-on: ubuntu-latest
+    needs: deploy-homologation
+    if: needs.deploy-homologation.result == 'success' && vars.AUTO_PR_ENABLED == 'true'
+
+    steps:
+      - name: "📥 01 · Baixar código do repositório"
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: "🔀 02 · Criar ou manter PR para main"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_BRANCH: ${{ github.ref_name }}
+        run: |
+          git fetch origin main "$SOURCE_BRANCH"
+
+          pending_commits="$(git rev-list --count "origin/main..origin/$SOURCE_BRANCH")"
+          if [ "$pending_commits" -eq 0 ]; then
+            echo "No pending commits from $SOURCE_BRANCH to main."
+            exit 0
+          fi
+
+          existing_pr="$(gh pr list --base main --head "$SOURCE_BRANCH" --state open --json number --jq '.[0].number // empty')"
+
+          if [ -n "$existing_pr" ]; then
+            echo "Pull request #$existing_pr already exists for $SOURCE_BRANCH -> main."
+            exit 0
+          fi
+
+          gh pr create \
+            --base main \
+            --head "$SOURCE_BRANCH" \
+            --title "ci(production): deploy $SOURCE_BRANCH to main" \
+            --body "PR automático aberto após deploy lógico em homologation. Este PR deve exigir aprovação manual antes do merge para \`main\`."

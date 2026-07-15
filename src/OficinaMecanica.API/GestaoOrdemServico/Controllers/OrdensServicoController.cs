@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OficinaMecanica.API.Extensions.Responses;
+using OficinaMecanica.API.Extensions.Security;
 using OficinaMecanica.Application.Identidade;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AguardarAprovacaoOrcamento;
@@ -17,6 +18,7 @@ using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Inicia
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarExecucaoServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ListarOrdensServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ListarTempoMedioExecucaoServicos;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.NotificarDecisaoOrcamento;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
 
 namespace OficinaMecanica.API.GestaoOrdemServico.Controllers;
@@ -45,7 +47,7 @@ public sealed class OrdensServicoController : ControllerBase
     }
 
     [HttpGet("ordens-servico/{ordemServicoId:guid}/consultar-status")]
-    [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanicoCliente)]
+    [AllowAnonymous]
     public async Task<IActionResult> ConsultarStatus([FromServices] ConsultarStatusOrdemServicoUseCase useCase, Guid ordemServicoId, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(new ConsultarStatusOrdemServicoRequest(ordemServicoId), cancellationToken);
@@ -55,7 +57,16 @@ public sealed class OrdensServicoController : ControllerBase
 
     [HttpGet("ordens-servico/listar")]
     [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanico)]
-    public async Task<IActionResult> Listar([FromServices] ListarOrdensServicoUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Listar([FromServices] ListarOrdensServicoAbertasUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
+    {
+        var result = await useCase.ExecuteAsync(new ListarOrdensServicoRequest(pagina, tamanhoPagina), cancellationToken);
+
+        return this.ToActionResult(result);
+    }
+
+    [HttpGet("ordens-servico/listar-historico")]
+    [Authorize(Roles = PerfisAcesso.AdministradorAtendenteMecanico)]
+    public async Task<IActionResult> ListarHistorico([FromServices] ListarOrdensServicoUseCase useCase, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10, CancellationToken cancellationToken = default)
     {
         var result = await useCase.ExecuteAsync(new ListarOrdensServicoRequest(pagina, tamanhoPagina), cancellationToken);
 
@@ -94,6 +105,16 @@ public sealed class OrdensServicoController : ControllerBase
     public async Task<IActionResult> AguardarAprovacaoOrcamento([FromServices] AguardarAprovacaoOrcamentoUseCase useCase, Guid ordemServicoId, CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(new AguardarAprovacaoOrcamentoRequest(ordemServicoId), cancellationToken);
+
+        return this.ToActionResult(result);
+    }
+
+    [HttpPost("ordens-servico/{ordemServicoId:guid}/orcamento/notificacoes")]
+    [AllowAnonymous]
+    [WebhookTokenAuthorize]
+    public async Task<IActionResult> NotificarDecisaoOrcamento([FromServices] NotificarDecisaoOrcamentoUseCase useCase, Guid ordemServicoId, [FromBody] NotificarDecisaoOrcamentoRequest request, CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(request with { OrdemServicoId = ordemServicoId }, cancellationToken);
 
         return this.ToActionResult(result);
     }

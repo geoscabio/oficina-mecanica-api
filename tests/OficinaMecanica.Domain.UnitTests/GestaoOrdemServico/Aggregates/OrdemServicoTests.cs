@@ -144,6 +144,23 @@ public class OrdemServicoTests
     }
 
     [Fact]
+    public void Dado_OrdemServicoRecebida_Quando_RegistrarServicoNaAbertura_Entao_DeveAdicionarServicoEManterRecebida()
+    {
+        // Arrange
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
+        var servicoCatalogoId = Guid.NewGuid();
+
+        // Act
+        ordemServico.RegistrarServicoNaAbertura(servicoCatalogoId, OrdemServicoTestDataFactory.ValorServicoPadrao);
+
+        // Assert
+        ordemServico.Status.Should().Be(StatusOrdemServico.Recebida);
+        ordemServico.Servicos.Should().ContainSingle();
+        ordemServico.Servicos.Single().ServicoCatalogoId.Should().Be(servicoCatalogoId);
+        ordemServico.ValorTotal.Should().Be(OrdemServicoTestDataFactory.ValorServicoPadrao);
+    }
+
+    [Fact]
     public void Dado_ServicoCatalogoIdVazio_Quando_DefinirServico_Entao_DeveLancarDomainException()
     {
         // Arrange
@@ -205,6 +222,23 @@ public class OrdemServicoTests
         acao.Should()
             .Throw<DomainException>()
             .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
+    }
+
+    [Fact]
+    public void Dado_OrdemServicoRecebida_Quando_RegistrarPecaInsumoNaAbertura_Entao_DeveAdicionarPecaInsumoEManterRecebida()
+    {
+        // Arrange
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoPadrao();
+        var pecaInsumoCatalogoId = Guid.NewGuid();
+
+        // Act
+        ordemServico.RegistrarPecaInsumoNaAbertura(pecaInsumoCatalogoId, OrdemServicoTestDataFactory.QuantidadePecaInsumoPadrao, OrdemServicoTestDataFactory.ValorPecaInsumoPadrao);
+
+        // Assert
+        ordemServico.Status.Should().Be(StatusOrdemServico.Recebida);
+        ordemServico.PecasInsumos.Should().ContainSingle();
+        ordemServico.PecasInsumos.Single().PecaInsumoCatalogoId.Should().Be(pecaInsumoCatalogoId);
+        ordemServico.ValorTotal.Should().Be(90m);
     }
 
     [Fact]
@@ -276,6 +310,36 @@ public class OrdemServicoTests
 
         // Assert
         ordemServico.Status.Should().Be(StatusOrdemServico.EmExecucao);
+    }
+
+    [Fact]
+    public void Dado_OrdemServicoAguardandoAprovacao_Quando_NotificarRecusaOrcamento_Entao_DeveFicarCanceladaComMotivoReprovacaoOrcamento()
+    {
+        // Arrange
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoAguardandoAprovacao();
+
+        // Act
+        ordemServico.NotificarDecisaoOrcamento(DecisaoOrcamento.Recusado);
+
+        // Assert
+        ordemServico.Status.Should().Be(StatusOrdemServico.Cancelada);
+        ordemServico.MotivoCancelamento.Should().Be(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
+        ordemServico.DataFim.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Dado_OrdemServicoEmDiagnostico_Quando_NotificarRecusaOrcamento_Entao_DeveLancarDomainException()
+    {
+        // Arrange
+        var ordemServico = OrdemServicoTestDataFactory.CriarOrdemServicoEmDiagnosticoComServico();
+
+        // Act
+        var acao = () => ordemServico.NotificarDecisaoOrcamento(DecisaoOrcamento.Recusado);
+
+        // Assert
+        acao.Should()
+            .Throw<DomainException>()
+            .WithMessage(OrdemServicoErrorMessages.TransicaoStatusInvalida);
     }
 
     [Fact]

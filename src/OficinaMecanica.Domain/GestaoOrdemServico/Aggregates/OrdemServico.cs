@@ -67,16 +67,28 @@ public sealed class OrdemServico
     {
         ExigirStatus(StatusOrdemServico.EmDiagnostico);
 
-        _servicos.Add(Servico.Criar(servicoCatalogoId, valor));
-        CalcularOrcamento();
+        AdicionarServico(servicoCatalogoId, valor);
     }
 
     public void ReservarPecaInsumo(Guid pecaInsumoCatalogoId, int quantidade, decimal valorUnitario)
     {
         ExigirStatus(StatusOrdemServico.EmDiagnostico);
 
-        _pecasInsumos.Add(PecaInsumo.Criar(pecaInsumoCatalogoId, quantidade, valorUnitario));
-        CalcularOrcamento();
+        AdicionarPecaInsumo(pecaInsumoCatalogoId, quantidade, valorUnitario);
+    }
+
+    public void RegistrarServicoNaAbertura(Guid servicoCatalogoId, decimal valor)
+    {
+        ExigirStatus(StatusOrdemServico.Recebida);
+
+        AdicionarServico(servicoCatalogoId, valor);
+    }
+
+    public void RegistrarPecaInsumoNaAbertura(Guid pecaInsumoCatalogoId, int quantidade, decimal valorUnitario)
+    {
+        ExigirStatus(StatusOrdemServico.Recebida);
+
+        AdicionarPecaInsumo(pecaInsumoCatalogoId, quantidade, valorUnitario);
     }
 
     public void CalcularOrcamento()
@@ -103,6 +115,29 @@ public sealed class OrdemServico
         ExigirStatus(StatusOrdemServico.AguardandoAprovacao);
 
         Status = StatusOrdemServico.EmExecucao;
+    }
+
+    public void NotificarDecisaoOrcamento(DecisaoOrcamento decisao)
+    {
+        if (!Enum.IsDefined(decisao))
+        {
+            throw new DomainException(OrdemServicoErrorMessages.DecisaoOrcamentoInvalida);
+        }
+
+        if (decisao == DecisaoOrcamento.Aprovado)
+        {
+            IniciarExecucao();
+            return;
+        }
+
+        RecusarOrcamento();
+    }
+
+    private void RecusarOrcamento()
+    {
+        ExigirStatus(StatusOrdemServico.AguardandoAprovacao);
+
+        Cancelar(MotivoCancelamentoOrdemServico.ReprovacaoOrcamento);
     }
 
     public void IniciarExecucaoServico(Guid servicoId)
@@ -160,6 +195,18 @@ public sealed class OrdemServico
     {
         return _servicos.SingleOrDefault(servico => servico.Id == servicoId)
             ?? throw new DomainException(OrdemServicoErrorMessages.ServicoNaoEncontrado);
+    }
+
+    private void AdicionarServico(Guid servicoCatalogoId, decimal valor)
+    {
+        _servicos.Add(Servico.Criar(servicoCatalogoId, valor));
+        CalcularOrcamento();
+    }
+
+    private void AdicionarPecaInsumo(Guid pecaInsumoCatalogoId, int quantidade, decimal valorUnitario)
+    {
+        _pecasInsumos.Add(PecaInsumo.Criar(pecaInsumoCatalogoId, quantidade, valorUnitario));
+        CalcularOrcamento();
     }
 
     private void ExigirStatus(StatusOrdemServico statusEsperado)

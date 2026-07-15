@@ -4,7 +4,6 @@ obj/
 .vscode/
 .sonarqube/
 TestResults/
-docs/
 *.user
 *.suo
 *.nupkg
@@ -12,5 +11,17 @@ docs/
 .env.local
 *.env.local
 
-Contexto para IA.zip
-_contexto_para_ia_extracted/
+Material de apoio local.zip
+_material_apoio_extraido/
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.auto.tfvars
+*.auto.tfvars.json
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

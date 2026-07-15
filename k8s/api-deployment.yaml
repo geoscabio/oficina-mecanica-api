@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oficina-mecanica-api
+  namespace: oficina-mecanica
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: oficina-mecanica-api
+
+  template:
+    metadata:
+      labels:
+        app: oficina-mecanica-api
+
+    spec:
+      automountServiceAccountToken: false
+
+      containers:
+        - name: oficina-mecanica-api
+          image: oficina_mecanica_api-api:latest
+          imagePullPolicy: IfNotPresent
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+              ephemeral-storage: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+              ephemeral-storage: "512Mi"
+
+          envFrom:
+            - configMapRef:
+                name: oficina-mecanica-api-config
+
+          ports:
+            - containerPort: 8080
+
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          env:
+            - name: Jwt__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: oficina-mecanica-api-secret
+                  key: Jwt__Secret
+
+            - name: Integracoes__Orcamento__WebhookToken
+              valueFrom:
+                secretKeyRef:
+                  name: oficina-mecanica-api-secret
+                  key: Integracoes__Orcamento__WebhookToken
+
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: oficina-mecanica-api-secret
+                  key: ConnectionStrings__DefaultConnection

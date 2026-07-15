@@ -15,6 +15,7 @@ using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Inicia
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarExecucaoServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ListarOrdensServico;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ListarTempoMedioExecucaoServicos;
+using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.NotificarDecisaoOrcamento;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
 
 namespace OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IValidator<DefinirServicosRequest>, DefinirServicosValidator>();
         services.AddScoped<IValidator<ReservarPecaInsumoRequest>, ReservarPecaInsumoValidator>();
         services.AddScoped<IValidator<AguardarAprovacaoOrcamentoRequest>, AguardarAprovacaoOrcamentoValidator>();
+        services.AddScoped<IValidator<NotificarDecisaoOrcamentoRequest>, NotificarDecisaoOrcamentoValidator>();
         services.AddScoped<IValidator<IniciarExecucaoOrdemServicoRequest>, IniciarExecucaoOrdemServicoValidator>();
         services.AddScoped<IValidator<IniciarExecucaoServicoRequest>, IniciarExecucaoServicoValidator>();
         services.AddScoped<IValidator<FinalizarServicoRequest>, FinalizarServicoValidator>();
@@ -40,11 +42,13 @@ public static class DependencyInjection
         services.AddScoped<IValidator<ConsultarTempoMedioExecucaoServicoRequest>, ConsultarTempoMedioExecucaoServicoValidator>();
         services.AddScoped<IValidator<ListarTempoMedioExecucaoServicosRequest>, ListarTempoMedioExecucaoServicosValidator>();
 
+        services.AddScoped<AbrirOrdemServicoRepositorios>();
         services.AddScoped<AbrirOrdemServicoUseCase>();
         services.AddScoped<IniciarDiagnosticoOrdemServicoUseCase>();
         services.AddScoped<DefinirServicosUseCase>();
         services.AddScoped<ReservarPecaInsumoUseCase>();
         services.AddScoped<AguardarAprovacaoOrcamentoUseCase>();
+        services.AddScoped<NotificarDecisaoOrcamentoUseCase>();
         services.AddScoped<IniciarExecucaoOrdemServicoUseCase>();
         services.AddScoped<IniciarExecucaoServicoUseCase>();
         services.AddScoped<FinalizarServicoUseCase>();
@@ -53,6 +57,7 @@ public static class DependencyInjection
         services.AddScoped<EntregarOrdemServicoUseCase>();
         services.AddScoped<DetalharOrdemServicoUseCase>();
         services.AddScoped<ListarOrdensServicoUseCase>();
+        services.AddScoped<ListarOrdensServicoAbertasUseCase>();
         services.AddScoped<ConsultarStatusOrdemServicoUseCase>();
         services.AddScoped<ConsultarTempoMedioExecucaoServicoUseCase>();
         services.AddScoped<ListarTempoMedioExecucaoServicosUseCase>();

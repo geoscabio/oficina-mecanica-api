@@ -5,7 +5,7 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: Developer
-      MSSQL_SA_PASSWORD: ${OFICINA_SQL_SA_PASSWORD:?Configure OFICINA_SQL_SA_PASSWORD no arquivo .env antes de executar o docker compose.}
+      MSSQL_SA_PASSWORD: ${OFICINA_MECANICA_SQL_SA_PASSWORD:?Configure OFICINA_MECANICA_SQL_SA_PASSWORD no arquivo .env antes de executar o docker compose.}
     ports:
       - "14333:1433"
     volumes:
@@ -28,10 +28,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__DefaultConnection: Server=sqlserver,1433;Database=OficinaMecanicaDb;User Id=sa;Password=${OFICINA_SQL_SA_PASSWORD:?Configure OFICINA_SQL_SA_PASSWORD no arquivo .env antes de executar o docker compose.};TrustServerCertificate=True;
+      ConnectionStrings__DefaultConnection: Server=sqlserver,1433;Database=OficinaMecanicaDb;User Id=sa;Password=${OFICINA_MECANICA_SQL_SA_PASSWORD:?Configure OFICINA_MECANICA_SQL_SA_PASSWORD no arquivo .env antes de executar o docker compose.};TrustServerCertificate=True;
       Database__ApplyMigrationsOnStartup: "true"
       Database__SeedDemoData: "true"
-      Jwt__Secret: ${OFICINA_JWT_SECRET:?Configure OFICINA_JWT_SECRET no arquivo .env antes de executar o docker compose.}
+      Jwt__Secret: ${OFICINA_MECANICA_JWT_SECRET:?Configure OFICINA_MECANICA_JWT_SECRET no arquivo .env antes de executar o docker compose.}
+      Integracoes__Orcamento__WebhookToken: ${OFICINA_MECANICA_ORCAMENTO_WEBHOOK_TOKEN:?Configure OFICINA_MECANICA_ORCAMENTO_WEBHOOK_TOKEN no arquivo .env antes de executar o docker compose.}
     ports:
       - "5093:8080"
 

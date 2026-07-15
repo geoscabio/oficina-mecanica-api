@@ -1,0 +1,25 @@
+name: "🏁 CD Production"
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-production:
+    name: "🚀 01 · Deploy lógico em production"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "📝 01 · Registrar deploy lógico"
+        run: |
+          echo "Production deploy is logical in this Tech Challenge repository."
+          echo "No AWS production resources are provisioned because the physical environment does not exist."
+          echo "The main branch records the approved production deploy."

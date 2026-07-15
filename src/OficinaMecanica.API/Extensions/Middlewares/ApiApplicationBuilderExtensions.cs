@@ -10,13 +10,17 @@ public static class ApiApplicationBuilderExtensions
     {
         app.UseSecurityHeaders();
         app.UseMiddleware<GlobalExceptionMiddleware>();
-        app.UseSwagger();
 
-        app.UseSwaggerUI(options =>
+        if (IsSwaggerEnabled(app))
         {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Oficina Mecânica API v1");
-            options.EnablePersistAuthorization();
-        });
+            app.UseSwagger();
+
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Oficina Mecanica API v1");
+                options.EnablePersistAuthorization();
+            });
+        }
 
         app.UseHttpsRedirection();
         app.UseAuthentication();
@@ -48,10 +52,22 @@ public static class ApiApplicationBuilderExtensions
 
     public static WebApplication MapApiEndpoints(this WebApplication app)
     {
+        app.MapHealthChecks("/api/health")
+            .AllowAnonymous()
+            .WithName("HealthCheck")
+            .WithTags("Health");
+
         app.MapControllers();
-        app.MapGet("/", () => Results.Redirect("/swagger"))
+        app.MapGet("/", () => Results.Redirect(IsSwaggerEnabled(app) ? "/swagger" : "/api/health"))
             .ExcludeFromDescription();
 
         return app;
+    }
+
+    private static bool IsSwaggerEnabled(WebApplication app)
+    {
+        return app.Environment.IsDevelopment()
+            || app.Environment.IsEnvironment("Testing")
+            || (bool.TryParse(app.Configuration["Swagger:Enabled"], out var enabled) && enabled);
     }
 }

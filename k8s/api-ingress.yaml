@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: oficina-mecanica-api
+  namespace: oficina-mecanica
+
+spec:
+  ingressClassName: nginx
+
+  rules:
+    - host: oficina-mecanica.local
+
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+
+            backend:
+              service:
+                name: oficina-mecanica-api
+
+                port:
+                  number: 8080

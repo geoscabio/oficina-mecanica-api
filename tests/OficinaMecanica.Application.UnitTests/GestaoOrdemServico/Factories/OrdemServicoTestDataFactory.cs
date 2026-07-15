@@ -167,9 +167,25 @@ internal static class OrdemServicoTestDataFactory
         return ordemServico;
     }
 
-    public static AbrirOrdemServicoRequest CriarAbrirOrdemServicoRequestValido(Guid? veiculoId = null, Guid? mecanicoId = null)
+    public static AbrirOrdemServicoRequest CriarAbrirOrdemServicoRequestValido(
+        Guid? veiculoId = null,
+        Guid? mecanicoId = null,
+        Guid? clienteId = null,
+        string? documentoCliente = null,
+        IReadOnlyCollection<Guid>? servicosCatalogoIds = null,
+        IReadOnlyCollection<PecaInsumoRequest>? pecasInsumos = null)
     {
-        return new AbrirOrdemServicoRequest(veiculoId ?? Guid.NewGuid(), mecanicoId ?? Guid.NewGuid());
+        var clienteIdentificador = documentoCliente is null
+            ? clienteId ?? Guid.NewGuid()
+            : clienteId;
+
+        return new AbrirOrdemServicoRequest(
+            clienteIdentificador,
+            documentoCliente,
+            veiculoId ?? Guid.NewGuid(),
+            mecanicoId ?? Guid.NewGuid(),
+            servicosCatalogoIds ?? [],
+            pecasInsumos ?? []);
     }
 
     public static IniciarDiagnosticoOrdemServicoRequest CriarIniciarDiagnosticoOrdemServicoRequestValido(Guid? ordemServicoId = null)

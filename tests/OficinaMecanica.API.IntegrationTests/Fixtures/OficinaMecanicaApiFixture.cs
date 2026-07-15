@@ -127,6 +127,7 @@ public sealed class OficinaMecanicaApiFixture : IAsyncLifetime
             ["Jwt__Audience"] = "OficinaMecanica.API",
             ["Jwt__Secret"] = "oficina-mecanica-api-chave-academica-jwt-2026",
             ["Jwt__ExpirationMinutes"] = "120",
+            ["Integracoes__Orcamento__WebhookToken"] = "webhook-orcamento-teste-local-2026",
             ["Identidade__UsuariosDemo__0__Nome"] = "Administrador",
             ["Identidade__UsuariosDemo__0__Login"] = "admin",
             ["Identidade__UsuariosDemo__0__Senha"] = "admin123",

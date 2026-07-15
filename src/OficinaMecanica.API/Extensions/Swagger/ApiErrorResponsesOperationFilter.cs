@@ -15,6 +15,7 @@ internal sealed class ApiErrorResponsesOperationFilter : IOperationFilter
         AddErrorResponse(operation, context, TipoErro.NaoAutorizado, ApiResponseMessages.NaoAutorizado);
         AddErrorResponse(operation, context, TipoErro.NaoEncontrado, ApiResponseMessages.RecursoNaoEncontrado);
         AddErrorResponse(operation, context, TipoErro.RegraNegocio, ApiResponseMessages.RegraNegocioViolada);
+        AddErrorResponse(operation, context, TipoErro.Conflito, ApiResponseMessages.ConflitoPersistencia);
         AddErrorResponse(operation, context, TipoErro.ErroInterno, ApiResponseMessages.ErroInternoInesperado);
     }
 
