@@ -2,7 +2,8 @@
 
 ## AWS
 
-- Evidenciar e executar de fato o deploy lógico nos ambientes `homologation` (branch `release`) e `production` (branch `main`) — a `main` é a branch usada para a avaliação da Fase 2. Próximo passo: mergear o PR automático `develop → release` (dispara `CD Release`), depois mergear o PR automático `release → main` que se abre em seguida (dispara `CD Production`).
+- Ambiente `development` destruído com sucesso após a gravação do vídeo de demonstração (`terraform destroy` real, via esteira `CD Development`).
+- Deploy lógico nos ambientes `homologation` (branch `release`) e `production` (branch `main`) — a `main` é a branch usada para a avaliação da Fase 2. Próximo passo: mergear o PR automático `develop → release` (dispara `CD Release`), depois mergear o PR automático `release → main` que se abre em seguida (dispara `CD Production`).
 
 ## Evolução pós-entrega
 
