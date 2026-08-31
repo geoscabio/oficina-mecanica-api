@@ -34,7 +34,7 @@ feature/*, bugfix/*, hotfix/* ...
   -> deploy lógico em production
 ```
 
-No estágio `development`, o deploy AWS é o último passo antes da abertura do PR para `release` quando o merge altera código, infraestrutura, Docker, workflows ou manifests. Merges somente de Markdown/`docs/` pulam o deploy AWS para evitar rebuild desnecessário e rollout sem mudança funcional. Como `homologation` e `production` não existem como ambientes físicos neste projeto, esses estágios registram deploys lógicos para manter o Git Flow completo e auditável.
+No estágio `development`, o deploy AWS é o último passo antes da abertura do PR para `release` quando o merge altera código, infraestrutura, Docker ou manifests Kubernetes. Merges somente de documentação, Markdown ou configuração da própria esteira pulam o deploy AWS para evitar rebuild desnecessário, `terraform apply` sem mudança funcional e rollout vazio. Como `homologation` e `production` não existem como ambientes físicos neste projeto, esses estágios registram deploys lógicos para manter o Git Flow completo e auditável.
 
 ## ✅ CI
 
@@ -43,6 +43,7 @@ O fluxo de integração economiza GitHub Actions no plano gratuito:
 - O PR de branch de trabalho para `develop` é aberto manualmente.
 - `.github/workflows/ci.yml` roda em `pull_request` para `develop`, `release`, `release/**` ou `main`.
 - PR automático fica reservado para os CDs: `develop -> release` e `release -> main`.
+- PR somente de documentação/Markdown passa pelo `Quality gate`, mas pula os jobs pesados de build, testes, Docker e Kubernetes.
 
 Valida:
 
@@ -82,15 +83,38 @@ Roda após merge/push na `develop`.
 
 Fluxo:
 
-1. Detecta se o merge tem mudança deployable ou apenas documentação Markdown.
-2. Se for somente documentação, pula o deploy AWS e pode abrir PR para `release` quando `AUTO_PR_ENABLED=true`.
+1. Detecta se o merge tem mudança deployable ou apenas mudança sem impacto de runtime.
+2. Se não houver mudança deployable, pula o deploy AWS e pode abrir PR para `release` quando `AUTO_PR_ENABLED=true`.
 3. Lê `infra/terraform/environments/dev/terraform-action.env`.
 4. Restaura o cache do Terraform state (GitHub Actions cache, chave `tfstate-development-*`).
 5. Executa `terraform init` e `validate`.
 6. Se `TERRAFORM_ACTION=apply`, garante o ECR, publica a imagem Docker no ECR, executa `plan`/`apply`, provisiona VPC, RDS, EKS e o workload Kubernetes da API, aguarda rollout e imprime o endpoint do Load Balancer.
 7. Salva o Terraform state atualizado de volta no cache do GitHub Actions (sempre, mesmo se um passo posterior falhar).
 7. Se `TERRAFORM_ACTION=destroy`, executa `plan -destroy`/`apply` e encerra os recursos AWS gerenciados pelo Terraform.
-8. Abre PR automático de `develop` para `release` quando o deploy `apply` passou ou quando a alteração era somente documentação.
+8. Abre PR automático de `develop` para `release` quando o deploy `apply` passou ou quando não houve mudança deployable.
+
+### O que exige deploy AWS
+
+O `CD Development` decide pelo conteúdo alterado no merge para `develop`, não pelo prefixo da branch.
+
+Arquivos considerados deployable:
+
+- `src/*`
+- `k8s/*`
+- `infra/terraform/*`
+- `Dockerfile`
+- `.dockerignore`
+- `OficinaMecanica.sln`
+- `Directory.Build.props`, `Directory.Build.targets`, `Directory.Packages.props`, `global.json` ou `NuGet.config`
+
+Arquivos que não disparam deploy AWS sozinhos:
+
+- `docs/*`
+- `README.md`
+- qualquer `*.md`
+- `.github/workflows/*`
+
+Mesmo sem deploy AWS, o fluxo continua auditável: o workflow pode abrir PR para `release`, depois `release` abre PR para `main`.
 
 ## 🏷️ CD Release
 
@@ -129,6 +153,8 @@ TERRAFORM_ACTION=destroy
 Procedimento completo (branch, PR, acompanhamento da esteira, verificação): ver a seção "Encerramento obrigatório pela esteira" em [`deploy-aws.md`](deploy-aws.md).
 
 `TERRAFORM_ACTION=destroy` só é aceito quando o arquivo `terraform-action.env` foi alterado no próprio merge. Isso evita que pushes futuros destruam recursos sem intenção.
+
+Se o arquivo ficar em `TERRAFORM_ACTION=destroy` depois de um encerramento, mudanças deployable futuras serão bloqueadas de propósito. Para reabilitar deploy real, abrir um PR dedicado voltando `terraform-action.env` para `TERRAFORM_ACTION=apply`. Mudanças não deployable, como documentação ou ajustes de workflow, podem seguir até `release`/`main` sem aplicar AWS.
 
 ## 🧩 Repository variables
 
@@ -176,7 +202,7 @@ Configurar branch protection em `develop` e `main`. Quando a branch `release` ex
 
 - bloquear push direto;
 - exigir PR antes de merge;
-- exigir status check `Quality gate`;
+- exigir status check `🚦 06 · Quality gate`;
 - exigir pelo menos um reviewer;
 - descartar aprovacoes antigas quando novos commits forem enviados;
 - bloquear force push e delecao da branch.
