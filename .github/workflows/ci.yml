@@ -19,8 +19,55 @@ env:
   DOTNET_VERSION: "10.0.x"
 
 jobs:
+  detect_ci_scope:
+    name: "🔎 00 · Detectar escopo do PR"
+    runs-on: ubuntu-latest
+    outputs:
+      ci_required: ${{ steps.detect.outputs.ci_required }}
+
+    steps:
+      - name: "📥 01 · Baixar código do repositório"
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: "🔍 02 · Analisar arquivos alterados"
+        id: detect
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          ci_required=false
+          changed_files="$(mktemp)"
+
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > "$changed_files"
+
+          if [ ! -s "$changed_files" ]; then
+            echo "No changed files found. Running full CI for safety."
+            ci_required=true
+          else
+            echo "Changed files:"
+            cat "$changed_files"
+
+            while IFS= read -r file; do
+              case "$file" in
+                README.md|docs/*|*.md)
+                  ;;
+                *)
+                  ci_required=true
+                  break
+                  ;;
+              esac
+            done < "$changed_files"
+          fi
+
+          echo "ci_required=$ci_required" >> "$GITHUB_OUTPUT"
+          echo "CI required: $ci_required"
+
   build_application:
     name: "🏗️ 01 · Build da aplicação"
+    needs: detect_ci_scope
+    if: needs.detect_ci_scope.outputs.ci_required == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -48,6 +95,8 @@ jobs:
 
   verify_code_style:
     name: "🎨 02 · Verificar padrão de código"
+    needs: detect_ci_scope
+    if: needs.detect_ci_scope.outputs.ci_required == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -67,6 +116,8 @@ jobs:
 
   test_application:
     name: "🧪 03 · Testar aplicação"
+    needs: detect_ci_scope
+    if: needs.detect_ci_scope.outputs.ci_required == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -169,6 +220,8 @@ jobs:
 
   build_container_image:
     name: "🐳 04 · Build da imagem Docker"
+    needs: detect_ci_scope
+    if: needs.detect_ci_scope.outputs.ci_required == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -190,6 +243,8 @@ jobs:
 
   validate_kubernetes_manifests:
     name: "☸️ 05 · Validar manifests Kubernetes"
+    needs: detect_ci_scope
+    if: needs.detect_ci_scope.outputs.ci_required == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -211,6 +266,7 @@ jobs:
     name: "🚦 06 · Quality gate"
     runs-on: ubuntu-latest
     needs:
+      - detect_ci_scope
       - build_application
       - verify_code_style
       - test_application
@@ -221,6 +277,16 @@ jobs:
     steps:
       - name: "🚦 01 · Conferir status de todos os jobs do CI"
         run: |
+          if [ "${{ needs.detect_ci_scope.result }}" != "success" ]; then
+            echo "CI scope detection failed."
+            exit 1
+          fi
+
+          if [ "${{ needs.detect_ci_scope.outputs.ci_required }}" != "true" ]; then
+            echo "Only documentation or Markdown files changed. Heavy CI skipped safely."
+            exit 0
+          fi
+
           results=(
             "${{ needs.build_application.result }}"
             "${{ needs.verify_code_style.result }}"
