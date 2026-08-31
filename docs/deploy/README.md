@@ -18,5 +18,6 @@ Os recursos executáveis ficam fora de `docs/`: Docker Compose local em [`../../
 - Planejar e executar `terraform destroy` ao final de qualquer teste AWS temporário, via PR alterando `infra/terraform/environments/dev/terraform-action.env` para `TERRAFORM_ACTION=destroy`.
 - Não versionar kubeconfig, tokens, senhas ou secrets reais.
 - Deploy em PR não executa: PR valida qualidade, build, imagem e manifests.
-- Deploy AWS automático roda em `develop`; `release` e `main` fazem deploys lógicos.
+- Deploy AWS automático roda em `develop` somente quando há mudança deployable (`src/`, `k8s/`, `infra/terraform/`, Dockerfile ou arquivos raiz de build).
+- Mudanças só de documentação, Markdown ou `.github/workflows/` seguem pelo Git Flow sem aplicar AWS.
 - A esteira bloqueia testes ignorados e cobertura global abaixo de 90%.
