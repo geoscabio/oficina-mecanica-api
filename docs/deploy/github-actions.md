@@ -18,7 +18,7 @@ Workflows reutilizáveis:
 ## 🔁 Fluxo esperado
 
 ```text
-feature/*, bugfix/*, hotfix/* ...
+feature/*, bugfix/*, docs/*, test/*, ci/*, chore/* ...
   -> PR manual para develop
   -> CI no pull request
   -> merge manual/revisado
@@ -68,6 +68,7 @@ O workflow `CI` usa jobs separados para deixar claro o princípio de separação
 
 | Job | Responsabilidade |
 | --- | --- |
+| `validate_git_flow` | Bloquear PR fora do fluxo `branch de trabalho -> develop -> release -> main`. |
 | `build_application` | Restaurar dependências e compilar a solution. |
 | `verify_code_style` | Validar formatação com `dotnet format`. |
 | `test_application` | Executar testes automatizados, cobertura e artefatos. |
@@ -198,7 +199,7 @@ Nenhum valor sensível deve ser escrito nos arquivos `.yml`, `.tf`, `.md` ou `.e
 
 ## 🔒 Proteções obrigatórias recomendadas
 
-Configurar branch protection em `develop` e `main`. Quando a branch `release` existir, aplicar a mesma proteção nela.
+Configurar branch protection em `develop`, `release`, `release/*` e `main`.
 
 - bloquear push direto;
 - exigir PR antes de merge;
@@ -208,5 +209,11 @@ Configurar branch protection em `develop` e `main`. Quando a branch `release` ex
 - bloquear force push e delecao da branch.
 
 Com isso, o fluxo fica coerente: ninguém commita direto nas branches protegidas, e o deploy entre estágios acontece por PR.
+
+No ruleset do GitHub, confirmar explicitamente que `required_approving_review_count` está como `1` ou maior. Se o valor ficar `0`, o PR continua obrigatório, mas o merge pode acontecer sem aprovação humana.
+
+O workflow de CI também valida a branch de origem do PR. Assim, um PR direto de `docs/*`, `feature/*` ou qualquer branch de trabalho para `main` falha no `Quality gate`; para `main`, a origem aceita deve ser `release` ou `release/*`.
+
+Fluxo formal de `hotfix/*` e rollback automatizado ficam no backlog técnico pós-entrega, porque não fazem parte do escopo obrigatório do Tech Challenge.
 
 > Observação: em repositório privado, branch protection pode depender do plano do GitHub. Se a proteção não estiver disponível, manter a regra operacional de não commitar direto em `develop` e `main`.
