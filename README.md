@@ -377,7 +377,7 @@ O PR de branch de trabalho para `develop` é manual para economizar GitHub Actio
 
 O deploy AWS real de `development` executa automaticamente após merge/push na `develop` somente quando há mudança deployable. Alterações de documentação, Markdown ou workflow seguem pelo Git Flow sem aplicar AWS. Os PRs automáticos de `develop -> release` e `release -> main` só executam com `AUTO_PR_ENABLED=true`.
 
-Branches `develop`, `release` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks quando o plano do GitHub permitir.
+Branches `develop`, `release`, `release/*` e `main` devem usar branch protection para bloquear commit direto e exigir PR com aprovação e status checks quando o plano do GitHub permitir.
 
 > Observação: o repositório utiliza rulesets/branch protection configurados para `develop`, `release`, `release/*` e `main`. Em função das limitações do GitHub Free para repositórios privados, essas regras ficam documentadas e configuradas, mas a aplicação automática requer GitHub Team/Enterprise ou repositório público.
 
@@ -385,7 +385,7 @@ Branches `develop`, `release` e `main` devem usar branch protection para bloquea
 
 ### Convenção Git Flow
 
-- Branches de trabalho nascem a partir de `develop` e seguem prefixos como `feature/*`, `bugfix/*`, `hotfix/*`, `docs/*`, `test/*`, `ci/*` e `chore/*`.
+- Branches de trabalho nascem a partir de `develop` e seguem prefixos como `feature/*`, `bugfix/*`, `docs/*`, `test/*`, `ci/*` e `chore/*`.
 - O fluxo padrão é `branch de trabalho -> PR develop -> deploy development -> PR release -> deploy homologation -> PR main -> deploy production`.
 - `develop`, `release` e `main` não recebem commit direto; toda integração deve passar por PR, revisão e checks obrigatórios.
 - Commits e PRs seguem Conventional Commits: `<type>(scope): <description>`, por exemplo `feat(api): add healthcheck endpoint`.
