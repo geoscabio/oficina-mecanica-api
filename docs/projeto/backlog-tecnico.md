@@ -27,9 +27,9 @@ Este backlog guarda melhorias tecnicas, itens de codigo e evolucoes operacionais
 | `F3-001` | `P0` | Fase 3 | Autenticacao | Criar Lambda de autenticacao por CPF emitindo JWT. | `POST /auth/cpf` retorna token para cliente ativo e erro controlado para CPF invalido, inexistente ou inativo. | A fazer |
 | `F3-002` | `P0` | Fase 3 | API | Manter a API protegida validando JWT internamente. | Rotas protegidas retornam `401` sem token e funcionam com token valido. | A fazer |
 | `F3-003` | `P0` | Fase 3 | Banco | Usar banco gerenciado no RDS. | RDS provisionado por Terraform e usado pela API/Lambda em ambiente de demonstracao. | A fazer |
-| `F3-004` | `P0` | Fase 3 | Kubernetes | Executar a API em Kubernetes com escalabilidade. | API publicada no EKS, healthcheck funcional e HPA evidenciado. | A fazer |
+| `F3-004` | `P0` | Fase 3 | Kubernetes | Executar a API em Kubernetes com escalabilidade. | API publicada no EKS, healthcheck funcional e HPA evidenciado. | Em andamento |
 | `F3-005` | `P0` | Fase 3 | API Gateway | Expor a entrada publica via API Gateway. | Gateway roteia `/auth/*` para Lambda e `/api/*` para API no Kubernetes. | A fazer |
-| `F3-006` | `P0` | Fase 3 | Terraform | Separar infraestrutura em repositorios/esteiras por recurso. | Repositorios criados com README, Terraform, CI e instrucoes de apply/destroy. | A fazer |
+| `F3-006` | `P0` | Fase 3 | Terraform | Separar infraestrutura em repositorios/esteiras por recurso. | Repositorios criados com README, Terraform, CI e instrucoes de apply/destroy. | Em andamento |
 | `F3-007` | `P0` | Fase 3 | CI/CD | Manter branch protegida, PR obrigatorio e quality gate. | Branches principais protegidas, PR, aprovacao e CI exigidos antes do merge. | Em andamento |
 | `F3-008` | `P0` | Fase 3 | Observabilidade | Enviar logs, metricas e traces para Datadog. | Datadog mostra API, Lambda, Gateway e Kubernetes com tags padronizadas. | A fazer |
 | `F3-009` | `P0` | Fase 3 | Observabilidade | Criar dashboards e alertas pedidos no enunciado. | Evidencias de latencia, CPU/memoria, healthcheck, uptime e falhas de ordem de servico. | A fazer |
@@ -41,11 +41,12 @@ Este backlog guarda melhorias tecnicas, itens de codigo e evolucoes operacionais
 | --- | --- | --- | --- | --- | --- | --- |
 | `SETUP-001` | `P0` | Fase 3 | Repositorio | Criar repositorio com nome padronizado `oficina-mecanica-*`. | Nome reflete o recurso e aparece no plano da Fase 3. | Em andamento |
 | `SETUP-002` | `P0` | Fase 3 | Branches | Criar `main`, `develop` e `release` quando aplicavel. | Branches existem antes do primeiro fluxo de PR. | Em andamento |
-| `SETUP-003` | `P0` | Fase 3 | Branch protection | Aplicar protecao nas branches principais. | Push direto, force push e delecao ficam bloqueados; PR, aprovacao e CI sao obrigatorios. | Em andamento |
-| `SETUP-004` | `P0` | Fase 3 | CI/CD | Criar workflow de CI minimo para cada tipo de repo. | PR executa validacao compativel com o repositorio: `.NET`, Terraform, Lambda ou manifests. | A fazer |
-| `SETUP-005` | `P0` | Fase 3 | Documentacao | Criar README inicial com objetivo, stack, execucao e deploy. | README permite entender o papel do repo sem depender de conversa externa. | A fazer |
+| `SETUP-003` | `P0` | Fase 3 | Branch protection | Aplicar protecao nas branches principais. | Push direto, force push e delecao ficam bloqueados; PR, aprovacao, CI e bypass via PR para maintain/admin ficam configurados. | Em andamento |
+| `SETUP-004` | `P0` | Fase 3 | CI/CD | Criar workflow de CI minimo para cada tipo de repo. | PR executa validacao compativel com o repositorio: `.NET`, Terraform, Lambda ou manifests. | Em andamento |
+| `SETUP-005` | `P0` | Fase 3 | Documentacao | Criar README inicial com objetivo, stack, execucao e deploy. | README permite entender o papel do repo sem depender de conversa externa. | Em andamento |
 | `SETUP-006` | `P1` | Antes da demo | Operacao | Padronizar repository variables, secrets e environments. | Variaveis obrigatorias documentadas e cadastradas antes da esteira real. | A fazer |
 | `SETUP-007` | `P1` | Antes da demo | Governanca | Confirmar acesso do usuario `soat-architecture`. | Usuario aparece com acesso exigido em todos os repositorios da entrega. | A fazer |
+| `SETUP-008` | `P0` | Fase 3 | CI/CD | Padronizar todos os fluxos de CI/CD com o desenho da API. | VPC, Kubernetes e proximas esteiras usam o mesmo encadeamento: `ci`, `cd-development`, `aws-deploy`, `cd-release` e `cd-production`, mudando apenas a responsabilidade tecnica de cada job. | Em andamento |
 
 ## Backlog de codigo e qualidade
 
