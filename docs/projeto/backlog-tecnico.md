@@ -1,92 +1,92 @@
-# Backlog tecnico
+# Backlog técnico
 
-Este backlog guarda melhorias tecnicas, itens de codigo e evolucoes operacionais que nao precisam entrar imediatamente na entrega principal. A ideia e separar bem o que e escopo do Tech Challenge do que e maturidade de producao para depois.
+Este backlog guarda melhorias técnicas, itens de código e evoluções operacionais que não precisam entrar imediatamente na entrega principal. A ideia é separar bem o que é escopo do Tech Challenge do que é maturidade de produção para depois.
 
 ## Como usar
 
 | Campo | Regra |
 | --- | --- |
-| Prioridade | `P0` obrigatorio para a entrega, `P1` importante se couber, `P2` pos-entrega, `P3` oportunidade futura. |
-| Horizonte | `Fase 3`, `Antes da demo`, `Pos-entrega` ou `Pesquisa`. |
-| Status | `A fazer`, `Em andamento`, `Bloqueado`, `Concluido` ou `Nao priorizado agora`. |
-| Criterio de aceite | Evidencia objetiva de que o item saiu do backlog. |
+| Prioridade | `P0` obrigatório para a entrega, `P1` importante se couber, `P2` pós-entrega, `P3` oportunidade futura. |
+| Horizonte | `Fase 3`, `Antes da demo`, `Pós-entrega` ou `Pesquisa`. |
+| Status | `A fazer`, `Em andamento`, `Bloqueado`, `Concluído` ou `Não priorizado agora`. |
+| Critério de aceite | Evidência objetiva de que o item saiu do backlog. |
 
-## Visao de prioridade
+## Visão de prioridade
 
-| Prioridade | Significado | Decisao pratica |
+| Prioridade | Significado | Decisão prática |
 | --- | --- | --- |
-| `P0` | Necessario para cumprir o Tech Challenge com seguranca. | Fazer antes da entrega. |
-| `P1` | Melhora clareza, demonstracao ou confiabilidade. | Fazer se nao ameaçar o prazo. |
-| `P2` | Padrao mais proximo de empresa em producao. | Guardar para depois da entrega. |
-| `P3` | Ideia tecnica, pesquisa ou refinamento. | Reavaliar quando o produto estiver estavel. |
+| `P0` | Necessário para cumprir o Tech Challenge com segurança. | Fazer antes da entrega. |
+| `P1` | Melhora clareza, demonstração ou confiabilidade. | Fazer se não ameaçar o prazo. |
+| `P2` | Padrão mais próximo de empresa em produção. | Guardar para depois da entrega. |
+| `P3` | Ideia técnica, pesquisa ou refinamento. | Reavaliar quando o produto estiver estável. |
 
 ## Escopo da Fase 3
 
-| ID | Prioridade | Horizonte | Area | Item | Criterio de aceite | Status |
+| ID | Prioridade | Horizonte | Área | Item | Critério de aceite | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `F3-001` | `P0` | Fase 3 | Autenticacao | Criar Lambda de autenticacao por CPF emitindo JWT. | `POST /auth/cpf` retorna token para cliente ativo e erro controlado para CPF invalido, inexistente ou inativo. | A fazer |
-| `F3-002` | `P0` | Fase 3 | API | Manter a API protegida validando JWT internamente. | Rotas protegidas retornam `401` sem token e funcionam com token valido. | A fazer |
-| `F3-003` | `P0` | Fase 3 | Banco | Usar banco gerenciado no RDS. | RDS provisionado por Terraform e usado pela API/Lambda em ambiente de demonstracao. | A fazer |
+| `F3-001` | `P0` | Fase 3 | Autenticação | Criar Lambda de autenticação por CPF emitindo JWT. | `POST /auth/cpf` retorna token para cliente ativo e erro controlado para CPF inválido, inexistente ou inativo. | A fazer |
+| `F3-002` | `P0` | Fase 3 | API | Manter a API protegida validando JWT internamente. | Rotas protegidas retornam `401` sem token e funcionam com token válido. | A fazer |
+| `F3-003` | `P0` | Fase 3 | Banco | Usar banco gerenciado no RDS. | RDS provisionado por Terraform e usado pela API/Lambda em ambiente de demonstração. | A fazer |
 | `F3-004` | `P0` | Fase 3 | Kubernetes | Executar a API em Kubernetes com escalabilidade. | API publicada no EKS, healthcheck funcional e HPA evidenciado. | Em andamento |
-| `F3-005` | `P0` | Fase 3 | API Gateway | Expor a entrada publica via API Gateway. | Gateway roteia `/auth/*` para Lambda e `/api/*` para API no Kubernetes. | A fazer |
-| `F3-006` | `P0` | Fase 3 | Terraform | Separar infraestrutura em repositorios/esteiras por recurso. | Repositorios criados com README, Terraform, CI e instrucoes de apply/destroy. | Em andamento |
-| `F3-007` | `P0` | Fase 3 | CI/CD | Manter branch protegida, PR obrigatorio e quality gate. | Branches principais protegidas, PR, aprovacao e CI exigidos antes do merge. | Em andamento |
-| `F3-008` | `P0` | Fase 3 | Observabilidade | Enviar logs, metricas e traces para Datadog. | Datadog mostra API, Lambda, Gateway e Kubernetes com tags padronizadas. | A fazer |
-| `F3-009` | `P0` | Fase 3 | Observabilidade | Criar dashboards e alertas pedidos no enunciado. | Evidencias de latencia, CPU/memoria, healthcheck, uptime e falhas de ordem de servico. | A fazer |
-| `F3-010` | `P0` | Fase 3 | Documentacao | Consolidar diagramas, ADRs/RFCs, video e PDF final. | Documentacao explica requisitos, decisoes, execucao e evidencias da entrega. | A fazer |
+| `F3-005` | `P0` | Fase 3 | API Gateway | Expor a entrada pública via API Gateway. | Gateway roteia `/auth/*` para Lambda e `/api/*` para API no Kubernetes. | A fazer |
+| `F3-006` | `P0` | Fase 3 | Terraform | Separar infraestrutura em repositórios/esteiras por recurso. | Repositórios criados com README, Terraform, CI e instruções de apply/destroy. | Em andamento |
+| `F3-007` | `P0` | Fase 3 | CI/CD | Manter branch protegida, PR obrigatório e quality gate. | Branches principais protegidas, PR, aprovação e CI exigidos antes do merge. | Em andamento |
+| `F3-008` | `P0` | Fase 3 | Observabilidade | Enviar logs, métricas e traces para Datadog. | Datadog mostra API, Lambda, Gateway e Kubernetes com tags padronizadas. | A fazer |
+| `F3-009` | `P0` | Fase 3 | Observabilidade | Criar dashboards e alertas pedidos no enunciado. | Evidências de latência, CPU/memória, healthcheck, uptime e falhas de ordem de serviço. | A fazer |
+| `F3-010` | `P0` | Fase 3 | Documentação | Consolidar diagramas, ADRs/RFCs, vídeo e PDF final. | Documentação explica requisitos, decisões, execução e evidências da entrega. | A fazer |
 
-## Setup inicial de novos repositorios
+## Setup inicial de novos repositórios
 
-| ID | Prioridade | Horizonte | Area | Item | Criterio de aceite | Status |
+| ID | Prioridade | Horizonte | Área | Item | Critério de aceite | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `SETUP-001` | `P0` | Fase 3 | Repositorio | Criar repositorio com nome padronizado `oficina-mecanica-*`. | Nome reflete o recurso e aparece no plano da Fase 3. | Em andamento |
-| `SETUP-002` | `P0` | Fase 3 | Branches | Criar `main`, `develop` e `release` quando aplicavel. | Branches existem antes do primeiro fluxo de PR. | Em andamento |
-| `SETUP-003` | `P0` | Fase 3 | Branch protection | Aplicar protecao nas branches principais. | Push direto, force push e delecao ficam bloqueados; PR, aprovacao, CI e bypass via PR para maintain/admin ficam configurados. | Em andamento |
-| `SETUP-004` | `P0` | Fase 3 | CI/CD | Criar workflow de CI minimo para cada tipo de repo. | PR executa validacao compativel com o repositorio: `.NET`, Terraform, Lambda ou manifests. | Em andamento |
-| `SETUP-005` | `P0` | Fase 3 | Documentacao | Criar README inicial com objetivo, stack, execucao e deploy. | README permite entender o papel do repo sem depender de conversa externa. | Em andamento |
-| `SETUP-006` | `P1` | Antes da demo | Operacao | Padronizar repository variables, secrets e environments. | Variaveis obrigatorias documentadas e cadastradas antes da esteira real. | A fazer |
-| `SETUP-007` | `P1` | Antes da demo | Governanca | Confirmar acesso do usuario `soat-architecture`. | Usuario aparece com acesso exigido em todos os repositorios da entrega. | A fazer |
-| `SETUP-008` | `P0` | Fase 3 | CI/CD | Padronizar todos os fluxos de CI/CD com o desenho da API. | VPC, Kubernetes e proximas esteiras usam o mesmo encadeamento: `ci-development`, `ci-release`, `ci-production`, `cd-development`, `aws-deploy`, `cd-release` e `cd-production`, mudando apenas a responsabilidade tecnica de cada job. | Em andamento |
+| `SETUP-001` | `P0` | Fase 3 | Repositório | Criar repositório com nome padronizado `oficina-mecanica-*`. | Nome reflete o recurso e aparece no plano da Fase 3. | Em andamento |
+| `SETUP-002` | `P0` | Fase 3 | Branches | Criar `main`, `develop` e `release` quando aplicável. | Branches existem antes do primeiro fluxo de PR. | Em andamento |
+| `SETUP-003` | `P0` | Fase 3 | Branch protection | Aplicar proteção nas branches principais. | Push direto, force push e deleção ficam bloqueados; PR, aprovação, CI e bypass via PR para maintain/admin ficam configurados. | Em andamento |
+| `SETUP-004` | `P0` | Fase 3 | CI/CD | Criar workflow de CI mínimo para cada tipo de repo. | PR executa validação compatível com o repositório: `.NET`, Terraform, Lambda ou manifests. | Em andamento |
+| `SETUP-005` | `P0` | Fase 3 | Documentação | Criar README inicial com objetivo, stack, execução e deploy. | README permite entender o papel do repo sem depender de conversa externa. | Em andamento |
+| `SETUP-006` | `P1` | Antes da demo | Operação | Padronizar repository variables, secrets e environments. | Variáveis obrigatórias documentadas e cadastradas antes da esteira real. | A fazer |
+| `SETUP-007` | `P1` | Antes da demo | Governança | Confirmar acesso do usuário `soat-architecture`. | Usuário aparece com acesso exigido em todos os repositórios da entrega. | A fazer |
+| `SETUP-008` | `P0` | Fase 3 | CI/CD | Padronizar todos os fluxos de CI/CD com o desenho da API. | VPC, Kubernetes e próximas esteiras usam o mesmo encadeamento: `🧪 CI Development`, `🔎 CI Release`, `🛡️ CI Production`, `🚀 CD Development`, `☁️ AWS Deploy`, `🔀 CD Release` e `🏁 CD Production`, mudando apenas a responsabilidade técnica de cada job. | Em andamento |
 | `SETUP-009` | `P1` | Antes da demo | Documentação | Revisar acentuação e português dos textos das esteiras. | Workflows, READMEs e docs de todas as esteiras ficam legíveis em português, sem palavras sem acento por padronização manual ou mojibake. | A fazer |
 
-## Backlog de codigo e qualidade
+## Backlog de código e qualidade
 
-| ID | Prioridade | Horizonte | Area | Item | Criterio de aceite | Status |
+| ID | Prioridade | Horizonte | Área | Item | Critério de aceite | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `CODE-001` | `P0` | Fase 3 | Dominio | Adicionar status do cliente para suportar autenticacao por CPF. | Modelo, migration, seed/demo e testes cobrem cliente ativo e inativo. | A fazer |
-| `CODE-002` | `P0` | Fase 3 | Seguranca | Evitar CPF puro em logs e respostas tecnicas. | Logs usam `cliente_id`, CPF mascarado ou hash; nenhum log registra CPF completo. | A fazer |
-| `CODE-003` | `P0` | Fase 3 | Testes | Cobrir fluxo de autenticacao e autorizacao. | Testes validam sucesso, CPF invalido, cliente inexistente, cliente inativo e rota protegida. | A fazer |
-| `CODE-004` | `P1` | Antes da demo | Contratos | Atualizar OpenAPI e Postman para os fluxos da Fase 3. | Colecoes e ambientes permitem demonstrar autenticacao por CPF e consumo com JWT. | A fazer |
-| `CODE-005` | `P1` | Antes da demo | Observabilidade | Padronizar `X-Correlation-Id`, `dd.trace_id` e `dd.span_id`. | Logs da API e Lambda permitem seguir a mesma requisicao ponta a ponta. | A fazer |
-| `CODE-006` | `P2` | Pos-entrega | Banco | Mover migrations e seed inicial do startup da API para Kubernetes Job versionado. | Deploy da API nao executa migration automaticamente no startup. | Nao priorizado agora |
-| `CODE-007` | `P2` | Pos-entrega | Banco | Avaliar lock distribuido para migrations concorrentes. | Estrategia definida, por exemplo com `sp_getapplock`, antes de escalar replicas com migration automatica. | Nao priorizado agora |
-| `CODE-008` | `P2` | Pos-entrega | Qualidade | Adicionar analise de dependencias e vulnerabilidades. | Pipeline publica resultado de auditoria de pacotes sem bloquear indevidamente a entrega academica. | Nao priorizado agora |
+| `CODE-001` | `P0` | Fase 3 | Domínio | Adicionar status do cliente para suportar autenticação por CPF. | Modelo, migration, seed/demo e testes cobrem cliente ativo e inativo. | A fazer |
+| `CODE-002` | `P0` | Fase 3 | Segurança | Evitar CPF puro em logs e respostas técnicas. | Logs usam `cliente_id`, CPF mascarado ou hash; nenhum log registra CPF completo. | A fazer |
+| `CODE-003` | `P0` | Fase 3 | Testes | Cobrir fluxo de autenticação e autorização. | Testes validam sucesso, CPF inválido, cliente inexistente, cliente inativo e rota protegida. | A fazer |
+| `CODE-004` | `P1` | Antes da demo | Contratos | Atualizar OpenAPI e Postman para os fluxos da Fase 3. | Coleções e ambientes permitem demonstrar autenticação por CPF e consumo com JWT. | A fazer |
+| `CODE-005` | `P1` | Antes da demo | Observabilidade | Padronizar `X-Correlation-Id`, `dd.trace_id` e `dd.span_id`. | Logs da API e Lambda permitem seguir a mesma requisição ponta a ponta. | A fazer |
+| `CODE-006` | `P2` | Pós-entrega | Banco | Mover migrations e seed inicial do startup da API para Kubernetes Job versionado. | Deploy da API não executa migration automaticamente no startup. | Não priorizado agora |
+| `CODE-007` | `P2` | Pós-entrega | Banco | Avaliar lock distribuído para migrations concorrentes. | Estratégia definida, por exemplo com `sp_getapplock`, antes de escalar réplicas com migration automática. | Não priorizado agora |
+| `CODE-008` | `P2` | Pós-entrega | Qualidade | Adicionar análise de dependências e vulnerabilidades. | Pipeline publica resultado de auditoria de pacotes sem bloquear indevidamente a entrega acadêmica. | Não priorizado agora |
 
-## Backlog operacional pos-entrega
+## Backlog operacional pós-entrega
 
-| ID | Prioridade | Horizonte | Area | Item | Criterio de aceite | Status |
+| ID | Prioridade | Horizonte | Área | Item | Critério de aceite | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `OPS-001` | `P2` | Pos-entrega | Hotfix | Definir fluxo `hotfix/*` a partir de `main`. | Hotfix entra por PR para `main`, passa por CI/aprovacao e depois e sincronizado para `develop` e `release`. | Nao priorizado agora |
-| `OPS-002` | `P2` | Pos-entrega | Rollback | Criar rollback manual por versao/tag de imagem. | Esteira permite redeploy de uma versao anterior conhecida como boa. | Nao priorizado agora |
-| `OPS-003` | `P2` | Pos-entrega | Rollback | Avaliar rollback automatico apos falha de healthcheck. | Rollback automatico e limitado a deploy de aplicacao e nunca reverte banco de forma destrutiva sem aprovacao humana. | Nao priorizado agora |
-| `OPS-004` | `P2` | Pos-entrega | Banco | Definir politica de rollback de migrations. | Migrations possuem estrategia segura para forward fix, compatibilidade ou rollback manual controlado. | Nao priorizado agora |
-| `OPS-005` | `P2` | Pos-entrega | Infra | Evoluir RDS para Multi-AZ, backups e snapshot final. | Ambiente deixa de depender das simplificacoes da AWS Academy. | Nao priorizado agora |
-| `OPS-006` | `P2` | Pos-entrega | Segredos | Formalizar rotacao de secrets e chaves JWT. | Segredos possuem dono, periodicidade e procedimento de rotacao. | Nao priorizado agora |
-| `OPS-007` | `P2` | Pos-entrega | DNS | Trocar hostname bruto do Load Balancer por DNS amigavel. | API usa dominio proprio com Route 53 ou provedor equivalente. | Nao priorizado agora |
-| `OPS-008` | `P3` | Pesquisa | Plataforma | Avaliar trunk-based development como alternativa ao Git Flow. | Decisao documentada somente se houver ganho real para o contexto do time. | Nao priorizado agora |
+| `OPS-001` | `P2` | Pós-entrega | Hotfix | Definir fluxo `hotfix/*` a partir de `main`. | Hotfix entra por PR para `main`, passa por CI/aprovação e depois é sincronizado para `develop` e `release`. | Não priorizado agora |
+| `OPS-002` | `P2` | Pós-entrega | Rollback | Criar rollback manual por versão/tag de imagem. | Esteira permite redeploy de uma versão anterior conhecida como boa. | Não priorizado agora |
+| `OPS-003` | `P2` | Pós-entrega | Rollback | Avaliar rollback automático após falha de healthcheck. | Rollback automático é limitado a deploy de aplicação e nunca reverte banco de forma destrutiva sem aprovação humana. | Não priorizado agora |
+| `OPS-004` | `P2` | Pós-entrega | Banco | Definir política de rollback de migrations. | Migrations possuem estratégia segura para forward fix, compatibilidade ou rollback manual controlado. | Não priorizado agora |
+| `OPS-005` | `P2` | Pós-entrega | Infra | Evoluir RDS para Multi-AZ, backups e snapshot final. | Ambiente deixa de depender das simplificações da AWS Academy. | Não priorizado agora |
+| `OPS-006` | `P2` | Pós-entrega | Segredos | Formalizar rotação de secrets e chaves JWT. | Segredos possuem dono, periodicidade e procedimento de rotação. | Não priorizado agora |
+| `OPS-007` | `P2` | Pós-entrega | DNS | Trocar hostname bruto do Load Balancer por DNS amigável. | API usa domínio próprio com Route 53 ou provedor equivalente. | Não priorizado agora |
+| `OPS-008` | `P3` | Pesquisa | Plataforma | Avaliar trunk-based development como alternativa ao Git Flow. | Decisão documentada somente se houver ganho real para o contexto do time. | Não priorizado agora |
 
 ## Fora do escopo imediato
 
-Estes itens ficam registrados para nao serem esquecidos, mas nao devem competir com a entrega da Fase 3:
+Estes itens ficam registrados para não serem esquecidos, mas não devem competir com a entrega da Fase 3:
 
-- rollback automatico completo;
+- rollback automático completo;
 - fluxo formal de hotfix;
-- banco Multi-AZ com politica completa de backup;
-- DNS com dominio proprio;
-- rotacao corporativa de segredos;
+- banco Multi-AZ com política completa de backup;
+- DNS com domínio próprio;
+- rotação corporativa de segredos;
 - esteira corporativa com change management;
-- plataforma compartilhada de templates para todos os repositorios.
+- plataforma compartilhada de templates para todos os repositórios.
 
-## Proxima revisao
+## Próxima revisão
 
-Antes de iniciar uma nova frente, revisar primeiro os itens `P0`. Depois da entrega, reabrir os itens `P2` e decidir o que vira melhoria real do projeto e o que continua apenas como referencia de arquitetura.
+Antes de iniciar uma nova frente, revisar primeiro os itens `P0`. Depois da entrega, reabrir os itens `P2` e decidir o que vira melhoria real do projeto e o que continua apenas como referência de arquitetura.

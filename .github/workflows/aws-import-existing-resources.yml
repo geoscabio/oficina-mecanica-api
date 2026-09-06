@@ -1,27 +1,28 @@
 name: "🆘 AWS Import Existing Resources"
+run-name: "🆘 Importar recursos AWS existentes"
 
-# USO EXCLUSIVO DE EMERGENCIA - nao faz parte do fluxo normal de CI/CD.
+# USO EXCLUSIVO DE EMERGÊNCIA - não faz parte do fluxo normal de CI/CD.
 #
 # Para que serve:
-# Reconcilia o Terraform state com recursos AWS que ja existem de verdade
-# mas que o state (cache do GitHub Actions, ver aws-deploy.yml) nao conhece.
+# Reconcilia o Terraform state com recursos AWS que já existem de verdade
+# mas que o state (cache do GitHub Actions, ver aws-deploy.yml) não conhece.
 # Roda "terraform import" para VPC, subnets, EKS, RDS e ECR.
 #
 # Quando usar:
-# So se "terraform apply" falhar com erro de recurso "ja existe"
-# (ex: RepositoryAlreadyExistsException, cluster ja existe) OU se
+# Só se "terraform apply" falhar com erro de recurso "já existe"
+# (ex: RepositoryAlreadyExistsException, cluster já existe) OU se
 # "terraform destroy" completar sem realmente destruir nada (state vazio).
-# Isso so acontece se alguem rodou Terraform manualmente, fora da esteira
-# (nunca faca isso), ou se o cache do state expirou por 7+ dias sem uso.
+# Isso só acontece se alguém rodou Terraform manualmente, fora da esteira
+# (nunca faça isso), ou se o cache do state expirou por 7+ dias sem uso.
 #
 # Como usar:
 # Actions -> AWS Import Existing Resources -> Run workflow (workflow_dispatch).
 # Revisar o "terraform plan" no final antes de rodar apply/destroy de novo.
 #
-# Por que nao esta no fluxo automatico:
-# Se a esteira (CD Development) sempre for o unico lugar que roda
+# Por que não está no fluxo automático:
+# Se a esteira (🚀 CD Development) sempre for o único lugar que roda
 # terraform apply/destroy, o state nunca desalinha e este workflow nunca
-# precisa rodar. Ele existe soh como rede de seguranca.
+# precisa rodar. Ele existe só como rede de segurança.
 on:
   workflow_dispatch:
 
@@ -130,7 +131,7 @@ jobs:
           path.write_text(new_content, encoding="utf-8")
           PY
 
-          echo "providers.tf (execucao deste workflow apenas, nao commitado):"
+          echo "providers.tf (execução deste workflow apenas, não commitado):"
           cat "$TF_WORKING_DIRECTORY/providers.tf"
 
       - name: "📋 08 · Listar state atual (antes do import)"

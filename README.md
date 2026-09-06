@@ -304,7 +304,7 @@ Como usar:
 1. Abrir uma branch a partir da `develop`.
 2. Alterar somente `infra/terraform/environments/dev/terraform-action.env`.
 3. Abrir PR para `develop`.
-4. Após o merge, o workflow `CD Development` roda automaticamente.
+4. Após o merge, o workflow `🚀 CD Development` roda automaticamente.
 5. Ao finalizar o destroy, abrir outro PR voltando para `TERRAFORM_ACTION=apply`.
 
 > Segurança: `TERRAFORM_ACTION=destroy` só é aceito quando o arquivo `terraform-action.env` foi alterado no próprio merge. Isso evita destruir recursos por acidente em pushes futuros.
@@ -352,12 +352,13 @@ Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separad
 
 | Evento | O que acontece |
 | --- | --- |
-| `CI Development` | Em `pull_request` para `develop`, valida build, format, testes, cobertura, Docker e Kubernetes. |
-| `CI Release` | Em `pull_request` para `release` ou `release/**`, valida build, format, testes, cobertura, Docker e Kubernetes. |
-| `CI Production` | Em `pull_request` para `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
-| `CD Development` | Em `push` na `develop`, executa deploy AWS real somente para mudanças deployable e abre PR para `release`. |
-| `CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
-| `CD Production` | Em `push` na `main`, registra deploy lógico em `production`. |
+| `🧪 CI Development` | Em `pull_request` para `develop`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `🔎 CI Release` | Em `pull_request` para `release` ou `release/**`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `🛡️ CI Production` | Em `pull_request` para `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `🚀 CD Development` | Em `push` na `develop`, executa deploy AWS real somente para mudanças deployable e abre PR para `release`. |
+| `☁️ AWS Deploy` | Chamado pelo CD de desenvolvimento, executa `apply` ou `destroy` da API na AWS conforme controle versionado. |
+| `🔀 CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
+| `🏁 CD Production` | Em `push` na `main`, registra deploy lógico em `production`. |
 
 ### Bloqueios de qualidade
 

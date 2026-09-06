@@ -259,25 +259,25 @@ Cada repositório seguirá o estilo da Fase 2: nomes claros, emojis, jobs numera
 
 | Workflow | Responsabilidade |
 | --- | --- |
-| `ci-development.yml` | Validar PR para `develop` com build, testes, lint ou validação Terraform |
-| `ci-release.yml` | Validar PR para `release` ou `release/**` com build, testes, lint ou validação Terraform |
-| `ci-production.yml` | Validar PR para `main` com build, testes, lint ou validação Terraform |
-| `cd-development.yml` | Deploy real em development |
-| `cd-release.yml` | Promoção lógica para release |
-| `cd-production.yml` | Promoção lógica para production |
-| `deploy.yml` ou `aws-deploy.yml` | Workflow reutilizável chamado pelas esteiras |
+| `🧪 CI Development` | Validar PR para `develop` com build, testes, lint ou validação Terraform |
+| `🔎 CI Release` | Validar PR para `release` ou `release/**` com build, testes, lint ou validação Terraform |
+| `🛡️ CI Production` | Validar PR para `main` com build, testes, lint ou validação Terraform |
+| `🚀 CD Development` | Deploy real em development |
+| `🔀 CD Release` | Promoção lógica para release |
+| `🏁 CD Production` | Promoção lógica para production |
+| `☁️ AWS Deploy` | Workflow reutilizável chamado pelas esteiras |
 
 ### Regra de padronização entre esteiras
 
 Os repositórios da Fase 3 devem manter o mesmo desenho de CI/CD da API para facilitar leitura, revisão e demonstração:
 
-- `ci-development.yml` valida PR para `develop`, Git Flow e quality gate.
-- `ci-release.yml` valida PR para `release` ou `release/**`, Git Flow e quality gate.
-- `ci-production.yml` valida PR para `main`, Git Flow e quality gate.
-- `cd-development.yml` detecta mudança deployable, chama o deploy real de development e abre PR para `release` quando `AUTO_PR_ENABLED=true`.
-- `aws-deploy.yml` concentra o deploy real do recurso em `development`.
-- `cd-release.yml` registra homologation lógico e abre PR para `main` quando `AUTO_PR_ENABLED=true`.
-- `cd-production.yml` registra production lógico.
+- `🧪 CI Development` valida PR para `develop`, Git Flow e quality gate.
+- `🔎 CI Release` valida PR para `release` ou `release/**`, Git Flow e quality gate.
+- `🛡️ CI Production` valida PR para `main`, Git Flow e quality gate.
+- `🚀 CD Development` detecta mudança deployable, chama o deploy real de development e abre PR para `release` quando `AUTO_PR_ENABLED=true`.
+- `☁️ AWS Deploy` concentra o deploy real do recurso em `development`.
+- `🔀 CD Release` registra homologation lógico e abre PR para `main` quando `AUTO_PR_ENABLED=true`.
+- `🏁 CD Production` registra production lógico.
 
 A diferença entre as esteiras deve ficar apenas na responsabilidade técnica interna de cada job, como `.NET`, Terraform da VPC, Terraform do Kubernetes, Lambda ou API Gateway.
 
