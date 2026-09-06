@@ -208,7 +208,7 @@ Configurar branch protection em `develop`, `release`, `release/*` e `main`.
 
 - bloquear push direto;
 - exigir PR antes de merge;
-- exigir status check `🚦 06 · Quality gate`;
+- exigir status check `🚦 07 · Quality gate`;
 - exigir pelo menos um reviewer;
 - descartar aprovacoes antigas quando novos commits forem enviados;
 - bloquear force push e deleção da branch.
