@@ -304,7 +304,7 @@ Como usar:
 1. Abrir uma branch a partir da `develop`.
 2. Alterar somente `infra/terraform/environments/dev/terraform-action.env`.
 3. Abrir PR para `develop`.
-4. Após o merge, o workflow `CD Development` roda automaticamente.
+4. Após o merge, o workflow `🚀 CD Development` roda automaticamente.
 5. Ao finalizar o destroy, abrir outro PR voltando para `TERRAFORM_ACTION=apply`.
 
 > Segurança: `TERRAFORM_ACTION=destroy` só é aceito quando o arquivo `terraform-action.env` foi alterado no próprio merge. Isso evita destruir recursos por acidente em pushes futuros.
@@ -352,10 +352,13 @@ Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separad
 
 | Evento | O que acontece |
 | --- | --- |
-| `CI` | Em `pull_request` para `develop`, `release` ou `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
-| `CD Development` | Em `push` na `develop`, executa deploy AWS real somente para mudanças deployable e abre PR para `release`. |
-| `CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
-| `CD Production` | Em `push` na `main`, registra deploy lógico em `production`. |
+| `🧪 CI Development` | Em `pull_request` para `develop`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `🔎 CI Release` | Em `pull_request` para `release` ou `release/**`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `🛡️ CI Production` | Em `pull_request` para `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `🚀 CD Development` | Em `push` na `develop`, executa deploy AWS real somente para mudanças deployable e abre PR para `release`. |
+| `☁️ AWS Deploy` | Chamado pelo CD de desenvolvimento, executa `apply` ou `destroy` da API na AWS conforme controle versionado. |
+| `🔀 CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
+| `🏁 CD Production` | Em `push` na `main`, registra deploy lógico em `production`. |
 
 ### Bloqueios de qualidade
 
@@ -377,7 +380,7 @@ O PR de branch de trabalho para `develop` é manual para economizar GitHub Actio
 
 O deploy AWS real de `development` executa automaticamente após merge/push na `develop` somente quando há mudança deployable. Alterações de documentação, Markdown ou workflow seguem pelo Git Flow sem aplicar AWS. Os PRs automáticos de `develop -> release` e `release -> main` só executam com `AUTO_PR_ENABLED=true`.
 
-Branches `develop`, `release` e `main` devem usar branch protection para bloquear commit direto e exigir PR com status checks quando o plano do GitHub permitir.
+Branches `develop`, `release`, `release/*` e `main` devem usar branch protection para bloquear commit direto e exigir PR com aprovação e status checks quando o plano do GitHub permitir.
 
 > Observação: o repositório utiliza rulesets/branch protection configurados para `develop`, `release`, `release/*` e `main`. Em função das limitações do GitHub Free para repositórios privados, essas regras ficam documentadas e configuradas, mas a aplicação automática requer GitHub Team/Enterprise ou repositório público.
 
@@ -385,7 +388,7 @@ Branches `develop`, `release` e `main` devem usar branch protection para bloquea
 
 ### Convenção Git Flow
 
-- Branches de trabalho nascem a partir de `develop` e seguem prefixos como `feature/*`, `bugfix/*`, `hotfix/*`, `docs/*`, `test/*`, `ci/*` e `chore/*`.
+- Branches de trabalho nascem a partir de `develop` e seguem prefixos como `feature/*`, `bugfix/*`, `docs/*`, `test/*`, `ci/*` e `chore/*`.
 - O fluxo padrão é `branch de trabalho -> PR develop -> deploy development -> PR release -> deploy homologation -> PR main -> deploy production`.
 - `develop`, `release` e `main` não recebem commit direto; toda integração deve passar por PR, revisão e checks obrigatórios.
 - Commits e PRs seguem Conventional Commits: `<type>(scope): <description>`, por exemplo `feat(api): add healthcheck endpoint`.
