@@ -204,20 +204,30 @@ Nenhum valor sensível deve ser escrito nos arquivos `.yml`, `.tf`, `.md` ou `.e
 
 ## 🔒 Proteções obrigatórias recomendadas
 
-Configurar branch protection em `develop`, `release`, `release/*` e `main`.
+Configurar dois rulesets ativos em `develop`, `release`, `release/*` e `main`, tanto neste repositório quanto em cada novo repositório da solução.
 
-- bloquear push direto;
-- exigir PR antes de merge;
-- exigir status check `🚦 07 · Quality gate`;
-- exigir pelo menos um reviewer;
-- descartar aprovacoes antigas quando novos commits forem enviados;
-- bloquear force push e deleção da branch.
+### 🔒 Proteção Git Flow: sem bypass
 
-Com isso, o fluxo fica coerente: ninguém commita direto nas branches protegidas, e o deploy entre estágios acontece por PR.
+- Exigir PR antes do merge e resolução das conversas de revisão.
+- Exigir os checks `🔀 01 · Validar fluxo de branches` e `🚦 07 · Quality gate` da integração GitHub Actions. Na VPC e no Kubernetes, o Quality gate é `🚦 03 · Quality gate`.
+- Bloquear push direto, force push e deleção da branch.
+- Manter a lista de bypass vazia, inclusive para o dono do repositório, admins e maintainers.
+- Usar `required_approving_review_count=0` e `require_last_push_approval=false` neste ruleset: a exigência de aprovação pertence exclusivamente ao segundo ruleset.
+- Usar `strict_required_status_checks_policy=false`: os checks continuam obrigatórios, mas não se exige incorporar `main` em `release` ou `release` em `develop` para promover as branches. Conflitos reais ainda precisam ser resolvidos e os checks precisam passar.
 
-No ruleset do GitHub, confirmar explicitamente que `required_approving_review_count` está como `1` ou maior. Se o valor ficar `0`, o PR continua obrigatório, mas o merge pode acontecer sem aprovação humana.
+O GitHub permite abrir um PR com origem incorreta; a validação bloqueia o merge. Para `release` ou `release/*`, a origem aceita é `develop`; para `main`, é `release` ou `release/*`. Branches de trabalho entram por `develop`. Falha ou ausência de qualquer check obrigatório não pode ser dispensada pelo bypass de aprovação.
 
-O workflow de CI também valida a branch de origem do PR. Assim, um PR direto de `docs/*`, `feature/*` ou qualquer branch de trabalho para `main` falha no `Quality gate`; para `main`, a origem aceita deve ser `release` ou `release/*`.
+### 👥 Aprovação de PR: bypass somente da revisão humana
+
+- Exigir uma aprovação (`required_approving_review_count=1`), descartar aprovações antigas após novos commits e exigir aprovação de alguém diferente do último autor do push.
+- Incluir somente a regra de aprovação por PR, sem checks ou regras de proteção do histórico neste ruleset.
+- Permitir bypass em modo `pull_request` para `geoscabio`, `sousagabriel14`, `RepositoryRole maintain` (ID `2`) e `RepositoryRole admin` (ID `5`).
+
+Quando o outro integrante estiver indisponível, usar o bypass para mesclar o próprio PR depois que os checks passarem. Isso dispensa a revisão de outra pessoa; não cria uma autoaprovação nem dispensa as regras do primeiro ruleset.
+
+Os dois rulesets são aplicados em conjunto. O dono do repositório ainda pode editar ou desativar as configurações administrativas; não é possível retirar esse poder do proprietário com um ruleset do próprio repositório. A garantia de bloqueio vale com as regras ativas. A integridade dos workflows que produzem os checks também faz parte da revisão das mudanças.
+
+O `🔀 CD Release` usa o título de execução `🔀 Registrar deploy em release`: registra o deploy lógico da release e abre o PR de promoção. O registro de produção ocorre no `🏁 CD Production`, após merge em `main`.
 
 Fluxo formal de `hotfix/*` e rollback automatizado ficam no backlog técnico pós-entrega, porque não fazem parte do escopo obrigatório do Tech Challenge.
 
