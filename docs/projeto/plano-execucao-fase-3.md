@@ -259,7 +259,9 @@ Cada repositório seguirá o estilo da Fase 2: nomes claros, emojis, jobs numera
 
 | Workflow | Responsabilidade |
 | --- | --- |
-| `ci.yml` | Validar PR com build, testes, lint ou validação Terraform |
+| `ci-development.yml` | Validar PR para `develop` com build, testes, lint ou validação Terraform |
+| `ci-release.yml` | Validar PR para `release` ou `release/**` com build, testes, lint ou validação Terraform |
+| `ci-production.yml` | Validar PR para `main` com build, testes, lint ou validação Terraform |
 | `cd-development.yml` | Deploy real em development |
 | `cd-release.yml` | Promoção lógica para release |
 | `cd-production.yml` | Promoção lógica para production |
@@ -269,13 +271,26 @@ Cada repositório seguirá o estilo da Fase 2: nomes claros, emojis, jobs numera
 
 Os repositórios da Fase 3 devem manter o mesmo desenho de CI/CD da API para facilitar leitura, revisão e demonstração:
 
-- `ci.yml` valida PR, Git Flow e quality gate.
+- `ci-development.yml` valida PR para `develop`, Git Flow e quality gate.
+- `ci-release.yml` valida PR para `release` ou `release/**`, Git Flow e quality gate.
+- `ci-production.yml` valida PR para `main`, Git Flow e quality gate.
 - `cd-development.yml` detecta mudança deployable, chama o deploy real de development e abre PR para `release` quando `AUTO_PR_ENABLED=true`.
 - `aws-deploy.yml` concentra o deploy real do recurso em `development`.
 - `cd-release.yml` registra homologation lógico e abre PR para `main` quando `AUTO_PR_ENABLED=true`.
 - `cd-production.yml` registra production lógico.
 
 A diferença entre as esteiras deve ficar apenas na responsabilidade técnica interna de cada job, como `.NET`, Terraform da VPC, Terraform do Kubernetes, Lambda ou API Gateway.
+
+### Papel de Kubernetes, `k8s/` e Docker
+
+Separar a esteira `oficina-mecanica-infra-kubernetes` não remove a pasta `k8s/` da API:
+
+- `oficina-mecanica-infra-kubernetes` provisiona a plataforma: EKS, node group, ECR e outputs de infraestrutura.
+- `oficina-mecanica-api/k8s/` descreve o workload da aplicação: Deployment, Service, HPA, ConfigMap e Secret da API.
+- `Dockerfile` continua na API porque a imagem pertence ao código da aplicação.
+- `docker-compose.yml` continua sendo ambiente local de desenvolvimento e testes rápidos, fora do deploy AWS.
+
+Assim, a esteira Kubernetes entrega o cluster; a esteira da API entrega a aplicação dentro desse cluster.
 
 ### Padrão de nomes dos jobs
 

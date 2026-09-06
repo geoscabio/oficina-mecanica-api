@@ -46,7 +46,8 @@ Este backlog guarda melhorias tecnicas, itens de codigo e evolucoes operacionais
 | `SETUP-005` | `P0` | Fase 3 | Documentacao | Criar README inicial com objetivo, stack, execucao e deploy. | README permite entender o papel do repo sem depender de conversa externa. | Em andamento |
 | `SETUP-006` | `P1` | Antes da demo | Operacao | Padronizar repository variables, secrets e environments. | Variaveis obrigatorias documentadas e cadastradas antes da esteira real. | A fazer |
 | `SETUP-007` | `P1` | Antes da demo | Governanca | Confirmar acesso do usuario `soat-architecture`. | Usuario aparece com acesso exigido em todos os repositorios da entrega. | A fazer |
-| `SETUP-008` | `P0` | Fase 3 | CI/CD | Padronizar todos os fluxos de CI/CD com o desenho da API. | VPC, Kubernetes e proximas esteiras usam o mesmo encadeamento: `ci`, `cd-development`, `aws-deploy`, `cd-release` e `cd-production`, mudando apenas a responsabilidade tecnica de cada job. | Em andamento |
+| `SETUP-008` | `P0` | Fase 3 | CI/CD | Padronizar todos os fluxos de CI/CD com o desenho da API. | VPC, Kubernetes e proximas esteiras usam o mesmo encadeamento: `ci-development`, `ci-release`, `ci-production`, `cd-development`, `aws-deploy`, `cd-release` e `cd-production`, mudando apenas a responsabilidade tecnica de cada job. | Em andamento |
+| `SETUP-009` | `P1` | Antes da demo | Documentação | Revisar acentuação e português dos textos das esteiras. | Workflows, READMEs e docs de todas as esteiras ficam legíveis em português, sem palavras sem acento por padronização manual ou mojibake. | A fazer |
 
 ## Backlog de codigo e qualidade
 

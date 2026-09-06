@@ -6,7 +6,9 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 
 | Workflow | Arquivo | Quando roda | Objetivo |
 | --- | --- | --- | --- |
-| `CI` | `.github/workflows/ci.yml` | `pull_request` | Validar qualidade antes do merge. |
+| `CI Development` | `.github/workflows/ci-development.yml` | `pull_request` para `develop` | Validar qualidade antes do merge em `develop`. |
+| `CI Release` | `.github/workflows/ci-release.yml` | `pull_request` para `release` ou `release/**` | Validar qualidade antes do merge em `release`. |
+| `CI Production` | `.github/workflows/ci-production.yml` | `pull_request` para `main` | Validar qualidade antes do merge em `main`. |
 | `CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Detectar escopo, executar deploy AWS quando necessário e abrir PR para `release`. |
 | `CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Registrar deploy lógico em `homologation` e abrir PR para `main`. |
 | `CD Production` | `.github/workflows/cd-production.yml` | `push` na `main` | Registrar deploy lógico em `production`. |
@@ -20,7 +22,7 @@ Workflows reutilizáveis:
 ```text
 feature/*, bugfix/*, docs/*, test/*, ci/*, chore/* ...
   -> PR manual para develop
-  -> CI no pull request
+  -> CI do ambiente no pull request
   -> merge manual/revisado
   -> CD Development
   -> terraform apply + deploy development na AWS quando houver mudança deployable
@@ -36,12 +38,14 @@ feature/*, bugfix/*, docs/*, test/*, ci/*, chore/* ...
 
 No estágio `development`, o deploy AWS é o último passo antes da abertura do PR para `release` quando o merge altera código, infraestrutura, Docker ou manifests Kubernetes. Merges somente de documentação, Markdown ou configuração da própria esteira pulam o deploy AWS para evitar rebuild desnecessário, `terraform apply` sem mudança funcional e rollout vazio. Como `homologation` e `production` não existem como ambientes físicos neste projeto, esses estágios registram deploys lógicos para manter o Git Flow completo e auditável.
 
-## ✅ CI
+## ✅ CI por ambiente
 
 O fluxo de integração economiza GitHub Actions no plano gratuito:
 
 - O PR de branch de trabalho para `develop` é aberto manualmente.
-- `.github/workflows/ci.yml` roda em `pull_request` para `develop`, `release`, `release/**` ou `main`.
+- `.github/workflows/ci-development.yml` roda em `pull_request` para `develop`.
+- `.github/workflows/ci-release.yml` roda em `pull_request` para `release` ou `release/**`.
+- `.github/workflows/ci-production.yml` roda em `pull_request` para `main`.
 - PR automático fica reservado para os CDs: `develop -> release` e `release -> main`.
 - PR somente de documentação/Markdown passa pelo `Quality gate`, mas pula os jobs pesados de build, testes, Docker e Kubernetes.
 
@@ -64,7 +68,7 @@ Para acelerar execuções repetidas, a esteira usa cache de pacotes NuGet e cach
 
 ### Separação por responsabilidade
 
-O workflow `CI` usa jobs separados para deixar claro o princípio de separação de responsabilidades:
+Os workflows de CI usam os mesmos jobs separados para deixar claro o princípio de separação de responsabilidades:
 
 | Job | Responsabilidade |
 | --- | --- |

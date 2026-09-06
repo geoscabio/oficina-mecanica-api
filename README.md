@@ -352,7 +352,9 @@ Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separad
 
 | Evento | O que acontece |
 | --- | --- |
-| `CI` | Em `pull_request` para `develop`, `release` ou `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `CI Development` | Em `pull_request` para `develop`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `CI Release` | Em `pull_request` para `release` ou `release/**`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `CI Production` | Em `pull_request` para `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
 | `CD Development` | Em `push` na `develop`, executa deploy AWS real somente para mudanças deployable e abre PR para `release`. |
 | `CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
 | `CD Production` | Em `push` na `main`, registra deploy lógico em `production`. |
