@@ -259,7 +259,7 @@ Cada repositório seguirá o estilo da Fase 2: nomes claros, emojis, jobs numera
 
 | Workflow | Responsabilidade |
 | --- | --- |
-| `🧪 CI` | Validar PR para `develop` com build, testes, lint ou validação Terraform |
+| `🧪 CI` | Validar PR e push em `develop`, `release`, `release/**` e `main` com build, testes, lint ou Terraform |
 | `🚀 CD Development` | Deploy real em development |
 | `🔀 CD Release` | Promoção lógica para release |
 | `🏁 CD Production` | Promoção lógica para production |
@@ -269,7 +269,7 @@ Cada repositório seguirá o estilo da Fase 2: nomes claros, emojis, jobs numera
 
 Os repositórios da Fase 3 devem manter o mesmo desenho de CI/CD da API para facilitar leitura, revisão e demonstração:
 
-- `🧪 CI` valida PR para `develop`, Git Flow e quality gate.
+- `🧪 CI` valida PRs e pushes das branches protegidas, Git Flow e quality gate em um único workflow.
 - `🚀 CD Development` detecta mudança deployable, chama o deploy real de development e abre PR para `release` quando `AUTO_PR_ENABLED=true`.
 - `☁️ AWS Deploy` concentra o deploy real do recurso em `development`.
 - `🔀 CD Release` registra homologation lógico e abre PR para `main` quando `AUTO_PR_ENABLED=true`.

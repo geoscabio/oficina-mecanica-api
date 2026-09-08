@@ -251,6 +251,10 @@ jobs:
 
           Write-Host "Tests: total=$total passed=$passed failed=$failed skipped=$skipped"
 
+          if ($total -eq 0) {
+            throw "Nenhum teste foi executado."
+          }
+
           if ($failed -gt 0) {
             throw "There are failing tests."
           }
