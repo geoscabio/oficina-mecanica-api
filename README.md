@@ -273,7 +273,7 @@ A infraestrutura AWS real é provisionada por Terraform para o ambiente `develop
 1. Configurar credenciais e secrets no GitHub Environment `development`.
 2. Conferir o arquivo `infra/terraform/environments/dev/terraform-action.env`.
 3. Integrar feature em `develop`.
-4. Se a alteração não impactar runtime, como documentação, Markdown ou configuração da esteira, o CD pula o deploy AWS e não abre promoção automática para `release`.
+4. Se a alteração não impactar runtime, como documentação, Markdown ou configuração da esteira, o CD pula o deploy AWS e pode abrir PR para `release`.
 5. Se `TERRAFORM_ACTION=apply`, a esteira garante o ECR, publica a imagem, aplica Terraform, faz deploy no EKS e abre PR automático para `release`.
 6. Se `TERRAFORM_ACTION=destroy`, a esteira executa `terraform destroy` usando o mesmo backend/state e não promove PR para `release`.
 7. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
@@ -352,7 +352,9 @@ Os workflows ficam em [`.github/workflows/`](.github/workflows/) e foram separad
 
 | Evento | O que acontece |
 | --- | --- |
-| `🧪 CI` | Workflow único para PR e push em `develop`, `release`, `release/**` e `main`; valida código e Git Flow. |
+| `🧪 CI Development` | Em `pull_request` para `develop`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `🔎 CI Release` | Em `pull_request` para `release` ou `release/**`, valida build, format, testes, cobertura, Docker e Kubernetes. |
+| `🛡️ CI Production` | Em `pull_request` para `main`, valida build, format, testes, cobertura, Docker e Kubernetes. |
 | `🚀 CD Development` | Em `push` na `develop`, executa deploy AWS real somente para mudanças deployable e abre PR para `release`. |
 | `☁️ AWS Deploy` | Chamado pelo CD de desenvolvimento, executa `apply` ou `destroy` da API na AWS conforme controle versionado. |
 | `🔀 CD Release` | Em `push` na `release` ou `release/**`, registra deploy lógico em `homologation` e abre PR para `main`. |
@@ -537,29 +539,3 @@ Itens manuais restantes:
 - Ambientes AWS temporários devem ser destruídos após a demonstração.
 - O deploy para `main` deve usar branch protection e aprovação obrigatória de PR.
 - O projeto prioriza rastreabilidade e simplicidade operacional, sem depender de contexto externo para ser compreendido.
-
-### CI única e progressão do CD
-
-O arquivo `.github/workflows/ci.yml` concentra a integração contínua. O mesmo
-workflow valida cada PR e o commit resultante do merge; não existe uma CI por
-ambiente. O CD aguarda uma execução `push` aprovada desse workflow, do mesmo
-repositório, branch e SHA. Falha, cancelamento, ausência ou timeout bloqueiam a entrega.
-Os nomes dos checks obrigatórios existentes foram preservados.
-
-Somente Markdown pode dispensar validações pesadas. Arquivos executáveis em `docs/`
-também passam pela CI. A concorrência da CI cancela validações antigas; a do CD
-preserva a execução em andamento para não interromper Terraform.
-
-`development` é o ambiente físico. `release` e `main` registram homologação e
-produção lógicas, conforme ADR-0010, sem provisionar outros ambientes AWS.
-A promoção automática para `release` exige deploy físico concluído com sucesso;
-mudanças sem deploy não são apresentadas como um deploy validado. Merges e
-aprovações continuam humanos. Nenhum workflow aprova ou faz merge de PR.
-
-Veja a [auditoria de CI/CD](docs/auditoria-ci-cd.md) para verificações e limitações.
-
-A CI exporta a imagem Docker do commit de `develop` como artefato imutável
-`api-image-<SHA>`, com retenção de sete dias. O CD baixa o artefato da execução
-aprovada, carrega e publica essa mesma imagem no ECR, sem recompilá-la. Artefato
-ausente ou expirado bloqueia o deploy; execute novamente a CI do mesmo commit
-antes de repetir o CD. Não há promoção física de imagem para ambientes inexistentes.

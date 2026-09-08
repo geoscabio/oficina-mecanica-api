@@ -8,10 +8,6 @@ on:
         description: "GitHub Environment used by this deploy."
         required: true
         type: string
-      ci_run_id:
-        description: "Execução aprovada da CI que produziu a imagem deste commit."
-        required: true
-        type: string
     outputs:
       terraform_action:
         description: "Resolved Terraform action: apply or destroy."
@@ -293,8 +289,6 @@ jobs:
         with:
           name: api-image-${{ github.sha }}
           path: ${{ runner.temp }}/ci-image
-          github-token: ${{ github.token }}
-          run-id: ${{ inputs.ci_run_id }}
 
       - name: "📤 05 · Publicar a mesma imagem no ECR"
         env:
