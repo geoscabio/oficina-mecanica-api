@@ -52,3 +52,13 @@
 - **FIAP, Pós-Tech Software Architecture.** [Enunciado do Tech Challenge — Fase 2](../../projeto/enunciado-fase-2-tech-challenge.pdf), seção "Integração Contínua/Entrega Contínua (CI/CD)".
 - **ATLASSIAN.** *Gitflow Workflow*. 2026.
 - Detalhamento operacional: [`docs/deploy/github-actions.md`](../../deploy/github-actions.md).
+
+## 7. Atualização de implementação — 08/09/2026
+
+A CI foi reunificada em `ci.yml`, executada nos PRs e pushes das branches
+protegidas. Os CDs aguardam a CI do SHA definitivo. O build da imagem pertence à
+CI; o CD de development publica o artefato aprovado, sem recompilação.
+Homologação e produção permanecem lógicas. A promoção automática para release
+agora exige operação física bem-sucedida; commits sem deploy não abrem promoção
+automaticamente. Esta atualização substitui a exceção anterior de promoção sem
+deploy e mantém aprovação e merge humanos.

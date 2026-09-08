@@ -6,9 +6,7 @@ A esteira foi separada em workflows menores para deixar o Git Flow simples de vi
 
 | Workflow | Arquivo | Quando roda | Objetivo |
 | --- | --- | --- | --- |
-| `🧪 CI Development` | `.github/workflows/ci-development.yml` | `pull_request` para `develop` | Validar qualidade antes do merge em `develop`. |
-| `🔎 CI Release` | `.github/workflows/ci-release.yml` | `pull_request` para `release` ou `release/**` | Validar qualidade antes do merge em `release`. |
-| `🛡️ CI Production` | `.github/workflows/ci-production.yml` | `pull_request` para `main` | Validar qualidade antes do merge em `main`. |
+| `🧪 CI` | `.github/workflows/ci.yml` | `pull_request` e `push` em `develop`, `release`, `release/**` e `main` | Validar o código e liberar o CD do mesmo commit. |
 | `🚀 CD Development` | `.github/workflows/cd-development.yml` | `push` na `develop` | Detectar escopo, executar deploy AWS quando necessário e abrir PR para `release`. |
 | `☁️ AWS Deploy` | `.github/workflows/aws-deploy.yml` | `workflow_call` | Executar `apply` ou `destroy` da API na AWS conforme controle versionado. |
 | `🔀 CD Release` | `.github/workflows/cd-release.yml` | `push` na `release` ou `release/**` | Registrar deploy lógico em `homologation` e abrir PR para `main`. |
@@ -23,7 +21,7 @@ Workflow reutilizável principal:
 ```text
 feature/*, bugfix/*, docs/*, test/*, ci/*, chore/* ...
   -> PR manual para develop
-  -> CI do ambiente no pull request
+  -> CI única no pull request
   -> merge manual/revisado
   -> 🚀 CD Development
   -> terraform apply + deploy development na AWS quando houver mudança deployable
@@ -37,16 +35,14 @@ feature/*, bugfix/*, docs/*, test/*, ci/*, chore/* ...
   -> deploy lógico em production
 ```
 
-No estágio `development`, o deploy AWS é o último passo antes da abertura do PR para `release` quando o merge altera código, infraestrutura, Docker ou manifests Kubernetes. Merges somente de documentação, Markdown ou configuração da própria esteira pulam o deploy AWS para evitar rebuild desnecessário, `terraform apply` sem mudança funcional e rollout vazio. Como `homologation` e `production` não existem como ambientes físicos neste projeto, esses estágios registram deploys lógicos para manter o Git Flow completo e auditável.
+No estágio `development`, o deploy AWS é o último passo antes da abertura do PR para `release` quando o merge altera código, infraestrutura, Docker ou manifests Kubernetes. Merges sem alteração de runtime pulam o deploy AWS e a promoção automática para release para evitar rebuild desnecessário, `terraform apply` sem mudança funcional e rollout vazio. Como `homologation` e `production` não existem como ambientes físicos neste projeto, esses estágios registram deploys lógicos para manter o Git Flow completo e auditável.
 
-## ✅ CI por ambiente
+## ✅ CI única para o código
 
 O fluxo de integração economiza GitHub Actions no plano gratuito:
 
 - O PR de branch de trabalho para `develop` é aberto manualmente.
-- `🧪 CI Development` roda em `pull_request` para `develop`.
-- `🔎 CI Release` roda em `pull_request` para `release` ou `release/**`.
-- `🛡️ CI Production` roda em `pull_request` para `main`.
+- `🧪 CI` roda nos PRs e pushes das quatro branches protegidas, com uma única definição.
 - PR automático fica reservado para os CDs: `develop -> release` e `release -> main`.
 - PR somente de documentação/Markdown passa pelo `Quality gate`, mas pula os jobs pesados de build, testes, Docker e Kubernetes.
 
@@ -58,10 +54,10 @@ Valida:
 4. testes com cobertura;
 5. zero testes ignorados;
 6. cobertura global mínima de `90%`;
-7. build local da imagem Docker, sem push para ECR;
+7. build da imagem Docker e exportação do artefato em push para develop, sem acesso AWS;
 8. dry-run client-side dos manifests `k8s/` em cluster KinD efêmero no CI.
 
-Em `push` de branch de trabalho, a esteira não roda checks pesados nem abre PR automático. Os checks completos rodam uma vez no próprio PR.
+Em `push` de branch de trabalho, a esteira não roda checks pesados nem abre PR automático. O PR valida a integração proposta; após o merge, a CI valida o SHA definitivo que o CD entregará.
 
 O workflow usa `concurrency` por branch/PR para cancelar execuções antigas quando um novo commit chega na mesma branch. Isso evita fila duplicada e reduz custo de tempo no GitHub Actions.
 
@@ -69,7 +65,7 @@ Para acelerar execuções repetidas, a esteira usa cache de pacotes NuGet e cach
 
 ### Separação por responsabilidade
 
-Os workflows de CI usam os mesmos jobs separados para deixar claro o princípio de separação de responsabilidades:
+O workflow único de CI usa jobs separados para deixar claro o princípio de separação de responsabilidades:
 
 | Job | Responsabilidade |
 | --- | --- |
@@ -77,7 +73,7 @@ Os workflows de CI usam os mesmos jobs separados para deixar claro o princípio 
 | `build_application` | Restaurar dependências e compilar a solution. |
 | `verify_code_style` | Validar formatação com `dotnet format`. |
 | `test_application` | Executar testes automatizados, cobertura e artefatos. |
-| `build_container_image` | Validar o build da imagem Docker sem publicar. |
+| `build_container_image` | Construir a imagem e exportar o artefato de develop para o CD. |
 | `validate_kubernetes_manifests` | Validar manifests locais em cluster KinD efêmero. |
 | `quality_gate` | Consolidar o resultado dos jobs anteriores para branch protection. |
 
@@ -90,14 +86,14 @@ Roda após merge/push na `develop`.
 Fluxo:
 
 1. Detecta se o merge tem mudança deployable ou apenas mudança sem impacto de runtime.
-2. Se não houver mudança deployable, pula o deploy AWS e pode abrir PR para `release` quando `AUTO_PR_ENABLED=true`.
+2. Aguarda a CI do mesmo SHA. Sem mudança deployable, pula o deploy AWS e não abre promoção automática.
 3. Lê `infra/terraform/environments/dev/terraform-action.env`.
 4. Restaura o cache do Terraform state (GitHub Actions cache, chave `tfstate-development-*`).
 5. Executa `terraform init` e `validate`.
 6. Se `TERRAFORM_ACTION=apply`, garante o ECR, publica a imagem Docker no ECR, executa `plan`/`apply`, provisiona VPC, RDS, EKS e o workload Kubernetes da API, aguarda rollout e imprime o endpoint do Load Balancer.
 7. Salva o Terraform state atualizado de volta no cache do GitHub Actions (sempre, mesmo se um passo posterior falhar).
 7. Se `TERRAFORM_ACTION=destroy`, executa `plan -destroy`/`apply` e encerra os recursos AWS gerenciados pelo Terraform.
-8. Abre PR automático de `develop` para `release` quando o deploy `apply` passou ou quando não houve mudança deployable.
+8. Abre PR automático de `develop` para `release` somente após a operação física concluir com sucesso.
 
 ### O que exige deploy AWS
 
@@ -120,7 +116,7 @@ Arquivos que não disparam deploy AWS sozinhos:
 - qualquer `*.md`
 - `.github/workflows/*`
 
-Mesmo sem deploy AWS, o fluxo continua auditável: o workflow pode abrir PR para `release`, depois `release` abre PR para `main`.
+Sem deploy AWS, o workflow registra a ausência de mudança de runtime e não abre promoção automática para `release`.
 
 ## 🏷️ CD Release
 
@@ -232,3 +228,5 @@ O `🔀 CD Release` usa o título de execução `🔀 Registrar deploy em releas
 Fluxo formal de `hotfix/*` e rollback automatizado ficam no backlog técnico pós-entrega, porque não fazem parte do escopo obrigatório do Tech Challenge.
 
 > Observação: em repositório privado, branch protection pode depender do plano do GitHub. Se a proteção não estiver disponível, manter a regra operacional de não commitar direto em `develop` e `main`.
+
+O CD publica a imagem exportada pela CI, sem executar `docker build`. O download usa o ID da execução aprovada e o SHA exato; retenção de sete dias. Veja [auditoria](../auditoria-ci-cd.md).
