@@ -2,16 +2,14 @@ name: "🏁 CD Production"
 run-name: "🏁 Registrar deploy em production"
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy-production:

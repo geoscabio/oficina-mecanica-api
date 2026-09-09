@@ -2,9 +2,7 @@ name: "🚀 CD Development"
 run-name: "🚀 Deploy em development"
 
 on:
-  push:
-    branches:
-      - develop
+  workflow_call:
 
 permissions:
   contents: write
@@ -12,7 +10,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   RELEASE_BRANCH: ${{ vars.RELEASE_BRANCH || 'release' }}
@@ -83,7 +81,7 @@ jobs:
     needs:
       - detect-deploy-scope
       - deploy-development
-    if: always() && vars.AUTO_PR_ENABLED == 'true' && (needs.detect-deploy-scope.outputs.deploy_required == 'false' || (needs.deploy-development.result == 'success' && needs.deploy-development.outputs.terraform_action == 'apply'))
+    if: needs.deploy-development.result == 'success' && needs.deploy-development.outputs.terraform_action == 'apply' && vars.AUTO_PR_ENABLED == 'true'
 
     steps:
       - name: "📥 01 · Baixar código do repositório"
@@ -103,6 +101,11 @@ jobs:
           fi
 
           git fetch origin develop "$RELEASE_BRANCH"
+
+          if [ "$(git rev-parse "origin/develop")" != "$GITHUB_SHA" ]; then
+            echo "Branch avançou após este commit. A promoção cabe ao CD do novo commit."
+            exit 0
+          fi
 
           pending_commits="$(git rev-list --count "origin/$RELEASE_BRANCH..origin/develop")"
           if [ "$pending_commits" -eq 0 ]; then
