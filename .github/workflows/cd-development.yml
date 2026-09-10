@@ -7,12 +7,13 @@ on:
       - develop
 
 permissions:
+  actions: read
   contents: write
   pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   RELEASE_BRANCH: ${{ vars.RELEASE_BRANCH || 'release' }}
@@ -83,7 +84,15 @@ jobs:
     needs:
       - detect-deploy-scope
       - deploy-development
-    if: always() && vars.AUTO_PR_ENABLED == 'true' && (needs.detect-deploy-scope.outputs.deploy_required == 'false' || (needs.deploy-development.result == 'success' && needs.deploy-development.outputs.terraform_action == 'apply'))
+    if: >-
+      !cancelled() &&
+      vars.AUTO_PR_ENABLED == 'true' &&
+      needs.detect-deploy-scope.result == 'success' &&
+      (needs.deploy-development.result == 'success' ||
+       (needs.detect-deploy-scope.outputs.deploy_required == 'false' &&
+        needs.deploy-development.result == 'skipped'))
+    env:
+      TERRAFORM_ACTION: ${{ needs.deploy-development.outputs.terraform_action }}
 
     steps:
       - name: "📥 01 · Baixar código do repositório"
@@ -95,6 +104,22 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          case "$TERRAFORM_ACTION" in
+            "")
+              promotion_message="PR automático de alterações sem necessidade de deploy em development. O merge continua manual."
+              ;;
+            apply)
+              promotion_message="PR automático após deploy bem-sucedido em development. O merge continua manual."
+              ;;
+            destroy)
+              promotion_message="PR automático após destroy bem-sucedido em development. Registra a remoção; release não executa Terraform."
+              ;;
+            *)
+              echo "::error::Ação do CD não reconhecida. Promoção bloqueada."
+              exit 1
+              ;;
+          esac
+
           if ! git ls-remote --exit-code --heads origin "$RELEASE_BRANCH"; then
             echo "Release branch '$RELEASE_BRANCH' does not exist. Creating it from main."
             git fetch origin main
@@ -103,6 +128,11 @@ jobs:
           fi
 
           git fetch origin develop "$RELEASE_BRANCH"
+
+          if [ "$(git rev-parse "origin/develop")" != "$GITHUB_SHA" ]; then
+            echo "Branch avançou após este commit. A promoção cabe ao CD do novo commit."
+            exit 0
+          fi
 
           pending_commits="$(git rev-list --count "origin/$RELEASE_BRANCH..origin/develop")"
           if [ "$pending_commits" -eq 0 ]; then
@@ -121,4 +151,4 @@ jobs:
             --base "$RELEASE_BRANCH" \
             --head develop \
             --title "ci(release): deploy develop to $RELEASE_BRANCH" \
-            --body "PR automático aberto após deploy bem-sucedido em development. O merge para \`$RELEASE_BRANCH\` continua manual para manter revisão e rastreabilidade."
+            --body "$promotion_message"
