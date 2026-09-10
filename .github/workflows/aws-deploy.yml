@@ -284,18 +284,40 @@ jobs:
       - name: "🔓 03 · Login no Amazon ECR"
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: "⬇️ 04 · Baixar imagem da CI aprovada"
+      - name: "🔎 04 · Localizar a CI do PR que foi integrado"
+        id: ci
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pr_number="$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq ".[] | select(.merged_at != null and .base.ref == \"develop\" and .merge_commit_sha == \"$GITHUB_SHA\") | .number" | head -n 1)"
+          test -n "$pr_number" || { echo "::error::PR integrado não encontrado."; exit 1; }
+          head_sha="$(gh pr view "$pr_number" --json headRefOid --jq .headRefOid)"
+          run_id="$(gh run list --workflow ci.yml --commit "$head_sha" --event pull_request --status success --json databaseId --jq '.[0].databaseId // empty')"
+          test -n "$run_id" || { echo "::error::CI aprovada não encontrada para o PR."; exit 1; }
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
+
+      - name: "⬇️ 05 · Baixar imagem da CI aprovada"
         uses: actions/download-artifact@v8
         with:
-          name: api-image-${{ github.sha }}
+          name: api-image-pr-${{ steps.ci.outputs.pr_number }}
           path: ${{ runner.temp }}/ci-image
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.ci.outputs.run_id }}
 
-      - name: "📤 05 · Publicar a mesma imagem no ECR"
+      - name: "🧾 06 · Conferir se o conteúdo integrado é o validado"
+        run: |
+          test "$(cat "$RUNNER_TEMP/ci-image/source-tree.txt")" = "$(git rev-parse 'HEAD^{tree}')" || {
+            echo "::error::O conteúdo integrado difere do validado pela CI. Deploy bloqueado."
+            exit 1
+          }
+
+      - name: "📤 07 · Publicar a mesma imagem no ECR"
         env:
           IMAGE_ARCHIVE: ${{ runner.temp }}/ci-image/api-image.tar
         run: |
           docker load --input "$IMAGE_ARCHIVE"
-          docker tag "oficina-mecanica-api:sha-$GITHUB_SHA" "$ECR_IMAGE_URI"
+          docker tag "oficina-mecanica-api:ci" "$ECR_IMAGE_URI"
           docker push "$ECR_IMAGE_URI"
 
   apply_or_destroy:

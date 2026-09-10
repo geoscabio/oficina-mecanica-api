@@ -2,9 +2,12 @@ name: "🚀 CD Development"
 run-name: "🚀 Deploy em development"
 
 on:
-  workflow_call:
+  push:
+    branches:
+      - develop
 
 permissions:
+  actions: read
   contents: write
   pull-requests: write
 
@@ -81,7 +84,9 @@ jobs:
     needs:
       - detect-deploy-scope
       - deploy-development
-    if: needs.deploy-development.result == 'success' && needs.deploy-development.outputs.terraform_action == 'apply' && vars.AUTO_PR_ENABLED == 'true'
+    if: needs.deploy-development.result == 'success' && vars.AUTO_PR_ENABLED == 'true'
+    env:
+      TERRAFORM_ACTION: ${{ needs.deploy-development.outputs.terraform_action }}
 
     steps:
       - name: "📥 01 · Baixar código do repositório"
@@ -93,6 +98,19 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          case "$TERRAFORM_ACTION" in
+            apply)
+              promotion_message="PR automático após deploy bem-sucedido em development. O merge continua manual."
+              ;;
+            destroy)
+              promotion_message="PR automático após destroy bem-sucedido em development. Registra a remoção; release não executa Terraform."
+              ;;
+            *)
+              echo "::error::Ação do CD não reconhecida. Promoção bloqueada."
+              exit 1
+              ;;
+          esac
+
           if ! git ls-remote --exit-code --heads origin "$RELEASE_BRANCH"; then
             echo "Release branch '$RELEASE_BRANCH' does not exist. Creating it from main."
             git fetch origin main
@@ -124,4 +142,4 @@ jobs:
             --base "$RELEASE_BRANCH" \
             --head develop \
             --title "ci(release): deploy develop to $RELEASE_BRANCH" \
-            --body "PR automático aberto após deploy bem-sucedido em development. O merge para \`$RELEASE_BRANCH\` continua manual para manter revisão e rastreabilidade."
+            --body "$promotion_message"
