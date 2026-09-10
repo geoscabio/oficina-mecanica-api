@@ -84,7 +84,13 @@ jobs:
     needs:
       - detect-deploy-scope
       - deploy-development
-    if: needs.deploy-development.result == 'success' && vars.AUTO_PR_ENABLED == 'true'
+    if: >-
+      !cancelled() &&
+      vars.AUTO_PR_ENABLED == 'true' &&
+      needs.detect-deploy-scope.result == 'success' &&
+      (needs.deploy-development.result == 'success' ||
+       (needs.detect-deploy-scope.outputs.deploy_required == 'false' &&
+        needs.deploy-development.result == 'skipped'))
     env:
       TERRAFORM_ACTION: ${{ needs.deploy-development.outputs.terraform_action }}
 
@@ -99,6 +105,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           case "$TERRAFORM_ACTION" in
+            "")
+              promotion_message="PR automático de alterações sem necessidade de deploy em development. O merge continua manual."
+              ;;
             apply)
               promotion_message="PR automático após deploy bem-sucedido em development. O merge continua manual."
               ;;
