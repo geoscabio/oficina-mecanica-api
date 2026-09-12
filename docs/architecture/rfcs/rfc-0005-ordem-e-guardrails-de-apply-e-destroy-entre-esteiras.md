@@ -71,7 +71,7 @@ Exemplos:
 - A VPC não poderá ser destruída enquanto existirem EKS, RDS, Lambda ou VPC Link dependentes.
 - O RDS não poderá ser destruído enquanto a Lambda ou a API ainda dependerem dele.
 - O NLB não poderá ser removido enquanto o API Gateway possuir uma integração ativa por VPC Link.
-- A Lambda não poderá ser removida enquanto o API Gateway ainda possuir a rota `POST /auth/cpf`.
+- A Lambda não poderá ser removida enquanto o API Gateway ainda possuir a rota `POST /auth/documento`.
 
 ## Guardrails obrigatórios
 
