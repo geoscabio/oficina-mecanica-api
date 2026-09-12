@@ -1,4 +1,5 @@
 using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OficinaMecanica.API.Extensions.Responses;
@@ -19,7 +20,7 @@ public static class JwtAuthenticationExtensions
             Secret = configuration["Jwt:Secret"] ?? string.Empty,
             ExpirationMinutes = int.TryParse(configuration["Jwt:ExpirationMinutes"], out var expirationMinutes)
                 ? expirationMinutes
-                : 120
+                : 60
         };
 
         jwtOptions.Validar();
@@ -30,6 +31,7 @@ public static class JwtAuthenticationExtensions
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+                options.MapInboundClaims = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -39,7 +41,11 @@ public static class JwtAuthenticationExtensions
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = signingKey,
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.FromMinutes(2)
+                    RequireExpirationTime = true,
+                    RequireSignedTokens = true,
+                    ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
+                    RoleClaimType = "role",
+                    ClockSkew = TimeSpan.Zero
                 };
 
                 options.Events = new JwtBearerEvents
