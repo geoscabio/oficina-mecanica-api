@@ -28,7 +28,8 @@ public sealed class TokenService : ITokenService
             new Claim(JwtRegisteredClaimNames.Name, nome),
             new Claim(ClaimTypes.NameIdentifier, usuarioId.ToString()),
             new Claim(ClaimTypes.Name, nome),
-            new Claim(ClaimTypes.Role, perfil),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("role", perfil),
             new Claim("perfil", perfil)
         };
 
