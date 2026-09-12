@@ -53,7 +53,7 @@ Este backlog guarda melhorias técnicas, itens de código e evoluções operacio
 
 | ID | Prioridade | Horizonte | Área | Item | Critério de aceite | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `CODE-001` | `P0` | Fase 3 | Domínio | Adicionar `StatusCliente` para suportar autenticação de Cliente por documento. | Aggregate/modelo, mapeamento EF, migration e snapshot são atualizados; seed/demo possui cliente ativo e inativo; testes cobrem os documentos CPF e CNPJ nos dois estados. A representação física do status é documentada antes da migration. | A fazer |
+| `CODE-001` | `P0` | Fase 3 | Domínio | Adicionar `StatusCliente` para suportar autenticação de Cliente por documento. | Aggregate/modelo, mapeamento EF, migration e snapshot são atualizados; seed/demo possui cliente ativo e inativo; testes cobrem os documentos CPF e CNPJ nos dois estados. A representação física do status é documentada antes da migration. | Concluído |
 | `CODE-002` | `P0` | Fase 3 | Segurança | Evitar CPF/CNPJ puro em logs, respostas técnicas e JWT. | Logs usam `cliente_id` ou documento mascarado; nenhum log registra CPF/CNPJ completo e o JWT não transporta documento ou hashes sem necessidade funcional. | A fazer |
 | `CODE-003` | `P0` | Fase 3 | Testes | Cobrir fluxo de autenticação e autorização por documento. | Testes validam CPF e CNPJ válidos, documento inválido, cliente inexistente, cliente inativo, `401` sem token, claims sem documento e autorização por papel; o cenário CPF é obrigatório para a demonstração. | Bloqueado |
 | `CODE-004` | `P1` | Antes da demo | Contratos | Atualizar OpenAPI e Postman para os fluxos da Fase 3. | Coleções e ambientes permitem demonstrar `POST /auth/documento` com CPF (obrigatório) e CNPJ, além do consumo com JWT. | A fazer |

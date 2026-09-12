@@ -1,5 +1,6 @@
 using FluentAssertions;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
+using OficinaMecanica.Domain.Atendimento.Enums;
 using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
 using OficinaMecanica.Domain.Shared.Exceptions;
@@ -30,6 +31,7 @@ public class ClienteTests
         cliente.Telefone.Should().Be(telefone);
         cliente.Telefone.Numero.Should().Be(ClienteTestDataFactory.TelefoneNormalizadoPadrao);
         cliente.Email.Should().Be(email);
+        cliente.Status.Should().Be(StatusCliente.Ativo);
     }
 
     [Theory]
@@ -88,5 +90,62 @@ public class ClienteTests
         acao.Should()
             .Throw<DomainException>()
             .WithMessage(ClienteErrorMessages.NomeObrigatorio);
+    }
+
+    [Fact]
+    public void Dado_ClienteAtivo_Quando_Inativar_Entao_DeveAtualizarStatus()
+    {
+        // Arrange
+        var cliente = ClienteTestDataFactory.CriarClientePadrao();
+
+        // Act
+        cliente.Inativar();
+
+        // Assert
+        cliente.Status.Should().Be(StatusCliente.Inativo);
+    }
+
+    [Theory]
+    [MemberData(nameof(ClientesComCpfECnpj))]
+    public void Dado_ClienteComDocumentoValido_Quando_Criar_Entao_DeveIniciarAtivo(Cliente cliente, string documentoNormalizado)
+    {
+        // Assert
+        cliente.Documento.Numero.Should().Be(documentoNormalizado);
+        cliente.Status.Should().Be(StatusCliente.Ativo);
+    }
+
+    [Theory]
+    [MemberData(nameof(ClientesComCpfECnpj))]
+    public void Dado_ClienteComDocumentoValido_Quando_Inativar_Entao_DevePreservarDocumentoEAtualizarStatus(Cliente cliente, string documentoNormalizado)
+    {
+        // Act
+        cliente.Inativar();
+
+        // Assert
+        cliente.Documento.Numero.Should().Be(documentoNormalizado);
+        cliente.Status.Should().Be(StatusCliente.Inativo);
+    }
+
+    [Fact]
+    public void Dado_ClienteInativo_Quando_Ativar_Entao_DeveAtualizarStatus()
+    {
+        // Arrange
+        var cliente = ClienteTestDataFactory.CriarClientePadrao();
+        cliente.Inativar();
+
+        // Act
+        cliente.Ativar();
+
+        // Assert
+        cliente.Status.Should().Be(StatusCliente.Ativo);
+    }
+
+    public static TheoryData<Cliente, string> ClientesComCpfECnpj()
+    {
+        return new TheoryData<Cliente, string>
+        {
+            { ClienteTestDataFactory.CriarClientePadrao(), ClienteTestDataFactory.DocumentoNormalizadoPadrao },
+            { ClienteTestDataFactory.CriarClienteCnpjPadrao(), ClienteTestDataFactory.CnpjNormalizadoPadrao }
+        };
     }
 }
