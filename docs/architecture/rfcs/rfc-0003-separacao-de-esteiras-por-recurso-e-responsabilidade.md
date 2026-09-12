@@ -26,7 +26,7 @@ A solução será organizada em seis repositórios, separados por recurso e resp
 | `oficina-mecanica-infra-vpc` | VPC, sub-redes, rotas, Internet Gateway, NAT Gateway e grupos de segurança base |
 | `oficina-mecanica-infra-rds` | RDS SQL Server, grupos de sub-redes, grupo de segurança do banco e outputs |
 | `oficina-mecanica-infra-kubernetes` | EKS, node groups, ECR e componentes de infraestrutura do cluster |
-| `oficina-mecanica-auth-lambda` | Lambda .NET de autenticação por CPF e emissão de JWT |
+| `oficina-mecanica-auth-lambda` | Lambda .NET de autenticação de Cliente por documento e emissão de JWT |
 | `oficina-mecanica-api` | API ASP.NET Core, Dockerfile, migrations, manifests da carga de trabalho, Swagger e coleção Postman |
 | `oficina-mecanica-infra-api-gateway` | API Gateway, VPC Link, rotas, integrações e logs de acesso |
 
@@ -65,7 +65,7 @@ O repositório da API será responsável pela imagem da aplicação e pelos mani
 
 ### Lambda de autenticação
 
-O repositório `oficina-mecanica-auth-lambda` será responsável exclusivamente pela autenticação de clientes por CPF, consulta ao RDS e emissão de JWT.
+O repositório `oficina-mecanica-auth-lambda` será responsável exclusivamente pela autenticação de clientes por documento, consulta ao RDS e emissão de JWT. Ele aceitará CPF e CNPJ em um único fluxo; o CPF permanece obrigatório para a Fase 3.
 
 Ele não deverá assumir responsabilidades da API principal, como consulta de ordens de serviço ou regras operacionais da oficina.
 

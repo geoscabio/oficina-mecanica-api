@@ -8,13 +8,13 @@ Aceita para implementação na Fase 3.
 
 Atualmente, a API executada no Kubernetes é exposta por um Load Balancer público. Esse modelo permite que requisições externas cheguem diretamente à aplicação, sem passar por uma camada central de controle, roteamento e observabilidade.
 
-Na Fase 3, será utilizado um API Gateway como porta pública única da solução. A autenticação de clientes por CPF será realizada por uma Lambda, enquanto as rotas da aplicação continuarão sendo atendidas pela API executada no Kubernetes.
+Na Fase 3, será utilizado um API Gateway como porta pública única da solução. A autenticação de clientes por documento será realizada por uma Lambda, enquanto as rotas da aplicação continuarão sendo atendidas pela API executada no Kubernetes. O fluxo de CPF permanece obrigatório para a Fase 3 e para a demonstração.
 
 A arquitetura deve garantir que a API permaneça privada dentro da VPC e que todo o tráfego público passe somente pelo API Gateway.
 
 ## Decisão
 
-Será adotado o AWS API Gateway no modelo HTTP API como única porta pública da solução.
+Será adotado o AWS API Gateway no modelo HTTP API como única porta pública da solução. A integração de `POST /auth/documento` utilizará Lambda Proxy Integration com **payload format 2.0**; a futura Function consumirá `APIGatewayHttpApiV2ProxyRequest`.
 
 Será utilizado o estágio padrão `$default`, permitindo URLs públicas sem um prefixo de ambiente, como `/development`.
 
@@ -22,7 +22,7 @@ O Gateway possuirá duas integrações:
 
 | Rota pública | Destino | Tipo de integração |
 | --- | --- | --- |
-| `POST /auth/cpf` | `oficina-mecanica-auth-lambda` | Lambda Proxy Integration |
+| `POST /auth/documento` | `oficina-mecanica-auth-lambda` | Lambda Proxy Integration, payload format 2.0 |
 | `ANY /api/{proxy+}` | API no Kubernetes | HTTP Proxy Integration via VPC Link |
 
 A integração com a API no Kubernetes seguirá este fluxo:
@@ -42,15 +42,17 @@ O NLB será interno e não terá exposição pública. O API Gateway será o ún
 
 ### Autenticação de cliente
 
-A rota pública `POST /auth/cpf` será direcionada à Lambda de autenticação.
+A rota pública `POST /auth/documento` será direcionada à Lambda de autenticação.
+
+O formato 2.0 é adotado por manter o contrato proxy direto e menor para uma única Lambda. Não há necessidade atual de REST API payload v1 ou de mapeamentos adicionais no MVP.
 
 A Lambda será responsável por:
 
-1. Validar o formato do CPF.
-2. Consultar o cliente no RDS.
+1. Validar e normalizar o documento, identificando CPF ou CNPJ.
+2. Consultar o cliente no RDS por `Documento + TipoDocumento`.
 3. Verificar se o cliente está ativo.
 4. Emitir um JWT válido quando a autenticação for autorizada.
-5. Retornar resposta genérica quando o CPF não existir ou o cliente estiver inativo.
+5. Retornar resposta genérica quando o documento não existir ou o cliente estiver inativo.
 
 ### Aplicação principal
 
@@ -77,7 +79,7 @@ A aplicação continuará validando:
 - Papel do usuário.
 - Claim `cliente_id` nas rotas destinadas ao cliente.
 
-Não será utilizado Lambda Authorizer neste MVP. A Lambda será responsável apenas pela autenticação inicial do cliente por CPF e pela emissão do JWT.
+Não será utilizado Lambda Authorizer neste MVP. A Lambda será responsável apenas pela autenticação inicial do cliente por documento e pela emissão do JWT.
 
 Essa decisão reduz a complexidade inicial e mantém a segurança da API independente do Gateway.
 
@@ -93,7 +95,7 @@ A definição detalhada de logs, traces, métricas, dashboards e alertas será t
 
 - O API Gateway se torna a única porta pública da solução.
 - A API no Kubernetes deixa de ficar acessível diretamente pela internet.
-- A autenticação de cliente por CPF fica isolada em uma Lambda.
+- A autenticação de cliente por documento fica isolada em uma Lambda, preservando o fluxo obrigatório de CPF.
 - O roteamento entre Lambda e API principal fica centralizado.
 - A arquitetura fica alinhada aos requisitos de API Gateway, Function Serverless e Kubernetes.
 - A solução permite registrar logs de acesso em uma única camada de entrada.
@@ -116,7 +118,7 @@ A definição detalhada de logs, traces, métricas, dashboards e alertas será t
 
 ## Critérios de aceite
 
-- `POST /auth/cpf` é atendido pela Lambda de autenticação.
+- `POST /auth/documento` é atendido pela Lambda de autenticação para CPF e CNPJ; o cenário de CPF é obrigatório na validação e na demonstração da Fase 3.
 - As rotas `/api/*` são encaminhadas para a API no Kubernetes por meio do VPC Link.
 - O NLB da API é interno e não pode ser acessado diretamente pela internet.
 - O API Gateway é a única entrada pública da API.

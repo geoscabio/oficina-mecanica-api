@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OficinaMecanica.Domain.Atendimento.Aggregates;
+using OficinaMecanica.Domain.Atendimento.Enums;
 
 namespace OficinaMecanica.Infrastructure.Atendimento.Configurations;
 
@@ -17,6 +18,11 @@ public sealed class ClienteConfiguration : IEntityTypeConfiguration<Cliente>
 
         builder.Property(cliente => cliente.Nome)
             .HasMaxLength(160)
+            .IsRequired();
+
+        builder.Property(cliente => cliente.Status)
+            .HasConversion<int>()
+            .HasDefaultValue(StatusCliente.Ativo)
             .IsRequired();
 
         builder.OwnsOne(cliente => cliente.Documento, documento =>

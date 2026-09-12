@@ -78,4 +78,9 @@ internal static class ClienteTestDataFactory
     {
         return Cliente.Criar(CriarDocumentoPadrao(), NomePadrao, CriarEnderecoPadrao(), CriarTelefonePadrao(), CriarEmailPadrao());
     }
+
+    public static Cliente CriarClienteCnpjPadrao()
+    {
+        return Cliente.Criar(CriarCnpjPadrao(), NomePadrao, CriarEnderecoPadrao(), CriarTelefonePadrao(), CriarEmailPadrao());
+    }
 }
