@@ -28,6 +28,7 @@ on:
 
 env:
   TF_WORKING_DIRECTORY: infra/terraform/environments/dev
+  TERRAFORM_VERSION: "1.15.8"
 
 jobs:
   import_existing_resources:
@@ -53,6 +54,7 @@ jobs:
       - name: "🛠️ 03 · Instalar Terraform"
         uses: hashicorp/setup-terraform@v4
         with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
       - name: "📝 04 · Preparar variáveis do Terraform"
