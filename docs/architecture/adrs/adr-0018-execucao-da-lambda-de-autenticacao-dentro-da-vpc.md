@@ -10,7 +10,7 @@
 
 ## 1. Contexto e Problema
 
-A Lambda `oficina-mecanica-auth-lambda` será responsável por autenticar clientes por CPF. Para isso, ela precisará consultar os dados do cliente e seu status no RDS SQL Server.
+A Lambda `oficina-mecanica-auth-lambda` será responsável por autenticar clientes por documento. Para isso, ela precisará consultar os dados do cliente e seu status no RDS SQL Server. O fluxo CPF continua obrigatório para a Fase 3; CNPJ é aceito no mesmo fluxo para respeitar o domínio existente.
 
 O RDS será executado em sub-redes privadas e não terá acesso público. Uma Lambda executada fora da VPC não poderá acessar esse banco privado sem alterar a exposição de rede do RDS.
 
@@ -46,7 +46,7 @@ Cliente
 
 ## 4. Justificativa
 
-A autenticação por CPF exige consultar a existência e o status do cliente no banco de dados. Como o RDS deve permanecer privado, a Lambda precisa estar na mesma VPC ou possuir conectividade privada equivalente.
+A autenticação por documento exige consultar a existência e o status do cliente no banco de dados. Como o RDS deve permanecer privado, a Lambda precisa estar na mesma VPC ou possuir conectividade privada equivalente.
 
 Anexar a Lambda à VPC permite que ela acesse o RDS sem abrir o banco para a internet. O uso de grupos de segurança específicos restringe a comunicação ao menor conjunto necessário de recursos.
 
@@ -59,7 +59,7 @@ A solução também permite que a Lambda utilize o mesmo segredo de JWT armazena
 - A Lambda consegue consultar o RDS privado.
 - O banco de dados permanece sem acesso público.
 - A comunicação é restrita por grupos de segurança.
-- A autenticação por CPF não exige expor dados de clientes para a internet.
+- A autenticação por documento não exige expor dados de clientes para a internet.
 - A Lambda pode acessar o AWS Secrets Manager de forma controlada.
 - A arquitetura fica alinhada ao modelo de rede privada adotado para a solução.
 
@@ -73,7 +73,7 @@ A solução também permite que a Lambda utilize o mesmo segredo de JWT armazena
 
 ## 6. Referências
 
-- RFC-0001 — Autenticação de Clientes por CPF com Função Serverless.
+- RFC-0001 — Autenticação de Clientes por Documento com Função Serverless.
 - RFC-0004 — Compartilhamento de Outputs entre Esteiras via AWS Systems Manager Parameter Store.
 - ADR-0007 — Topologia de Rede AWS: VPC, 2 AZs e NAT Gateway Único.
 - Tech Challenge FIAP — Fase 3.
