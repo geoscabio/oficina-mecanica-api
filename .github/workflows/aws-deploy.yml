@@ -16,6 +16,7 @@ on:
 env:
   TF_WORKING_DIRECTORY: infra/terraform/environments/dev
   ECR_REPOSITORY_NAME: oficina-mecanica-api
+  TERRAFORM_VERSION: "1.15.8"
 
 jobs:
   resolve_action:
@@ -111,6 +112,7 @@ jobs:
       - name: "🛠️ 03 · Instalar Terraform"
         uses: hashicorp/setup-terraform@v4
         with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
       - name: "✅ 04 · Validar segredos necessários para o deploy"
@@ -351,6 +353,7 @@ jobs:
       - name: "🛠️ 03 · Instalar Terraform"
         uses: hashicorp/setup-terraform@v4
         with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
       - name: "🚀 04 · Inicializar Terraform (baixa os plugins dos providers)"
