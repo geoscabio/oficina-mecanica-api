@@ -1,4 +1,5 @@
 using OficinaMecanica.Domain.Shared.Exceptions;
+using OficinaMecanica.Domain.Atendimento.Enums;
 using OficinaMecanica.Domain.Atendimento.Messages;
 using OficinaMecanica.Domain.Atendimento.ValueObjects;
 
@@ -13,6 +14,7 @@ public sealed class Cliente
         Endereco = null!;
         Telefone = null!;
         Email = null!;
+        Status = StatusCliente.Ativo;
     }
 
     private Cliente(Guid id, CpfCnpj documento, string nome, Endereco endereco, Telefone telefone, Email email)
@@ -23,6 +25,7 @@ public sealed class Cliente
         Endereco = endereco;
         Telefone = telefone;
         Email = email;
+        Status = StatusCliente.Ativo;
     }
 
     public Guid Id { get; private set; }
@@ -31,6 +34,7 @@ public sealed class Cliente
     public Endereco Endereco { get; private set; }
     public Telefone Telefone { get; private set; }
     public Email Email { get; private set; }
+    public StatusCliente Status { get; private set; }
 
     public static Cliente Criar(CpfCnpj documento, string nome, Endereco endereco, Telefone telefone, Email email)
     {
@@ -65,5 +69,14 @@ public sealed class Cliente
         Telefone = telefone ?? throw new DomainException(ClienteErrorMessages.TelefoneObrigatorio);
         Email = email ?? throw new DomainException(ClienteErrorMessages.EmailObrigatorio);
     }
-}
 
+    public void Ativar()
+    {
+        Status = StatusCliente.Ativo;
+    }
+
+    public void Inativar()
+    {
+        Status = StatusCliente.Inativo;
+    }
+}

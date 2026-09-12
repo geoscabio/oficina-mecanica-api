@@ -9,6 +9,7 @@ internal static class AtendimentoSeedData
     {
         var maria = await ClienteSeedData.ObterOuCriarMariaAsync(dbContext, cancellationToken);
         var carlos = await ClienteSeedData.ObterOuCriarCarlosAsync(dbContext, cancellationToken);
+        await ClienteSeedData.ObterOuCriarAnaAsync(dbContext, cancellationToken);
 
         var civic = await VeiculoSeedData.ObterOuCriarCivicAsync(dbContext, maria.Id, cancellationToken);
         var onix = await VeiculoSeedData.ObterOuCriarOnixAsync(dbContext, maria.Id, cancellationToken);

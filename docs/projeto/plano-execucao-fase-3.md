@@ -41,7 +41,7 @@ O enunciado pede 4 entregáveis obrigatórios. O plano mantém esses 4 entregáv
 | `oficina-mecanica-infra-vpc` | VPC, subnets, rotas, NAT/IGW e security groups base | Base técnica compartilhada |
 | `oficina-mecanica-infra-rds` | RDS SQL Server, subnet group, security group do banco e outputs | Infraestrutura do banco gerenciado |
 | `oficina-mecanica-infra-kubernetes` | EKS, node group, ECR e Datadog Agent/Cluster Agent | Infraestrutura Kubernetes |
-| `oficina-mecanica-auth-lambda` | Lambda .NET de autenticação por CPF e emissão de JWT | Function Serverless |
+| `oficina-mecanica-auth-lambda` | Lambda .NET de autenticação de Cliente por documento e emissão de JWT | Function Serverless |
 | `oficina-mecanica-api` | Aplicação principal, Docker, manifests Kubernetes, migrations e Swagger/Postman | Aplicação principal em Kubernetes |
 | `oficina-mecanica-infra-api-gateway` | API Gateway, VPC Link, rotas públicas e logs de acesso | API Gateway para controle e roteamento |
 
@@ -63,7 +63,7 @@ flowchart LR
     Datadog["📈 Datadog<br/>APM + Logs + Infra + Dashboards + Alertas"]
 
     Cliente --> Gateway
-    Gateway -->|POST /auth/cpf| Lambda
+    Gateway -->|POST /auth/documento| Lambda
     Lambda --> Rds
     Gateway -->|/api/*| VpcLink
     VpcLink --> Nlb
@@ -92,29 +92,41 @@ flowchart LR
 
 ### Fluxo
 
-1. Cliente chama `POST /auth/cpf` no API Gateway.
+1. Cliente chama `POST /auth/documento` no API Gateway com `{ "documento": "..." }`.
 2. API Gateway encaminha para `oficina-mecanica-auth-lambda`.
-3. Lambda valida o formato do CPF.
-4. Lambda consulta o cliente no RDS.
+3. Lambda normaliza, valida e identifica CPF ou CNPJ pelo próprio documento.
+4. Lambda consulta o cliente no RDS por `Documento + TipoDocumento`.
 5. Lambda verifica se o cliente existe e está ativo.
 6. Lambda gera JWT com perfil `Cliente`.
 7. Cliente usa o JWT nas rotas protegidas em `/api/*`.
 8. API valida o JWT normalmente via middleware ASP.NET Core.
 
-### Claims mínimas do JWT
+### Contrato JWT a consolidar antes da implementação
 
-- `sub`: identificador do cliente.
-- `cpf_hash`: hash ou representação mascarada do CPF.
-- `cliente_id`: identificador interno do cliente.
-- `role`: `Cliente`.
-- `jti`: identificador único do token.
-- `iss`, `aud`, `exp`: emissor, audiência e expiração.
+O ADR-0019 e o RFC-0001 definem `iss`, `aud`, algoritmo, segredo compartilhado, expiração, `sub = cliente_id`, `cliente_id`, `role` e `jti`. A API e a Lambda devem aceitar e emitir exatamente esse contrato.
+
+CPF e CNPJ não são necessários para autorização depois da identificação do cliente. Por isso, não entram no JWT em texto puro, nem como `cpf_hash`, `cnpj_hash` ou hash genérico. `cliente_id` é a identidade interna suficiente para autorização e correlação.
+
+> O requisito obrigatório de autenticação via CPF é atendido pelo fluxo `POST /auth/documento`. A solução também aceita CNPJ porque o domínio existente permite Clientes identificados por CPF ou CNPJ e a Auth Lambda passa a ser o mecanismo de autenticação de todo o perfil Cliente.
+
+### Pré-requisitos para a Auth Lambda
+
+Não iniciar a implementação da Lambda enquanto os pontos abaixo não tiverem resposta rastreável no backlog:
+
+| Pré-requisito | Evidência necessária |
+| --- | --- |
+| Estado autenticável do cliente | `StatusCliente` definido no modelo, mapeamento EF, migration/snapshot, seed ativo/inativo e testes. |
+| JWT emitido e aceito | Contrato único de `iss`, `aud`, expiração, `jti`, `role`, `sub = cliente_id`, `cliente_id`, algoritmo e segredo compartilhado; sem documento ou hash de documento. |
+| Credenciais do RDS | Segredo de banco criado pelo repositório RDS em Secrets Manager e forma aprovada de fornecer apenas a referência aos consumidores. |
+| Rede do RDS | Regra 1433 limitada aos security groups da API/EKS e Lambda, conforme ADR-0018, com dono Terraform definido. |
+| Evento do Gateway | HTTP API payload format 2.0; a Function consumirá `APIGatewayHttpApiV2ProxyRequest`. |
+| Contrato HTTP | `POST /auth/documento` recebe `documento`; `200` retorna token mínimo; `400`, `401` e `503` usam envelopes genéricos sem expor documento ou infraestrutura. |
 
 ### Mudanças na aplicação
 
-- Adicionar status ao cliente, por exemplo `StatusCliente`.
-- Criar migration para refletir o novo campo.
-- Atualizar seed/demo com clientes ativos e inativos.
+- Adicionar `StatusCliente` ao aggregate/modelo, mapeamento EF, migration, snapshot e seed/demo com clientes ativos e inativos.
+- Alinhar validação JWT da API a emissor, audiência, expiração, `jti`, papel e `cliente_id`; remover o perfil `Cliente` do login interno de usuário/senha somente quando o fluxo por documento cobrir CPF e CNPJ, preservando Admin, Atendente e Mecânico.
+- Criar `GET /api/v1/clientes/me/ordens-servico`, usando apenas o `cliente_id` validado no token, com testes de autorização do papel `Cliente`.
 - Garantir que nenhuma rota sensível dependa apenas do Gateway: a API continua validando JWT.
 
 ---
@@ -125,7 +137,7 @@ flowchart LR
 
 | Rota | Destino | Autenticação |
 | --- | --- | --- |
-| `POST /auth/cpf` | Lambda .NET | Pública, com validação dentro da Lambda |
+| `POST /auth/documento` | Lambda .NET | Pública, com validação de CPF ou CNPJ dentro da Lambda |
 | `/api/*` | API no EKS via VPC Link + NLB interno | JWT validado pela API |
 
 ### Por que VPC Link?
@@ -307,17 +319,17 @@ Exemplos:
 
 ### Controle de apply/destroy
 
-Repos Terraform usam arquivo versionado:
+As esteiras atuais usam o arquivo versionado:
 
 ```text
-infra-action.env
+terraform-action.env
 TERRAFORM_ACTION=apply
 ```
 
 Para `destroy`:
 
 - PR dedicado.
-- Alteração explícita do arquivo `infra-action.env`.
+- Alteração explícita do arquivo `terraform-action.env`.
 - Environment approval no GitHub.
 - Plano publicado como artefato.
 - Bloqueio se houver dependentes ativos.
@@ -443,7 +455,7 @@ Manter SQL Server no RDS.
 
 Criar RFCs em `docs/architecture/rfcs/` para:
 
-- 🔐 Autenticação por CPF com Lambda.
+- 🔐 Autenticação de Cliente por documento com Lambda, preservando CPF como requisito obrigatório.
 - 🌐 API Gateway com VPC Link.
 - 🧩 Separação de esteiras por recurso.
 - 🗂️ Compartilhamento de outputs via SSM.
@@ -493,8 +505,9 @@ Produzir:
 
 Validar:
 
-- `POST /auth/cpf` retorna JWT para cliente ativo.
-- CPF inexistente retorna erro controlado.
+- `POST /auth/documento` retorna JWT para cliente ativo identificado por CPF ou CNPJ.
+- CPF inválido ou inexistente retorna erro controlado; este é o cenário obrigatório demonstrado no vídeo da Fase 3.
+- CNPJ inválido ou inexistente retorna erro controlado.
 - Cliente inativo retorna erro controlado.
 - Chamada em `/api/*` sem JWT retorna `401`.
 - Chamada em `/api/*` com JWT válido funciona.
@@ -540,22 +553,20 @@ Roteiro sugerido:
 
 ## 🗓️ Ordem Recomendada de Execução
 
-### Trilha principal
+### Trilha principal após a auditoria
 
-Essas atividades formam o núcleo técnico da Fase 3 e devem ser priorizadas nas primeiras semanas.
+As extrações de VPC, Kubernetes e RDS continuam sendo as bases da arquitetura. A sequência abaixo reorganiza apenas os bloqueios da autenticação para evitar criar a Lambda sem contrato, banco ou rede definidos.
 
-| Ordem | Atividade | Responsável |
-| --- | --- | --- |
-| 1 | 📚 Escrever RFCs iniciais | Gabriel |
-| 2 | 🧱 Criar ADRs base | Gabriel |
-| 3 | 🌐 Extrair `oficina-mecanica-infra-vpc` | Geo |
-| 4 | ☸️ Extrair `oficina-mecanica-infra-kubernetes` | Gabriel |
-| 5 | 🗄️ Extrair `oficina-mecanica-infra-rds` | Gabriel |
-| 6 | 🪪 Ajustar modelo da API com `StatusCliente` | Geo |
-| 7 | ⚡ Criar `oficina-mecanica-auth-lambda` | Geo |
-| 8 | 🔒 Tornar o Load Balancer da API interno com NLB | Gabriel |
-| 9 | 🌐 Criar `oficina-mecanica-infra-api-gateway` | Gabriel |
-| 10 | 📈 Instrumentar Datadog na API, Lambda e Gateway | Geo |
+| Ordem | Atividade | Responsável | Dependência de saída |
+| --- | --- | --- | --- |
+| 1 | 📚 `DEC-001` e `DEC-002` estão consolidados: claims sem hash de documento, HTTP API payload format 2.0 e contrato HTTP de `POST /auth/documento`. | Gabriel + Geo | Contratos versionados, sem decisão implícita. |
+| 2 | 🪪 Implementar na API `StatusCliente`, schema, seed, alinhamento do JWT e rota do próprio cliente. | Geo | Estado autenticável e API capaz de aceitar o token aprovado. |
+| 3 | 🗄️ Preparar RDS: credenciais em Secrets Manager, referência não secreta conforme decisão e regra 1433 por security group sem criar dependência circular. | Gabriel | Lambda e API têm caminho seguro e definido para o banco; a regra é aplicada quando o security group da Lambda estiver disponível. |
+| 4 | ⚡ Criar `oficina-mecanica-auth-lambda` após os pré-requisitos. | Geo | Lambda valida documento (CPF ou CNPJ), status e emite o JWT aprovado; CPF compõe a demonstração obrigatória. |
+| 5 | 🧱 Criar Terraform e CI/CD da Lambda pelo padrão maduro de `ci.yml`, sem copiar divergências legadas do RDS. | Geo | Esteira validada, protegida e pronta para deploy. |
+| 6 | 🔒 Concluir a entrada privada da API (NLB/VPC Link) e criar `oficina-mecanica-infra-api-gateway`. | Gabriel | Gateway entrega `/auth/documento` e `/api/*` conforme os contratos fechados. |
+| 7 | 🧪 Executar validação ponta a ponta de CPF, JWT, rota `me`, rede privada e respostas de erro. | Gabriel + Geo | Evidência integrada para a entrega. |
+| 8 | 📈 Instrumentar Datadog na API, Lambda e Gateway. | Geo | Logs, métricas e traces correlacionados. |
 
 ### Fechamento da entrega
 
@@ -581,7 +592,7 @@ A Fase 3 estará pronta quando:
 - Todas as esteiras estiverem funcionando.
 - O ambiente subir na ordem documentada.
 - O ambiente destruir na ordem inversa sem recurso órfão.
-- A autenticação por CPF funcionar via Lambda.
+- A autenticação por documento funcionar via Lambda, com CPF validado e demonstrado como requisito obrigatório da Fase 3.
 - As rotas protegidas funcionarem apenas com JWT válido.
 - O API Gateway for a única entrada pública.
 - O Datadog mostrar métricas, logs, traces, dashboards e alertas.
@@ -595,10 +606,10 @@ A Fase 3 estará pronta quando:
 
 | Requisito da Fase 3 | Como o plano atende |
 | --- | --- |
-| Controlar acessos e autenticações com segurança | API Gateway como entrada pública única, JWT por CPF e API protegida com `[Authorize]`. |
+| Controlar acessos e autenticações com segurança | API Gateway como entrada pública única, JWT por documento e API protegida com `[Authorize]`; o fluxo CPF atende ao requisito obrigatório. |
 | API Gateway para controle e roteamento | `oficina-mecanica-infra-api-gateway` com rotas `/auth/*` e `/api/*`. |
-| Function Serverless para autenticação | `oficina-mecanica-auth-lambda` valida CPF, consulta cliente e emite JWT. |
-| Autenticação via CPF | Lambda consulta o cliente pelo CPF e verifica o status antes de gerar token. |
+| Function Serverless para autenticação | `oficina-mecanica-auth-lambda` valida documento, consulta cliente e emite JWT. |
+| Autenticação via CPF | `POST /auth/documento` valida CPF, consulta o cliente e verifica o status antes de gerar token; também aceita CNPJ para manter coerência com o domínio. |
 | Banco de dados gerenciado | `oficina-mecanica-infra-rds` mantém SQL Server no RDS. |
 | Cluster Kubernetes com escalabilidade | `oficina-mecanica-infra-kubernetes` mantém EKS, node group e HPA da aplicação. |
 | Terraform para provisionamento | Repositórios de infraestrutura usam Terraform por recurso. |
@@ -623,6 +634,6 @@ A Fase 3 estará pronta quando:
 
 Este plano fecha o acordo técnico:
 
-> **4 entregáveis obrigatórios, organizados em 6 esteiras claras, com AWS API Gateway como porta única, Lambda .NET para CPF, API privada no EKS via VPC Link, RDS gerenciado, Datadog nativo e CI/CD no mesmo estilo da Fase 2.**
+> **4 entregáveis obrigatórios, organizados em 6 esteiras claras, com AWS API Gateway como porta única, Lambda .NET de autenticação por documento — incluindo o fluxo obrigatório de CPF —, API privada no EKS via VPC Link, RDS gerenciado, Datadog nativo e CI/CD no mesmo estilo da Fase 2.**
 
 Sem firula. Sem arquitetura decorativa. Só o básico bem feito, com rastreabilidade, segurança e documentação forte.

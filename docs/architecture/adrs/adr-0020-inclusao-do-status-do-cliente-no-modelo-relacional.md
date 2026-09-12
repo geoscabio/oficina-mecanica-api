@@ -10,9 +10,9 @@
 
 ## 1. Contexto e Problema
 
-A Fase 3 introduz a autenticação de clientes por CPF. Durante o processo de autenticação, não basta verificar se o CPF informado corresponde a um cliente existente: também é necessário verificar se esse cliente está apto a utilizar as APIs da aplicação.
+A Fase 3 introduz a autenticação de clientes por CPF. No domínio existente, o mesmo fluxo de autenticação deve também atender clientes identificados por CNPJ; não basta verificar se o documento informado corresponde a um cliente existente: também é necessário verificar se esse cliente está apto a utilizar as APIs da aplicação.
 
-O requisito da Fase 3 determina que a Function Serverless seja responsável por validar o CPF e consultar a existência e o status do cliente na base de dados antes de gerar o JWT.
+O requisito da Fase 3 determina que a Function Serverless seja responsável por validar o CPF e consultar a existência e o status do cliente na base de dados antes de gerar o JWT. A extensão para CNPJ segue o mesmo fluxo por documento e não reduz a obrigatoriedade do cenário CPF.
 
 Na versão atual do modelo de dados, era necessário estabelecer uma forma explícita de representar a situação do cliente para que a Lambda pudesse diferenciar um cliente válido e ativo de um cliente existente, porém inativo.
 
@@ -30,12 +30,12 @@ Na versão atual do modelo de dados, era necessário estabelecer uma forma expl�
 
 Será adicionado um campo **`StatusCliente`** ao modelo de dados de cliente.
 
-Esse campo representará a situação atual do cliente e será utilizado pela `oficina-mecanica-auth-lambda` durante o processo de autenticação por CPF.
+Esse campo representará a situação atual do cliente e será utilizado pela `oficina-mecanica-auth-lambda` durante o processo de autenticação por documento.
 
 O fluxo de validação será:
 
 ```text
-CPF informado
+Documento informado (CPF ou CNPJ)
     ↓
 Cliente encontrado?
     ↓
@@ -55,11 +55,11 @@ A alteração será incorporada ao modelo relacional por meio de uma **migration
 
 Os dados de demonstração/seed também serão atualizados para contemplar clientes em diferentes situações, permitindo validar tanto o fluxo de autenticação bem-sucedido quanto o fluxo de cliente inativo.
 
-A definição da representação física do campo no banco — incluindo seu tipo e valores exatos — será tratada na implementação da alteração do modelo, mantendo esta ADR focada na decisão arquitetural de persistir o status do cliente.
+Na implementação, `StatusCliente` será um enum persistido como `int`: `Ativo = 1` e `Inativo = 2`. A coluna não aceitará nulo e terá default `1` (`Ativo`), de modo que registros existentes sejam preservados como ativos na migration, sem migração de dados adicional.
 
 ## 4. Justificativa
 
-A autenticação da Fase 3 exige que a aplicação consulte não apenas a existência do cliente, mas também seu status antes de emitir o token.
+A autenticação da Fase 3 exige que a aplicação consulte não apenas a existência do cliente pelo documento, mas também seu status antes de emitir o token.
 
 Persistir essa informação no próprio modelo de cliente fornece uma fonte única e consistente para essa decisão.
 
@@ -93,7 +93,7 @@ A decisão está alinhada ao plano da solução, que determina a inclusão do st
 
 ## 6. Referências
 
-- RFC-0001 — Autenticação de Clientes por CPF com Função Serverless.
+- RFC-0001 — Autenticação de Clientes por Documento com Função Serverless.
 - ADR-0019 — Autenticação das APIs por JWT Emitido pela Lambda.
 - ADR-0018 — Execução da Lambda de Autenticação dentro da VPC.
 - Tech Challenge FIAP — Fase 3.
