@@ -25,6 +25,7 @@ jobs:
       name: ${{ inputs.environment_name }}
     outputs:
       terraform_action: ${{ steps.resolve_terraform_action.outputs.terraform_action }}
+      deployment_required: ${{ steps.resolve_terraform_action.outputs.deployment_required }}
 
     steps:
       - name: "📥 01 · Baixar código do repositório"
@@ -68,8 +69,10 @@ jobs:
             fi
 
             if [ "$destroy_control_changed" != "true" ]; then
-              echo "::error::TERRAFORM_ACTION=destroy is present but terraform-action.env was not changed in this push. Change it back to apply or open a dedicated destroy PR."
-              exit 1
+              echo "::notice::TERRAFORM_ACTION=destroy is already versioned and terraform-action.env was not changed in this push. Keeping destroy configured, but skipping AWS changes for this run."
+              echo "terraform_action=$terraform_action" >> "$GITHUB_OUTPUT"
+              echo "deployment_required=false" >> "$GITHUB_OUTPUT"
+              exit 0
             fi
 
             echo "::warning::TERRAFORM_ACTION=destroy detected. This run will destroy AWS resources managed by Terraform."
@@ -82,10 +85,12 @@ jobs:
           fi
 
           echo "terraform_action=$terraform_action" >> "$GITHUB_OUTPUT"
+          echo "deployment_required=true" >> "$GITHUB_OUTPUT"
 
   prepare_and_plan:
     name: "📋 02 · Preparar variáveis e gerar plano do Terraform"
     needs: resolve_action
+    if: needs.resolve_action.outputs.deployment_required == 'true'
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment_name }}
@@ -261,7 +266,7 @@ jobs:
     needs:
       - resolve_action
       - prepare_and_plan
-    if: needs.resolve_action.outputs.terraform_action == 'apply'
+    if: needs.resolve_action.outputs.deployment_required == 'true' && needs.resolve_action.outputs.terraform_action == 'apply'
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment_name }}
@@ -326,7 +331,7 @@ jobs:
       - resolve_action
       - prepare_and_plan
       - build_and_push_image
-    if: always() && needs.resolve_action.result == 'success' && needs.prepare_and_plan.result == 'success' && (needs.resolve_action.outputs.terraform_action == 'destroy' || needs.build_and_push_image.result == 'success')
+    if: always() && needs.resolve_action.outputs.deployment_required == 'true' && needs.resolve_action.result == 'success' && needs.prepare_and_plan.result == 'success' && (needs.resolve_action.outputs.terraform_action == 'destroy' || needs.build_and_push_image.result == 'success')
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment_name }}
@@ -396,7 +401,7 @@ jobs:
     needs:
       - resolve_action
       - apply_or_destroy
-    if: needs.resolve_action.outputs.terraform_action == 'apply' && needs.apply_or_destroy.result == 'success'
+    if: needs.resolve_action.outputs.deployment_required == 'true' && needs.resolve_action.outputs.terraform_action == 'apply' && needs.apply_or_destroy.result == 'success'
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment_name }}

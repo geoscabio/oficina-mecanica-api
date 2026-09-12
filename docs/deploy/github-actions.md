@@ -158,9 +158,9 @@ TERRAFORM_ACTION=destroy
 
 Procedimento completo (branch, PR, acompanhamento da esteira, verificação): ver a seção "Encerramento obrigatório pela esteira" em [`deploy-aws.md`](deploy-aws.md).
 
-`TERRAFORM_ACTION=destroy` só é aceito quando o arquivo `terraform-action.env` foi alterado no próprio merge. Isso evita que pushes futuros destruam recursos sem intenção.
+`TERRAFORM_ACTION=destroy` executa o encerramento apenas quando o arquivo `terraform-action.env` foi alterado no próprio merge. Isso evita que pushes futuros destruam recursos sem intenção.
 
-Se o arquivo ficar em `TERRAFORM_ACTION=destroy` depois de um encerramento, mudanças deployable futuras serão bloqueadas de propósito. Para reabilitar deploy real, abrir um PR dedicado voltando `terraform-action.env` para `TERRAFORM_ACTION=apply`. Mudanças não deployable, como documentação ou ajustes de workflow, podem seguir até `release`/`main` sem aplicar AWS.
+Se o arquivo ficar em `TERRAFORM_ACTION=destroy` depois de um encerramento, pushes posteriores mantêm `destroy` configurado, mas pulam mudanças na AWS quando o arquivo de controle não tiver sido alterado. Para reabilitar deploy real, abrir um PR dedicado voltando `terraform-action.env` para `TERRAFORM_ACTION=apply`.
 
 ## 🧩 Repository variables
 
