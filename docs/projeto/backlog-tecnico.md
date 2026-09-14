@@ -29,11 +29,12 @@ Este backlog guarda melhorias técnicas, itens de código e evoluções operacio
 | `F3-003` | `P0` | Fase 3 | Banco | Usar banco gerenciado no RDS, com credenciais e rede compatíveis com os consumidores da Fase 3. | RDS provisionado por Terraform, credenciais em Secrets Manager, referência não secreta publicada somente após decisão e acesso da API/Lambda comprovado em ambiente de demonstração. | Em andamento |
 | `F3-004` | `P0` | Fase 3 | Kubernetes | Executar a API em Kubernetes com escalabilidade. | API publicada no EKS, healthcheck funcional e HPA evidenciado. | Em andamento |
 | `F3-005` | `P0` | Fase 3 | API Gateway | Expor a entrada pública via API Gateway, depois de fechar o contrato da Lambda e da integração. | Gateway usa o tipo de payload acordado, roteia `POST /auth/documento` para Lambda e `/api/*` para API no Kubernetes sem transformar silenciosamente request, response ou erros. | Bloqueado |
-| `F3-006` | `P0` | Fase 3 | Terraform | Separar infraestrutura em repositórios/esteiras por recurso. | Repositórios criados com README, Terraform, CI e instruções de apply/destroy; a regra de entrada 1433 do RDS é de responsabilidade de `oficina-mecanica-infra-rds`. | Em andamento |
+| `F3-006` | `P0` | Fase 3 | Terraform | Separar infraestrutura em repositórios/esteiras por recurso. | Repositórios criados com README, Terraform, CI e instruções de apply/destroy. O repositório RDS permanece dono do Security Group do RDS e pode manter a regra TCP/1433 necessária para o EKS, pois Kubernetes existe antes do RDS. A Auth Lambda possui Security Group próprio e cria, no seu repositório, a regra de ingress TCP/1433 no SG do RDS, usando o SG do RDS obtido via SSM e o SG da Lambda como origem, sem fazer o RDS depender da Lambda. | Em andamento |
 | `F3-007` | `P0` | Fase 3 | CI/CD | Manter branch protegida, PR obrigatório e quality gate. | Branches principais protegidas, PR, aprovação e CI exigidos antes do merge; a nova Lambda nasce usando o padrão maduro de CI/CD, sem herdar divergências históricas. | Em andamento |
 | `F3-008` | `P0` | Fase 3 | Observabilidade | Enviar logs, métricas e traces para Datadog. | Datadog mostra API, Lambda, Gateway e Kubernetes com tags padronizadas. | A fazer |
 | `F3-009` | `P0` | Fase 3 | Observabilidade | Criar dashboards e alertas pedidos no enunciado. | Evidências de latência, CPU/memória, healthcheck, uptime e falhas de ordem de serviço. | A fazer |
 | `F3-010` | `P0` | Fase 3 | Documentação | Consolidar diagramas, ADRs/RFCs, vídeo e PDF final. | Documentação explica requisitos, decisões, execução e evidências da entrega. | A fazer |
+| `F3-011` | `P0` | Fase 3 | Rede | Garantir entrada pública única pelo API Gateway e backend privado da API. | Fluxo final: Internet → API Gateway → VPC Link → Load Balancer interno compatível → API no EKS. `/auth/documento` integra com a Auth Lambda e `/api/*` encaminha à API no EKS, sem Load Balancer da API acessível diretamente pela Internet ou bypass do API Gateway; o healthcheck permanece funcional pelo caminho aprovado. A implementação deve configurar explicitamente scheme interno, tipo de Load Balancer compatível com VPC Link e contrato/identificador para o repositório API Gateway localizar a integração; o Service atual apenas `type = LoadBalancer` e não deve ser assumido como NLB. | A fazer |
 
 ## Setup inicial de novos repositórios
 
@@ -48,6 +49,7 @@ Este backlog guarda melhorias técnicas, itens de código e evoluções operacio
 | `SETUP-007` | `P1` | Antes da demo | Governança | Confirmar acesso do usuário `soat-architecture`. | Usuário aparece com acesso exigido em todos os repositórios da entrega. | A fazer |
 | `SETUP-008` | `P0` | Fase 3 | CI/CD | Padronizar os novos fluxos de CI/CD pelo padrão maduro atual. | VPC, Kubernetes, API e a nova Lambda usam `ci.yml` com os estágios compatíveis (`🧪 CI Development`, `🔎 CI Release`, `🛡️ CI Production`, `🚀 CD Development`, `☁️ AWS Deploy`, `🔀 CD Release` e `🏁 CD Production`); o check obrigatório no ruleset corresponde ao Quality gate. A divergência legada do RDS é tratada em `PIPE-001` a `PIPE-004`, sem bloquear a Lambda. | Em andamento |
 | `SETUP-009` | `P1` | Antes da demo | Documentação | Revisar acentuação e português dos textos das esteiras. | Workflows, READMEs e docs de todas as esteiras ficam legíveis em português, sem palavras sem acento por padronização manual ou mojibake. | A fazer |
+| `SETUP-010` | `P1` | Antes da demo | Higiene | Completar `.gitignore` do repositório RDS. | Arquivos Terraform gerados, crash logs, overrides e arquivos de IDE ficam alinhados, sem remover as proteções já existentes. | A fazer |
 
 ## Backlog de código e qualidade
 
@@ -62,6 +64,8 @@ Este backlog guarda melhorias técnicas, itens de código e evoluções operacio
 | `CODE-007` | `P2` | Pós-entrega | Banco | Avaliar lock distribuído para migrations concorrentes. | Estratégia definida, por exemplo com `sp_getapplock`, antes de escalar réplicas com migration automática. | Não priorizado agora |
 | `CODE-008` | `P2` | Pós-entrega | Qualidade | Adicionar análise de dependências e vulnerabilidades. | Pipeline publica resultado de auditoria de pacotes sem bloquear indevidamente a entrega acadêmica. | Não priorizado agora |
 | `CODE-009` | `P0` | Fase 3 | API | Criar a rota do próprio cliente para consultar suas ordens de serviço. | `GET /api/v1/clientes/me/ordens-servico` usa somente `cliente_id` validado do JWT, não aceita substituição por parâmetro de rota/query e possui testes de autorização para o papel `Cliente`. | Bloqueado |
+| `CODE-010` | `P1` | Antes da demo | Segredos locais | Substituir o segredo local versionado no manifesto Kubernetes. | `k8s/api-secret.yaml`, hoje com credencial local fixa versionada, é trocado por estratégia de exemplo/template sem segredo real ou local versionado, preservando a facilidade de execução local e as validações existentes. | A fazer |
+| `CODE-011` | `P2` | Pós-entrega | Qualidade | Tratar vulnerabilidade reportada no SSH.NET 2025.1.0. | Atualização da dependência é avaliada com impactos e regressões antes da correção. | A fazer |
 
 ## Decisões e contratos pendentes da autenticação
 
@@ -70,7 +74,7 @@ Este backlog guarda melhorias técnicas, itens de código e evoluções operacio
 | `DEC-001` | `P0` | Fase 3 | Contrato JWT | Resolver a divergência entre o `cpf_hash` do ADR-0019 e o contrato do RFC-0001. | ADR-0019 e RFC-0001 definem o mesmo claim set: `sub = cliente_id`, `cliente_id`, `role`, `jti`, `iss`, `aud` e expiração; CPF/CNPJ e hashes de documento ficam fora do JWT. | Concluído |
 | `DEC-002` | `P0` | Fase 3 | Contrato HTTP | Formalizar o contrato de `POST /auth/documento` e sua integração com o API Gateway. | HTTP API payload format 2.0 com `APIGatewayHttpApiV2ProxyRequest`; request por `documento`; `200` com token mínimo; `400` genérico para entrada inválida; `401` idêntico para inexistente/inativo; `503` genérico para RDS/Secrets Manager; sem exposição de documento ou infraestrutura. | Concluído |
 | `RDS-001` | `P0` | Fase 3 | Segredos | Definir e provisionar as credenciais do RDS em AWS Secrets Manager. | `oficina-mecanica-infra-rds` é o dono do segredo de banco; consumidores recebem somente a referência não secreta (ARN via SSM, se essa publicação for confirmada) e não há credencial em variável, estado ou output público. | A fazer |
-| `RDS-002` | `P0` | Fase 3 | Rede | Restringir o acesso SQL Server do RDS conforme ADR-0018. | A entrada TCP 1433 deixa de aceitar CIDRs privados amplos e permite somente os security groups da API no EKS e da Lambda; a responsabilidade Terraform da regra e a sequência sem dependência circular são documentadas. | A fazer |
+| `RDS-002` | `P0` | Fase 3 | Rede | Restringir o acesso SQL Server do RDS conforme ADR-0018. | O repositório RDS continua dono do Security Group do RDS e pode manter a regra TCP/1433 necessária para o EKS. A Auth Lambda, que depende do RDS já provisionado, possui SG próprio e cria no seu repositório a regra de ingress TCP/1433 no SG do RDS com `security_group_id` obtido via SSM e `referenced_security_group_id` igual ao SG da Lambda. No destroy da Lambda, a regra é removida antes do SG da Lambda. ADR-0018 permanece válido: RDS privado e acesso somente de componentes autorizados. | A fazer |
 
 ## Dependências P0 da autenticação
 
@@ -81,7 +85,7 @@ Este backlog guarda melhorias técnicas, itens de código e evoluções operacio
 | `CODE-001` | `oficina-mecanica-api` | definição física do status | `F3-001`, `CODE-003`, `CODE-009` |
 | `F3-002` | `oficina-mecanica-api` | contrato JWT consolidado em `DEC-001` | `CODE-003`, `CODE-009`, testes ponta a ponta |
 | `RDS-001` | `oficina-mecanica-infra-rds` | decisão de publicar ARN não secreto via SSM | `F3-001`, testes ponta a ponta |
-| `RDS-002` | `oficina-mecanica-infra-rds` | output do security group da Lambda e definição da regra Terraform | deploy funcional da Lambda |
+| `RDS-002` | `oficina-mecanica-infra-rds` (SG do RDS) e `oficina-mecanica-auth-lambda` (regra de integração) | SG do RDS publicado via SSM e SG próprio da Lambda | deploy funcional da Lambda |
 | `F3-001` | `oficina-mecanica-auth-lambda` | `CODE-001`, `RDS-001` | `RDS-002`, `F3-005`, testes ponta a ponta |
 | `CODE-009` | `oficina-mecanica-api` | `CODE-001`, `F3-002` | demonstração de autorização do cliente |
 | `F3-005` | `oficina-mecanica-infra-api-gateway` | `F3-001`, endpoint privado da API | testes ponta a ponta |
@@ -109,6 +113,9 @@ Os itens desta seção não bloqueiam a entrega atual da Fase 3.
 | `OPS-012` | `P2` | Pós-entrega | Solution | Migrar a solution `.sln` para `.slnx`. | Migração validada sem alterar o comportamento da aplicação. | Não priorizado agora |
 | `OPS-013` | `P1` | Assim que possível após o primeiro apply seguro | Infraestrutura da API | Concluir a limpeza transicional da API desacoplada: remover módulos legados VPC/EKS/RDS/ECR e `state-ownership.tf`, deixando somente namespace, configmap, secret, deployment, service, HPA, providers/data sources e pipeline. | Após o primeiro apply seguro, não há ruído nem ownership de infraestrutura compartilhada na pasta `infra/terraform` da API. | Concluído |
 | `OPS-014` | `P1` | Pós-entrega | Ambientes | Auditar hardcoded de ambiente e paths SSM em todas as esteiras. | Workflows reutilizáveis não apontam silenciosamente para development; a relação entre branch, GitHub Environment, pasta Terraform e paths SSM está parametrizada ou explicitamente documentada. | A fazer |
+| `OPS-015` | `P2` | Pós-entrega | Kubernetes | Restringir o endpoint administrativo do EKS. | Avaliar `cluster_endpoint_public_access_cidrs`, eliminar `0.0.0.0/0` e usar endpoint privado e/ou runner self-hosted dentro da VPC em produção. Não bloqueia a Fase 3. | A fazer |
+| `OPS-016` | `P2` | Pós-entrega | Rede | Evoluir a estratégia de egress privado. | Avaliar manter NAT Gateway único, usar NAT por AZ para alta disponibilidade ou substituir parte do tráfego por VPC Endpoints (ECR, S3, Secrets Manager, CloudWatch, STS e similares). O NAT atual permanece intencional na Fase 3: EKS e Lambda estão em subnets privadas e precisam de saída, inclusive para Secrets Manager e Datadog conforme ADR-0018. | A fazer |
+| `OPS-017` | `P3` | Pós-entrega | Rede | Reavaliar subnets públicas após remover o Load Balancer público da API. | Não remover subnets na Fase 3. Hoje o NAT usa `public[0]`; a segunda subnet pode ser útil em uma evolução para NAT por AZ e não há benefício suficiente para alterar a topologia imediatamente antes da entrega. | A fazer |
 
 ## Status atual da entrega
 
