@@ -16,3 +16,5 @@ O ECR permanece temporariamente em `oficina-mecanica-infra-kubernetes` para redu
 ## Consequências
 
 Há menor duplicidade, states separados, pipelines independentes e ownership explícito. A ordem operacional passa a ser VPC → Kubernetes/EKS/ECR → RDS → API → Auth Lambda → API Gateway. Helm não é introduzido nesta mudança; a possível centralização futura de manifests fica no backlog.
+
+Após o primeiro apply seguro da API desacoplada, os módulos legados, o workflow de import e o arquivo transicional de state foram removidos deste repositório. A API mantém apenas o workload Kubernetes e seus contratos de consumo.
