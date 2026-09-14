@@ -144,6 +144,14 @@ jobs:
       - name: "🏷️ 05 · Validar infraestrutura compartilhada e montar a tag da imagem"
         id: prepare_vars
         run: |
+          if [ "$TERRAFORM_ACTION" = "destroy" ]; then
+            echo "AWS_ACCOUNT_ID=destroy-only-placeholder" >> "$GITHUB_ENV"
+            echo "ECR_IMAGE_URI=destroy-only-placeholder" >> "$GITHUB_ENV"
+            echo "account_id=destroy-only-placeholder" >> "$GITHUB_OUTPUT"
+            echo "ecr_image_uri=destroy-only-placeholder" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           test "$(aws ssm get-parameter --name "$SSM_KUBERNETES_STATUS_PARAMETER" --query 'Parameter.Value' --output text)" = "ready"
           test "$(aws ssm get-parameter --name "$SSM_RDS_STATUS_PARAMETER" --query 'Parameter.Value' --output text)" = "ready"
           ecr_repository_name="$(aws ssm get-parameter --name "$SSM_KUBERNETES_PREFIX/ecr_repository_name" --query 'Parameter.Value' --output text)"
@@ -176,7 +184,17 @@ jobs:
           python - <<'PY'
           import json
           import os
+          import subprocess
           from pathlib import Path
+
+          def aws_output(*args):
+              result = subprocess.run(
+                  ["aws", *args],
+                  check=True,
+                  capture_output=True,
+                  text=True,
+              )
+              return result.stdout.strip()
 
           terraform_action = os.environ["TERRAFORM_ACTION"]
 
@@ -185,12 +203,22 @@ jobs:
               jwt_secret = "destroy-only-placeholder"
               webhook_token = "destroy-only-placeholder"
           else:
-              endpoint = os.popen("aws ssm get-parameter --name /oficina-mecanica/development/rds/endpoint --query Parameter.Value --output text").read().strip()
-              secret_arn = os.popen("aws ssm get-parameter --name /oficina-mecanica/development/rds/master_secret_arn --query Parameter.Value --output text").read().strip()
-              secret = json.loads(os.popen(f"aws secretsmanager get-secret-value --secret-id {secret_arn} --query SecretString --output text").read())
-              db_connection_string = f"Server=tcp:{endpoint},1433;Database=OficinaMecanicaDb;User Id={secret['username']};Password={secret['password']};TrustServerCertificate=True;"
-              print(f"::add-mask::{secret['username']}")
-              print(f"::add-mask::{secret['password']}")
+              endpoint = aws_output("ssm", "get-parameter", "--name", "/oficina-mecanica/development/rds/endpoint", "--query", "Parameter.Value", "--output", "text")
+              secret_arn = aws_output("ssm", "get-parameter", "--name", "/oficina-mecanica/development/rds/master_secret_arn", "--query", "Parameter.Value", "--output", "text")
+              if not endpoint or not secret_arn:
+                  raise ValueError("RDS endpoint ou ARN do segredo não foi publicado.")
+              secret_string = aws_output("secretsmanager", "get-secret-value", "--secret-id", secret_arn, "--query", "SecretString", "--output", "text")
+              try:
+                  secret = json.loads(secret_string)
+              except json.JSONDecodeError as error:
+                  raise ValueError("SecretString do RDS não contém JSON válido.") from error
+              username = secret.get("username")
+              password = secret.get("password")
+              if not username or not password:
+                  raise ValueError("SecretString do RDS não contém username e password.")
+              db_connection_string = f"Server=tcp:{endpoint},1433;Database=OficinaMecanicaDb;User Id={username};Password={password};TrustServerCertificate=True;"
+              print(f"::add-mask::{username}")
+              print(f"::add-mask::{password}")
               print(f"::add-mask::{db_connection_string}")
               jwt_secret = os.environ["JWT_SECRET"]
               webhook_token = os.environ["WEBHOOK_TOKEN"]
@@ -236,7 +264,7 @@ jobs:
         if: always()
         run: rm -f "$TF_WORKING_DIRECTORY/zz_ci.auto.tfvars.json"
 
-      - name: "⬆️ 14 · Publicar plano do Terraform como artefato"
+      - name: "⬆️ 15 · Publicar plano do Terraform como artefato"
         uses: actions/upload-artifact@v7
         with:
           name: tfplan-${{ github.run_id }}
