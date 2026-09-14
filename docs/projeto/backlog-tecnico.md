@@ -97,6 +97,27 @@ Este backlog guarda melhorias técnicas, itens de código e evoluções operacio
 
 ## Backlog operacional pós-entrega
 
+### Itens não bloqueantes para a Fase 3
+
+Os itens desta seção não bloqueiam a entrega atual da Fase 3.
+
+| ID | Prioridade | Horizonte | Área | Item | Critério de aceite | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `OPS-009` | `P2` | Pós-entrega | Registry | Avaliar mover o ownership do ECR da API de `oficina-mecanica-infra-kubernetes` para `oficina-mecanica-api`, aproximando o registry do ciclo de vida da aplicação. | Decisão registrada e migração planejada sem interromper a entrega atual. | Não priorizado agora |
+| `OPS-010` | `P2` | Pós-entrega | Kubernetes | Avaliar Helm ou manifests centralizados em `oficina-mecanica-infra-kubernetes` após a entrega. | Estratégia de workloads definida sem duplicação e com migração segura. | Não priorizado agora |
+| `OPS-011` | `P2` | Pós-entrega | Segredos | Revisar uso de Secrets Manager e SSM SecureString para reduzir a exposição de secrets no state Terraform. | Referências e segredos são separados conforme a decisão registrada. | Não priorizado agora |
+| `OPS-012` | `P2` | Pós-entrega | Solution | Migrar a solution `.sln` para `.slnx`. | Migração validada sem alterar o comportamento da aplicação. | Não priorizado agora |
+
+## Status atual da entrega
+
+- VPC development aplicada e ready.
+- Kubernetes/EKS development aplicado e ready.
+- RDS development aplicado e ready.
+- A API será ajustada para consumir a infraestrutura compartilhada.
+- Auth Lambda possui PR de CD aberto, aguardando ordem segura.
+- API Gateway será tratado separadamente.
+- Datadog e observabilidade serão tratados posteriormente.
+
 | ID | Prioridade | Horizonte | Área | Item | Critério de aceite | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | `OPS-001` | `P2` | Pós-entrega | Hotfix | Definir fluxo `hotfix/*` a partir de `main`. | Hotfix entra por PR para `main`, passa por CI/aprovação e depois é sincronizado para `develop` e `release`. | Não priorizado agora |

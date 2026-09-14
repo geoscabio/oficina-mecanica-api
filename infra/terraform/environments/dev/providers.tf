@@ -11,18 +11,18 @@ provider "aws" {
 }
 
 data "aws_eks_cluster" "this" {
-  name = module.eks.cluster_name
+  name = data.aws_ssm_parameter.kubernetes_cluster_name.value
 
   depends_on = [
-    module.eks
+    terraform_data.kubernetes_ready
   ]
 }
 
 data "aws_eks_cluster_auth" "this" {
-  name = module.eks.cluster_name
+  name = data.aws_ssm_parameter.kubernetes_cluster_name.value
 
   depends_on = [
-    module.eks
+    terraform_data.kubernetes_ready
   ]
 }
 
