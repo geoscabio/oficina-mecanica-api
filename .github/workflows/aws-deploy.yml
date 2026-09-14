@@ -276,18 +276,18 @@ jobs:
           python - <<'PY'
           import json
           plan = json.load(open("tfplan.json", encoding="utf-8"))
-          blocked_types = {"aws_vpc", "aws_subnet", "aws_nat_gateway", "aws_internet_gateway", "aws_route_table", "aws_route", "aws_route_table_association", "aws_eks_cluster", "aws_eks_node_group", "aws_db_instance", "aws_db_subnet_group", "aws_ecr_repository"}
+          blocked_types = {"aws_vpc", "aws_subnet", "aws_nat_gateway", "aws_internet_gateway", "aws_route_table", "aws_route", "aws_route_table_association", "aws_eks_cluster", "aws_eks_node_group", "aws_db_instance", "aws_db_subnet_group", "aws_ecr_repository", "aws_security_group", "aws_security_group_rule", "aws_vpc_security_group_ingress_rule", "aws_vpc_security_group_egress_rule", "aws_lb", "aws_lb_listener", "aws_lb_target_group"}
           blocked_modules = ("module.vpc", "module.eks", "module.rds", "module.ecr")
           violations = [change["address"] for change in plan.get("resource_changes", []) if change.get("mode") == "managed" and (change.get("type") in blocked_types or change.get("address", "").startswith(blocked_modules)) and set(change.get("change", {}).get("actions", [])) & {"create", "update", "delete", "replace"}]
           if violations:
               raise SystemExit("Infraestrutura compartilhada proibida no plano: " + ", ".join(violations))
           PY
 
-      - name: "🧹 14 · Remover arquivo temporário com secrets"
+      - name: "🧹 15 · Remover arquivo temporário com secrets"
         if: always()
         run: rm -f "$TF_WORKING_DIRECTORY/zz_ci.auto.tfvars.json"
 
-      - name: "⬆️ 15 · Publicar plano do Terraform como artefato"
+      - name: "⬆️ 16 · Publicar plano do Terraform como artefato"
         uses: actions/upload-artifact@v7
         with:
           name: tfplan-${{ github.run_id }}
