@@ -11,6 +11,10 @@ resource "kubernetes_secret_v1" "oficina_mecanica_api" {
   data = {
     Jwt__Secret                          = var.jwt_secret
     Integracoes__Orcamento__WebhookToken = var.webhook_token
-    ConnectionStrings__DefaultConnection = local.api_rds_connection_string
+    ConnectionStrings__DefaultConnection = var.db_connection_string
   }
+
+  depends_on = [
+    terraform_data.rds_ready
+  ]
 }
