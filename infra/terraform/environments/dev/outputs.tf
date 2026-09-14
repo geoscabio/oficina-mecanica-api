@@ -1,11 +1,11 @@
 output "ecr_repository_url" {
   description = "URL do repositorio ECR da API."
-  value       = data.aws_ssm_parameter.kubernetes_ecr_repository_url.value
+  value       = nonsensitive(data.aws_ssm_parameter.kubernetes_ecr_repository_url.value)
 }
 
 output "eks_cluster_name" {
   description = "Nome do cluster EKS."
-  value       = data.aws_ssm_parameter.kubernetes_cluster_name.value
+  value       = nonsensitive(data.aws_ssm_parameter.kubernetes_cluster_name.value)
 }
 
 output "api_service_hostname" {
