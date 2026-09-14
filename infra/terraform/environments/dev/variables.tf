@@ -3,6 +3,12 @@ variable "aws_region" {
   type        = string
 }
 
+variable "ssm_environment_name" {
+  description = "Nome do ambiente usado nos paths do SSM."
+  type        = string
+  default     = "development"
+}
+
 variable "db_connection_string" {
   description = "Connection string SQL Server da API montada pela esteira a partir do RDS compartilhado."
   type        = string

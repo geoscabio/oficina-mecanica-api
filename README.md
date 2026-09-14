@@ -545,6 +545,8 @@ As seis esteiras são: API, Auth Lambda, infra-vpc, infra-kubernetes, infra-rds 
 
 Helm não foi introduzido nesta mudança para reduzir risco. A evolução para Helm/manifests centralizados e a possível migração futura do ECR para a API estão registradas no backlog técnico.
 
+Os módulos legados de VPC, EKS, RDS e ECR, o workflow de import e o arquivo transicional de state foram removidos após o primeiro apply seguro. Dockerfile e Docker Compose local permanecem independentes da infraestrutura AWS compartilhada.
+
 - Não versionar credenciais, tokens, kubeconfig, secrets ou outputs sensíveis.
 - Ambientes AWS temporários devem ser destruídos após a demonstração.
 - O deploy para `main` deve usar branch protection e aprovação obrigatória de PR.

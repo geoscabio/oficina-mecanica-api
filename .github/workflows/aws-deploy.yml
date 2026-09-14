@@ -8,17 +8,26 @@ on:
         description: "GitHub Environment used by this deploy."
         required: true
         type: string
+      terraform_environment_directory:
+        description: "Diretório do ambiente Terraform."
+        required: true
+        type: string
+      ssm_environment_name:
+        description: "Nome do ambiente nos paths SSM."
+        required: true
+        type: string
     outputs:
       terraform_action:
         description: "Resolved Terraform action: apply or destroy."
         value: ${{ jobs.resolve_action.outputs.terraform_action }}
 
 env:
-  TF_WORKING_DIRECTORY: infra/terraform/environments/dev
-  SSM_KUBERNETES_STATUS_PARAMETER: /oficina-mecanica/development/status/kubernetes
-  SSM_KUBERNETES_PREFIX: /oficina-mecanica/development/kubernetes
-  SSM_RDS_STATUS_PARAMETER: /oficina-mecanica/development/status/rds
-  SSM_RDS_PREFIX: /oficina-mecanica/development/rds
+  TF_WORKING_DIRECTORY: infra/terraform/environments/${{ inputs.terraform_environment_directory }}
+  SSM_ENVIRONMENT_NAME: ${{ inputs.ssm_environment_name }}
+  SSM_KUBERNETES_STATUS_PARAMETER: /oficina-mecanica/${{ inputs.ssm_environment_name }}/status/kubernetes
+  SSM_KUBERNETES_PREFIX: /oficina-mecanica/${{ inputs.ssm_environment_name }}/kubernetes
+  SSM_RDS_STATUS_PARAMETER: /oficina-mecanica/${{ inputs.ssm_environment_name }}/status/rds
+  SSM_RDS_PREFIX: /oficina-mecanica/${{ inputs.ssm_environment_name }}/rds
   TERRAFORM_VERSION: "1.15.8"
 
 jobs:
@@ -203,8 +212,8 @@ jobs:
               jwt_secret = "destroy-only-placeholder"
               webhook_token = "destroy-only-placeholder"
           else:
-              endpoint = aws_output("ssm", "get-parameter", "--name", "/oficina-mecanica/development/rds/endpoint", "--query", "Parameter.Value", "--output", "text")
-              secret_arn = aws_output("ssm", "get-parameter", "--name", "/oficina-mecanica/development/rds/master_secret_arn", "--query", "Parameter.Value", "--output", "text")
+              endpoint = aws_output("ssm", "get-parameter", "--name", f"{os.environ['SSM_RDS_PREFIX']}/endpoint", "--query", "Parameter.Value", "--output", "text")
+              secret_arn = aws_output("ssm", "get-parameter", "--name", f"{os.environ['SSM_RDS_PREFIX']}/master_secret_arn", "--query", "Parameter.Value", "--output", "text")
               if not endpoint or not secret_arn:
                   raise ValueError("RDS endpoint ou ARN do segredo não foi publicado.")
               secret_string = aws_output("secretsmanager", "get-secret-value", "--secret-id", secret_arn, "--query", "SecretString", "--output", "text")
@@ -225,6 +234,7 @@ jobs:
 
           values = {
               "aws_region": os.environ["AWS_REGION"],
+              "ssm_environment_name": os.environ["SSM_ENVIRONMENT_NAME"],
               "db_connection_string": db_connection_string,
               "api_deploy_enabled": True,
               "api_image_uri": os.environ["ECR_IMAGE_URI"],
@@ -260,11 +270,24 @@ jobs:
         if: env.TERRAFORM_ACTION == 'destroy'
         run: terraform -chdir="$TF_WORKING_DIRECTORY" plan -destroy -input=false -out=tfplan
 
-      - name: "🧹 14 · Remover arquivo temporário com secrets"
+      - name: "🛡️ 14 · Bloquear infraestrutura compartilhada no plano"
+        run: |
+          terraform -chdir="$TF_WORKING_DIRECTORY" show -json tfplan > tfplan.json
+          python - <<'PY'
+          import json
+          plan = json.load(open("tfplan.json", encoding="utf-8"))
+          blocked_types = {"aws_vpc", "aws_subnet", "aws_nat_gateway", "aws_internet_gateway", "aws_route_table", "aws_route", "aws_route_table_association", "aws_eks_cluster", "aws_eks_node_group", "aws_db_instance", "aws_db_subnet_group", "aws_ecr_repository", "aws_security_group", "aws_security_group_rule", "aws_vpc_security_group_ingress_rule", "aws_vpc_security_group_egress_rule", "aws_lb", "aws_lb_listener", "aws_lb_target_group"}
+          blocked_modules = ("module.vpc", "module.eks", "module.rds", "module.ecr")
+          violations = [change["address"] for change in plan.get("resource_changes", []) if change.get("mode") == "managed" and (change.get("type") in blocked_types or change.get("address", "").startswith(blocked_modules)) and set(change.get("change", {}).get("actions", [])) & {"create", "update", "delete", "replace"}]
+          if violations:
+              raise SystemExit("Infraestrutura compartilhada proibida no plano: " + ", ".join(violations))
+          PY
+
+      - name: "🧹 15 · Remover arquivo temporário com secrets"
         if: always()
         run: rm -f "$TF_WORKING_DIRECTORY/zz_ci.auto.tfvars.json"
 
-      - name: "⬆️ 15 · Publicar plano do Terraform como artefato"
+      - name: "⬆️ 16 · Publicar plano do Terraform como artefato"
         uses: actions/upload-artifact@v7
         with:
           name: tfplan-${{ github.run_id }}

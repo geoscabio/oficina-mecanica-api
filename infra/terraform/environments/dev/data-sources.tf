@@ -1,29 +1,29 @@
 data "aws_ssm_parameter" "kubernetes_status" {
-  name = "/oficina-mecanica/development/status/kubernetes"
+  name = "${local.ssm_base_path}/status/kubernetes"
 }
 
 data "aws_ssm_parameter" "kubernetes_cluster_name" {
-  name = "/oficina-mecanica/development/kubernetes/cluster_name"
+  name = "${local.ssm_base_path}/kubernetes/cluster_name"
 }
 
 data "aws_ssm_parameter" "kubernetes_ecr_repository_name" {
-  name = "/oficina-mecanica/development/kubernetes/ecr_repository_name"
+  name = "${local.ssm_base_path}/kubernetes/ecr_repository_name"
 }
 
 data "aws_ssm_parameter" "kubernetes_ecr_repository_url" {
-  name = "/oficina-mecanica/development/kubernetes/ecr_repository_url"
+  name = "${local.ssm_base_path}/kubernetes/ecr_repository_url"
 }
 
 data "aws_ssm_parameter" "rds_status" {
-  name = "/oficina-mecanica/development/status/rds"
+  name = "${local.ssm_base_path}/status/rds"
 }
 
 data "aws_ssm_parameter" "rds_endpoint" {
-  name = "/oficina-mecanica/development/rds/endpoint"
+  name = "${local.ssm_base_path}/rds/endpoint"
 }
 
 data "aws_ssm_parameter" "rds_master_secret_arn" {
-  name = "/oficina-mecanica/development/rds/master_secret_arn"
+  name = "${local.ssm_base_path}/rds/master_secret_arn"
 }
 
 resource "terraform_data" "kubernetes_ready" {
