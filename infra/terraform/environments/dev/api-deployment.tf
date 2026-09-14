@@ -120,8 +120,6 @@ resource "kubernetes_deployment_v1" "oficina_mecanica_api" {
   }
 
   depends_on = [
-    module.rds,
-    module.ecr,
     kubernetes_config_map_v1.oficina_mecanica_api,
     kubernetes_secret_v1.oficina_mecanica_api
   ]

@@ -31,10 +31,7 @@ Este é o índice mestre da documentação do projeto. Use este arquivo para nav
 | --- | --- | --- |
 | Docker local | [`../README.md#execucao-local-docker-compose`](../README.md#execucao-local-docker-compose) | Comandos do Docker Compose local. |
 | Kubernetes | [`../k8s/README.md`](../k8s/README.md) | Manifests Kubernetes (local e base para EKS). |
-| Terraform EKS | [`../infra/terraform/modules/eks/README.md`](../infra/terraform/modules/eks/README.md) | Módulo do cluster EKS e node group. |
-| Terraform RDS | [`../infra/terraform/modules/rds/README.md`](../infra/terraform/modules/rds/README.md) | Módulo RDS SQL Server e security group. |
-| Terraform VPC | [`../infra/terraform/modules/vpc/README.md`](../infra/terraform/modules/vpc/README.md) | Módulo VPC, subnets, rotas e NAT Gateway. |
-| Terraform ECR | [`../infra/terraform/modules/ecr/README.md`](../infra/terraform/modules/ecr/README.md) | Módulo ECR usado pela imagem Docker da API. |
+| Terraform da API | [`../infra/terraform/environments/dev/`](../infra/terraform/environments/dev/) | Workload Kubernetes que consome a infraestrutura compartilhada por SSM e Secrets Manager. |
 
 ## Regras
 

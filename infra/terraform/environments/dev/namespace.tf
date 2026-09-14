@@ -6,6 +6,6 @@ resource "kubernetes_namespace_v1" "oficina_mecanica" {
   }
 
   depends_on = [
-    module.eks
+    terraform_data.kubernetes_ready
   ]
 }

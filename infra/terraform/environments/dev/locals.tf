@@ -1,4 +1,5 @@
 locals {
+  ssm_base_path = "/oficina-mecanica/${var.ssm_environment_name}"
   common_tags = {
     Project     = "OficinaMecanica"
     Environment = "Development"
@@ -9,5 +10,4 @@ locals {
     app = "oficina-mecanica-api"
   }
 
-  api_rds_connection_string = "Server=tcp:${module.rds.db_instance_address},1433;Database=OficinaMecanicaDb;User Id=adminoficinamecanica;Password=${var.db_password};TrustServerCertificate=True;"
 }

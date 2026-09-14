@@ -19,6 +19,7 @@ Registro das decisões arquiteturais do projeto, no padrão definido pela equipe
 | [ADR-0011](adr-0011-controle-apply-destroy-arquivo-versionado.md) | Controle de apply/destroy via arquivo versionado | 11/07/2026 | ✅ Aceito |
 | [ADR-0012](adr-0012-terraform-state-local-cache-github-actions.md) | Terraform state em backend local com cache do GitHub Actions | 11/07/2026 | ✅ Aceito |
 | [ADR-0013](adr-0013-autoscaling-hpa-runtime-dotnet.md) | Autoscaling horizontal via HPA e ajuste de runtime .NET | 12/07/2026 | ✅ Aceito |
+| [ADR-0023](adr-0023-separacao-ownership-infraestrutura-compartilhada-deploy-api.md) | Separação de ownership da infraestrutura compartilhada e deploy da API | 13/09/2026 | ✅ Aceito |
 
 ## Origem
 
