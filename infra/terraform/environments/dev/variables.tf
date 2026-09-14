@@ -3,20 +3,16 @@ variable "aws_region" {
   type        = string
 }
 
-variable "db_password" {
-  description = "Senha do usuário administrador do banco RDS."
+variable "ssm_environment_name" {
+  description = "Nome do ambiente usado nos paths do SSM."
+  type        = string
+  default     = "development"
+}
+
+variable "db_connection_string" {
+  description = "Connection string SQL Server da API montada pela esteira a partir do RDS compartilhado."
   type        = string
   sensitive   = true
-}
-
-variable "eks_cluster_role_name" {
-  description = "Nome da IAM Role existente que sera usada pelo cluster EKS no AWS Academy."
-  type        = string
-}
-
-variable "eks_node_role_name" {
-  description = "Nome da IAM Role existente que sera usada pelo Managed Node Group no AWS Academy."
-  type        = string
 }
 
 variable "api_deploy_enabled" {

@@ -535,6 +535,18 @@ Itens manuais restantes:
 
 ## 📝 Observações
 
+## 🏗️ Responsabilidade de infraestrutura da API
+
+Este repositório mantém a aplicação principal .NET, Dockerfile, CI, build e publicação da imagem Docker, deploy no Kubernetes e os recursos Kubernetes específicos da aplicação enquanto a estratégia atual usa Terraform neste repositório.
+
+VPC, subnets, NAT/Internet Gateway, rotas, EKS, RDS e o ECR compartilhado não são criados aqui. A API depende de `oficina-mecanica-infra-vpc`, `oficina-mecanica-infra-kubernetes` (EKS/ECR via SSM) e `oficina-mecanica-infra-rds` (endpoint e ARN do segredo via SSM). Auth Lambda e API Gateway são componentes separados.
+
+As seis esteiras são: API, Auth Lambda, infra-vpc, infra-kubernetes, infra-rds e infra-api-gateway. Os quatro repositórios obrigatórios da Fase 3 são o mínimo; a separação adicional por responsabilidade é aceita quando ownership e dependências estão documentados.
+
+Helm não foi introduzido nesta mudança para reduzir risco. A evolução para Helm/manifests centralizados e a possível migração futura do ECR para a API estão registradas no backlog técnico.
+
+Os módulos legados de VPC, EKS, RDS e ECR, o workflow de import e o arquivo transicional de state foram removidos após o primeiro apply seguro. Dockerfile e Docker Compose local permanecem independentes da infraestrutura AWS compartilhada.
+
 - Não versionar credenciais, tokens, kubeconfig, secrets ou outputs sensíveis.
 - Ambientes AWS temporários devem ser destruídos após a demonstração.
 - O deploy para `main` deve usar branch protection e aprovação obrigatória de PR.
