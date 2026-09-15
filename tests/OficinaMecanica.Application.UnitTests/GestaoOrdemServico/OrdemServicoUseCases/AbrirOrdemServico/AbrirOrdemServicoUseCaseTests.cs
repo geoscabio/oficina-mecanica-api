@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AbrirOrdemServico;
@@ -417,6 +418,7 @@ public class AbrirOrdemServicoUseCaseTests
             repositorios,
             (unitOfWork ?? CriarUnitOfWork()).Object,
             new AbrirOrdemServicoValidator(),
-            MapperFactory.Criar());
+            MapperFactory.Criar(),
+            NullLogger<AbrirOrdemServicoUseCase>.Instance);
     }
 }

@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
@@ -16,14 +17,16 @@ public sealed class FinalizarOrdemServicoUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<FinalizarOrdemServicoRequest> _validator;
     private readonly IMapper _mapper;
+    private readonly ILogger<FinalizarOrdemServicoUseCase> _logger;
 
-    public FinalizarOrdemServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IEstoqueRepository estoqueRepository, IUnitOfWork unitOfWork, IValidator<FinalizarOrdemServicoRequest> validator, IMapper mapper)
+    public FinalizarOrdemServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IEstoqueRepository estoqueRepository, IUnitOfWork unitOfWork, IValidator<FinalizarOrdemServicoRequest> validator, IMapper mapper, ILogger<FinalizarOrdemServicoUseCase> logger)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _estoqueRepository = estoqueRepository;
         _unitOfWork = unitOfWork;
         _validator = validator;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<Result<OrdemServicoResponse>> ExecuteAsync(FinalizarOrdemServicoRequest request, CancellationToken cancellationToken = default)
@@ -49,6 +52,13 @@ public sealed class FinalizarOrdemServicoUseCase
 
         if (possuiPecasInsumos && estoque is null)
         {
+            _logger.LogWarning(
+                "Falha ao finalizar a ordem de servico {OrdemServicoId}: {failure_reason}. {operation} {bounded_context}",
+                ordemServico.Id,
+                EstoqueErrorMessages.EstoqueNaoEncontrado,
+                "FinalizarOrdemServico",
+                "GestaoOrdemServico");
+
             return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
@@ -74,7 +84,13 @@ public sealed class FinalizarOrdemServicoUseCase
                 cancellationToken);
         }
 
+        _logger.LogInformation(
+            "Ordem de servico {OrdemServicoId} finalizada com status {OrdemServicoStatus}. {operation} {bounded_context}",
+            ordemServico.Id,
+            ordemServico.Status,
+            "FinalizarOrdemServico",
+            "GestaoOrdemServico");
+
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }
-

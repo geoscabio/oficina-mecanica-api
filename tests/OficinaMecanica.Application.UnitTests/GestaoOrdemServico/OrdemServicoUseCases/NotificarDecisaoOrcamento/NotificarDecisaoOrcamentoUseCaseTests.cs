@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.NotificarDecisaoOrcamento;
@@ -196,6 +197,6 @@ public class NotificarDecisaoOrcamentoUseCaseTests
     {
         unitOfWork ??= CriarUnitOfWork();
 
-        return new NotificarDecisaoOrcamentoUseCase(ordemServicoRepository.Object, estoqueRepository.Object, unitOfWork.Object, new NotificarDecisaoOrcamentoValidator(), MapperFactory.Criar());
+        return new NotificarDecisaoOrcamentoUseCase(ordemServicoRepository.Object, estoqueRepository.Object, unitOfWork.Object, new NotificarDecisaoOrcamentoValidator(), MapperFactory.Criar(), NullLogger<NotificarDecisaoOrcamentoUseCase>.Instance);
     }
 }

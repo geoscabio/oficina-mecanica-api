@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
@@ -18,14 +19,16 @@ public sealed class NotificarDecisaoOrcamentoUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<NotificarDecisaoOrcamentoRequest> _validator;
     private readonly IMapper _mapper;
+    private readonly ILogger<NotificarDecisaoOrcamentoUseCase> _logger;
 
-    public NotificarDecisaoOrcamentoUseCase(IOrdemServicoRepository ordemServicoRepository, IEstoqueRepository estoqueRepository, IUnitOfWork unitOfWork, IValidator<NotificarDecisaoOrcamentoRequest> validator, IMapper mapper)
+    public NotificarDecisaoOrcamentoUseCase(IOrdemServicoRepository ordemServicoRepository, IEstoqueRepository estoqueRepository, IUnitOfWork unitOfWork, IValidator<NotificarDecisaoOrcamentoRequest> validator, IMapper mapper, ILogger<NotificarDecisaoOrcamentoUseCase> logger)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _estoqueRepository = estoqueRepository;
         _unitOfWork = unitOfWork;
         _validator = validator;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<Result<OrdemServicoResponse>> ExecuteAsync(NotificarDecisaoOrcamentoRequest request, CancellationToken cancellationToken = default)
@@ -55,6 +58,13 @@ public sealed class NotificarDecisaoOrcamentoUseCase
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
 
+        _logger.LogInformation(
+            "Orcamento aprovado para a ordem de servico {OrdemServicoId}, com status {OrdemServicoStatus}. {operation} {bounded_context}",
+            ordemServico.Id,
+            ordemServico.Status,
+            "AprovarOrcamento",
+            "GestaoOrdemServico");
+
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 
@@ -67,6 +77,13 @@ public sealed class NotificarDecisaoOrcamentoUseCase
 
         if (deveEstornarEstoque && estoque is null)
         {
+            _logger.LogWarning(
+                "Falha ao processar a recusa do orcamento da ordem de servico {OrdemServicoId}: {failure_reason}. {operation} {bounded_context}",
+                ordemServico.Id,
+                EstoqueErrorMessages.EstoqueNaoEncontrado,
+                "RecusarOrcamento",
+                "GestaoOrdemServico");
+
             return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
@@ -94,6 +111,13 @@ public sealed class NotificarDecisaoOrcamentoUseCase
                 },
                 cancellationToken);
         }
+
+        _logger.LogInformation(
+            "Orcamento recusado para a ordem de servico {OrdemServicoId}, com status {OrdemServicoStatus}. {operation} {bounded_context}",
+            ordemServico.Id,
+            ordemServico.Status,
+            "RecusarOrcamento",
+            "GestaoOrdemServico");
 
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }

@@ -2,6 +2,7 @@ using System.Text.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using OficinaMecanica.API.Middlewares;
 using OficinaMecanica.API.Responses;
 using OficinaMecanica.Application.Common;
@@ -17,7 +18,7 @@ public sealed class GlobalExceptionMiddlewareTests
         // Arrange
         const string mensagem = "Regra de dominio invalida.";
         var context = CriarHttpContext();
-        var middleware = new GlobalExceptionMiddleware(_ => throw new DomainException(mensagem));
+        var middleware = new GlobalExceptionMiddleware(_ => throw new DomainException(mensagem), NullLogger<GlobalExceptionMiddleware>.Instance);
 
         // Act
         await middleware.InvokeAsync(context);
@@ -35,7 +36,7 @@ public sealed class GlobalExceptionMiddlewareTests
     {
         // Arrange
         var context = CriarHttpContext();
-        var middleware = new GlobalExceptionMiddleware(_ => throw new DbUpdateConcurrencyException("Conflito de concorrencia."));
+        var middleware = new GlobalExceptionMiddleware(_ => throw new DbUpdateConcurrencyException("Conflito de concorrencia."), NullLogger<GlobalExceptionMiddleware>.Instance);
 
         // Act
         await middleware.InvokeAsync(context);
@@ -53,7 +54,7 @@ public sealed class GlobalExceptionMiddlewareTests
     {
         // Arrange
         var context = CriarHttpContext();
-        var middleware = new GlobalExceptionMiddleware(_ => throw new InvalidOperationException("Falha externa."));
+        var middleware = new GlobalExceptionMiddleware(_ => throw new InvalidOperationException("Falha externa."), NullLogger<GlobalExceptionMiddleware>.Instance);
 
         // Act
         await middleware.InvokeAsync(context);

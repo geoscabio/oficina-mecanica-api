@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.CancelarOrdemServico;
@@ -309,6 +310,6 @@ public class CancelarOrdemServicoUseCaseTests
     {
         unitOfWork ??= CriarUnitOfWork();
 
-        return new CancelarOrdemServicoUseCase(ordemServicoRepository.Object, estoqueRepository.Object, unitOfWork.Object, new CancelarOrdemServicoValidator(), MapperFactory.Criar());
+        return new CancelarOrdemServicoUseCase(ordemServicoRepository.Object, estoqueRepository.Object, unitOfWork.Object, new CancelarOrdemServicoValidator(), MapperFactory.Criar(), NullLogger<CancelarOrdemServicoUseCase>.Instance);
     }
 }

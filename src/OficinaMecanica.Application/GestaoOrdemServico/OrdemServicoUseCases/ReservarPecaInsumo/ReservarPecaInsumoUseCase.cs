@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Domain.GestaoEstoque.Messages;
 using OficinaMecanica.Domain.GestaoOrdemServico.Messages;
@@ -21,6 +22,7 @@ public sealed class ReservarPecaInsumoUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<ReservarPecaInsumoRequest> _validator;
     private readonly IMapper _mapper;
+    private readonly ILogger<ReservarPecaInsumoUseCase> _logger;
 
     public ReservarPecaInsumoUseCase(
         IOrdemServicoRepository ordemServicoRepository,
@@ -28,7 +30,8 @@ public sealed class ReservarPecaInsumoUseCase
         IEstoqueRepository estoqueRepository,
         IUnitOfWork unitOfWork,
         IValidator<ReservarPecaInsumoRequest> validator,
-        IMapper mapper)
+        IMapper mapper,
+        ILogger<ReservarPecaInsumoUseCase> logger)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _pecaInsumoCatalogoRepository = pecaInsumoCatalogoRepository;
@@ -36,6 +39,7 @@ public sealed class ReservarPecaInsumoUseCase
         _unitOfWork = unitOfWork;
         _validator = validator;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<Result<OrdemServicoResponse>> ExecuteAsync(ReservarPecaInsumoRequest request, CancellationToken cancellationToken = default)
@@ -58,6 +62,7 @@ public sealed class ReservarPecaInsumoUseCase
 
         if (estoque is null)
         {
+            LogProcessingFailure(ordemServico.Id, EstoqueErrorMessages.EstoqueNaoEncontrado);
             return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
@@ -70,6 +75,7 @@ public sealed class ReservarPecaInsumoUseCase
 
         if (!ExisteEstoqueDisponivel(estoque, request.PecasInsumos))
         {
+            LogProcessingFailure(ordemServico.Id, EstoqueErrorMessages.EstoqueInsuficiente);
             return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueInsuficiente, TipoErro.RegraNegocio);
         }
 
@@ -93,6 +99,16 @@ public sealed class ReservarPecaInsumoUseCase
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 
+    private void LogProcessingFailure(Guid ordemServicoId, string failureReason)
+    {
+        _logger.LogWarning(
+            "Falha ao reservar pecas ou insumos para a ordem de servico {OrdemServicoId}: {failure_reason}. {operation} {bounded_context}",
+            ordemServicoId,
+            failureReason,
+            "ReservarPecaInsumo",
+            "GestaoOrdemServico");
+    }
+
     private async Task<Dictionary<Guid, PecaInsumoCatalogo>> ObterPecasInsumosCatalogoAsync(IEnumerable<PecaInsumoRequest> pecasInsumos, CancellationToken cancellationToken)
     {
         var ids = pecasInsumos
@@ -110,7 +126,6 @@ public sealed class ReservarPecaInsumoUseCase
         return pecasInsumos.All(pecaInsumo => estoque.VerificarDisponibilidade(pecaInsumo.PecaInsumoCatalogoId, pecaInsumo.Quantidade));
     }
 }
-
 
 
 

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.AguardarAprovacaoOrcamento;
@@ -132,6 +133,6 @@ public class AguardarAprovacaoOrcamentoUseCaseTests
 
     private static AguardarAprovacaoOrcamentoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
     {
-        return new AguardarAprovacaoOrcamentoUseCase(repository.Object, new AguardarAprovacaoOrcamentoValidator(), MapperFactory.Criar());
+        return new AguardarAprovacaoOrcamentoUseCase(repository.Object, new AguardarAprovacaoOrcamentoValidator(), MapperFactory.Criar(), NullLogger<AguardarAprovacaoOrcamentoUseCase>.Instance);
     }
 }
