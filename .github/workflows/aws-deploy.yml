@@ -623,19 +623,28 @@ jobs:
             exit "$rollout_status"
           fi
 
-      - name: "🌐 05 · Exibir endpoint do Load Balancer"
+      - name: "🔌 05 · Validar Service NodePort da API"
         run: |
-          for attempt in $(seq 1 30); do
-            endpoint="$(kubectl get svc oficina-mecanica-api -n oficina-mecanica -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+          set -euo pipefail
 
-            if [ -n "$endpoint" ]; then
-              echo "API_URL=http://$endpoint"
-              exit 0
-            fi
+          service_name="oficina-mecanica-api"
+          namespace="oficina-mecanica"
 
-            echo "Waiting for AWS LoadBalancer endpoint... attempt $attempt/30"
-            sleep 10
-          done
+          if ! kubectl get service "$service_name" -n "$namespace" > /dev/null; then
+            echo "::error::Service $service_name não foi encontrado no namespace $namespace."
+            exit 1
+          fi
 
-          echo "::error::LoadBalancer endpoint was not ready within the timeout."
-          exit 1
+          service_type="$(kubectl get service "$service_name" -n "$namespace" -o jsonpath='{.spec.type}')"
+          if [ "$service_type" != "NodePort" ]; then
+            echo "::error::Service $service_name possui tipo '$service_type'; esperado: 'NodePort'."
+            exit 1
+          fi
+
+          node_port="$(kubectl get service "$service_name" -n "$namespace" -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')"
+          if [ -z "$node_port" ] || [ "$node_port" = "0" ]; then
+            echo "::error::Service $service_name não possui nodePort configurado na porta 'http'."
+            exit 1
+          fi
+
+          echo "Service $service_name validado como NodePort na porta $node_port."
