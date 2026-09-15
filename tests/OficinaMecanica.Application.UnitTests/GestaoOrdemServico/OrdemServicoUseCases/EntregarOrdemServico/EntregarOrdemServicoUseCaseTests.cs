@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.EntregarOrdemServico;
@@ -131,6 +132,6 @@ public class EntregarOrdemServicoUseCaseTests
 
     private static EntregarOrdemServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
     {
-        return new EntregarOrdemServicoUseCase(repository.Object, new EntregarOrdemServicoValidator(), MapperFactory.Criar());
+        return new EntregarOrdemServicoUseCase(repository.Object, new EntregarOrdemServicoValidator(), MapperFactory.Criar(), NullLogger<EntregarOrdemServicoUseCase>.Instance);
     }
 }

@@ -101,6 +101,13 @@ public sealed class AbrirOrdemServicoUseCase
         var resultadoReserva = await ReservarPecasInsumosAsync(ordemServico, pecasInsumos, cancellationToken);
         if (!resultadoReserva.Sucesso)
         {
+            _logger.LogWarning(
+                "Falha ao processar a abertura da ordem de servico {OrdemServicoId}: {failure_reason}. {operation} {bounded_context}",
+                ordemServico.Id,
+                resultadoReserva.Erro!.Mensagem,
+                "AbrirOrdemServico",
+                "GestaoOrdemServico");
+
             return Result<OrdemServicoResponse>.Falha(resultadoReserva.Erro!.Mensagem, resultadoReserva.Erro.Tipo);
         }
 

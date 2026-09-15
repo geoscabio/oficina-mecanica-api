@@ -21,9 +21,15 @@ public static class ApiApplicationBuilderExtensions
                 var route = (endpoint as RouteEndpoint)?.RoutePattern.RawText ?? "unmatched";
 
                 diagnosticContext.Set("operation", endpoint?.DisplayName ?? "HTTP request");
-                diagnosticContext.Set("http_method", context.Request.Method);
-                diagnosticContext.Set("http_route", route);
-                diagnosticContext.Set("http_status_code", context.Response.StatusCode);
+                diagnosticContext.Set(
+                    "http",
+                    new
+                    {
+                        method = context.Request.Method,
+                        route,
+                        status_code = context.Response.StatusCode
+                    },
+                    destructureObjects: true);
 
                 if (context.Items.TryGetValue(CorrelationIdMiddleware.ItemName, out var correlationId))
                 {

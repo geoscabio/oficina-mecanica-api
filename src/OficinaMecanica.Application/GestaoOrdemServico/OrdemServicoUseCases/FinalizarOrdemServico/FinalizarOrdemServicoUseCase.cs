@@ -52,6 +52,13 @@ public sealed class FinalizarOrdemServicoUseCase
 
         if (possuiPecasInsumos && estoque is null)
         {
+            _logger.LogWarning(
+                "Falha ao finalizar a ordem de servico {OrdemServicoId}: {failure_reason}. {operation} {bounded_context}",
+                ordemServico.Id,
+                EstoqueErrorMessages.EstoqueNaoEncontrado,
+                "FinalizarOrdemServico",
+                "GestaoOrdemServico");
+
             return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
