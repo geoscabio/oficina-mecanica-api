@@ -253,6 +253,147 @@ jobs:
       - name: "🔍 09 · Validar configuração do Terraform"
         run: terraform -chdir="$TF_WORKING_DIRECTORY" validate
 
+      - name: "🩹 10 · Recuperar destroy parcial sem cluster EKS"
+        if: env.TERRAFORM_ACTION == 'destroy'
+        run: |
+          set -euo pipefail
+
+          state_json="$RUNNER_TEMP/api-terraform-state.json"
+          kubernetes_addresses_file="$RUNNER_TEMP/api-kubernetes-state-addresses.txt"
+          override_file="$TF_WORKING_DIRECTORY/partial_destroy_override.tf"
+          rm -f "$state_json" "$kubernetes_addresses_file" "$override_file"
+          trap 'rm -f "$state_json" "$kubernetes_addresses_file"' EXIT
+
+          state_addresses=""
+          if [ -f "$TF_WORKING_DIRECTORY/terraform.tfstate" ]; then
+            if state_addresses="$(terraform -chdir="$TF_WORKING_DIRECTORY" state list 2>&1)"; then
+              terraform -chdir="$TF_WORKING_DIRECTORY" show -json > "$state_json"
+            else
+              state_status=$?
+              case "$state_addresses" in
+                *"No state file was found"*)
+                  state_addresses=""
+                  ;;
+                *)
+                  echo "::error::Não foi possível inspecionar o state antes do destroy."
+                  echo "$state_addresses"
+                  exit "$state_status"
+                  ;;
+              esac
+            fi
+          fi
+
+          cluster_name=""
+          if ssm_output="$(aws ssm get-parameter --name "$SSM_KUBERNETES_PREFIX/cluster_name" --query 'Parameter.Value' --output text 2>&1)"; then
+            cluster_name="$(printf '%s' "$ssm_output" | xargs)"
+          else
+            ssm_status=$?
+            case "$ssm_output" in
+              *ParameterNotFound*)
+                if [ -f "$state_json" ]; then
+                  cluster_name="$(python - "$state_json" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as state_file:
+              state = json.load(state_file)
+
+          def resources(module):
+              yield from module.get("resources", [])
+              for child in module.get("child_modules", []):
+                  yield from resources(child)
+
+          root = state.get("values", {}).get("root_module", {})
+          for resource in resources(root):
+              if resource.get("address") == "data.aws_ssm_parameter.kubernetes_cluster_name":
+                  print(resource.get("values", {}).get("value", ""))
+                  break
+          PY
+                  )"
+                fi
+                ;;
+              *)
+                echo "::error::Não foi possível consultar o nome do cluster EKS no SSM; o erro não confirma ausência."
+                echo "$ssm_output"
+                exit "$ssm_status"
+                ;;
+            esac
+          fi
+
+          if [ -z "$cluster_name" ]; then
+            echo "::notice::Nenhum cluster EKS foi referenciado pelo SSM ou pelo state; nenhuma reconciliação foi aplicada."
+            exit 0
+          fi
+
+          if eks_output="$(aws eks describe-cluster --name "$cluster_name" --query 'cluster.name' --output text 2>&1)"; then
+            echo "Cluster EKS $cluster_name existe; o destroy seguirá sem alterar o state."
+            exit 0
+          else
+            eks_status=$?
+            case "$eks_output" in
+              *ResourceNotFoundException*)
+                echo "::warning::Cluster EKS $cluster_name comprovadamente ausente. Iniciando reconciliação do state da API."
+                ;;
+              *)
+                echo "::error::Não foi possível inspecionar o cluster EKS $cluster_name; o erro não confirma ausência."
+                echo "$eks_output"
+                exit "$eks_status"
+                ;;
+            esac
+          fi
+
+          if [ -f "$state_json" ]; then
+            python - "$state_json" > "$kubernetes_addresses_file" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as state_file:
+              state = json.load(state_file)
+
+          def resources(module):
+              yield from module.get("resources", [])
+              for child in module.get("child_modules", []):
+                  yield from resources(child)
+
+          root = state.get("values", {}).get("root_module", {})
+          addresses = sorted({
+              resource["address"]
+              for resource in resources(root)
+              if resource.get("mode") == "managed"
+              and resource.get("provider_name") == "registry.terraform.io/hashicorp/kubernetes"
+              and resource.get("type", "").startswith("kubernetes_")
+          })
+          print("\n".join(addresses))
+          PY
+          fi
+
+          mapfile -t kubernetes_addresses < <(sed '/^[[:space:]]*$/d' "$kubernetes_addresses_file" 2>/dev/null || true)
+          if [ "${#kubernetes_addresses[@]}" -eq 0 ]; then
+            echo "Nenhum resource gerenciado pelo provider Kubernetes existe no state da API."
+          else
+            printf 'Resources Kubernetes identificados no state da API:\n'
+            printf '  - %s\n' "${kubernetes_addresses[@]}"
+            terraform -chdir="$TF_WORKING_DIRECTORY" state rm "${kubernetes_addresses[@]}"
+          fi
+
+          cat > "$override_file" <<'EOF'
+          data "aws_eks_cluster" "this" {
+            count = 0
+          }
+
+          data "aws_eks_cluster_auth" "this" {
+            count = 0
+          }
+
+          provider "kubernetes" {
+            host                   = "https://127.0.0.1"
+            cluster_ca_certificate = ""
+            token                  = ""
+          }
+          EOF
+
+          terraform -chdir="$TF_WORKING_DIRECTORY" validate
+
       - name: "💾 12 · Salvar cache intermediário do state do Terraform"
         if: always()
         uses: actions/cache/save@v6
@@ -291,7 +432,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: tfplan-${{ github.run_id }}
-          path: ${{ env.TF_WORKING_DIRECTORY }}/tfplan
+          path: |
+            ${{ env.TF_WORKING_DIRECTORY }}/tfplan
+            ${{ env.TF_WORKING_DIRECTORY }}/partial_destroy_override.tf
           retention-days: 1
           if-no-files-found: error
 
