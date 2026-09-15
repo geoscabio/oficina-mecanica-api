@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.FinalizarOrdemServico;
@@ -270,6 +271,6 @@ public class FinalizarOrdemServicoUseCaseTests
     {
         unitOfWork ??= CriarUnitOfWork();
 
-        return new FinalizarOrdemServicoUseCase(ordemServicoRepository.Object, estoqueRepository.Object, unitOfWork.Object, new FinalizarOrdemServicoValidator(), MapperFactory.Criar());
+        return new FinalizarOrdemServicoUseCase(ordemServicoRepository.Object, estoqueRepository.Object, unitOfWork.Object, new FinalizarOrdemServicoValidator(), MapperFactory.Criar(), NullLogger<FinalizarOrdemServicoUseCase>.Instance);
     }
 }

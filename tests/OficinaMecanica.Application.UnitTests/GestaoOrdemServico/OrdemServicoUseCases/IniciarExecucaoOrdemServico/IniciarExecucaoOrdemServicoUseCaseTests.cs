@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarExecucaoOrdemServico;
@@ -131,6 +132,6 @@ public class IniciarExecucaoOrdemServicoUseCaseTests
 
     private static IniciarExecucaoOrdemServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
     {
-        return new IniciarExecucaoOrdemServicoUseCase(repository.Object, new IniciarExecucaoOrdemServicoValidator(), MapperFactory.Criar());
+        return new IniciarExecucaoOrdemServicoUseCase(repository.Object, new IniciarExecucaoOrdemServicoValidator(), MapperFactory.Criar(), NullLogger<IniciarExecucaoOrdemServicoUseCase>.Instance);
     }
 }
