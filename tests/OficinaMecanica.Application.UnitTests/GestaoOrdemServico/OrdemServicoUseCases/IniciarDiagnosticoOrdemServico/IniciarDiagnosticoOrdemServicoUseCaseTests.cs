@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.IniciarDiagnosticoOrdemServico;
@@ -105,6 +106,6 @@ public class IniciarDiagnosticoOrdemServicoUseCaseTests
 
     private static IniciarDiagnosticoOrdemServicoUseCase CriarUseCase(Mock<IOrdemServicoRepository> repository)
     {
-        return new IniciarDiagnosticoOrdemServicoUseCase(repository.Object, new IniciarDiagnosticoOrdemServicoValidator(), MapperFactory.Criar());
+        return new IniciarDiagnosticoOrdemServicoUseCase(repository.Object, new IniciarDiagnosticoOrdemServicoValidator(), MapperFactory.Criar(), NullLogger<IniciarDiagnosticoOrdemServicoUseCase>.Instance);
     }
 }

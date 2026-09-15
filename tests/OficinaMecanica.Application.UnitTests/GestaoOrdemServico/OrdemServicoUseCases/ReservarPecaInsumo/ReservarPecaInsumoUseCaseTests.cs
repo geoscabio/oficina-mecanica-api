@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
@@ -458,6 +459,6 @@ public class ReservarPecaInsumoUseCaseTests
     {
         unitOfWork ??= CriarUnitOfWork();
 
-        return new ReservarPecaInsumoUseCase(ordemServicoRepository.Object, pecaInsumoCatalogoRepository.Object, estoqueRepository.Object, unitOfWork.Object, new ReservarPecaInsumoValidator(), MapperFactory.Criar());
+        return new ReservarPecaInsumoUseCase(ordemServicoRepository.Object, pecaInsumoCatalogoRepository.Object, estoqueRepository.Object, unitOfWork.Object, new ReservarPecaInsumoValidator(), MapperFactory.Criar(), NullLogger<ReservarPecaInsumoUseCase>.Instance);
     }
 }

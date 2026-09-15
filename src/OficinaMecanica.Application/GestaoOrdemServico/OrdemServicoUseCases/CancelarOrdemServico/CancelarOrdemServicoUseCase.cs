@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.GestaoEstoque.Interfaces;
@@ -16,14 +17,16 @@ public sealed class CancelarOrdemServicoUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<CancelarOrdemServicoRequest> _validator;
     private readonly IMapper _mapper;
+    private readonly ILogger<CancelarOrdemServicoUseCase> _logger;
 
-    public CancelarOrdemServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IEstoqueRepository estoqueRepository, IUnitOfWork unitOfWork, IValidator<CancelarOrdemServicoRequest> validator, IMapper mapper)
+    public CancelarOrdemServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IEstoqueRepository estoqueRepository, IUnitOfWork unitOfWork, IValidator<CancelarOrdemServicoRequest> validator, IMapper mapper, ILogger<CancelarOrdemServicoUseCase> logger)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _estoqueRepository = estoqueRepository;
         _unitOfWork = unitOfWork;
         _validator = validator;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<Result<OrdemServicoResponse>> ExecuteAsync(CancelarOrdemServicoRequest request, CancellationToken cancellationToken = default)
@@ -49,6 +52,13 @@ public sealed class CancelarOrdemServicoUseCase
 
         if (deveEstornarEstoque && estoque is null)
         {
+            _logger.LogWarning(
+                "Falha ao cancelar a ordem de servico {OrdemServicoId}: {failure_reason}. {operation} {bounded_context}",
+                ordemServico.Id,
+                EstoqueErrorMessages.EstoqueNaoEncontrado,
+                "CancelarOrdemServico",
+                "GestaoOrdemServico");
+
             return Result<OrdemServicoResponse>.Falha(EstoqueErrorMessages.EstoqueNaoEncontrado, TipoErro.NaoEncontrado);
         }
 
@@ -77,8 +87,14 @@ public sealed class CancelarOrdemServicoUseCase
                 cancellationToken);
         }
 
+        _logger.LogInformation(
+            "Ordem de servico {OrdemServicoId} cancelada com status {OrdemServicoStatus}. {operation} {bounded_context}",
+            ordemServico.Id,
+            ordemServico.Status,
+            "CancelarOrdemServico",
+            "GestaoOrdemServico");
+
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 
 }
-
