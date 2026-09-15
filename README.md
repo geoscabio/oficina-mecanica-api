@@ -1,8 +1,37 @@
-# Oficina Mecânica API
+# 🔧 Oficina Mecânica API
 
 API principal da solução da Oficina Mecânica para a Fase 3 do Tech Challenge FIAP. Implementa os contextos de atendimento, estoque, catálogo e ordens de serviço em .NET, com Clean Architecture e DDD.
 
-## Repositórios da solução
+---
+
+## 📌 Índice
+
+- [✨ Visão geral](#visao-geral)
+- [🧩 Repositórios da solução](#repositorios-da-solucao)
+- [🏗️ Arquitetura](#arquitetura)
+- [🧰 Tecnologias](#tecnologias)
+- [📁 Estrutura do repositório](#estrutura-do-repositorio)
+- [🚀 Execução local](#execucao-local)
+- [🔐 Configuração, secrets e contratos](#configuracao)
+- [☁️ Deploy AWS](#deploy-aws)
+- [🔁 CI/CD e Git Flow](#cicd)
+- [📊 Observabilidade](#observabilidade)
+- [🧪 Testes e qualidade](#testes)
+- [🧭 Documentação e links úteis](#documentacao)
+
+---
+
+<a id="visao-geral"></a>
+
+## ✨ Visão geral
+
+A solução simula o ciclo de atendimento, diagnóstico, orçamento, execução e
+entrega de ordens de serviço. Esta API é o monólito modular que concentra os
+contextos de atendimento, estoque, catálogo e ordem de serviço.
+
+<a id="repositorios-da-solucao"></a>
+
+## 🧩 Repositórios da solução
 
 | Repositório | Responsabilidade |
 | --- | --- |
@@ -13,7 +42,11 @@ API principal da solução da Oficina Mecânica para a Fase 3 do Tech Challenge 
 | [Infra RDS](https://github.com/geoscabio/oficina-mecanica-infra-rds) | SQL Server privado, secret gerenciado e contratos de banco no SSM. |
 | [Infra API Gateway](https://github.com/geoscabio/oficina-mecanica-infra-api-gateway) | HTTP API pública, VPC Link, integração Lambda/NLB e access logs. |
 
-## Responsabilidade e arquitetura
+---
+
+<a id="arquitetura"></a>
+
+## 🏗️ Arquitetura
 
 Este repositório é dono do código da API e do seu deployment/Service Kubernetes. Ele não cria VPC, EKS, ECR, NLB, RDS ou API Gateway.
 
@@ -32,11 +65,39 @@ O Service da API é `NodePort`; não existe LoadBalancer público da API. Endpoi
 - `GET /api/v1/clientes/me/ordens-servico` (JWT Cliente com claim `cliente_id`);
 - rotas administrativas sob `/api/v1/...`, protegidas por perfil.
 
-## Tecnologias
+---
 
-.NET 10, ASP.NET Core, Entity Framework Core, SQL Server, FluentValidation, AutoMapper, xUnit, FluentAssertions, Moq, Testcontainers, Docker, Kubernetes, Terraform e GitHub Actions.
+<a id="tecnologias"></a>
 
-## Pré-requisitos e execução local
+## 🧰 Tecnologias
+
+.NET 10, ASP.NET Core, Entity Framework Core, SQL Server, FluentValidation,
+AutoMapper, xUnit, FluentAssertions, Moq, Testcontainers, Docker, Kubernetes,
+Terraform e GitHub Actions.
+
+---
+
+<a id="estrutura-do-repositorio"></a>
+
+## 📁 Estrutura do repositório
+
+```text
+.
+├── .github/workflows/    # CI/CD
+├── docs/                 # ADRs, RFCs, OpenAPI, Postman e evidências
+├── infra/terraform/      # Recursos próprios da API no ambiente development
+├── k8s/                  # Manifests do workload e Service NodePort
+├── src/                  # API, Application, Domain e Infrastructure
+├── tests/                # Testes unitários e integração
+├── Dockerfile
+└── docker-compose.yml
+```
+
+---
+
+<a id="execucao-local"></a>
+
+## 🚀 Execução local
 
 Para desenvolvimento local: .NET SDK 10 e Docker Desktop. Copie `.env.example` para `.env` e execute:
 
@@ -58,7 +119,11 @@ O deployment AWS exige que VPC, Kubernetes/ECR e RDS já tenham publicado seus c
 | `/oficina-mecanica/development/status/rds` e `/rds/endpoint` | Confirma e localiza o banco. |
 | `/oficina-mecanica/development/rds/master_secret_arn` | ARN do secret gerenciado; o valor nunca entra no Terraform state. |
 
-## Secrets, variables e parâmetros
+---
+
+<a id="configuracao"></a>
+
+## 🔐 Configuração, secrets e contratos
 
 Cadastre itens GitHub em **Settings > Environments > development**. Valores reais nunca devem ser versionados.
 
@@ -75,17 +140,39 @@ Cadastre itens GitHub em **Settings > Environments > development**. Valores reai
 
 O RDS mantém usuário/senha no AWS Secrets Manager. A esteira lê o ARN pelo SSM e consulta o secret somente durante o deploy; não existe secret de connection string cadastrado no GitHub.
 
-## CI/CD e deploy
+---
+
+<a id="deploy-aws"></a>
+
+## ☁️ Deploy AWS
 
 Pull requests executam CI de build, formatação, testes, cobertura, imagem Docker, manifests e Terraform. O merge em `develop` aciona o CD quando houver mudança deployável. A ação é controlada por `infra/terraform/environments/dev/terraform-action.env`: `TERRAFORM_ACTION=apply` atualiza recursos da API; `destroy` exige PR dedicado que altere o mesmo arquivo.
 
-O deploy publica imagem imutável `sha-$GITHUB_SHA`, aplica somente recursos da API no EKS e valida rollout/Service NodePort. A promoção segue `branch de trabalho -> develop -> release -> main`.
+O deploy publica imagem imutável `sha-$GITHUB_SHA`, aplica somente recursos da
+API no EKS e valida rollout/Service NodePort.
 
-## Observabilidade
+<a id="cicd"></a>
+
+## 🔁 CI/CD e Git Flow
+
+Os workflows em [`.github/workflows`](.github/workflows) validam pull requests e
+o merge em `develop` aciona o CD somente para mudanças implantáveis. A promoção
+segue `branch de trabalho -> develop -> release -> main`; os PRs continuam
+sujeitos a revisão e aos checks obrigatórios.
+
+---
+
+<a id="observabilidade"></a>
+
+## 📊 Observabilidade
 
 O caminho de borda possui access logs CloudWatch no repositório de API Gateway. A instrumentação Datadog da API é tratada em esteira própria e só deve ser considerada ativa após merge, deploy e evidência de runtime; nenhum segredo Datadog pertence a este repositório nesta configuração base.
 
-## Testes e validações
+---
+
+<a id="testes"></a>
+
+## 🧪 Testes e qualidade
 
 ```powershell
 dotnet restore
@@ -96,7 +183,11 @@ terraform -chdir=infra/terraform/environments/dev init -backend=false
 terraform -chdir=infra/terraform/environments/dev validate
 ```
 
-## Documentação relacionada e links úteis
+---
+
+<a id="documentacao"></a>
+
+## 🧭 Documentação e links úteis
 
 - [Índice de documentação](docs/README.md)
 - [ADRs](docs/architecture/adrs)
