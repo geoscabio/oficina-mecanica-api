@@ -1,4 +1,6 @@
 using OficinaMecanica.API.Middlewares;
+using Microsoft.AspNetCore.Routing;
+using Serilog;
 
 namespace OficinaMecanica.API.Extensions.Middlewares;
 
@@ -9,6 +11,26 @@ public static class ApiApplicationBuilderExtensions
     public static WebApplication UseApiMiddlewares(this WebApplication app)
     {
         app.UseSecurityHeaders();
+        app.UseMiddleware<CorrelationIdMiddleware>();
+        app.UseSerilogRequestLogging(options =>
+        {
+            options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+            options.EnrichDiagnosticContext = (diagnosticContext, context) =>
+            {
+                var endpoint = context.GetEndpoint();
+                var route = (endpoint as RouteEndpoint)?.RoutePattern.RawText ?? "unmatched";
+
+                diagnosticContext.Set("operation", endpoint?.DisplayName ?? "HTTP request");
+                diagnosticContext.Set("http_method", context.Request.Method);
+                diagnosticContext.Set("http_route", route);
+                diagnosticContext.Set("http_status_code", context.Response.StatusCode);
+
+                if (context.Items.TryGetValue(CorrelationIdMiddleware.ItemName, out var correlationId))
+                {
+                    diagnosticContext.Set("x_correlation_id", correlationId);
+                }
+            };
+        });
         app.UseMiddleware<GlobalExceptionMiddleware>();
 
         if (IsSwaggerEnabled(app))

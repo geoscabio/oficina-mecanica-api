@@ -10,10 +10,12 @@ namespace OficinaMecanica.API.Middlewares;
 public sealed class GlobalExceptionMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
-    public GlobalExceptionMiddleware(RequestDelegate next)
+    public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -29,15 +31,17 @@ public sealed class GlobalExceptionMiddleware
                 throw;
             }
 
+            _logger.LogWarning(exception, "Falha de regra de negocio ao processar {operation}.", "HTTP request");
             await WriteErrorAsync(context, TipoErro.RegraNegocio.ToHttpStatusCode(), new ErrorResponse(exception.Message, TipoErro.RegraNegocio));
         }
-        catch (DbUpdateConcurrencyException)
+        catch (DbUpdateConcurrencyException exception)
         {
             if (context.Response.HasStarted)
             {
                 throw;
             }
 
+            _logger.LogWarning(exception, "Conflito de persistencia ao processar {operation}.", "HTTP request");
             await WriteErrorAsync(context, TipoErro.Conflito.ToHttpStatusCode(), new ErrorResponse(ApiResponseMessages.ConflitoPersistencia, TipoErro.Conflito));
         }
         catch (DbUpdateException exception) when (IsUniqueConstraintViolation(exception))
@@ -47,15 +51,17 @@ public sealed class GlobalExceptionMiddleware
                 throw;
             }
 
+            _logger.LogWarning(exception, "Violacao de unicidade ao processar {operation}.", "HTTP request");
             await WriteErrorAsync(context, TipoErro.Conflito.ToHttpStatusCode(), new ErrorResponse(ApiResponseMessages.ConflitoPersistencia, TipoErro.Conflito));
         }
-        catch
+        catch (Exception exception)
         {
             if (context.Response.HasStarted)
             {
                 throw;
             }
 
+            _logger.LogError(exception, "Erro inesperado ao processar {operation}.", "HTTP request");
             await WriteErrorAsync(context, TipoErro.ErroInterno.ToHttpStatusCode(), new ErrorResponse(ApiResponseMessages.ErroInternoInesperado, TipoErro.ErroInterno));
         }
     }

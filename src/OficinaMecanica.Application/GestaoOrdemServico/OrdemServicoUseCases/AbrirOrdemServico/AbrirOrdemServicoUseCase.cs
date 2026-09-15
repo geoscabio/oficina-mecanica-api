@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.ReservarPecaInsumo;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
@@ -30,12 +31,14 @@ public sealed class AbrirOrdemServicoUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<AbrirOrdemServicoRequest> _validator;
     private readonly IMapper _mapper;
+    private readonly ILogger<AbrirOrdemServicoUseCase> _logger;
 
     public AbrirOrdemServicoUseCase(
         AbrirOrdemServicoRepositorios repositorios,
         IUnitOfWork unitOfWork,
         IValidator<AbrirOrdemServicoRequest> validator,
-        IMapper mapper)
+        IMapper mapper,
+        ILogger<AbrirOrdemServicoUseCase> logger)
     {
         _ordemServicoRepository = repositorios.OrdemServico;
         _clienteRepository = repositorios.Cliente;
@@ -47,6 +50,7 @@ public sealed class AbrirOrdemServicoUseCase
         _unitOfWork = unitOfWork;
         _validator = validator;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<Result<OrdemServicoResponse>> ExecuteAsync(AbrirOrdemServicoRequest request, CancellationToken cancellationToken = default)
@@ -116,6 +120,14 @@ public sealed class AbrirOrdemServicoUseCase
                 },
                 cancellationToken);
         }
+
+        _logger.LogInformation(
+            "Ordem de servico {OrdemServicoId} aberta com numero {OrdemServicoNumero} e status {OrdemServicoStatus}. {operation} {bounded_context}",
+            ordemServico.Id,
+            ordemServico.Numero,
+            ordemServico.Status,
+            "AbrirOrdemServico",
+            "GestaoOrdemServico");
 
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }

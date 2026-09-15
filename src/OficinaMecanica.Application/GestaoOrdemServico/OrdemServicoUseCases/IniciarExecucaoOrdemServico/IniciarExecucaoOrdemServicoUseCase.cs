@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
@@ -12,12 +13,14 @@ public sealed class IniciarExecucaoOrdemServicoUseCase
     private readonly IOrdemServicoRepository _ordemServicoRepository;
     private readonly IValidator<IniciarExecucaoOrdemServicoRequest> _validator;
     private readonly IMapper _mapper;
+    private readonly ILogger<IniciarExecucaoOrdemServicoUseCase> _logger;
 
-    public IniciarExecucaoOrdemServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IValidator<IniciarExecucaoOrdemServicoRequest> validator, IMapper mapper)
+    public IniciarExecucaoOrdemServicoUseCase(IOrdemServicoRepository ordemServicoRepository, IValidator<IniciarExecucaoOrdemServicoRequest> validator, IMapper mapper, ILogger<IniciarExecucaoOrdemServicoUseCase> logger)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _validator = validator;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<Result<OrdemServicoResponse>> ExecuteAsync(IniciarExecucaoOrdemServicoRequest request, CancellationToken cancellationToken = default)
@@ -40,7 +43,13 @@ public sealed class IniciarExecucaoOrdemServicoUseCase
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
 
+        _logger.LogInformation(
+            "Ordem de servico {OrdemServicoId} iniciou execucao com status {OrdemServicoStatus}. {operation} {bounded_context}",
+            ordemServico.Id,
+            ordemServico.Status,
+            "IniciarExecucaoOrdemServico",
+            "GestaoOrdemServico");
+
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }
-
