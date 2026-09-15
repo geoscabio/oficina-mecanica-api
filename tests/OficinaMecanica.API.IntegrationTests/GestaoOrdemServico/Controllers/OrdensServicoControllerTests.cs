@@ -226,7 +226,7 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
     {
         // Arrange
         var clienteId = await CadastrarClienteAsync();
-        var outroClienteId = await CadastrarClienteAsync();
+        var outroClienteId = await CadastrarClienteAsync("111.444.777-35", "outro.cliente@email.com");
         var mecanicoId = await CadastrarMecanicoAsync();
         var ordemClienteId = await CriarOrdemServicoRecebidaAsync(clienteId, mecanicoId, "CLI-1001");
         var ordemOutroClienteId = await CriarOrdemServicoRecebidaAsync(outroClienteId, mecanicoId, "CLI-1002");
@@ -282,9 +282,15 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    private async Task<Guid> CadastrarClienteAsync()
+    private async Task<Guid> CadastrarClienteAsync(
+        string documento = "529.982.247-25",
+        string email = "maria.cliente@email.com")
     {
-        var response = await PostJsonAsync("/api/v1/atendimento/clientes/cadastrar", ClienteRequestBuilder.Novo().BuildCadastro(), HttpStatusCode.Created);
+        var request = ClienteRequestBuilder.Novo()
+            .ComDocumento(documento)
+            .ComEmail(email)
+            .BuildCadastro();
+        var response = await PostJsonAsync("/api/v1/atendimento/clientes/cadastrar", request, HttpStatusCode.Created);
 
         return ObterGuid(response, "id");
     }
