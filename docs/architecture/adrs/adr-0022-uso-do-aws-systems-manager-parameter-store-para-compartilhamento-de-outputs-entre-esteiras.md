@@ -55,10 +55,7 @@ Exemplos:
 /oficina-mecanica/development/auth-lambda/function_arn
 /oficina-mecanica/development/auth-lambda/jwt_secret_arn
 /oficina-mecanica/development/kubernetes/api_internal_node_port
-/oficina-mecanica/development/kubernetes/internal_nlb_arn
-/oficina-mecanica/development/kubernetes/internal_nlb_dns_name
 /oficina-mecanica/development/kubernetes/internal_nlb_security_group_id
-/oficina-mecanica/development/kubernetes/internal_nlb_target_group_arn
 /oficina-mecanica/development/kubernetes/internal_nlb_listener_arn
 ```
 

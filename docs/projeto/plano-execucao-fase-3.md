@@ -148,10 +148,10 @@ Usar VPC Link evita que alguém acesse a API diretamente pelo Load Balancer, pul
 
 ### Ajuste necessário no Kubernetes
 
-O NLB interno é criado explicitamente pela esteira `infra-kubernetes`; o Service da API fornecerá o NodePort contratual, sem criar um Load Balancer. A infraestrutura Kubernetes publica os contratos necessários ao API Gateway:
+O NLB interno é criado explicitamente pela esteira `infra-kubernetes`; o Service da API fornecerá o NodePort contratual, sem criar um Load Balancer. A infraestrutura Kubernetes publica somente os contratos consumidos pelas outras esteiras:
 
 - `/oficina-mecanica/development/kubernetes/api_internal_node_port`
-- `/oficina-mecanica/development/kubernetes/internal_nlb_dns_name`
+- `/oficina-mecanica/development/kubernetes/internal_nlb_security_group_id`
 - `/oficina-mecanica/development/kubernetes/internal_nlb_listener_arn`
 
 ---
@@ -420,7 +420,7 @@ Exemplos de validação real:
 | `/oficina-mecanica/development/auth-lambda/function_arn` | `auth-lambda` |
 | `/oficina-mecanica/development/auth-lambda/jwt_secret_arn` | `auth-lambda` |
 | `/oficina-mecanica/development/kubernetes/api_internal_node_port` | `infra-kubernetes` |
-| `/oficina-mecanica/development/kubernetes/internal_nlb_dns_name` | `infra-kubernetes` |
+| `/oficina-mecanica/development/kubernetes/internal_nlb_security_group_id` | `infra-kubernetes` |
 | `/oficina-mecanica/development/kubernetes/internal_nlb_listener_arn` | `infra-kubernetes` |
 
 > Se o LabRole bloquear `ssm:PutParameter`, documentar fallback por GitHub Repository Variables. Mas o plano principal usa SSM.
