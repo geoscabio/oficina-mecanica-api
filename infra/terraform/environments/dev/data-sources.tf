@@ -14,6 +14,10 @@ data "aws_ssm_parameter" "kubernetes_ecr_repository_url" {
   name = "${local.ssm_base_path}/kubernetes/ecr_repository_url"
 }
 
+data "aws_ssm_parameter" "kubernetes_api_internal_node_port" {
+  name = "${local.ssm_base_path}/kubernetes/api_internal_node_port"
+}
+
 data "aws_ssm_parameter" "rds_status" {
   name = "${local.ssm_base_path}/status/rds"
 }
