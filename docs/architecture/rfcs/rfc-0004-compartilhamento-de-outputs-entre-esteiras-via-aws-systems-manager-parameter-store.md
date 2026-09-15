@@ -42,7 +42,7 @@ Exemplo para o ambiente de desenvolvimento:
 /oficina-mecanica/development/rds/endpoint
 /oficina-mecanica/development/kubernetes/cluster_name
 /oficina-mecanica/development/auth-lambda/function_arn
-/oficina-mecanica/development/api/nlb_listener_arn
+/oficina-mecanica/development/kubernetes/internal_nlb_listener_arn
 /oficina-mecanica/development/status/vpc
 /oficina-mecanica/development/status/rds
 ```
@@ -59,8 +59,9 @@ Exemplo para o ambiente de desenvolvimento:
 | `/oficina-mecanica/development/kubernetes/ecr_repository_url` | `infra-kubernetes` | `api` |
 | `/oficina-mecanica/development/auth-lambda/function_arn` | `auth-lambda` | `infra-api-gateway` |
 | `/oficina-mecanica/development/auth-lambda/jwt_secret_arn` | `auth-lambda` | `api` e `infra-api-gateway`, quando necessário |
-| `/oficina-mecanica/development/api/nlb_dns_name` | `api` | `infra-api-gateway` |
-| `/oficina-mecanica/development/api/nlb_listener_arn` | `api` | `infra-api-gateway` |
+| `/oficina-mecanica/development/kubernetes/api_internal_node_port` | `infra-kubernetes` | `api` |
+| `/oficina-mecanica/development/kubernetes/internal_nlb_security_group_id` | `infra-kubernetes` | `infra-api-gateway` |
+| `/oficina-mecanica/development/kubernetes/internal_nlb_listener_arn` | `infra-kubernetes` | `infra-api-gateway` |
 
 ## Regras de segurança
 
