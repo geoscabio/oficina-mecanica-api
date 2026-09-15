@@ -11,74 +11,65 @@
 
 ## 1. Contexto e Problema
 
-Na Fase 2, a API executada no Kubernetes foi exposta por um Load Balancer público criado a partir de um Service do tipo `LoadBalancer`. Essa decisão permitiu demonstrar a API em ambiente AWS, mas deixa a aplicação acessível diretamente pela internet.
+Na Fase 2, a API no Kubernetes foi exposta por um Classic Load Balancer público criado por um Service `LoadBalancer`. Na Fase 3, o API Gateway HTTP API é a porta pública única; manter essa exposição permitiria contornar o Gateway.
 
-Na Fase 3, o API Gateway será adotado como porta pública única. Portanto, manter um Load Balancer público criaria uma rota alternativa de acesso à API, permitindo que consumidores externos tentassem contornar o Gateway.
-
-A integração privada do API Gateway com recursos dentro da VPC exige um alvo acessível internamente. Era necessário definir o tipo de Load Balancer adequado para receber o tráfego encaminhado pelo VPC Link e manter a API privada.
+É necessário um backend privado, com listener determinístico para o VPC Link, sem introduzir AWS Load Balancer Controller, Helm, Pod Identity, IRSA, TargetGroupBinding ou o Service Controller legado.
 
 ## 2. Fatores Decisivos
 
-- Garantir que o API Gateway seja a única entrada pública da aplicação.
-- Impedir acesso direto à API executada no Kubernetes.
-- Permitir integração privada entre API Gateway e Kubernetes por VPC Link.
-- Manter a solução simples para o MVP.
-- Preservar a capacidade de expor um Service Kubernetes para os pods da API.
-- Substituir o Load Balancer público utilizado na Fase 2.
+- Garantir o API Gateway como única porta pública final.
+- Manter o backend privado e compatível com o VPC Link.
+- Respeitar as restrições de IAM do AWS Academy.
+- Evitar mecanismo legado para um recurso novo.
+- Manter ownership explícito entre infraestrutura Kubernetes e workload da API.
+- Privilegiar simplicidade operacional e reconstrução reprodutível por Terraform.
 
 ## 3. Decisão
 
-O Load Balancer público da API será substituído por um Network Load Balancer interno.
+O repositório `oficina-mecanica-infra-kubernetes` cria explicitamente, por Terraform, o NLB interno `oficina-mecanica-api-nlb-dev`, seu Security Group, listener TCP/80, Target Group `oficina-mecanica-api-tg-dev` e o vínculo deste Target Group ao ASG do Managed Node Group.
 
-O Service Kubernetes da API continuará sendo responsável por expor a aplicação dentro do cluster, mas será configurado para criar um NLB com visibilidade interna, sem endereço público.
-
-O fluxo de acesso será:
+O fluxo final é:
 
 ```text
-Cliente
-  → API Gateway público
+API Gateway HTTP API
   → VPC Link
   → NLB interno
-  → Service Kubernetes
-  → Pods da oficina-mecanica-api
+  → Target Group (target_type = instance)
+  → EKS Managed Node Group / ASG
+  → Kubernetes Service NodePort
+  → Pods oficina-mecanica-api:8080
 ```
 
-O DNS e o ARN do listener do NLB serão publicados como outputs para consumo da esteira do API Gateway.
+O contrato de NodePort é `30080`. O ASG é descoberto dinamicamente a partir do EKS Managed Node Group, sem fixar o seu nome físico. O NLB usa as sub-redes privadas e habilita explicitamente cross-zone load balancing: o laboratório possui um único worker node, que pode estar em apenas uma das duas AZs do NLB.
+
+O repositório da API continua dono do Deployment, HPA, ConfigMap, Secret e Service NodePort. O Service não cria este NLB.
 
 ## 4. Justificativa
 
-O NLB interno permite que o API Gateway encaminhe requisições para a API dentro da VPC, sem tornar o Load Balancer acessível pela internet.
+O AWS Load Balancer Controller com target IP foi avaliado como abordagem moderna, mas exige identidade AWS apropriada. Pod Identity e IRSA estão bloqueados pelas restrições de IAM do AWS Academy. O uso do LBC com a LabRole dos nodes foi rejeitado por não fornecer isolamento nem menor privilégio adequados, e o Service Controller legado foi rejeitado para recurso novo.
 
-Essa decisão elimina a rota pública direta utilizada na Fase 2 e reforça a separação de responsabilidades:
-
-- API Gateway: entrada pública, roteamento e logs de acesso.
-- NLB interno: encaminhamento de rede para a API privada.
-- API ASP.NET Core: validação de JWT, autorização e regras de negócio.
-
-A criação do NLB a partir do Service Kubernetes mantém a integração natural entre Kubernetes e AWS, evitando a necessidade de gerenciar manualmente os targets dos pods.
+Foi escolhida a combinação NLB explícito, target `instance` e NodePort por manter recursos nomeados e state Terraform explícito, listener ARN determinístico, compatibilidade com o laboratório, ausência de mecanismo legado e menor complexidade operacional sem usar uma identidade IAM inadequada.
 
 ## 5. Consequências
 
 ### Positivas
 
-- A API deixa de possuir um endpoint público direto.
-- O API Gateway se torna a única porta pública da solução.
-- O tráfego entre Gateway e Kubernetes permanece dentro da VPC.
-- O NLB atende à integração privada por VPC Link.
-- O ciclo de vida do Load Balancer continua vinculado ao Service Kubernetes.
-- A arquitetura fica mais segura e mais simples de explicar.
+- O API Gateway é a única entrada pública final.
+- A infraestrutura de rede do private ingress possui ownership explícito e contratos SSM claros.
+- O NLB encaminha apenas para o NodePort, com regra SG por referência ao SG do NLB.
+- A associação ao ASG acompanha a substituição de instâncias do Managed Node Group.
 
 ### Negativas e riscos
 
-- O NLB interno não poderá ser usado diretamente por clientes externos.
-- A API dependerá da configuração correta do API Gateway e do VPC Link.
-- A criação do NLB pode levar alguns minutos após o deploy do Service Kubernetes.
-- O API Gateway dependerá do ARN do listener do NLB antes de criar sua integração privada.
-- Configurações incorretas de sub-rede, grupo de segurança ou anotação do Service podem impedir a comunicação interna.
+- O SG do NLB inicia sem ingress; a futura esteira do API Gateway criará a regra VPC Link → NLB em TCP/80.
+- Até o PR posterior criar o Service NodePort, o Target Group pode não possuir alvo saudável. Isso não representa prontidão E2E.
+- O Classic Load Balancer público existente só será removido após a validação E2E documentada no backlog F3-012.
 
 ## 6. Referências
 
 - ADR-0009 — Load Balancer provisionado via Kubernetes Service.
 - ADR-0015 — Uso do AWS API Gateway como Porta Pública Única.
 - RFC-0002 — API Gateway com VPC Link e NLB Interno.
+- RFC-0003 — Separação de Esteiras por Recurso e Responsabilidade.
+- RFC-0004 — Compartilhamento de Outputs entre Esteiras via AWS Systems Manager Parameter Store.
 - Tech Challenge FIAP — Fase 3.
