@@ -59,9 +59,9 @@ As migrations e os dados de seed continuarão sendo responsabilidade da aplicaç
 
 ### Infraestrutura Kubernetes
 
-O repositório `oficina-mecanica-infra-kubernetes` será responsável pelo cluster EKS, node groups, repositório ECR e complementos de infraestrutura do cluster.
+O repositório `oficina-mecanica-infra-kubernetes` será responsável pelo cluster EKS, node groups, repositório ECR e complementos de infraestrutura do cluster, incluindo o private ingress AWS associado ao cluster: NLB, Target Group, listener, Security Group do NLB e vínculo do Target Group ao ASG.
 
-O repositório da API será responsável pela imagem da aplicação e pelos manifests ou definições de carga de trabalho necessários para executar a API no cluster.
+O repositório da API será responsável pela imagem da aplicação e pelos manifests ou definições de carga de trabalho necessários para executar a API no cluster, incluindo Deployment, HPA, ConfigMap, Secret e Service NodePort. O workload não é movido para a esteira de infraestrutura Kubernetes.
 
 ### Lambda de autenticação
 

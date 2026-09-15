@@ -148,11 +148,11 @@ Usar VPC Link evita que alguém acesse a API diretamente pelo Load Balancer, pul
 
 ### Ajuste necessário no Kubernetes
 
-O `Service` da API deve criar um **NLB interno**, não um Load Balancer público. A esteira da API deve publicar no SSM os dados necessários para o API Gateway, como:
+O NLB interno é criado explicitamente pela esteira `infra-kubernetes`; o Service da API fornecerá o NodePort contratual, sem criar um Load Balancer. A infraestrutura Kubernetes publica os contratos necessários ao API Gateway:
 
-- `/oficina-mecanica/development/api/nlb_dns_name`
-- `/oficina-mecanica/development/api/nlb_listener_arn`
-- `/oficina-mecanica/development/status/api`
+- `/oficina-mecanica/development/kubernetes/api_internal_node_port`
+- `/oficina-mecanica/development/kubernetes/internal_nlb_dns_name`
+- `/oficina-mecanica/development/kubernetes/internal_nlb_listener_arn`
 
 ---
 
@@ -419,8 +419,9 @@ Exemplos de validação real:
 | `/oficina-mecanica/development/kubernetes/ecr_repository_url` | `infra-kubernetes` |
 | `/oficina-mecanica/development/auth-lambda/function_arn` | `auth-lambda` |
 | `/oficina-mecanica/development/auth-lambda/jwt_secret_arn` | `auth-lambda` |
-| `/oficina-mecanica/development/api/nlb_dns_name` | `api` |
-| `/oficina-mecanica/development/api/nlb_listener_arn` | `api` |
+| `/oficina-mecanica/development/kubernetes/api_internal_node_port` | `infra-kubernetes` |
+| `/oficina-mecanica/development/kubernetes/internal_nlb_dns_name` | `infra-kubernetes` |
+| `/oficina-mecanica/development/kubernetes/internal_nlb_listener_arn` | `infra-kubernetes` |
 
 > Se o LabRole bloquear `ssm:PutParameter`, documentar fallback por GitHub Repository Variables. Mas o plano principal usa SSM.
 

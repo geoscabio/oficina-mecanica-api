@@ -13,7 +13,7 @@ Exemplos:
 - O RDS e o EKS dependem da VPC.
 - A Lambda depende da rede e do RDS.
 - A API depende do EKS, do ECR e do RDS.
-- O API Gateway depende da Lambda e do NLB interno publicado pela API.
+- O API Gateway depende da Lambda e do listener do NLB interno publicado pela infraestrutura Kubernetes.
 
 O ambiente será utilizado no AWS Academy Learner Lab, onde os recursos podem ser temporários e precisam ser destruídos de forma controlada após demonstrações ou testes.
 
@@ -42,10 +42,11 @@ O provisionamento deverá respeitar a seguinte ordem:
 
 ```text
 1. oficina-mecanica-infra-vpc
-2. oficina-mecanica-infra-kubernetes e oficina-mecanica-infra-rds
-3. oficina-mecanica-auth-lambda
-4. oficina-mecanica-api
-5. oficina-mecanica-infra-api-gateway
+2. oficina-mecanica-infra-kubernetes: EKS, node group, ECR e NLB/Target Group/listener do private ingress
+3. oficina-mecanica-infra-rds
+4. oficina-mecanica-api: workload e Service NodePort
+5. oficina-mecanica-auth-lambda
+6. oficina-mecanica-infra-api-gateway: HTTP API e VPC Link
 ```
 
 As esteiras de Kubernetes e RDS poderão ser executadas em paralelo após a criação bem-sucedida da VPC.
@@ -57,11 +58,12 @@ Nenhuma esteira poderá executar apply quando seus parâmetros obrigatórios ou 
 A destruição deverá seguir a ordem inversa:
 
 ```text
-1. oficina-mecanica-infra-api-gateway
-2. oficina-mecanica-api
+1. oficina-mecanica-infra-api-gateway: API Gateway e VPC Link
+2. oficina-mecanica-api: workload e Service NodePort
 3. oficina-mecanica-auth-lambda
-4. oficina-mecanica-infra-kubernetes e oficina-mecanica-infra-rds
-5. oficina-mecanica-infra-vpc
+4. oficina-mecanica-infra-rds
+5. oficina-mecanica-infra-kubernetes: NLB/Target Group/listener e EKS
+6. oficina-mecanica-infra-vpc
 ```
 
 Uma esteira não poderá executar destroy caso existam recursos dependentes ativos.
