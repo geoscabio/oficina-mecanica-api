@@ -11,5 +11,9 @@ resource "kubernetes_config_map_v1" "oficina_mecanica_api" {
     ASPNETCORE_URLS                    = "http://+:8080"
     Database__ApplyMigrationsOnStartup = "true"
     Database__SeedDemoData             = "true"
+    DD_ENV                             = "development"
+    DD_LOGS_INJECTION                  = "true"
+    DD_SERVICE                         = "oficina-mecanica-api"
+    DD_VERSION                         = local.api_version
   }
 }

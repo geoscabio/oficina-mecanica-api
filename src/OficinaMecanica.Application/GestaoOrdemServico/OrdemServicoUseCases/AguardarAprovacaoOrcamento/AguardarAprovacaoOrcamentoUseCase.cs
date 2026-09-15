@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using OficinaMecanica.Application.Common;
 using OficinaMecanica.Application.GestaoOrdemServico.OrdemServicoUseCases.Responses;
 using OficinaMecanica.Domain.GestaoOrdemServico.Interfaces;
@@ -12,12 +13,14 @@ public sealed class AguardarAprovacaoOrcamentoUseCase
     private readonly IOrdemServicoRepository _ordemServicoRepository;
     private readonly IValidator<AguardarAprovacaoOrcamentoRequest> _validator;
     private readonly IMapper _mapper;
+    private readonly ILogger<AguardarAprovacaoOrcamentoUseCase> _logger;
 
-    public AguardarAprovacaoOrcamentoUseCase(IOrdemServicoRepository ordemServicoRepository, IValidator<AguardarAprovacaoOrcamentoRequest> validator, IMapper mapper)
+    public AguardarAprovacaoOrcamentoUseCase(IOrdemServicoRepository ordemServicoRepository, IValidator<AguardarAprovacaoOrcamentoRequest> validator, IMapper mapper, ILogger<AguardarAprovacaoOrcamentoUseCase> logger)
     {
         _ordemServicoRepository = ordemServicoRepository;
         _validator = validator;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<Result<OrdemServicoResponse>> ExecuteAsync(AguardarAprovacaoOrcamentoRequest request, CancellationToken cancellationToken = default)
@@ -40,7 +43,13 @@ public sealed class AguardarAprovacaoOrcamentoUseCase
 
         await _ordemServicoRepository.AtualizarAsync(ordemServico, cancellationToken);
 
+        _logger.LogInformation(
+            "Ordem de servico {OrdemServicoId} aguarda aprovacao com status {OrdemServicoStatus}. {operation} {bounded_context}",
+            ordemServico.Id,
+            ordemServico.Status,
+            "AguardarAprovacaoOrcamento",
+            "GestaoOrdemServico");
+
         return Result<OrdemServicoResponse>.Ok(_mapper.Map<OrdemServicoResponse>(ordemServico));
     }
 }
-
