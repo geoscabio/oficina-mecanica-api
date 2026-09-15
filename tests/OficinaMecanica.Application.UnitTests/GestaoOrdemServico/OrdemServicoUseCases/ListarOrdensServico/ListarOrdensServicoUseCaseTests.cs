@@ -97,6 +97,39 @@ public class ListarOrdensServicoUseCaseTests
     }
 
     [Fact]
+    public async Task Dado_ClienteId_Quando_ListarOrdensServico_Entao_DeveFiltrarPeloClienteAutenticado()
+    {
+        // Arrange
+        var clienteId = Guid.NewGuid();
+        var ordensServico = new[] { OrdemServicoTestDataFactory.CriarOrdemServicoRecebida() };
+        var repository = new Mock<IOrdemServicoRepository>();
+
+        repository
+            .Setup(repo => repo.ListarPorClienteAsync(clienteId, OrdemServicoTestDataFactory.PaginaPadrao, OrdemServicoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ordensServico);
+        repository
+            .Setup(repo => repo.ContarPorClienteAsync(clienteId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ordensServico.Length);
+
+        var useCase = CriarUseCase(repository);
+        var request = new ListarOrdensServicoRequest(
+            OrdemServicoTestDataFactory.PaginaPadrao,
+            OrdemServicoTestDataFactory.TamanhoPaginaPadrao,
+            clienteId);
+
+        // Act
+        var resultado = await useCase.ExecuteAsync(request);
+
+        // Assert
+        resultado.Sucesso.Should().BeTrue();
+        resultado.Valor!.Itens.Should().ContainSingle();
+        repository.Verify(repo => repo.ListarPorClienteAsync(clienteId, OrdemServicoTestDataFactory.PaginaPadrao, OrdemServicoTestDataFactory.TamanhoPaginaPadrao, It.IsAny<CancellationToken>()), Times.Once);
+        repository.Verify(repo => repo.ContarPorClienteAsync(clienteId, It.IsAny<CancellationToken>()), Times.Once);
+        repository.Verify(repo => repo.ListarAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        repository.Verify(repo => repo.ContarAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
     public async Task Dado_PaginaInvalida_Quando_ListarOrdensServico_Entao_DeveRetornarFalhaDeValidacao()
     {
         // Arrange

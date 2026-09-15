@@ -69,6 +69,24 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
         return _dbContext.OrdensServico.CountAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<OrdemServico>> ListarPorClienteAsync(Guid clienteId, int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
+    {
+        return await ObterOrdensServicoComDetalhes()
+            .Where(ordemServico => _dbContext.Veiculos.Any(veiculo => veiculo.Id == ordemServico.VeiculoId && veiculo.ClienteId == clienteId))
+            .OrderByDescending(ordemServico => ordemServico.DataInicio)
+            .ThenByDescending(ordemServico => ordemServico.Numero)
+            .Skip((pagina - 1) * tamanhoPagina)
+            .Take(tamanhoPagina)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public Task<int> ContarPorClienteAsync(Guid clienteId, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.OrdensServico.CountAsync(
+            ordemServico => _dbContext.Veiculos.Any(veiculo => veiculo.Id == ordemServico.VeiculoId && veiculo.ClienteId == clienteId),
+            cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<OrdemServico>> ListarAbertasAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
     {
         return await ObterOrdensServicoAbertas()
@@ -132,4 +150,3 @@ public sealed class OrdemServicoRepository : IOrdemServicoRepository
             .Where(ordemServico => StatusAbertos.Contains(ordemServico.Status));
     }
 }
-

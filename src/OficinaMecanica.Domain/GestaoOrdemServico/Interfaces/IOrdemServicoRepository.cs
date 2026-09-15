@@ -10,6 +10,8 @@ public interface IOrdemServicoRepository
     Task<int> ObterProximoNumeroAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyCollection<OrdemServico>> ListarAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default);
     Task<int> ContarAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<OrdemServico>> ListarPorClienteAsync(Guid clienteId, int pagina, int tamanhoPagina, CancellationToken cancellationToken = default);
+    Task<int> ContarPorClienteAsync(Guid clienteId, CancellationToken cancellationToken = default);
     Task<IReadOnlyCollection<OrdemServico>> ListarAbertasAsync(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default);
     Task<int> ContarAbertasAsync(CancellationToken cancellationToken = default);
     Task<double?> ObterTempoMedioExecucaoServicoAsync(Guid servicoCatalogoId, CancellationToken cancellationToken = default);

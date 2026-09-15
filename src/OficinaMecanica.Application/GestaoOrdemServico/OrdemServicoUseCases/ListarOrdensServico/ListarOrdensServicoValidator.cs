@@ -14,5 +14,9 @@ public sealed class ListarOrdensServicoValidator : AbstractValidator<ListarOrden
         RuleFor(request => request.TamanhoPagina)
             .InclusiveBetween(1, 100)
             .WithMessage(OrdemServicoValidationMessages.TamanhoPaginaInvalido);
+
+        RuleFor(request => request.ClienteId)
+            .NotEqual(Guid.Empty)
+            .When(request => request.ClienteId.HasValue);
     }
 }
