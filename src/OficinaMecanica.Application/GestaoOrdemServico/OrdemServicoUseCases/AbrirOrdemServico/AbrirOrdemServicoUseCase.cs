@@ -101,12 +101,15 @@ public sealed class AbrirOrdemServicoUseCase
         var resultadoReserva = await ReservarPecasInsumosAsync(ordemServico, pecasInsumos, cancellationToken);
         if (!resultadoReserva.Sucesso)
         {
-            _logger.LogWarning(
-                "Falha ao processar a abertura da ordem de servico {OrdemServicoId}: {failure_reason}. {operation} {bounded_context}",
-                ordemServico.Id,
-                resultadoReserva.Erro!.Mensagem,
-                "AbrirOrdemServico",
-                "GestaoOrdemServico");
+            if (IsStockProcessingFailure(resultadoReserva.Erro!.Mensagem))
+            {
+                _logger.LogWarning(
+                    "Falha ao processar a abertura da ordem de servico {OrdemServicoId}: {failure_reason}. {operation} {bounded_context}",
+                    ordemServico.Id,
+                    resultadoReserva.Erro.Mensagem,
+                    "AbrirOrdemServico",
+                    "GestaoOrdemServico");
+            }
 
             return Result<OrdemServicoResponse>.Falha(resultadoReserva.Erro!.Mensagem, resultadoReserva.Erro.Tipo);
         }
@@ -217,5 +220,11 @@ public sealed class AbrirOrdemServicoUseCase
     private static bool ExisteEstoqueDisponivel(Estoque estoque, IEnumerable<PecaInsumoRequest> pecasInsumos)
     {
         return pecasInsumos.All(pecaInsumo => estoque.VerificarDisponibilidade(pecaInsumo.PecaInsumoCatalogoId, pecaInsumo.Quantidade));
+    }
+
+    private static bool IsStockProcessingFailure(string failureReason)
+    {
+        return failureReason == EstoqueErrorMessages.EstoqueNaoEncontrado
+            || failureReason == EstoqueErrorMessages.EstoqueInsuficiente;
     }
 }
