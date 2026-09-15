@@ -1,6 +1,11 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using FluentAssertions;
+using Microsoft.IdentityModel.Tokens;
 using OficinaMecanica.API.IntegrationTests.Administrativo.Builders;
 using OficinaMecanica.API.IntegrationTests.Atendimento.Builders;
 using OficinaMecanica.API.IntegrationTests.Fixtures;
@@ -216,6 +221,67 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         ObterString(response, "tipo").Should().Be("NaoAutorizado");
     }
 
+    [RequiresDockerFact]
+    public async Task Dado_ClienteAutenticado_Quando_ListarPropriasOrdens_Entao_DeveRetornarSomenteOrdensDoCliente()
+    {
+        // Arrange
+        var clienteId = await CadastrarClienteAsync();
+        var outroClienteId = await CadastrarClienteAsync();
+        var mecanicoId = await CadastrarMecanicoAsync();
+        var ordemClienteId = await CriarOrdemServicoRecebidaAsync(clienteId, mecanicoId, "CLI-1001");
+        var ordemOutroClienteId = await CriarOrdemServicoRecebidaAsync(outroClienteId, mecanicoId, "CLI-1002");
+
+        AutenticarComoClienteComClaim(clienteId.ToString());
+
+        // Act
+        var response = await GetJsonAsync("/api/v1/clientes/me/ordens-servico");
+        var itens = response.GetProperty("itens").EnumerateArray().ToArray();
+
+        // Assert
+        response.GetProperty("totalItens").GetInt32().Should().Be(1);
+        itens.Should().ContainSingle();
+        itens.Select(item => ObterGuid(item, "id")).Should().Contain(ordemClienteId);
+        itens.Select(item => ObterGuid(item, "id")).Should().NotContain(ordemOutroClienteId);
+    }
+
+    [RequiresDockerFact]
+    public async Task Dado_RequisicaoSemJwt_Quando_ListarPropriasOrdens_Entao_DeveRetornarNaoAutorizado()
+    {
+        Client.DefaultRequestHeaders.Authorization = null;
+
+        var response = await Client.GetAsync("/api/v1/clientes/me/ordens-servico");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [RequiresDockerFact]
+    public async Task Dado_AdministradorAutenticado_Quando_ListarPropriasOrdens_Entao_DeveRetornarProibido()
+    {
+        var response = await Client.GetAsync("/api/v1/clientes/me/ordens-servico");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [RequiresDockerFact]
+    public async Task Dado_ClienteSemClienteId_Quando_ListarPropriasOrdens_Entao_DeveFalharComSeguranca()
+    {
+        AutenticarComoClienteComClaim(clienteId: null);
+
+        var response = await Client.GetAsync("/api/v1/clientes/me/ordens-servico");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [RequiresDockerFact]
+    public async Task Dado_ClienteComClienteIdInvalido_Quando_ListarPropriasOrdens_Entao_DeveFalharComSeguranca()
+    {
+        AutenticarComoClienteComClaim("cliente-id-invalido");
+
+        var response = await Client.GetAsync("/api/v1/clientes/me/ordens-servico");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
     private async Task<Guid> CadastrarClienteAsync()
     {
         var response = await PostJsonAsync("/api/v1/atendimento/clientes/cadastrar", ClienteRequestBuilder.Novo().BuildCadastro(), HttpStatusCode.Created);
@@ -350,6 +416,34 @@ public sealed class OrdensServicoControllerTests : ApiIntegrationTestBase
         Client.DefaultRequestHeaders.Remove("X-Webhook-Token");
         Client.DefaultRequestHeaders.Add("X-Webhook-Token", "webhook-orcamento-teste-local-2026");
     }
+
+    private void AutenticarComoClienteComClaim(string? clienteId)
+    {
+        const string secret = "oficina-mecanica-api-chave-academica-jwt-2026";
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, Guid.NewGuid().ToString()),
+            new("role", "Cliente"),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        if (clienteId is not null)
+        {
+            claims.Add(new Claim("cliente_id", clienteId));
+        }
+
+        var credentials = new SigningCredentials(
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
+            SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityTokenHandler().WriteToken(
+            new JwtSecurityToken(
+                "oficina-mecanica-auth",
+                "oficina-mecanica-api",
+                claims,
+                expires: DateTime.UtcNow.AddMinutes(60),
+                signingCredentials: credentials));
+
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    }
 }
-
-

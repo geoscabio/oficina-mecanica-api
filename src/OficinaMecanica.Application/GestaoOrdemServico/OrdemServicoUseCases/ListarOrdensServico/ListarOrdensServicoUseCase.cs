@@ -28,12 +28,16 @@ public sealed class ListarOrdensServicoUseCase
             return Result<PagedResult<OrdemServicoResponse>>.Falha(validationResult.ObterMensagensErro(), TipoErro.Validacao);
         }
 
-        var ordensServico = await _ordemServicoRepository.ListarAsync(request.Pagina, request.TamanhoPagina, cancellationToken);
-        var totalItens = await _ordemServicoRepository.ContarAsync(cancellationToken);
+        var ordensServico = request.ClienteId.HasValue
+            ? await _ordemServicoRepository.ListarPorClienteAsync(request.ClienteId.Value, request.Pagina, request.TamanhoPagina, cancellationToken)
+            : await _ordemServicoRepository.ListarAsync(request.Pagina, request.TamanhoPagina, cancellationToken);
+
+        var totalItens = request.ClienteId.HasValue
+            ? await _ordemServicoRepository.ContarPorClienteAsync(request.ClienteId.Value, cancellationToken)
+            : await _ordemServicoRepository.ContarAsync(cancellationToken);
         var response = _mapper.Map<IReadOnlyCollection<OrdemServicoResponse>>(ordensServico);
         var pagedResult = new PagedResult<OrdemServicoResponse>(response, request.Pagina, request.TamanhoPagina, totalItens);
 
         return Result<PagedResult<OrdemServicoResponse>>.Ok(pagedResult);
     }
 }
-
