@@ -32,11 +32,13 @@ Cliente
   → API Gateway
   → VPC Link
   → NLB interno
+  → Target Group (instance)
+  → EKS Managed Node Group / NodePort
   → Service Kubernetes
   → Pods da oficina-mecanica-api
 ```
 
-O NLB será interno e não terá exposição pública. O API Gateway será o único componente acessível diretamente pela internet.
+O NLB será interno e não terá exposição pública. Ele será provisionado explicitamente pelo repositório `oficina-mecanica-infra-kubernetes`, e não pelo Service Kubernetes. O backend usará Target Group `instance` e o NodePort contratual da API; o ARN do listener será publicado pelo Parameter Store para a esteira do API Gateway. O API Gateway será o único componente acessível diretamente pela internet.
 
 ## Roteamento
 
