@@ -43,10 +43,10 @@
 
 - Nenhuma tolerância a falha de instância: se o RDS cair, não há failover automático.
 - Nenhum backup para recuperação de dados — aceitável apenas porque o ambiente não guarda dado real de produção.
-- Um design de produção real exigiria, no mínimo, Multi-AZ, backup retention adequado e `deletion_protection = true` (ver "Evolução pós-entrega" em `docs/projeto/pendencias.md`).
+- Um design de produção real exigiria, no mínimo, Multi-AZ, backup retention adequado e `deletion_protection = true` (ver itens pós-entrega em [`docs/projeto/backlog-tecnico.md`](../../projeto/backlog-tecnico.md)).
 
 ## 6. Referências
 
 - **FIAP, Pós-Tech Software Architecture.** [Enunciado do Tech Challenge — Fase 2](../../projeto/enunciado-fase-2-tech-challenge.pdf), seção "Infraestrutura como Código (IaC)".
 - **AWS.** *Amazon RDS Multi-AZ Deployments*. 2026.
-- Configuração real: [`infra/terraform/environments/dev/rds.tf`](../../../infra/terraform/environments/dev/rds.tf).
+- Configuração real: [`infra/terraform/environments/dev/rds.tf`](https://github.com/geoscabio/oficina-mecanica-infra-rds/blob/develop/infra/terraform/environments/dev/rds.tf), no repositório dedicado de RDS.

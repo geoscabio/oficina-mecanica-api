@@ -2,13 +2,14 @@
 
 API REST para atendimento, execução e acompanhamento de ordens de serviço em uma oficina mecânica.
 
-Projeto desenvolvido para o **Tech Challenge - Fase 2 da Pós Tech FIAP em Arquitetura de Software**, com foco em Clean Architecture, modelagem de domínio, execução containerizada, Kubernetes, AWS e rastreabilidade de qualidade via CI/CD.
+Projeto desenvolvido para o **Tech Challenge — Fase 3 da Pós Tech FIAP em Arquitetura de Software**, com foco em Clean Architecture, modelagem de domínio, autenticação serverless, execução em Kubernetes, AWS, observabilidade e rastreabilidade de qualidade via CI/CD.
 
 ---
 
 ## 📌 Índice
 
 - [✨ Visão geral](#visao-geral)
+- [🧩 Repositórios da solução](#repositorios-da-solucao)
 - [✅ Funcionalidades](#funcionalidades)
 - [🏗️ Arquitetura](#arquitetura)
 - [🧭 Documentação e diagramas](#documentacao-e-diagramas)
@@ -21,6 +22,7 @@ Projeto desenvolvido para o **Tech Challenge - Fase 2 da Pós Tech FIAP em Arqui
 - [🌿 Convenção Git Flow](#convencao-git-flow)
 - [🧪 Testes e qualidade](#testes-e-qualidade)
 - [🔐 Autenticação](#autenticacao)
+- [📊 Observabilidade](#observabilidade)
 - [📚 Swagger, OpenAPI e collection](#swagger-openapi-collection)
 - [🗄️ Banco de dados e seed](#banco-de-dados-e-seed)
 
@@ -36,8 +38,25 @@ A solução simula um sistema integrado para uma oficina mecânica, cobrindo o f
 | --- | --- |
 | 👩‍💼 **Atendente** | Cadastra clientes e veículos, abre ordens de serviço, acompanha orçamento e registra entrega. |
 | 👨‍🔧 **Mecânico** | Inicia diagnóstico, define serviços, reserva peças, executa e finaliza serviços. |
-| 👤 **Cliente** | Consulta publicamente o status da ordem de serviço. |
+| 👤 **Cliente** | Consulta o status das próprias ordens de serviço com JWT emitido pela Auth Lambda. |
 | 🛠️ **Administrador** | Opera cadastros administrativos e apoia a gestão da oficina. |
+
+---
+
+<a id="repositorios-da-solucao"></a>
+
+## 🧩 Repositórios da solução
+
+Este README é a porta de entrada da solução. Cada infraestrutura possui repositório e pipeline próprios.
+
+| Repositório | Responsabilidade |
+| --- | --- |
+| [`oficina-mecanica-api`](https://github.com/geoscabio/oficina-mecanica-api) | API .NET, regras de negócio, testes e workload Kubernetes. |
+| [`oficina-mecanica-infra-vpc`](https://github.com/geoscabio/oficina-mecanica-infra-vpc) | Rede base, subnets, NAT e contratos de VPC no SSM. |
+| [`oficina-mecanica-infra-kubernetes`](https://github.com/geoscabio/oficina-mecanica-infra-kubernetes) | EKS, ECR, NLB interno e Datadog no cluster. |
+| [`oficina-mecanica-infra-rds`](https://github.com/geoscabio/oficina-mecanica-infra-rds) | SQL Server privado, credenciais gerenciadas e contratos de banco no SSM. |
+| [`oficina-mecanica-auth-lambda`](https://github.com/geoscabio/oficina-mecanica-auth-lambda) | Autenticação por documento e emissão do JWT de Cliente. |
+| [`oficina-mecanica-infra-api-gateway`](https://github.com/geoscabio/oficina-mecanica-infra-api-gateway) | HTTP API pública, VPC Link, integrações e access logs. |
 
 ---
 
@@ -78,6 +97,18 @@ Fluxos alternativos como estoque insuficiente, reprovação de orçamento, cance
 ## 🏗️ Arquitetura
 
 O projeto adota **Clean Architecture** em um **monólito modular**, preservando o domínio de detalhes externos como HTTP, Swagger, banco de dados e infraestrutura.
+
+A arquitetura final da Fase 3 mantém o API Gateway como entrada pública única:
+
+```text
+Internet
+  -> API Gateway HTTP API
+      -> POST /auth/documento -> Auth Lambda -> RDS
+      -> ANY /api/{proxy+} -> VPC Link -> NLB interno
+         -> EKS NodePort -> API Pods -> RDS
+```
+
+O NLB é interno e encaminha tráfego ao Service `NodePort`; não há acesso público direto à API no EKS.
 
 | Camada | Projeto | Responsabilidade |
 | --- | --- | --- |
@@ -266,14 +297,16 @@ A infraestrutura AWS real é provisionada por Terraform para o ambiente `develop
 
 ### Fluxo operacional
 
-1. Configurar credenciais e secrets no GitHub Environment `development`.
-2. Conferir o arquivo `infra/terraform/environments/dev/terraform-action.env`.
-3. Integrar feature em `develop`.
-4. Se a alteração não impactar runtime, como documentação, Markdown ou configuração da esteira, o CD pula o deploy AWS e pode abrir PR para `release`.
-5. Se `TERRAFORM_ACTION=apply`, a esteira garante o ECR, publica a imagem, aplica Terraform, faz deploy no EKS e abre PR automático para `release`.
-6. Se `TERRAFORM_ACTION=destroy`, a esteira executa `terraform destroy` usando o mesmo backend/state e não promove PR para `release`.
-7. O merge em `release` valida a release, registra deploy lógico em `homologation` e abre PR automático para `main`.
-8. O merge em `main` exige revisão/proteção e registra deploy lógico em `production`.
+1. Provisionar a VPC pelo repositório `oficina-mecanica-infra-vpc`.
+2. Provisionar Kubernetes/ECR e RDS por seus repositórios; essas duas esteiras podem evoluir em paralelo após a VPC.
+3. Publicar a imagem e o workload da API por este repositório.
+4. Provisionar a Auth Lambda.
+5. Provisionar o API Gateway por último, quando NLB e Lambda estiverem disponíveis.
+6. Instalar/validar o Datadog no EKS pelo workflow do repositório Kubernetes e validar a instrumentação da API.
+7. Em cada repositório, integrar a branch de trabalho em `develop`; mudanças deployáveis executam o pipeline próprio e alterações exclusivamente documentais pulam a AWS.
+8. Promover por PR para `release` e `main` somente após o estágio anterior concluir com sucesso.
+
+Os comandos de execução, dependências, outputs SSM, secrets e procedimento de `destroy` estão documentados no README de cada repositório. A ordem de destruição é a inversa, mantendo a VPC por último.
 
 ### Controle apply/destroy pela esteira
 
@@ -438,7 +471,7 @@ Arquivos de evidência:
 
 ## 🔐 Autenticação
 
-Endpoint:
+Para usuários internos, permanece disponível o login da API:
 
 ```http
 POST /api/v1/identidade/autenticacao/login
@@ -460,6 +493,36 @@ Bearer <token>
 
 Consulta pública de status não exige autenticação.
 
+Na Fase 3, clientes autenticam pelo ponto de entrada público:
+
+```http
+POST /auth/documento
+```
+
+O cenário demonstrado usa CPF. A Auth Lambda valida o documento e o status do cliente, consulta o RDS e emite um JWT de Cliente sem transportar CPF/CNPJ. Esse token autoriza a rota protegida:
+
+```http
+GET /api/v1/clientes/me/ordens-servico
+```
+
+Essa rota obtém a identidade exclusivamente do claim `cliente_id`; não aceita substituir o cliente por parâmetro de rota ou query string.
+
+---
+
+<a id="observabilidade"></a>
+
+## 📊 Observabilidade
+
+A observabilidade da aplicação e do cluster usa Datadog:
+
+- Agent e Cluster Agent no EKS;
+- APM, traces e logs correlacionados da API;
+- métricas de CPU e memória;
+- latência P95, error rate e healthcheck;
+- logs ao vivo e dashboard da entrega.
+
+A Auth Lambda possui layers e variáveis de instrumentação Datadog e armazena a API key no AWS Secrets Manager. Entretanto, a ingestão de logs e traces da Lambda não foi evidenciada de ponta a ponta no ambiente acadêmico; essa lacuna permanece registrada como evolução pós-entrega. O API Gateway publica access logs no CloudWatch, sem afirmar a existência de um Datadog Forwarder que não foi validado.
+
 ---
 
 <a id="swagger-openapi-collection"></a>
@@ -470,11 +533,11 @@ Consulta pública de status não exige autenticação.
 | --- | --- |
 | Swagger local | `http://localhost:5093/swagger` |
 | OpenAPI local | `http://localhost:5093/swagger/v1/swagger.json` |
-| OpenAPI versionado | [`docs/openapi/oficina-mecanica-openapi.json`](docs/openapi/oficina-mecanica-openapi.json) |
-| Collection Postman pronta | [`docs/postman/oficina-mecanica-api.postman_collection.json`](docs/postman/oficina-mecanica-api.postman_collection.json) |
+| OpenAPI versionado (referência da Fase 2) | [`docs/openapi/oficina-mecanica-openapi.json`](docs/openapi/oficina-mecanica-openapi.json) |
+| Collection Postman (referência da Fase 2) | [`docs/postman/oficina-mecanica-api.postman_collection.json`](docs/postman/oficina-mecanica-api.postman_collection.json) |
 | Environments Postman | [`local`](docs/postman/oficina-mecanica-local.postman_environment.json) · [`AWS dev`](docs/postman/oficina-mecanica-aws-dev.postman_environment.json) |
 
-O arquivo OpenAPI versionado pode ser importado como collection no Postman, Insomnia ou Bruno. Como alternativa mais rapida, a collection e os environments do Postman já prontos estão em [`docs/postman/`](docs/postman/) — detalhes de uso em [`docs/evidencias/postman.md`](docs/evidencias/postman.md).
+O Swagger runtime é gerado pela aplicação atual e permanece a fonte mais fiel para explorar os endpoints executados. O OpenAPI e a collection Postman versionados ainda refletem a Fase 2 e não incluem integralmente o fluxo da Fase 3; sua atualização final está registrada como evolução pós-entrega. Não os use como evidência de cobertura do endpoint `POST /auth/documento`.
 
 ---
 
