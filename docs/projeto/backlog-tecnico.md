@@ -24,18 +24,18 @@ Este backlog guarda melhorias técnicas, itens de código e evoluções operacio
 
 | ID | Prioridade | Horizonte | Área | Item | Critério de aceite | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `F3-001` | `P0` | Fase 3 | Autenticação | Criar uma Lambda de autenticação por documento, em repositório próprio, emitindo JWT somente para Cliente ativo. | `POST /auth/documento` valida e identifica CPF ou CNPJ, consulta por `Documento + TipoDocumento` e emite JWT com os claims aprovados; o cenário CPF é obrigatório para aceite e demonstração da Fase 3. | Bloqueado |
-| `F3-002` | `P0` | Fase 3 | API | Alinhar a API ao contrato único de JWT e manter a autorização dentro da aplicação. | Contrato-base JWT alinhado e compatibilidade com futuro token de Cliente preparada; a exigência definitiva de `cliente_id` e a remoção do perfil `Cliente` do login interno permanecem condicionadas ao fluxo por documento para CPF e CNPJ em `F3-001`. | Em andamento |
-| `F3-003` | `P0` | Fase 3 | Banco | Usar banco gerenciado no RDS, com credenciais e rede compatíveis com os consumidores da Fase 3. | RDS provisionado por Terraform, credenciais em Secrets Manager, referência não secreta publicada somente após decisão e acesso da API/Lambda comprovado em ambiente de demonstração. | Em andamento |
-| `F3-004` | `P0` | Fase 3 | Kubernetes | Executar a API em Kubernetes com escalabilidade. | API publicada no EKS, healthcheck funcional e HPA evidenciado. | Em andamento |
-| `F3-005` | `P0` | Fase 3 | API Gateway | Expor a entrada pública via API Gateway, depois de fechar o contrato da Lambda e da integração. | Gateway usa o tipo de payload acordado, roteia `POST /auth/documento` para Lambda e `/api/*` para API no Kubernetes sem transformar silenciosamente request, response ou erros. | Bloqueado |
-| `F3-006` | `P0` | Fase 3 | Terraform | Separar infraestrutura em repositórios/esteiras por recurso. | Repositórios criados com README, Terraform, CI e instruções de apply/destroy. O repositório RDS permanece dono do Security Group do RDS e pode manter a regra TCP/1433 necessária para o EKS, pois Kubernetes existe antes do RDS. A Auth Lambda possui Security Group próprio e cria, no seu repositório, a regra de ingress TCP/1433 no SG do RDS, usando o SG do RDS obtido via SSM e o SG da Lambda como origem, sem fazer o RDS depender da Lambda. | Em andamento |
-| `F3-007` | `P0` | Fase 3 | CI/CD | Manter branch protegida, PR obrigatório e quality gate. | Branches principais protegidas, PR, aprovação e CI exigidos antes do merge; a nova Lambda nasce usando o padrão maduro de CI/CD, sem herdar divergências históricas. | Em andamento |
-| `F3-008` | `P0` | Fase 3 | Observabilidade | Enviar logs, métricas e traces para Datadog. | Datadog mostra API, Lambda, Gateway e Kubernetes com tags padronizadas. | A fazer |
-| `F3-009` | `P0` | Fase 3 | Observabilidade | Criar dashboards e alertas pedidos no enunciado. | Evidências de latência, CPU/memória, healthcheck, uptime e falhas de ordem de serviço. | A fazer |
-| `F3-010` | `P0` | Fase 3 | Documentação | Consolidar diagramas, ADRs/RFCs, vídeo e PDF final. | Documentação explica requisitos, decisões, execução e evidências da entrega. | A fazer |
-| `F3-011` | `P0` | Fase 3 | Rede | Garantir entrada pública única pelo API Gateway e backend privado da API. | Fluxo final: Internet → API Gateway → VPC Link → Load Balancer interno compatível → API no EKS. `/auth/documento` integra com a Auth Lambda e `/api/*` encaminha à API no EKS, sem Load Balancer da API acessível diretamente pela Internet ou bypass do API Gateway; o healthcheck permanece funcional pelo caminho aprovado. A implementação deve configurar explicitamente scheme interno, tipo de Load Balancer compatível com VPC Link e contrato/identificador para o repositório API Gateway localizar a integração; o Service atual apenas `type = LoadBalancer` e não deve ser assumido como NLB. | A fazer |
-| `F3-012` | `P0` | Fase 3 | Rede / Cutover | Remover a exposição pública direta da API somente após validação E2E completa do novo private ingress. | `POST /auth/documento` pelo API Gateway retorna `200`; `/api/health` pelo API Gateway retorna `200`; rota protegida sem JWT retorna `401`; rota protegida com JWT válido de Cliente retorna `403`; VPC Link está `AVAILABLE`; NLB possui targets healthy; Service público é removido somente depois dessas evidências; Classic ELB deixa de existir; API Gateway é confirmado como única entrada pública. | A fazer |
+| `F3-001` | `P0` | Fase 3 | Autenticação | Criar uma Lambda de autenticação por documento, em repositório próprio, emitindo JWT somente para Cliente ativo. | `POST /auth/documento` valida CPF ou CNPJ, consulta por `Documento + TipoDocumento` e emite JWT com os claims aprovados; o cenário CPF foi adotado na demonstração. | Concluído |
+| `F3-002` | `P0` | Fase 3 | API | Alinhar a API ao contrato único de JWT e manter a autorização dentro da aplicação. | JWT de Cliente usa `sub`, `cliente_id`, `role`, `jti`, `iss`, `aud` e expiração, sem documento ou hash. | Concluído |
+| `F3-003` | `P0` | Fase 3 | Banco | Usar banco gerenciado no RDS, com credenciais e rede compatíveis com os consumidores da Fase 3. | RDS provisionado por Terraform, credenciais em Secrets Manager e contratos não sensíveis publicados no SSM. | Concluído |
+| `F3-004` | `P0` | Fase 3 | Kubernetes | Executar a API em Kubernetes com escalabilidade. | API publicada no EKS, healthcheck funcional e HPA evidenciado. | Concluído |
+| `F3-005` | `P0` | Fase 3 | API Gateway | Expor a entrada pública via API Gateway. | HTTP API roteia `POST /auth/documento` para Lambda e `ANY /api/{proxy+}` para a API no Kubernetes via VPC Link. | Concluído |
+| `F3-006` | `P0` | Fase 3 | Terraform | Separar infraestrutura em repositórios/esteiras por recurso. | Seis repositórios possuem ownership explícito, Terraform/implementação, CI/CD e instruções operacionais. | Concluído |
+| `F3-007` | `P0` | Fase 3 | CI/CD | Manter branch protegida, PR obrigatório e quality gate. | Esteiras e promoções Git Flow implementadas nos repositórios da solução. | Concluído |
+| `F3-008` | `P0` | Pós-entrega | Observabilidade | Enviar logs, métricas e traces para Datadog. | API e Kubernetes possuem métricas, logs e traces funcionando. Auth Lambda está instrumentada, mas a ingestão Datadog da Lambda não foi evidenciada no ambiente acadêmico. | Em andamento / evolução pós-entrega |
+| `F3-009` | `P0` | Pós-entrega | Observabilidade | Criar dashboards e alertas pedidos no enunciado. | Implementados: latência API, CPU, memória, healthcheck, error rate, logs ao vivo e dashboard Datadog. Restam métricas de negócio, alerta específico de falha de OS e visibilidade completa da Lambda. | Em andamento / evolução pós-entrega |
+| `F3-010` | `P0` | Fase 3 | Documentação | Consolidar diagramas, ADRs/RFCs e documentação final. | READMEs, diagramas, ADRs/RFCs, execução, arquitetura e limitações finais estão documentados sem afirmar evidências inexistentes. | Concluído |
+| `F3-011` | `P0` | Fase 3 | Rede | Garantir entrada pública única pelo API Gateway e backend privado da API. | Internet → API Gateway → VPC Link → NLB interno → NodePort → API no EKS; autenticação segue para a Auth Lambda. | Concluído |
+| `F3-012` | `P0` | Fase 3 | Rede / Cutover | Remover a exposição pública direta da API após validação E2E do private ingress. | VPC Link, NLB interno, NodePort e rotas do Gateway validados; API Gateway é a entrada pública única. | Concluído |
 
 ## Setup inicial de novos repositórios
 
@@ -57,14 +57,14 @@ Este backlog guarda melhorias técnicas, itens de código e evoluções operacio
 | ID | Prioridade | Horizonte | Área | Item | Critério de aceite | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | `CODE-001` | `P0` | Fase 3 | Domínio | Adicionar `StatusCliente` para suportar autenticação de Cliente por documento. | Aggregate/modelo, mapeamento EF, migration e snapshot são atualizados; seed/demo possui cliente ativo e inativo; testes cobrem os documentos CPF e CNPJ nos dois estados. A representação física do status é documentada antes da migration. | Concluído |
-| `CODE-002` | `P0` | Fase 3 | Segurança | Evitar CPF/CNPJ puro em logs, respostas técnicas e JWT. | Logs usam `cliente_id` ou documento mascarado; nenhum log registra CPF/CNPJ completo e o JWT não transporta documento ou hashes sem necessidade funcional. | A fazer |
-| `CODE-003` | `P0` | Fase 3 | Testes | Cobrir fluxo de autenticação e autorização por documento. | Testes validam CPF e CNPJ válidos, documento inválido, cliente inexistente, cliente inativo, `401` sem token, claims sem documento e autorização por papel; o cenário CPF é obrigatório para a demonstração. | Bloqueado |
-| `CODE-004` | `P1` | Antes da demo | Contratos | Atualizar OpenAPI e Postman para os fluxos da Fase 3. | Coleções e ambientes permitem demonstrar `POST /auth/documento` com CPF (obrigatório) e CNPJ, além do consumo com JWT. | A fazer |
-| `CODE-005` | `P1` | Antes da demo | Observabilidade | Padronizar `X-Correlation-Id`, `dd.trace_id` e `dd.span_id`. | Logs da API e Lambda permitem seguir a mesma requisição ponta a ponta. | A fazer |
+| `CODE-002` | `P0` | Fase 3 | Segurança | Evitar CPF/CNPJ puro em logs, respostas técnicas e JWT. | Testes e implementação garantem respostas sanitizadas e JWT sem documento ou hash. | Concluído |
+| `CODE-003` | `P0` | Fase 3 | Testes | Cobrir fluxo de autenticação e autorização por documento. | Testes cobrem CPF/CNPJ, entradas inválidas, cliente inexistente/inativo, claims e autorização. | Concluído |
+| `CODE-004` | `P1` | Pós-entrega | Contratos | Atualizar OpenAPI e Postman versionados para os fluxos da Fase 3. | Artefatos versionados ainda refletem a Fase 2; Swagger runtime representa a API atual. | Evolução pós-entrega |
+| `CODE-005` | `P1` | Fase 3 | Observabilidade | Padronizar `X-Correlation-Id`, `dd.trace_id` e `dd.span_id`. | API e Lambda propagam correlação e a API injeta identificadores Datadog nos logs. | Concluído |
 | `CODE-006` | `P2` | Pós-entrega | Banco | Mover migrations e seed inicial do startup da API para Kubernetes Job versionado. | Deploy da API não executa migration automaticamente no startup. | Não priorizado agora |
 | `CODE-007` | `P2` | Pós-entrega | Banco | Avaliar lock distribuído para migrations concorrentes. | Estratégia definida, por exemplo com `sp_getapplock`, antes de escalar réplicas com migration automática. | Não priorizado agora |
 | `CODE-008` | `P2` | Pós-entrega | Qualidade | Adicionar análise de dependências e vulnerabilidades. | Pipeline publica resultado de auditoria de pacotes sem bloquear indevidamente a entrega acadêmica. | Não priorizado agora |
-| `CODE-009` | `P0` | Fase 3 | API | Criar a rota do próprio cliente para consultar suas ordens de serviço. | `GET /api/v1/clientes/me/ordens-servico` usa somente `cliente_id` validado do JWT, não aceita substituição por parâmetro de rota/query e possui testes de autorização para o papel `Cliente`. | Bloqueado |
+| `CODE-009` | `P0` | Fase 3 | API | Criar a rota do próprio cliente para consultar suas ordens de serviço. | `GET /api/v1/clientes/me/ordens-servico` usa somente `cliente_id` validado do JWT e possui testes de autorização. | Concluído |
 | `CODE-010` | `P1` | Antes da demo | Segredos locais | Substituir o segredo local versionado no manifesto Kubernetes. | `k8s/api-secret.yaml`, hoje com credencial local fixa versionada, é trocado por estratégia de exemplo/template sem segredo real ou local versionado, preservando a facilidade de execução local e as validações existentes. | A fazer |
 | `CODE-011` | `P2` | Pós-entrega | Qualidade | Tratar vulnerabilidade reportada no SSH.NET 2025.1.0. | Atualização da dependência é avaliada com impactos e regressões antes da correção. | A fazer |
 
@@ -75,7 +75,7 @@ Este backlog guarda melhorias técnicas, itens de código e evoluções operacio
 | `DEC-001` | `P0` | Fase 3 | Contrato JWT | Resolver a divergência entre o `cpf_hash` do ADR-0019 e o contrato do RFC-0001. | ADR-0019 e RFC-0001 definem o mesmo claim set: `sub = cliente_id`, `cliente_id`, `role`, `jti`, `iss`, `aud` e expiração; CPF/CNPJ e hashes de documento ficam fora do JWT. | Concluído |
 | `DEC-002` | `P0` | Fase 3 | Contrato HTTP | Formalizar o contrato de `POST /auth/documento` e sua integração com o API Gateway. | HTTP API payload format 2.0 com `APIGatewayHttpApiV2ProxyRequest`; request por `documento`; `200` com token mínimo; `400` genérico para entrada inválida; `401` idêntico para inexistente/inativo; `503` genérico para RDS/Secrets Manager; sem exposição de documento ou infraestrutura. | Concluído |
 | `RDS-001` | `P0` | Fase 3 | Segredos | Provisionar e publicar a referência das credenciais do RDS. | `oficina-mecanica-infra-rds` é o dono do segredo gerenciado no AWS Secrets Manager; o endpoint e o ARN do segredo são publicados pelo SSM em `/oficina-mecanica/development/rds/endpoint` e `/oficina-mecanica/development/rds/master_secret_arn`. API e Auth Lambda resolvem as credenciais no deploy, sem GitHub Secret de connection string da Lambda. | Concluído |
-| `RDS-002` | `P0` | Fase 3 | Rede | Restringir o acesso SQL Server do RDS conforme ADR-0018. | O repositório RDS continua dono do Security Group do RDS e pode manter a regra TCP/1433 necessária para o EKS. A Auth Lambda, que depende do RDS já provisionado, possui SG próprio e cria no seu repositório a regra de ingress TCP/1433 no SG do RDS com `security_group_id` obtido via SSM e `referenced_security_group_id` igual ao SG da Lambda. No destroy da Lambda, a regra é removida antes do SG da Lambda. ADR-0018 permanece válido: RDS privado e acesso somente de componentes autorizados. | A fazer |
+| `RDS-002` | `P0` | Fase 3 | Rede | Restringir o acesso SQL Server do RDS conforme ADR-0018. | RDS privado aceita TCP/1433 somente dos componentes autorizados; EKS e Auth Lambda usam regras por security group. | Concluído |
 
 ## Dependências P0 da autenticação
 
@@ -137,21 +137,18 @@ Os itens desta seção não bloqueiam a entrega atual da Fase 3.
 | `OPS-020` | `P2` | Pós-entrega | CI/CD | Migrar a autenticação GitHub Actions → AWS para OIDC. | GitHub OIDC Provider e IAM Role usam trust policy restrita a repositório, branch e environment, menor privilégio e credenciais STS temporárias; não permanecem access keys no GitHub. Pode ser inviável no AWS Academy/voclabs por restrições de IAM: as credenciais temporárias atuais são concessão operacional acadêmica, não desenho de produção. | Não priorizado agora |
 | `OPS-021` | `P3` | Pós-entrega | Configuração | Centralizar configurações não sensíveis no Parameter Store. | Avaliar região quando aplicável, issuer, audience, expiração e demais configurações de ambiente no SSM. Não é requisito de segurança — GitHub Variables não são secrets — e busca governança/centralização sem competir com itens funcionais da Fase 3. | Não priorizado agora |
 | `ECR-001` | `P2` | Pós-entrega | Registry | Criar Lifecycle Policy do ECR para imagens publicadas com tags imutáveis `sha-$GITHUB_SHA`. | Existe `aws_ecr_lifecycle_policy` que mantém as últimas 10–20 imagens `sha-*`, remove imagens untagged antigas após alguns dias, preserva rollback e não apaga imediatamente a imagem anterior ao deploy. | A fazer |
-| `DOC-README-001` | `P2` | Pós-entrega / documentação final | Documentação | Revisar os READMEs dos seis repositórios para refletir o estado final real. | Conteúdo obsoleto é removido e status de implementação/entrega permanece no backlog, não nos READMEs. | A fazer |
-| `DOC-README-002` | `P2` | Pós-entrega / documentação final | Documentação | Revisar links quebrados nos seis repositórios. | Links entre repositórios, ADRs/RFCs, Swagger/OpenAPI, Postman, diagramas, pipelines e referências relativas foram validados e corrigidos quando necessário. | A fazer |
-| `DOC-README-003` | `P2` | Pós-entrega / documentação final | Documentação | Padronizar READMEs com template base comum, adaptado apenas quando tecnicamente necessário. | Cada README apresenta visão geral/propósito, responsabilidade, arquitetura/fluxo, tecnologias, pré-requisitos, execução, CI/CD, deploy, configuração/secrets, observabilidade, testes/validações, dependências, documentação relacionada e links úteis. | A fazer |
+| `DOC-README-001` | `P2` | Pós-entrega / documentação final | Documentação | Revisar os READMEs dos seis repositórios para refletir o estado final real. | Conteúdo obsoleto foi corrigido sem reescrever a documentação madura. | Concluído |
+| `DOC-README-002` | `P2` | Pós-entrega / documentação final | Documentação | Revisar links quebrados nos seis repositórios. | Links relativos alterados foram validados e referências removidas foram ajustadas. | Concluído |
+| `DOC-README-003` | `P2` | Pós-entrega / documentação final | Documentação | Padronizar conteúdo mínimo dos READMEs sem apagar o estilo próprio de cada repositório. | Cada README documenta responsabilidade, dependências, execução, CI/CD, configuração e retorno ao README principal. | Concluído |
 | `DOC-API-001` | `P2` | Pós-entrega / documentação final | Contratos | Atualizar OpenAPI e Postman após o código final. | Documentação cobre `POST /auth/documento`, `GET /api/v1/clientes/me/ordens-servico`, JWT/autorização e endpoints finais; referências ao LoadBalancer público e fluxos obsoletos foram removidas. | A fazer |
 | `DOC-API-002` | `P2` | Pós-entrega / documentação final | Demonstração | Criar collection Postman exclusiva para o vídeo. | Collection contém health, autenticação por documento, `/me` sem JWT (`401`) e com JWT Cliente (`200`), rota Admin com JWT Cliente (`403`), abertura de OS e chamada para logs/traces; variável/script captura automaticamente o JWT de `/auth/documento` para as requests seguintes. | A fazer |
 
 ## Status atual da entrega
 
-- VPC development aplicada e ready.
-- Kubernetes/EKS development aplicado e ready.
-- RDS development aplicado e ready.
-- A API será ajustada para consumir a infraestrutura compartilhada.
-- Auth Lambda possui PR de CD aberto, aguardando ordem segura.
-- API Gateway será tratado separadamente.
-- Datadog e observabilidade serão tratados posteriormente.
+- VPC, Kubernetes/EKS, RDS, API, Auth Lambda e API Gateway possuem esteiras separadas e contratos SSM documentados.
+- API Gateway é a entrada pública; a API no EKS é alcançada por VPC Link, NLB interno e NodePort.
+- Autenticação por documento e rota protegida do próprio cliente estão implementadas.
+- Datadog da API/Kubernetes possui métricas, logs e traces; a telemetria completa da Auth Lambda permanece como evolução.
 
 | ID | Prioridade | Horizonte | Área | Item | Critério de aceite | Status |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -163,6 +160,18 @@ Os itens desta seção não bloqueiam a entrega atual da Fase 3.
 | `OPS-006` | `P2` | Pós-entrega | Segredos | Formalizar rotação de secrets e chaves JWT. | Segredos possuem dono, periodicidade e procedimento de rotação. | Não priorizado agora |
 | `OPS-007` | `P2` | Pós-entrega | DNS | Trocar hostname bruto do Load Balancer por DNS amigável. | API usa domínio próprio com Route 53 ou provedor equivalente. | Não priorizado agora |
 | `OPS-008` | `P3` | Pesquisa | Plataforma | Avaliar trunk-based development como alternativa ao Git Flow. | Decisão documentada somente se houver ganho real para o contexto do time. | Não priorizado agora |
+
+## Evoluções pós-entrega identificadas na Fase 3
+
+- evidenciar a telemetria completa da Auth Lambda no Datadog;
+- medir o volume diário de ordens de serviço por evento de negócio;
+- medir o tempo médio por status de Diagnóstico, Execução e Finalização;
+- criar alerta específico de falha de processamento de ordem de serviço;
+- atualizar a collection Postman versionada para os fluxos da Fase 3;
+- atualizar o OpenAPI versionado, preservando o Swagger runtime como referência atual;
+- persistir o histórico de transições de status necessário às métricas de negócio;
+- criar monitores e alertas mais específicos conforme dados reais de operação;
+- reavaliar as melhorias de maturidade P2/P3 já mantidas neste backlog.
 
 ## Fora do escopo imediato
 
