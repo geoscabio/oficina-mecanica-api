@@ -17,12 +17,13 @@ resource "kubernetes_deployment_v1" "oficina_mecanica_api" {
 
     template {
       metadata {
-        labels = merge(local.api_labels, local.api_datadog_labels)
+        labels = merge(local.api_labels, local.api_datadog_labels, {
+          "admission.datadoghq.com/enabled" = "true"
+        })
 
         annotations = {
           "ad.datadoghq.com/oficina-mecanica-api.logs" = jsonencode([{ source = "csharp", service = "oficina-mecanica-api" }])
           "admission.datadoghq.com/dotnet-lib.version" = "3.50.0"
-          "admission.datadoghq.com/enabled"            = "true"
         }
       }
 
