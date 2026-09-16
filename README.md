@@ -23,8 +23,6 @@ Projeto desenvolvido para o **Tech Challenge - Fase 2 da Pós Tech FIAP em Arqui
 - [🔐 Autenticação](#autenticacao)
 - [📚 Swagger, OpenAPI e collection](#swagger-openapi-collection)
 - [🗄️ Banco de dados e seed](#banco-de-dados-e-seed)
-- [🎬 Entrega final](#entrega-final)
-- [📝 Observações](#observacoes)
 
 ---
 
@@ -112,8 +110,6 @@ O projeto adota **Clean Architecture** em um **monólito modular**, preservando 
 | 🧩 C4 Model oficial validado | [`docs/architecture/diagrams/c4-model`](docs/architecture/diagrams/c4-model) |
 | ☁️ Diagrama de infraestrutura AWS (inclui Kubernetes/Docker) | [`docs/architecture/diagrams/aws`](docs/architecture/diagrams/aws) |
 | 🔁 Diagrama de fluxo CI/CD | [`docs/architecture/diagrams/ci-cd`](docs/architecture/diagrams/ci-cd) |
-| ☸️ Diagrama do ambiente local Kubernetes | [`docs/architecture/diagrams/deployment/kubernetes`](docs/architecture/diagrams/deployment/kubernetes) |
-| 🐳 Diagrama do ambiente local Docker | [`docs/architecture/diagrams/deployment/docker`](docs/architecture/diagrams/deployment/docker) |
 | 🐳 Docker Compose local | [`docker-compose.yml`](docker-compose.yml) |
 | ☸️ Manifests Kubernetes | [`k8s`](k8s) |
 | 📄 Evidências de qualidade | [`docs/evidencias`](docs/evidencias) |
@@ -505,35 +501,7 @@ Credenciais locais ficam no arquivo `.env`, criado a partir de `.env.example`.
 
 ---
 
-<a id="entrega-final"></a>
-
-## 🎬 Entrega final
-
-Itens técnicos já estruturados:
-
-- ✅ API com fluxo principal da oficina.
-- ✅ Docker Compose local.
-- ✅ Kubernetes local.
-- ✅ Terraform para AWS.
-- ✅ Healthcheck `/api/health`.
-- ✅ CI/CD com cobertura mínima de 90%.
-- ✅ Evidências versionadas.
-- ✅ OpenAPI versionado.
-- ✅ C4 Model oficial versionado.
-
-Itens manuais restantes:
-
-- ⏳ Colar prints reais de SonarQube, OWASP ZAP, HPA e Terraform.
-- ⏳ Finalizar diagramas AWS, Kubernetes, Docker e CI/CD.
-- ⏳ Executar demonstração AWS com `terraform destroy` ao final.
-- ⏳ Gravar vídeo.
-- ⏳ Montar PDF final.
-
----
-
 <a id="observacoes"></a>
-
-## 📝 Observações
 
 ## 🏗️ Responsabilidade de infraestrutura da API
 
@@ -542,6 +510,18 @@ Este repositório mantém a aplicação principal .NET, Dockerfile, CI, build e 
 VPC, subnets, NAT/Internet Gateway, rotas, EKS, RDS e o ECR compartilhado não são criados aqui. A API depende de `oficina-mecanica-infra-vpc`, `oficina-mecanica-infra-kubernetes` (EKS/ECR via SSM) e `oficina-mecanica-infra-rds` (endpoint e ARN do segredo via SSM). Auth Lambda e API Gateway são componentes separados.
 
 As seis esteiras são: API, Auth Lambda, infra-vpc, infra-kubernetes, infra-rds e infra-api-gateway. Os quatro repositórios obrigatórios da Fase 3 são o mínimo; a separação adicional por responsabilidade é aceita quando ownership e dependências estão documentados.
+
+Oficina Mecânica — API: https://github.com/geoscabio/oficina-mecanica-api 
+
+Oficina Mecânica — Auth Lambda: https://github.com/geoscabio/oficina-mecanica-auth-lambda 
+
+Oficina Mecânica — Infra Kubernetes: https://github.com/geoscabio/oficina-mecanica-infra-kubernetes 
+
+Oficina Mecânica — Infra RDS: https://github.com/geoscabio/oficina-mecanica-infra-rds 
+
+Oficina Mecânica — Infra VPC: https://github.com/geoscabio/oficina-mecanica-infra-vpc 
+
+Oficina Mecânica — Infra API Gateway: https://github.com/geoscabio/oficina-mecanica-infra-api-gateway 
 
 Helm não foi introduzido nesta mudança para reduzir risco. A evolução para Helm/manifests centralizados e a possível migração futura do ECR para a API estão registradas no backlog técnico.
 
